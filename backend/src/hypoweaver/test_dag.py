@@ -20,6 +20,10 @@ from .models import (
     TestRole,
 )
 from .policy_causal import parse_policy_design
+from .group1_staggered_ddd import (
+    GROUP1_STAGGERED_DDD_REGISTRY_VERSION,
+    parse_group1_staggered_ddd_design,
+)
 
 
 ENTERPRISE_PANEL_REGISTRY_VERSION = "enterprise-panel-v1"
@@ -42,6 +46,10 @@ THREAT_POLICY_ENTITY_CLUSTER = "policy.entity_cluster_sensitivity"
 THREAT_POLICY_PERMUTATION_PLACEBO = "policy.permutation_placebo"
 THREAT_POLICY_ALTERNATIVE_OUTCOME = "policy.alternative_outcome"
 THREAT_POLICY_INDEPENDENT_REPLICATION = "policy.independent_replication"
+THREAT_GROUP1_SUPPORT = "group1.cohort_capacity_support"
+THREAT_GROUP1_EVENT_STUDY = "group1.event_study_pretrends"
+THREAT_GROUP1_SIGN_SWITCH = "group1.paired_sign_switch"
+THREAT_GROUP1_INDEPENDENT_REPLICATION = "group1.independent_replication"
 
 RunType = Literal[
     "baseline",
@@ -87,6 +95,59 @@ def validate_policy_did_execution_plan(plan: AnalysisPlan) -> ModelSpec:
     baseline = plan.baseline_models[0]
     parse_policy_design(baseline)
     return baseline
+
+
+def validate_group1_staggered_ddd_execution_plan(
+    plan: AnalysisPlan,
+) -> tuple[ModelSpec, ModelSpec]:
+    """Reject a malformed executable Group 1 plan before reading data."""
+
+    if plan.method_family != "policy_causal":
+        raise TestDagError(
+            "group1-staggered-ddd-v1 only supports policy_causal plans"
+        )
+    if plan.design_only:
+        raise TestDagError("group1-staggered-ddd-v1 requires design_only=false")
+    if plan.check_registry_version != GROUP1_STAGGERED_DDD_REGISTRY_VERSION:
+        raise TestDagError(
+            "group1-staggered-ddd-v1 requires its frozen check registry"
+        )
+    if len(plan.baseline_models) != 2:
+        raise TestDagError(
+            "group1-staggered-ddd-v1 requires exactly two paired baseline models"
+        )
+
+    baselines = tuple(plan.baseline_models)
+    designs = [parse_group1_staggered_ddd_design(model) for model in baselines]
+    paired_outcomes = designs[0].paired_outcomes
+    if tuple(model.outcome for model in baselines) != paired_outcomes:
+        raise TestDagError(
+            "Group 1 baseline order must exactly match the frozen paired outcomes"
+        )
+    if designs[0] != designs[1]:
+        raise TestDagError(
+            "Group 1 paired baselines must share one identical staggered DDD design"
+        )
+    if baselines[0].controls != baselines[1].controls:
+        raise TestDagError("Group 1 paired baselines must use identical controls")
+    if baselines[0].fixed_effects != baselines[1].fixed_effects:
+        raise TestDagError("Group 1 paired baselines must use identical fixed effects")
+
+    scheduled = schedule_test_dag(plan)
+    required_ids = {
+        "check-group1-support",
+        "check-group1-event-study",
+        "check-group1-sign-switch",
+        "check-group1-independent-replication",
+    }
+    scheduled_ids = {item.step.step_id for item in scheduled}
+    missing = sorted(required_ids - scheduled_ids)
+    if missing:
+        raise TestDagError(
+            "group1-staggered-ddd-v1 is missing required checks: "
+            + ", ".join(missing)
+        )
+    return baselines  # type: ignore[return-value]
 
 
 @dataclass(frozen=True)
@@ -1285,6 +1346,69 @@ def _execution_evidence_status(
         return "incomplete", execution.error or "Required check was not completed."
     if execution.provenance is None:
         return "invalid", "Succeeded execution is missing required provenance hashes."
+    if step is not None and step.threat_id == THREAT_GROUP1_SUPPORT:
+        diagnostics = execution.diagnostic_results
+        if diagnostics.get("capacity_timing_verified") is not True:
+            return (
+                "invalid",
+                "Strictly pre-policy capacity timing was not verified for every stack.",
+            )
+        if diagnostics.get("paired_outcome_sample_identical") is not True:
+            return (
+                "invalid",
+                "The greenwashing and direct-emissions outcomes do not share one paired sample.",
+            )
+        if diagnostics.get("scientific_release_ready") is not True:
+            below = diagnostics.get(
+                "cohorts_below_scientific_treated_entity_minimum", []
+            )
+            proxy_count = diagnostics.get("prefecture_proxy_treated_entities", 0)
+            return (
+                "incomplete",
+                "Engineering support checks passed, but scientific release remains held: "
+                f"cohorts below the treated-firm minimum={below}; "
+                f"prefecture-proxy treated firms={proxy_count}.",
+            )
+        return (
+            "supporting",
+            "Paired sample, cohort support, strict pre-policy capacity timing, and boundary precision passed.",
+        )
+    if step is not None and step.threat_id == THREAT_GROUP1_EVENT_STUDY:
+        by_outcome = execution.diagnostic_results.get("joint_pretrend_by_outcome")
+        if not isinstance(by_outcome, dict) or not by_outcome:
+            return "incomplete", "Paired event studies have no joint pre-trend tests."
+        p_values = {
+            str(outcome): result.get("p_value")
+            for outcome, result in by_outcome.items()
+            if isinstance(result, dict)
+        }
+        if set(p_values) != set(by_outcome) or not all(
+            _is_number(value) for value in p_values.values()
+        ):
+            return "incomplete", "At least one paired outcome lacks a joint pre-trend p-value."
+        rejected = [
+            outcome for outcome, value in p_values.items() if float(value) < alpha
+        ]
+        if rejected:
+            return (
+                "opposing",
+                "Joint pre-trend test rejects for: " + ", ".join(sorted(rejected)),
+            )
+        return (
+            "supporting",
+            "Neither paired outcome rejects the frozen joint pre-trend test; this is not proof of parallel trends.",
+        )
+    if step is not None and step.threat_id == THREAT_GROUP1_SIGN_SWITCH:
+        status = execution.diagnostic_results.get("paired_sign_switch_status")
+        reason = str(
+            execution.diagnostic_results.get("paired_sign_switch_reason")
+            or "Paired sign-switch assessment is missing."
+        )
+        if status == "supported":
+            return "supporting", reason
+        if status == "opposed":
+            return "opposing", reason
+        return "incomplete", reason
     if step is not None and step.threat_id == THREAT_POLICY_PERMUTATION_PLACEBO:
         empirical_p = execution.diagnostic_results.get("empirical_p_value")
         requested = execution.diagnostic_results.get("repetitions_requested")

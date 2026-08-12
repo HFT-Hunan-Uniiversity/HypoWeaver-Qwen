@@ -33,9 +33,17 @@ from .policy_causal import (
     reproduce_policy_baseline,
     reproduce_policy_model,
 )
+from .group1_staggered_ddd import (
+    GROUP1_PRIMARY_IMPLEMENTATION_ID,
+    GROUP1_REPRODUCTION_IMPLEMENTATION_ID,
+    GROUP1_STAGGERED_DDD_REGISTRY_VERSION,
+    Group1StaggeredDDDError,
+    reproduce_group1_staggered_ddd,
+)
 from .test_dag import (
     is_estimative_test_step,
     select_primary_test_dag_with_budget,
+    validate_group1_staggered_ddd_execution_plan,
     validate_policy_did_execution_plan,
 )
 
@@ -111,6 +119,11 @@ class ResearchReproducer:
             self._clock,
         )
         if contract.approved_plan.method_family == "policy_causal":
+            if (
+                contract.approved_plan.check_registry_version
+                == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+            ):
+                return self._execute_group1_contract(contract, deadline)
             return self._execute_policy_contract(contract, deadline)
         specifications: list[_EstimationSpec] = []
         try:
@@ -195,6 +208,150 @@ class ResearchReproducer:
             failed_runs=failed_runs,
             warnings=[
                 "独立实现已重新解析冻结数据，并用交替去均值、NumPy OLS 与手工实体聚类协方差复算。"
+            ],
+        )
+
+    def _execute_group1_contract(
+        self,
+        contract: FormalResearchContract,
+        deadline: _ContractDeadline,
+    ) -> ResearchRun:
+        """Re-estimate the paired Group 1 contract with the NumPy within estimator."""
+
+        plan = contract.approved_plan
+        try:
+            baselines = validate_group1_staggered_ddd_execution_plan(plan)
+            deadline.check()
+            source, actual_hashes = self._resolve_source(contract, deadline)
+            provenance = _group1_provenance(contract, actual_hashes)
+            budgeted = select_primary_test_dag_with_budget(
+                plan,
+                contract.budget.max_executions,
+            )
+            selected_ids = {item.step.step_id for item in budgeted.selected}
+        except _ContractWallTimeExceeded as error:
+            return self._failed_run(
+                contract,
+                str(error),
+                reason_code="budget_exhausted",
+            )
+        except (CaseImportError, OSError, ReproductionError, ValueError) as error:
+            return self._failed_run(contract, str(error))
+
+        results: dict[str, dict[str, Any]] = {}
+        executions: list[ExecutionRecord] = []
+        failed_runs: list[str] = []
+
+        def load(model: ModelSpec) -> dict[str, Any]:
+            existing = results.get(model.step_id)
+            if existing is None:
+                deadline.check()
+                existing = reproduce_group1_staggered_ddd(source, model)
+                deadline.check()
+                results[model.step_id] = existing
+            return existing
+
+        for model in baselines:
+            if model.step_id not in selected_ids:
+                continue
+            try:
+                result = load(model)
+                executions.append(
+                    ExecutionRecord(
+                        execution_id=f"replication-execution-{uuid4()}",
+                        run_type="baseline",
+                        plan_step_id=model.step_id,
+                        check_id=model.step_id,
+                        execution_status="succeeded",
+                        estimates=list(result["estimates"]),
+                        diagnostic_results=_group1_reproduction_diagnostics(result),
+                        provenance=provenance,
+                    )
+                )
+            except (
+                _ContractWallTimeExceeded,
+                Group1StaggeredDDDError,
+                OSError,
+                ValueError,
+            ) as error:
+                failed_runs.append(f"{model.step_id}: {error}")
+                executions.append(
+                    _group1_failed_execution(
+                        model.step_id,
+                        "baseline",
+                        provenance,
+                        str(error),
+                        reason_code=(
+                            "budget_exhausted"
+                            if isinstance(error, _ContractWallTimeExceeded)
+                            else "dependency_failed"
+                        ),
+                    )
+                )
+
+        for step_id, builder in (
+            ("check-group1-event-study", _group1_reproduction_event_execution),
+            ("check-group1-sign-switch", _group1_reproduction_sign_switch_execution),
+        ):
+            if step_id not in selected_ids:
+                continue
+            step = next(
+                (
+                    item
+                    for item in [*plan.falsification_tests, *plan.robustness_tests]
+                    if item.step_id == step_id
+                ),
+                None,
+            )
+            if step is None:
+                failed_runs.append(f"{step_id}: frozen step is missing")
+                continue
+            try:
+                execution = builder(
+                    step,
+                    [(model, load(model)) for model in baselines],
+                    provenance,
+                )
+            except (
+                _ContractWallTimeExceeded,
+                Group1StaggeredDDDError,
+                OSError,
+                ReproductionError,
+                ValueError,
+            ) as error:
+                failed_runs.append(f"{step_id}: {error}")
+                execution = _group1_failed_execution(
+                    step_id,
+                    "falsification",
+                    provenance,
+                    str(error),
+                    reason_code=(
+                        "budget_exhausted"
+                        if isinstance(error, _ContractWallTimeExceeded)
+                        else "dependency_failed"
+                    ),
+                )
+            executions.append(execution)
+
+        succeeded = not failed_runs
+        return ResearchRun(
+            research_run_id=f"replication-{uuid4()}",
+            case_id=contract.case_id,
+            contract_hash=contract.approved_plan_hash,
+            plan_version=plan.plan_version,
+            execution_status="succeeded" if succeeded else "failed",
+            scientific_status="pending_review" if succeeded else "invalid",
+            fixture_only=False,
+            not_executed_reason=(
+                None
+                if succeeded
+                else "Independent Group 1 reproduction failed: "
+                + "; ".join(failed_runs)
+            ),
+            executions=executions,
+            failed_runs=failed_runs,
+            warnings=[
+                "The independent implementation re-read the frozen CSV and used alternating multi-way demeaning, NumPy least squares, and manual firm-clustered covariance."
             ],
         )
 
@@ -995,7 +1152,13 @@ class ResearchReproducer:
             ]
         elif (
             contract.approved_plan.method_family == "policy_causal"
-            and len(contract.approved_plan.baseline_models) != 1
+            and len(contract.approved_plan.baseline_models)
+            != (
+                2
+                if contract.approved_plan.check_registry_version
+                == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+                else 1
+            )
         ):
             executions = []
             failed_runs = [reason]
@@ -1046,6 +1209,246 @@ def _policy_provenance(
             "implementation_version": "1.0.0",
             "code_sha256": _sha256_file(policy_code),
         }
+    )
+
+
+def _group1_provenance(
+    contract: FormalResearchContract,
+    data_sha256: list[str],
+) -> ExecutionProvenance:
+    base = _provenance(contract, data_sha256)
+    implementation = Path(__file__).with_name("group1_staggered_ddd.py")
+    return base.model_copy(
+        update={
+            "implementation_id": GROUP1_REPRODUCTION_IMPLEMENTATION_ID,
+            "implementation_version": "1.0.0",
+            "code_sha256": _sha256_file(implementation),
+        }
+    )
+
+
+def _group1_reproduction_diagnostics(result: dict[str, Any]) -> dict[str, Any]:
+    diagnostics = dict(result.get("diagnostics", {}))
+    rows_used = int(diagnostics.get("rows_used", 0) or 0)
+    fixed_effects = [str(value) for value in diagnostics.get("fixed_effects", [])]
+    cluster_field = str(diagnostics.get("cluster_field", ""))
+    return {
+        **diagnostics,
+        "rows_after_sample_filter": rows_used,
+        "rows_dropped": int(diagnostics.get("rows_input", rows_used)) - rows_used,
+        "duplicate_rows_dropped": 0,
+        "singleton_entities_dropped": 0,
+        "singleton_rows_dropped": 0,
+        "entity_fixed_effects": bool(fixed_effects),
+        "time_fixed_effects": len(fixed_effects) >= 2,
+        "standard_errors": "firm_clustered_debiased",
+        "cluster_variable": cluster_field,
+        "cluster_correction": "finite_sample_firm_cluster",
+        "event_study": result.get("event_study"),
+        "marginal_effects": result.get("marginal_effects"),
+    }
+
+
+def _group1_prefixed_estimates(
+    outcome: str,
+    estimates: list[dict[str, Any]],
+    *,
+    component: str | None = None,
+) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for estimate in estimates:
+        item = dict(estimate)
+        term = str(item.get("term", "estimate"))
+        prefix = f"{outcome}:{component}:" if component else f"{outcome}:"
+        item["term"] = prefix + term
+        item["outcome"] = outcome
+        if component is not None:
+            item["component"] = component
+        result.append(item)
+    return result
+
+
+def _group1_reproduction_event_execution(
+    step: PlannedStep,
+    results: list[tuple[ModelSpec, dict[str, Any]]],
+    provenance: ExecutionProvenance,
+) -> ExecutionRecord:
+    estimates: list[dict[str, Any]] = []
+    joint_by_outcome: dict[str, Any] = {}
+    dropped_by_outcome: dict[str, list[str]] = {}
+    for model, result in results:
+        outcome = str(model.outcome)
+        event = result.get("event_study")
+        if not isinstance(event, dict) or event.get("status") != "succeeded":
+            raise ReproductionError(
+                f"Independent Group 1 event study did not succeed for {outcome}."
+            )
+        estimates.extend(
+            _group1_prefixed_estimates(
+                outcome,
+                list(event.get("estimates", [])),
+            )
+        )
+        joint = event.get("joint_pretrend")
+        if not isinstance(joint, dict):
+            raise ReproductionError(
+                f"Independent Group 1 event study lacks a joint pre-trend test for {outcome}."
+            )
+        joint_by_outcome[outcome] = dict(joint)
+        dropped_by_outcome[outcome] = [
+            str(value) for value in event.get("dropped_terms", [])
+        ]
+    diagnostics = _group1_reproduction_diagnostics(results[0][1])
+    diagnostics.update(
+        {
+            "policy_component": "paired_event_study",
+            "joint_pretrend_by_outcome": joint_by_outcome,
+            "dropped_event_terms_by_outcome": dropped_by_outcome,
+        }
+    )
+    return ExecutionRecord(
+        execution_id=f"replication-execution-{uuid4()}",
+        run_type="falsification",
+        plan_step_id=step.step_id,
+        check_id=step.step_id,
+        execution_status="succeeded",
+        estimates=estimates,
+        diagnostic_results=diagnostics,
+        provenance=provenance,
+    )
+
+
+def _group1_reproduction_sign_switch_execution(
+    step: PlannedStep,
+    results: list[tuple[ModelSpec, dict[str, Any]]],
+    provenance: ExecutionProvenance,
+) -> ExecutionRecord:
+    estimates: list[dict[str, Any]] = []
+    assessments: dict[str, Any] = {}
+    paired_supported = True
+    for model, result in results:
+        outcome = str(model.outcome)
+        marginal = result.get("marginal_effects")
+        if not isinstance(marginal, dict):
+            raise ReproductionError(
+                f"Independent Group 1 marginal effects are missing for {outcome}."
+            )
+        low = marginal.get("low_capacity")
+        high = marginal.get("high_capacity")
+        crossing = marginal.get("zero_crossing")
+        if not isinstance(low, dict) or not isinstance(high, dict):
+            raise ReproductionError(
+                f"Independent Group 1 low/high capacity effects are missing for {outcome}."
+            )
+        estimates.extend(
+            _group1_prefixed_estimates(
+                outcome,
+                [dict(low)],
+                component="low_capacity",
+            )
+        )
+        estimates.extend(
+            _group1_prefixed_estimates(
+                outcome,
+                [dict(high)],
+                component="high_capacity",
+            )
+        )
+        design = model.parameters.get("staggered_ddd_design", {})
+        interaction_term = str(
+            design.get("policy_capacity_term", "policy_x_capacity")
+            if isinstance(design, dict)
+            else "policy_x_capacity"
+        )
+        interaction = next(
+            (
+                item
+                for item in result.get("estimates", [])
+                if item.get("term") == interaction_term
+            ),
+            None,
+        )
+        if not isinstance(interaction, dict):
+            raise ReproductionError(
+                f"Independent Group 1 DDD interaction is missing for {outcome}."
+            )
+        low_value = float(low["coefficient"])
+        high_value = float(high["coefficient"])
+        interaction_value = float(interaction["coefficient"])
+        interaction_p = interaction.get("p_value")
+        direction_ok = low_value > 0 and high_value < 0
+        crossing_inside = bool(
+            isinstance(crossing, dict)
+            and crossing.get("inside_treated_support") is True
+        )
+        interaction_supported = bool(
+            interaction_value < 0
+            and isinstance(interaction_p, (int, float))
+            and not isinstance(interaction_p, bool)
+            and float(interaction_p) < 0.05
+        )
+        supported = direction_ok and crossing_inside and interaction_supported
+        paired_supported = paired_supported and supported
+        assessments[outcome] = {
+            "low_capacity_coefficient": low_value,
+            "high_capacity_coefficient": high_value,
+            "direction_ok": direction_ok,
+            "zero_crossing": crossing,
+            "zero_crossing_inside_treated_support": crossing_inside,
+            "ddd_interaction_coefficient": interaction_value,
+            "ddd_interaction_p_value": interaction_p,
+            "ddd_interaction_supported": interaction_supported,
+            "outcome_sign_switch_supported": supported,
+        }
+    status = "supported" if paired_supported else "opposed"
+    reason = (
+        "Both paired outcomes meet the frozen sign-switch rule."
+        if paired_supported
+        else "The paired preregistered sign-switch rule is not met across both outcomes; no causal sign-switch claim is admitted."
+    )
+    diagnostics = _group1_reproduction_diagnostics(results[0][1])
+    diagnostics.update(
+        {
+            "policy_component": "paired_sign_switch",
+            "paired_sign_switch_status": status,
+            "paired_sign_switch_reason": reason,
+            "paired_outcome_assessments": assessments,
+            "alpha": 0.05,
+        }
+    )
+    return ExecutionRecord(
+        execution_id=f"replication-execution-{uuid4()}",
+        run_type="falsification",
+        plan_step_id=step.step_id,
+        check_id=step.step_id,
+        execution_status="succeeded",
+        estimates=estimates,
+        diagnostic_results=diagnostics,
+        warnings=[] if paired_supported else [reason],
+        provenance=provenance,
+    )
+
+
+def _group1_failed_execution(
+    step_id: str,
+    run_type: str,
+    provenance: ExecutionProvenance,
+    reason: str,
+    *,
+    reason_code: str,
+) -> ExecutionRecord:
+    return ExecutionRecord(
+        execution_id=f"replication-execution-{uuid4()}",
+        run_type=run_type,  # type: ignore[arg-type]
+        plan_step_id=step_id,
+        check_id=step_id,
+        execution_status="failed",
+        not_executed_reason_code=reason_code,  # type: ignore[arg-type]
+        error=reason,
+        warnings=[
+            "Independent Group 1 reproduction failed without falling back to the primary estimator."
+        ],
+        provenance=provenance,
     )
 
 
@@ -1314,6 +1717,11 @@ def compare_panel_reproduction(
         primary_implementation == POLICY_PRIMARY_IMPLEMENTATION_ID
         and replica_implementation == POLICY_REPRODUCTION_IMPLEMENTATION_ID
     )
+    group1_estimator_only = (
+        primary_implementation == GROUP1_PRIMARY_IMPLEMENTATION_ID
+        and replica_implementation == GROUP1_REPRODUCTION_IMPLEMENTATION_ID
+    )
+    estimator_only = policy_estimator_only or group1_estimator_only
     return ReproductionAudit(
         audit_id=f"reproduction-{uuid4()}",
         primary_run_id=primary.research_run_id,
@@ -1326,7 +1734,7 @@ def compare_panel_reproduction(
         mode="independent_implementation",
         independence_scope=(
             "estimator_only"
-            if policy_estimator_only
+            if estimator_only
             else "data_preparation_and_estimator"
         ),
         shared_components=(
@@ -1335,6 +1743,11 @@ def compare_panel_reproduction(
                 "policy event/placebo regressor construction",
             ]
             if policy_estimator_only
+            else [
+                "Group 1 stacked-panel validation and regressor construction",
+                "Group 1 event-time and marginal-effect contrasts",
+            ]
+            if group1_estimator_only
             else []
         ),
         covered_plan_step_ids=sorted(primary_steps & replica_steps),

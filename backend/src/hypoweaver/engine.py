@@ -13,6 +13,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 from .adapters import (
+    CodeOwnedModelGateway,
     FixtureExecutor,
     FixtureModelGateway,
     HttpResearchExecutor,
@@ -101,6 +102,7 @@ from .manuscript_ir import (
 from .prompts import get_prompt
 from .repository import RunRepository, VersionConflictError
 from .reproducer import compare_panel_reproduction
+from .group1_staggered_ddd import GROUP1_STAGGERED_DDD_REGISTRY_VERSION
 from .runtime_config import RuntimeConfigStore
 from .seal import canonical_sha256, sign_manifest
 from .spatial import SpatialWeights, is_spatial_weights_filename
@@ -118,11 +120,16 @@ from .test_dag import (
     THREAT_POLICY_PERMUTATION_PLACEBO,
     THREAT_POLICY_PLACEBO,
     THREAT_POLICY_SUPPORT,
+    THREAT_GROUP1_EVENT_STUDY,
+    THREAT_GROUP1_INDEPENDENT_REPLICATION,
+    THREAT_GROUP1_SIGN_SWITCH,
+    THREAT_GROUP1_SUPPORT,
     build_evidence_registry,
     compile_enterprise_panel_test_dag,
     compile_policy_did_test_dag,
     schedule_test_dag,
     stable_claim_id,
+    validate_group1_staggered_ddd_execution_plan,
     validate_policy_did_execution_plan,
 )
 from .visualization import (
@@ -590,6 +597,10 @@ def _is_reviewer_issue_blocking_design(
 
 
 _POLICY_DID_DELEGATED_THREATS = {
+    THREAT_GROUP1_SUPPORT,
+    THREAT_GROUP1_EVENT_STUDY,
+    THREAT_GROUP1_SIGN_SWITCH,
+    THREAT_GROUP1_INDEPENDENT_REPLICATION,
     THREAT_POLICY_SUPPORT,
     THREAT_POLICY_EVENT_STUDY,
     THREAT_POLICY_PLACEBO,
@@ -603,6 +614,7 @@ _POLICY_DID_DELEGATED_THREATS = {
 
 
 _SHARED_POLICY_INVARIANT_THREATS = {
+    THREAT_GROUP1_INDEPENDENT_REPLICATION,
     THREAT_POLICY_ENTITY_CLUSTER,
     THREAT_POLICY_INDEPENDENT_REPLICATION,
 }
@@ -1401,6 +1413,28 @@ _GROUP1_SIGN_SWITCH_FIELDS = {
     "prepolicy_digital_fintech_capacity",
 }
 _GROUP1_SIGN_SWITCH_REGISTRY_VERSION = "group1-staggered-ddd-design-v1"
+_GROUP1_EXECUTION_SOURCE_FIELDS = (
+    "firm_id",
+    "year",
+    "stack_cohort_year",
+    "treatment_cohort_year",
+    "prepolicy_digital_fintech_capacity",
+    "capacity_source_end_year",
+    "capacity_year_count",
+    "treated",
+    "gfripz_exposure",
+    "stack_entity_id",
+    "stack_time_id",
+    "assignment_boundary_precision",
+    "greenwashing_gap",
+    "firm_emission_intensity",
+    "firm_size",
+    "leverage",
+    "return_on_assets",
+    "sales_growth",
+    "cash_ratio",
+    "state_owned",
+)
 
 
 def _is_group1_sign_switch_package(package: ResearchPackage) -> bool:
@@ -1458,6 +1492,215 @@ def _normalize_group1_sign_switch_route(
     )
 
 
+def _group1_executable_plan(
+    plan: AnalysisPlan,
+    package: ResearchPackage,
+    strategy: str,
+) -> AnalysisPlan:
+    """Build the code-owned executable contract for a bound Group 1 panel."""
+
+    claim_ids = [f"claim-{item.hypothesis_id}" for item in package.hypotheses]
+    outcomes = ["greenwashing_gap", "firm_emission_intensity"]
+    controls = [
+        "firm_size",
+        "leverage",
+        "return_on_assets",
+        "sales_growth",
+        "cash_ratio",
+        "state_owned",
+    ]
+    design = {
+        "entity_field": "firm_id",
+        "time_field": "year",
+        "stack_cohort_field": "stack_cohort_year",
+        "assigned_cohort_field": "treatment_cohort_year",
+        "moderator_field": "prepolicy_digital_fintech_capacity",
+        "moderator_source_end_field": "capacity_source_end_year",
+        "capacity_source_count_field": "capacity_year_count",
+        "paired_outcomes": outcomes,
+        "treated_field": "treated",
+        "exposure_field": "gfripz_exposure",
+        "fixed_effects": ["stack_entity_id", "stack_time_id"],
+        "cluster_field": "firm_id",
+        "transition_year_mode": "exclude",
+        "event_time_min": -5,
+        "event_time_max": 4,
+        "event_reference": -1,
+        "policy_term": "policy_exposure",
+        "capacity_time_term": "post_x_capacity",
+        "policy_capacity_term": "policy_x_capacity",
+        "boundary_precision_field": "assignment_boundary_precision",
+        "engineering_minimum_treated_entities": 1,
+        "scientific_minimum_treated_entities": 5,
+    }
+    source_fields = list(_GROUP1_EXECUTION_SOURCE_FIELDS)
+    baselines = [
+        ModelSpec(
+            step_id=f"model-group1-{outcome}",
+            name=f"Stacked cohort continuous-capacity DDD: {outcome}",
+            rationale=(
+                "Estimate the frozen Group 1 policy effect and its slope over strictly "
+                "pre-policy regional digital/fintech capacity on the paired sample."
+            ),
+            required_data_fields=list(source_fields),
+            parameters={
+                "staggered_ddd_design": design,
+                "candidate_strategy": strategy,
+            },
+            target_claim_ids=claim_ids,
+            required_for_admission=True,
+            estimator="stacked-cohort-continuous-capacity-ddd",
+            formula=(
+                f"{outcome} ~ policy_exposure + post_x_capacity + "
+                "policy_x_capacity + controls + stack_entity_fe + stack_time_fe"
+            ),
+            outcome=outcome,
+            treatments_or_exposures=["policy_exposure", "policy_x_capacity"],
+            controls=controls,
+            fixed_effects=["stack_entity_id", "stack_time_id"],
+            standard_error_strategy="firm_clustered_debiased",
+        )
+        for outcome in outcomes
+    ]
+    support = PlannedStep(
+        step_id="check-group1-support",
+        name="Paired cohort, capacity-timing and boundary support",
+        rationale=(
+            "Verify stacked comparison support, paired-outcome identity, strict pre-policy "
+            "capacity timing, treated-cohort size, and pilot-boundary precision."
+        ),
+        required_data_fields=list(source_fields),
+        parameters={"staggered_ddd_design": design},
+        threat_id=THREAT_GROUP1_SUPPORT,
+        target_claim_ids=claim_ids,
+        test_role="diagnostic",
+        required_for_admission=True,
+    )
+    event = PlannedStep(
+        step_id="check-group1-event-study",
+        name="Paired stacked event-study pre-trends",
+        rationale=(
+            "Jointly test the preregistered pre-policy main and capacity-slope event terms "
+            "for both outcomes."
+        ),
+        required_data_fields=list(source_fields),
+        parameters={"staggered_ddd_design": design, "alpha": 0.05},
+        threat_id=THREAT_GROUP1_EVENT_STUDY,
+        target_claim_ids=claim_ids,
+        test_role="falsification",
+        required_for_admission=True,
+    )
+    sign_switch = PlannedStep(
+        step_id="check-group1-sign-switch",
+        name="Paired preregistered capacity sign-switch rule",
+        rationale=(
+            "Require both outcomes to show the frozen positive-low/negative-high pattern, "
+            "an in-support zero crossing, and a negative DDD slope at alpha 0.05."
+        ),
+        required_data_fields=list(source_fields),
+        parameters={
+            "staggered_ddd_design": design,
+            "alpha": 0.05,
+            "required_pattern": "positive_low_negative_high_both_outcomes",
+        },
+        threat_id=THREAT_GROUP1_SIGN_SWITCH,
+        target_claim_ids=claim_ids,
+        test_role="falsification",
+        required_for_admission=True,
+    )
+    replication = PlannedStep(
+        step_id="check-group1-independent-replication",
+        name="Independent NumPy stacked-DDD reproduction",
+        rationale=(
+            "Re-read the frozen data and reproduce every estimate-bearing step with an "
+            "independent within transformation and clustered covariance implementation."
+        ),
+        required_data_fields=list(source_fields),
+        parameters={"implementation": "numpy-stacked-cohort-ddd-v1"},
+        threat_id=THREAT_GROUP1_INDEPENDENT_REPLICATION,
+        target_claim_ids=claim_ids,
+        test_role="replication",
+        required_for_admission=True,
+    )
+    return plan.model_copy(
+        update={
+            "method_family": "policy_causal",
+            "base_method_family": None,
+            "design_only": False,
+            "estimands": [
+                PlannedStep(
+                    step_id="estimand-group1-capacity-slope",
+                    name="Cohort policy effect over pre-policy capacity",
+                    rationale="Freeze the policy main effect, continuous DDD slope, and zero crossing before execution.",
+                    required_data_fields=list(source_fields),
+                    parameters={"staggered_ddd_design": design},
+                    target_claim_ids=claim_ids,
+                    required_for_admission=True,
+                )
+            ],
+            "sample_rules": [
+                PlannedStep(
+                    step_id="sample-group1-paired-stacks",
+                    name="Paired stacked cohort sample",
+                    rationale="Use treated cohorts against never/not-yet-treated firms on one complete paired-outcome sample.",
+                    required_data_fields=list(source_fields),
+                    parameters={
+                        "primary_key": ["stack_cohort_year", "firm_id", "year"],
+                        "transition_year_mode": "exclude",
+                    },
+                )
+            ],
+            "variable_construction": [
+                PlannedStep(
+                    step_id="construct-group1-prepolicy-capacity",
+                    name="Strictly pre-policy capacity",
+                    rationale="Average the PKU index only over years before each treatment cohort and standardize within stack.",
+                    required_data_fields=[
+                        "stack_cohort_year",
+                        "prepolicy_digital_fintech_capacity",
+                        "capacity_source_end_year",
+                    ],
+                    parameters={"staggered_ddd_design": design},
+                )
+            ],
+            "baseline_models": baselines,
+            "diagnostics": [support],
+            "robustness_tests": [replication],
+            "falsification_tests": [event, sign_switch],
+            "mechanism_tests": [],
+            "heterogeneity_tests": [],
+            "identification_assumptions": [
+                "Cohort-specific conditional parallel trends.",
+                "No anticipation before the assigned policy cohort.",
+                "Never-treated and not-yet-treated firms provide valid comparisons through each stack end.",
+                "Regional digital/fintech capacity is measured strictly before treatment.",
+                "Firm location and pilot-cohort assignment are correctly frozen before outcomes.",
+            ],
+            "alternative_explanations": [
+                "Differential pre-trends by cohort and baseline capacity.",
+                "Concurrent regional policies and spatial spillovers.",
+                "Selective ESG disclosure or emissions reporting.",
+                "Prefecture proxies misclassify firms outside sub-prefecture pilot boundaries.",
+            ],
+            "failure_conditions": [
+                "Either outcome fails the frozen paired sign-switch rule.",
+                "Either paired event study rejects the joint pre-trend test.",
+                "Capacity timing, cohort support, paired sample, or boundary precision fails.",
+                "Independent reproduction diverges beyond frozen tolerances.",
+            ],
+            "stop_conditions": [
+                "Do not add thresholds, cohorts, outcomes, or denominator variants in response to significance."
+            ],
+            "required_data_fields": sorted(set(source_fields)),
+            "unsupported_requested_analyses": [
+                "Innovation, patent and EPIE mechanism outcomes are not present in this execution panel and remain outside this run.",
+                "A publishable causal release remains conditional on exact sub-prefecture firm-address matching, source-license review, and carbon-denominator confirmation.",
+            ],
+            "check_registry_version": GROUP1_STAGGERED_DDD_REGISTRY_VERSION,
+        }
+    )
+
+
 def _normalize_group1_sign_switch_candidate_plan(
     plan: AnalysisPlan,
     package: ResearchPackage,
@@ -1492,6 +1735,29 @@ def _normalize_group1_sign_switch_candidate_plan(
     entity = "firm_id"
     time = "year"
     region = "region_id"
+    visible_fields = set(variables)
+    executable_fields = {
+        "stack_cohort_year",
+        "stack_entity_id",
+        "stack_time_id",
+        "treated",
+        "capacity_source_end_year",
+        "capacity_year_count",
+        "assignment_boundary_precision",
+        "firm_size",
+        "leverage",
+        "return_on_assets",
+        "sales_growth",
+        "cash_ratio",
+        "state_owned",
+    }
+    if (
+        package.intake_readiness is not None
+        and package.intake_readiness.can_execute
+        and package.dataset_refs
+        and executable_fields.issubset(visible_fields)
+    ):
+        return _group1_executable_plan(plan, package, strategy)
     required_fields = sorted(variables)
     not_executable_reason = (
         "Awaiting executable firm-emissions/policy-cohort data and a dedicated "
@@ -2095,15 +2361,15 @@ class WorkflowEngine:
         return budget
 
     def _gateway(self, state: RunState) -> ModelGateway:
-        return (
-            QwenModelGateway(
+        if state.model_provider == "qwen":
+            return QwenModelGateway(
                 model_override=self.forced_model,
                 budget=self._model_budget(state),
                 config_store=self.runtime_config_store,
             )
-            if state.model_provider == "qwen"
-            else FixtureModelGateway()
-        )
+        if state.model_provider == "code_owned":
+            return CodeOwnedModelGateway()
+        return FixtureModelGateway()
 
     def _reviewer_gateway(self, state: RunState) -> ModelGateway:
         if state.model_provider == "qwen":
@@ -2112,6 +2378,8 @@ class WorkflowEngine:
                 budget=self._model_budget(state),
                 config_store=self.runtime_config_store,
             )
+        if state.model_provider == "code_owned":
+            return CodeOwnedModelGateway()
         return FixtureModelGateway()
 
     @staticmethod
@@ -2419,6 +2687,16 @@ class WorkflowEngine:
         time_keys = _names(package, "time")
         spatial_keys = _names(package, "spatial_id")
         event_keys = _names(package, "event_date")
+        group1_execution_profile = bool(
+            _is_group1_sign_switch_package(package)
+            and package.intake_readiness is not None
+            and package.intake_readiness.can_execute
+            and package.dataset_refs
+        )
+        if group1_execution_profile:
+            entity_keys = ["stack_entity_id"]
+            time_keys = ["stack_time_id"]
+            event_keys = ["treatment_cohort_year"]
         has_refs = bool(package.dataset_refs)
         supported = {
             "panel": ["policy_causal", "panel_association", "mechanism_boundary"],
@@ -2447,7 +2725,11 @@ class WorkflowEngine:
                 blocking_reasons=["没有可执行数据资产；仅允许形成研究计划。"],
             )
 
-        selected_columns = list(dict.fromkeys(variable.name for variable in package.variables))
+        selected_columns = (
+            [*_GROUP1_EXECUTION_SOURCE_FIELDS, "region_id"]
+            if group1_execution_profile
+            else list(dict.fromkeys(variable.name for variable in package.variables))
+        )
         key_columns = [*entity_keys, *time_keys]
         try:
             main_ref = next(
@@ -2516,8 +2798,18 @@ class WorkflowEngine:
         variables_with_missing = [
             item["variable"] for item in missingness if item["missing_count"]
         ]
+        if group1_execution_profile:
+            variables_with_missing = [
+                name
+                for name in variables_with_missing
+                if name != "treatment_cohort_year"
+            ]
         if variables_with_missing:
             risks.append("以下建模字段存在缺失值：" + "、".join(variables_with_missing))
+        if group1_execution_profile:
+            risks.append(
+                "R&D, patent and EPIE mechanism fields are outside the bound paired-outcome execution panel and are excluded from this run."
+            )
         missing_definitions = [
             variable.name for variable in package.variables if not variable.definition
         ]
@@ -2581,6 +2873,14 @@ class WorkflowEngine:
                 f"案例声明的数据结构为 {package.data_structure_hint}。",
                 f"变量字典包含 {len(package.variables)} 个字段。",
                 f"实际 CSV 共 {len(frame)} 行、{column_count} 列。",
+                *(
+                    [
+                        "The Group 1 execution profile uses stack_entity_id and stack_time_id as the frozen panel key.",
+                        "A missing treatment_cohort_year denotes a never-treated comparison entity and is expected by the stacked design.",
+                    ]
+                    if group1_execution_profile
+                    else []
+                ),
                 *spatial_facts,
             ],
             measurement_risks=risks,
@@ -3931,9 +4231,18 @@ class WorkflowEngine:
             else None,
         )
         policy_baseline: ModelSpec | None = None
+        group1_policy_plan = (
+            plan.check_registry_version
+            == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+        )
         if state.execution_mode == "external" and plan.method_family == "policy_causal":
             try:
-                policy_baseline = validate_policy_did_execution_plan(plan)
+                if group1_policy_plan:
+                    policy_baseline = validate_group1_staggered_ddd_execution_plan(
+                        plan
+                    )[0]
+                else:
+                    policy_baseline = validate_policy_did_execution_plan(plan)
             except ValueError as error:
                 add(
                     "policy_execution_contract",
@@ -3991,7 +4300,11 @@ class WorkflowEngine:
                     "由 H2 判断是否接受该识别风险。" if missing_fixed_effects else None,
                 )
 
-        if policy_baseline is not None and not design_only_probe:
+        if (
+            policy_baseline is not None
+            and not design_only_probe
+            and not group1_policy_plan
+        ):
             model = policy_baseline
             policy_contract = model.parameters.get("policy_design")
             if not isinstance(policy_contract, dict):
@@ -4283,7 +4596,7 @@ class WorkflowEngine:
                     f"{self._model_for_role(REVIEWER_MODEL)}:"
                     "paired-dimension-batch"
                     if state.model_provider == "qwen"
-                    else "fixture:paired-dimension-batch"
+                    else f"{state.model_provider}:paired-dimension-batch"
                 ),
                 "research_package": compact_package,
                 "design_envelope": envelope.model_dump(mode="json"),
@@ -4441,7 +4754,13 @@ class WorkflowEngine:
                 input_value={
                     "candidate_set_id": candidate_set.candidate_set_id,
                     "registry_version": (
-                        POLICY_DID_REGISTRY_VERSION
+                        GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+                        if any(
+                            candidate.plan.check_registry_version
+                            == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+                            for candidate in candidate_set.candidates
+                        )
+                        else POLICY_DID_REGISTRY_VERSION
                         if any(
                             candidate.plan.method_family == "policy_causal"
                             for candidate in candidate_set.candidates
@@ -5143,10 +5462,16 @@ class WorkflowEngine:
             raise WorkflowTransitionError("H2 cannot freeze a plan with unresolved critical issues")
         if state.execution_mode == "external" and plan.method_family == "policy_causal":
             try:
-                validate_policy_did_execution_plan(plan)
+                if (
+                    plan.check_registry_version
+                    == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+                ):
+                    validate_group1_staggered_ddd_execution_plan(plan)
+                else:
+                    validate_policy_did_execution_plan(plan)
             except ValueError as error:
                 raise WorkflowTransitionError(
-                    "H2 cannot freeze an invalid policy-did-v2 execution plan: "
+                    "H2 cannot freeze an invalid policy execution plan: "
                     f"{error}"
                 ) from error
         self._validate_spatial_plan(package, plan)

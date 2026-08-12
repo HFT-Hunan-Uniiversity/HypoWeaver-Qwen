@@ -5548,7 +5548,7 @@ class WorkflowEngineTests(unittest.IsolatedAsyncioTestCase):
             ),
             (
                 {"mode": "research", "model_provider": "fixture"},
-                "research mode requires model_provider=qwen",
+                "research mode requires model_provider=qwen or code_owned",
             ),
             (
                 {"mode": "research", "execution_mode": "fixture"},
@@ -5560,6 +5560,14 @@ class WorkflowEngineTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(values=values):
                 with self.assertRaisesRegex(ValidationError, expected_message):
                     CreateRunRequest(preset_case_id="esg-panel", **values)
+
+        request = CreateRunRequest(
+            preset_case_id="esg-panel",
+            mode="research",
+            model_provider="code_owned",
+            execution_mode="external",
+        )
+        self.assertEqual(request.model_provider, "code_owned")
 
     def test_definition_is_code_owned_and_edges_are_valid(self) -> None:
         definition = build_app_a_definition()

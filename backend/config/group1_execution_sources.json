@@ -1,0 +1,89 @@
+{
+  "schema_version": "group1-execution-sources-v1",
+  "sources": {
+    "greenwashing": {
+      "dataset_id": "mendeley-4yckzvjzcc-v1",
+      "landing_url": "https://data.mendeley.com/datasets/4yckzvjzcc/1",
+      "doi": "10.17632/4yckzvjzcc.1",
+      "license": "CC BY 4.0; third-party-content rights review required before redistribution",
+      "filename": "Data.dta",
+      "sha256": "d68b4084ea60e354714815208d7ba6ee1d88a8b3f4d3ce3050d8298cf241bb73",
+      "outcome_field": "gws_esg",
+      "outcome_definition": "standardized ESG disclosure minus standardized ESG performance"
+    },
+    "firm_emissions": {
+      "dataset_id": "mendeley-n8k6ss8hcg-v2",
+      "landing_url": "https://data.mendeley.com/datasets/n8k6ss8hcg/2",
+      "doi": "10.17632/n8k6ss8hcg.2",
+      "license": "CC BY 4.0; third-party-content rights review required before redistribution",
+      "filename": "China listed firms with emissions.dta",
+      "sha256": "aa3ca94dd36e9cc27f93f20f2731e1617279cd773cf058ce7d684c008e49a7b9",
+      "outcome_field": "lncarbon_emission",
+      "outcome_definition": "log direct firm carbon emissions derived from disclosed energy use"
+    },
+    "digital_capacity": {
+      "dataset_id": "pku-dfiic-2011-2023",
+      "landing_url": "https://idf.pku.edu.cn/zsbz/bjdxszphjrzs/index.htm",
+      "license": "public research-use index; cite the PKU Digital Finance Research Center",
+      "filename": "PKU_DFIIC_2011_2023.xlsx",
+      "sha256": "8b917b63dfcf90b40373e0408bd29c6067d0db53ccb932f5662f0c0c8c70a033",
+      "city_extract_filename": "Prefecture_Level_Cities.csv",
+      "city_extract_sha256": "dfc431d76b6f7b6e69440b31e7f74a41d2cc66b6a66a13a7f842f60af1bcc166",
+      "capacity_field": "index_aggregate",
+      "capacity_definition": "cohort-specific mean of the city index over years strictly before policy adoption"
+    }
+  },
+  "policy_sources": [
+    {
+      "cohort_year": 2017,
+      "decision_date": "2017-06-14",
+      "source_url": "https://www.mee.gov.cn/ywdt/hjywnews/201706/t20170615_416061.shtml",
+      "annual_transition_rule": "exclude adoption year; post begins in 2018"
+    },
+    {
+      "cohort_year": 2019,
+      "decision_date": "2019-11-12",
+      "source_url": "https://wuhan.pbc.gov.cn/chubanwu/114566/114579/4356048/4356317/2021100915434413422.pdf",
+      "annual_transition_rule": "exclude adoption year; post begins in 2020"
+    },
+    {
+      "cohort_year": 2022,
+      "decision_date": "2022-08-19",
+      "source_url": "https://www.pbc.gov.cn/zhengwugongkai/4081330/4406346/4693549/4642448/index.html",
+      "annual_transition_rule": "not-yet-treated comparison only because paired outcomes end in 2021"
+    }
+  ],
+  "pilot_locations": [
+    {"cohort_year": 2017, "province": "\u6d59\u6c5f\u7701", "city": "\u6e56\u5dde\u5e02", "boundary_precision": "exact_prefecture"},
+    {"cohort_year": 2017, "province": "\u6d59\u6c5f\u7701", "city": "\u8862\u5dde\u5e02", "boundary_precision": "exact_prefecture"},
+    {"cohort_year": 2017, "province": "\u6c5f\u897f\u7701", "city": "\u5357\u660c\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u8d63\u6c5f\u65b0\u533a"},
+    {"cohort_year": 2017, "province": "\u6c5f\u897f\u7701", "city": "\u4e5d\u6c5f\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u8d63\u6c5f\u65b0\u533a"},
+    {"cohort_year": 2017, "province": "\u5e7f\u4e1c\u7701", "city": "\u5e7f\u5dde\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u5e7f\u5dde\u5e02\u82b1\u90fd\u533a"},
+    {"cohort_year": 2017, "province": "\u8d35\u5dde\u7701", "city": "\u8d35\u9633\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u8d35\u5b89\u65b0\u533a"},
+    {"cohort_year": 2017, "province": "\u8d35\u5dde\u7701", "city": "\u5b89\u987a\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u8d35\u5b89\u65b0\u533a"},
+    {"cohort_year": 2017, "province": "\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a", "city": "\u54c8\u5bc6\u5e02", "boundary_precision": "exact_prefecture"},
+    {"cohort_year": 2017, "province": "\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a", "city": "\u660c\u5409\u56de\u65cf\u81ea\u6cbb\u5dde", "boundary_precision": "exact_prefecture"},
+    {"cohort_year": 2017, "province": "\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a", "city": "\u514b\u62c9\u739b\u4f9d\u5e02", "boundary_precision": "exact_prefecture"},
+    {"cohort_year": 2019, "province": "\u7518\u8083\u7701", "city": "\u5170\u5dde\u5e02", "boundary_precision": "prefecture_proxy", "pilot_area": "\u5170\u5dde\u65b0\u533a"},
+    {"cohort_year": 2022, "province": "\u91cd\u5e86\u5e02", "city": "\u91cd\u5e86\u5e02", "boundary_precision": "exact_municipality"}
+  ],
+  "analysis": {
+    "estimated_cohorts": [2017, 2019],
+    "comparison_cohorts": [2022],
+    "event_time_min": -5,
+    "event_time_max": 4,
+    "transition_year_mode": "exclude",
+    "minimum_capacity_years": 3,
+    "minimum_pre_observations": 2,
+    "minimum_post_observations": 2,
+    "scientific_minimum_treated_entities_per_cohort": 5,
+    "controls": [
+      "firm_size",
+      "leverage",
+      "return_on_assets",
+      "sales_growth",
+      "cash_ratio",
+      "state_owned"
+    ]
+  }
+}

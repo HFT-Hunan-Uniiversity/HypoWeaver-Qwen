@@ -24,7 +24,9 @@ from .seal import canonical_sha256
 from .test_dag import (
     ENTERPRISE_PANEL_REGISTRY_VERSION,
     ENTERPRISE_PANEL_THREAT_BY_ID,
+    GROUP1_STAGGERED_DDD_REGISTRY_VERSION,
     POLICY_DID_REGISTRY_VERSION,
+    THREAT_GROUP1_INDEPENDENT_REPLICATION,
     THREAT_INDEPENDENT_REPLICATION,
     THREAT_MECHANISM_INTERACTION_BOUNDARY,
     THREAT_POLICY_INDEPENDENT_REPLICATION,
@@ -604,7 +606,13 @@ def _systemic_gate_reasons(
 ) -> list[str]:
     reasons: list[str] = []
     allowed_registry = (
-        POLICY_DID_REGISTRY_VERSION
+        GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+        if (
+            plan.method_family == "policy_causal"
+            and plan.check_registry_version
+            == GROUP1_STAGGERED_DDD_REGISTRY_VERSION
+        )
+        else POLICY_DID_REGISTRY_VERSION
         if plan.method_family == "policy_causal"
         else ENTERPRISE_PANEL_REGISTRY_VERSION
     )
@@ -732,7 +740,11 @@ def _systemic_gate_reasons(
         item.step.step_id
         for item in schedule_test_dag(plan)
         if item.step.threat_id
-        in {THREAT_INDEPENDENT_REPLICATION, THREAT_POLICY_INDEPENDENT_REPLICATION}
+        in {
+            THREAT_INDEPENDENT_REPLICATION,
+            THREAT_POLICY_INDEPENDENT_REPLICATION,
+            THREAT_GROUP1_INDEPENDENT_REPLICATION,
+        }
     }
     estimated_steps = {
         item.plan_step_id

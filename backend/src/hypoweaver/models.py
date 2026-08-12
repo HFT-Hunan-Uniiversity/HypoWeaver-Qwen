@@ -1301,7 +1301,7 @@ class RunState(StrictModel):
     case_id: str
     case_name: str
     mode: Literal["fixture", "research"]
-    model_provider: Literal["fixture", "qwen"] = "fixture"
+    model_provider: Literal["fixture", "qwen", "code_owned"] = "fixture"
     execution_mode: Literal["fixture", "external"] = "fixture"
     status: RunStatus = "created"
     current_node_id: str | None = None
@@ -1327,7 +1327,7 @@ class CreateRunRequest(StrictModel):
     preset_case_id: str | None = None
     mode: Literal["fixture", "research"] = "fixture"
     case: CaseSubmission | None = None
-    model_provider: Literal["fixture", "qwen"] | None = None
+    model_provider: Literal["fixture", "qwen", "code_owned"] | None = None
     execution_mode: Literal["fixture", "external"] | None = None
 
     @model_validator(mode="after")
@@ -1340,8 +1340,14 @@ class CreateRunRequest(StrictModel):
             raise ValueError("fixture mode requires model_provider=fixture")
         if self.mode == "fixture" and self.execution_mode not in (None, "fixture"):
             raise ValueError("fixture mode requires execution_mode=fixture")
-        if self.mode == "research" and self.model_provider not in (None, "qwen"):
-            raise ValueError("research mode requires model_provider=qwen")
+        if self.mode == "research" and self.model_provider not in (
+            None,
+            "qwen",
+            "code_owned",
+        ):
+            raise ValueError(
+                "research mode requires model_provider=qwen or code_owned"
+            )
         if self.mode == "research" and self.execution_mode not in (None, "external"):
             raise ValueError("research mode requires execution_mode=external")
         return self

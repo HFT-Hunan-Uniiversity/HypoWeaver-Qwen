@@ -1370,6 +1370,34 @@ class FixtureModelGateway:
         return {"sections": sections}
 
 
+class CodeOwnedModelGateway(FixtureModelGateway):
+    """Deterministic research-planning gateway with no external model calls."""
+
+    provider_name = "code_owned"
+
+    @staticmethod
+    def _design_reviewer(payload: dict[str, Any]) -> dict[str, Any]:
+        report = FixtureModelGateway._design_reviewer(payload)
+        report["reviewer_policy"] = "code-owned-isolated-context"
+        return report
+
+    @staticmethod
+    def _reviewer_report_batch(payload: dict[str, Any]) -> dict[str, Any]:
+        dimensions = payload.get("dimensions")
+        if not isinstance(dimensions, list) or not 1 <= len(dimensions) <= 2:
+            raise ValueError("reviewer report batch requires one or two dimensions")
+        if len(dimensions) != len(set(dimensions)):
+            raise ValueError("reviewer report batch dimensions must be unique")
+        return {
+            "reports": [
+                CodeOwnedModelGateway._design_reviewer(
+                    {**payload, "dimension": dimension}
+                )
+                for dimension in dimensions
+            ]
+        }
+
+
 class QwenModelGateway:
     provider_name = "qwen"
 

@@ -25,6 +25,7 @@ from .benchmark_runner import (
 from .definition import DEFINITION_VERSION, build_app_a_definition
 from .engine import WorkflowEngine, WorkflowTransitionError
 from .group1_handoff import (
+    bind_group1_execution_panel,
     Group1BridgeResult,
     Group1LocalHandoffRequest,
     Group1RunLaunchResponse,
@@ -150,7 +151,7 @@ def preview_group1_handoff(
     _actor: str = Depends(mutation_actor),
 ) -> Group1BridgeResult:
     try:
-        return import_group1_handoff(request.path)
+        return _group1_bridge_from_request(request)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
 
@@ -165,13 +166,25 @@ async def start_group1_handoff_run(
     _actor: str = Depends(mutation_actor),
 ) -> Group1RunLaunchResponse:
     try:
-        bridge = import_group1_handoff(request.path)
+        bridge = _group1_bridge_from_request(request)
+        if request.execution_panel_path is not None:
+            main_ref = next(
+                item
+                for item in bridge.case_submission.dataset_refs
+                if item.role == "main"
+            )
+            engine.dataset_registry.register(
+                main_ref,
+                Path(request.execution_panel_path).expanduser().resolve(strict=True),
+            )
         fixture_mode = request.mode == "fixture"
         run = await engine.create_run(
             CreateRunRequest(
                 mode=request.mode,
                 case=bridge.case_submission,
-                model_provider="fixture" if fixture_mode else "qwen",
+                model_provider=(
+                    "fixture" if fixture_mode else request.research_model_provider
+                ),
                 execution_mode="fixture" if fixture_mode else "external",
             )
         )
@@ -180,6 +193,29 @@ async def start_group1_handoff_run(
         raise HTTPException(status_code=422, detail=str(error)) from error
     except LocalStorageLimitError as error:
         raise HTTPException(status_code=409, detail=error.detail()) from error
+
+
+def _group1_bridge_from_request(
+    request: Group1LocalHandoffRequest,
+) -> Group1BridgeResult:
+    bridge = import_group1_handoff(request.path)
+    binding = (
+        request.execution_panel_path,
+        request.execution_manifest_path,
+        request.source_config_path,
+    )
+    if any(value is not None for value in binding):
+        if not all(value is not None for value in binding):
+            raise ValueError(
+                "execution_panel_path, execution_manifest_path, and source_config_path must be supplied together"
+            )
+        bridge = bind_group1_execution_panel(
+            bridge,
+            request.execution_panel_path or "",
+            request.execution_manifest_path or "",
+            request.source_config_path or "",
+        )
+    return bridge
 
 
 @app.post(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import csv
 import json
 import re
 from pathlib import Path, PurePosixPath
@@ -8,6 +9,7 @@ from typing import Any, Literal
 
 from .models import (
     CaseSubmission,
+    DatasetRef,
     DesignEnvelope,
     Group2DataFeasibilityItem,
     Group2FeasibilityPackage,
@@ -34,6 +36,10 @@ class Group1HandoffError(ValueError):
 class Group1LocalHandoffRequest(StrictModel):
     path: str
     mode: Literal["research", "fixture"] = "research"
+    research_model_provider: Literal["qwen", "code_owned"] = "code_owned"
+    execution_panel_path: str | None = None
+    execution_manifest_path: str | None = None
+    source_config_path: str | None = None
 
 
 class Group1IntegrityReport(StrictModel):
@@ -795,4 +801,193 @@ def import_group1_handoff(path: str | Path) -> Group1BridgeResult:
         integrity=integrity,
         feasibility=readiness,
         group2_feasibility_package=feasibility_package,
+    )
+
+
+def bind_group1_execution_panel(
+    bridge: Group1BridgeResult,
+    panel_path: str | Path,
+    manifest_path: str | Path,
+    source_config_path: str | Path,
+) -> Group1BridgeResult:
+    """Bind an audited Group 2 execution panel without mutating Group 1 evidence."""
+
+    panel = Path(panel_path).expanduser().resolve(strict=True)
+    manifest_file = Path(manifest_path).expanduser().resolve(strict=True)
+    source_config = Path(source_config_path).expanduser().resolve(strict=True)
+    if not panel.is_file() or panel.suffix.casefold() != ".csv":
+        raise Group1HandoffError("Group 1 execution panel must be an existing CSV file")
+    if not manifest_file.is_file() or not source_config.is_file():
+        raise Group1HandoffError("Group 1 execution manifest or source config is missing")
+    manifest = _load_json(manifest_file)
+    if manifest.get("schema_version") != "group1-stacked-panel-manifest-v1":
+        raise Group1HandoffError("unsupported Group 1 execution-panel manifest")
+    output = manifest.get("output")
+    if not isinstance(output, dict):
+        raise Group1HandoffError("execution-panel manifest has no output binding")
+    actual_sha256 = _sha256(panel)
+    actual_size = panel.stat().st_size
+    if output.get("filename") != panel.name:
+        raise Group1HandoffError("execution-panel filename disagrees with its manifest")
+    if output.get("sha256") != actual_sha256:
+        raise Group1HandoffError("execution-panel SHA256 disagrees with its manifest")
+    if int(output.get("size_bytes", -1)) != actual_size:
+        raise Group1HandoffError("execution-panel size disagrees with its manifest")
+    if manifest.get("source_config_sha256") != _sha256(source_config):
+        raise Group1HandoffError("source-config SHA256 disagrees with the panel manifest")
+    if output.get("stack_firm_year_key_unique") is not True:
+        raise Group1HandoffError("execution-panel stacked primary key is not unique")
+    if output.get("paired_outcome_complete") is not True:
+        raise Group1HandoffError("execution-panel paired outcomes are not complete")
+
+    required_fields = {
+        "stack_cohort_year",
+        "stack_entity_id",
+        "stack_time_id",
+        "firm_id",
+        "year",
+        "treated",
+        "gfripz_exposure",
+        "treatment_cohort_year",
+        "region_id",
+        "assignment_boundary_precision",
+        "prepolicy_digital_fintech_capacity",
+        "capacity_year_count",
+        "capacity_source_end_year",
+        "greenwashing_gap",
+        "firm_emission_intensity",
+        "firm_size",
+        "leverage",
+        "return_on_assets",
+        "sales_growth",
+        "cash_ratio",
+        "state_owned",
+    }
+    try:
+        with panel.open("r", encoding="utf-8-sig", newline="") as handle:
+            header = next(csv.reader(handle))
+    except (OSError, UnicodeError, StopIteration) as error:
+        raise Group1HandoffError("cannot read the execution-panel CSV header") from error
+    missing = sorted(required_fields - set(header))
+    if missing:
+        raise Group1HandoffError(
+            "execution panel is missing frozen fields: " + ", ".join(missing)
+        )
+
+    dataset_ref = DatasetRef(
+        dataset_id=f"group1-paired-{actual_sha256[:16]}",
+        role="main",
+        filename=panel.name,
+        mime_type="text/csv",
+        sha256=actual_sha256,
+        size_bytes=actual_size,
+    )
+    existing = {variable.name: variable for variable in bridge.case_submission.variables}
+    additions = {
+        "stack_cohort_year": ("Stack cohort year", "event_date"),
+        "stack_entity_id": ("Stack-by-firm fixed-effect key", "fixed_effect"),
+        "stack_time_id": ("Stack-by-year fixed-effect key", "fixed_effect"),
+        "treated": ("Treated entity in cohort stack", "treatment"),
+        "assignment_boundary_precision": ("Pilot boundary precision", "control"),
+        "capacity_year_count": ("Pre-policy capacity source-year count", "control"),
+        "capacity_source_end_year": ("Last capacity source year", "control"),
+        "firm_size": ("Firm size", "control"),
+        "leverage": ("Leverage", "control"),
+        "return_on_assets": ("Return on assets", "control"),
+        "sales_growth": ("Sales growth", "control"),
+        "cash_ratio": ("Cash ratio", "control"),
+        "state_owned": ("State-owned indicator", "control"),
+    }
+    variables = list(bridge.case_submission.variables)
+    for name, (label, role) in additions.items():
+        if name in existing:
+            continue
+        variables.append(
+            VariableSpec(
+                name=name,
+                label=label,
+                role=role,  # type: ignore[arg-type]
+                definition=(
+                    "Code-owned field in the hash-frozen Group 2 paired stacked panel."
+                ),
+                source=f"Group 2 execution manifest {_sha256(manifest_file)}",
+            )
+        )
+
+    scientific_blockers = [
+        str(value)
+        for value in manifest.get("scientific_release_blockers", [])
+        if str(value).strip()
+    ]
+    readiness = IntakeReadiness(
+        status="conditional",
+        can_approve_h1=True,
+        can_execute=True,
+        blockers=[],
+        warnings=scientific_blockers,
+        required_inputs=[],
+        method_requirements=[
+            "Execute group1-staggered-ddd-v1 on the paired stacked panel.",
+            "Run an independent NumPy within-estimator reproduction.",
+            "Hold causal release whenever the manifest or paired sign-switch gate fails.",
+        ],
+    )
+    method_matrix = [
+        item.model_copy(
+            update={
+                "implementation_status": (
+                    "available"
+                    if item.method_id
+                    in {
+                        "method:staggered_did_event_study_ddd",
+                        "diagnostic:pretrend_common_support_spillover",
+                    }
+                    or "staggered" in item.method_id
+                    else item.implementation_status
+                ),
+                "next_action": (
+                    "Execute the frozen adapter and preserve the scientific-release hold."
+                    if "staggered" in item.method_id
+                    else item.next_action
+                ),
+            }
+        )
+        for item in bridge.group2_feasibility_package.method_matrix
+    ]
+    feasibility_package = bridge.group2_feasibility_package.model_copy(
+        update={"method_matrix": method_matrix}
+    )
+    case = bridge.case_submission.model_copy(
+        update={
+            "sample_period": "2012-2021 paired stacked execution window",
+            "variables": variables,
+            "dataset_refs": [dataset_ref],
+            "known_policy_facts": list(
+                dict.fromkeys(
+                    [
+                        *bridge.case_submission.known_policy_facts,
+                        "The Group 2 paired stacked panel and source manifest are SHA256-bound.",
+                        "Adoption years are excluded and post-treatment starts in the following calendar year.",
+                        "Engineering execution is authorized; scientific release remains conditional on the manifest blockers and empirical claim gate.",
+                    ]
+                )
+            ),
+            "constraints": list(
+                dict.fromkeys(
+                    [
+                        *bridge.case_submission.constraints,
+                        *scientific_blockers,
+                    ]
+                )
+            ),
+            "intake_readiness": readiness,
+            "group2_feasibility_package": feasibility_package,
+        }
+    )
+    return bridge.model_copy(
+        update={
+            "case_submission": case,
+            "feasibility": readiness,
+            "group2_feasibility_package": feasibility_package,
+        }
     )

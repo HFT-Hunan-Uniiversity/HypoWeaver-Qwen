@@ -16,6 +16,10 @@ from .policy_causal import (
     POLICY_PRIMARY_IMPLEMENTATION_ID,
     POLICY_REPRODUCTION_IMPLEMENTATION_ID,
 )
+from .group1_staggered_ddd import (
+    GROUP1_PRIMARY_IMPLEMENTATION_ID,
+    GROUP1_REPRODUCTION_IMPLEMENTATION_ID,
+)
 from .research_engine import (
     PANEL_IMPLEMENTATION_ID,
     SPATIAL_IMPLEMENTATION_ID,
@@ -113,6 +117,7 @@ def _runtime_identity() -> dict[str, object]:
             [
                 PANEL_IMPLEMENTATION_ID,
                 POLICY_PRIMARY_IMPLEMENTATION_ID,
+                GROUP1_PRIMARY_IMPLEMENTATION_ID,
                 SPATIAL_IMPLEMENTATION_ID,
             ]
         ),
@@ -121,6 +126,7 @@ def _runtime_identity() -> dict[str, object]:
             [
                 REPRODUCTION_IMPLEMENTATION_ID,
                 POLICY_REPRODUCTION_IMPLEMENTATION_ID,
+                GROUP1_REPRODUCTION_IMPLEMENTATION_ID,
             ]
         ),
         "supported_methods": sorted(SUPPORTED_METHODS),
