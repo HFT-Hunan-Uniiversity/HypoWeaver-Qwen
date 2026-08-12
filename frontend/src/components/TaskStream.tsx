@@ -1,0 +1,384 @@
+/**
+ * TaskStream：任务详情页（会话流形态）。
+ * - MockTaskStream：11 阶段演示流，逐句吐出，H1–H4 处内嵌 mock 闸门卡。
+ * - RunTaskStream：真实运行，前半程折叠占位，后半程由 RunSnapshot 映射，
+ *   闸门用 GateDecisionCard（走真实 API）。
+ * 左侧纵向进度轨道 + 彗星拖尾指示当前进行位置；等待人工的闸门节点呼吸环。
+ */
+import { CircleAlert, LoaderCircle, RotateCcw, ShieldCheck } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import type { GateDecisionInput, RunSnapshot, WorkflowDefinition, WorkflowStage } from '../runtime/types'
+import { MOCK_H2_CANDIDATES, MOCK_H3_CLAIMS, type MockGateAction, type MockStage, type MockTask } from '../data/mockPipeline'
+import { GateDecisionCard, claimDecisionText, returnedRevisionGate } from './GateDecisionCard'
+import { stageState } from './WorkspaceDrawer'
+
+/* ============================== 公共 ============================== */
+
+function useAutoScroll(dependency: unknown) {
+  const endRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [dependency])
+  return endRef
+}
+
+function StageNode({ state, gate }: { state: 'pending' | 'active' | 'waiting' | 'done' | 'problem'; gate?: string }) {
+  return (
+    <span className={`stream-node is-${state} ${gate ? 'is-gate' : ''}`} aria-hidden="true">
+      {gate ?? ''}
+    </span>
+  )
+}
+
+/* ============================== Mock 流 ============================== */
+
+function MockGateCard({ stage, onDecide }: { stage: MockStage; onDecide: (action: MockGateAction, comment?: string) => void }) {
+  const [comment, setComment] = useState('')
+  const [candidateId, setCandidateId] = useState(MOCK_H2_CANDIDATES[0].id)
+  const [claimDecisions, setClaimDecisions] = useState<Record<string, 'approve' | 'reject'>>(
+    () => Object.fromEntries(MOCK_H3_CLAIMS.map((claim) => [claim.id, 'approve' as const])),
+  )
+  const gate = stage.gate!
+  return (
+    <section className="human-review-card stream-gate-card">
+      <header><ShieldCheck size={22} /><div><strong>{stage.gateTitle}</strong><p>{stage.gateHint}（演示决策，仅更新本地状态）</p></div></header>
+      {gate === 'H2' && (
+        <section className="design-candidate-list" aria-label="可行研究设计候选（演示）">
+          {MOCK_H2_CANDIDATES.map((candidate) => (
+            <label key={candidate.id} className={`design-candidate ${candidateId === candidate.id ? 'is-selected' : ''} ${candidate.recommended ? '' : 'is-unavailable'}`}>
+              <input type="radio" name="mock-design-candidate" value={candidate.id} checked={candidateId === candidate.id} disabled={!candidate.recommended} onChange={() => setCandidateId(candidate.id)} />
+              <span><strong>{candidate.label}</strong><small>{candidate.detail}</small></span>
+            </label>
+          ))}
+        </section>
+      )}
+      {gate === 'H3' && (
+        <div className="claim-review-list">
+          {MOCK_H3_CLAIMS.map((claim) => (
+            <article key={claim.id}>
+              <p>{claim.text}</p>
+              <div className="claim-gate-summary"><small>Gate：{claim.admission}</small></div>
+              <div>
+                {(['approve', 'reject'] as const).map((decision) => (
+                  <button type="button" key={decision} aria-pressed={claimDecisions[claim.id] === decision} className={claimDecisions[claim.id] === decision ? 'is-selected' : ''} onClick={() => setClaimDecisions((current) => ({ ...current, [claim.id]: decision }))}>
+                    {decision === 'approve' ? '批准' : '拒绝'}
+                  </button>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      <label>审核说明<textarea rows={2} value={comment} onChange={(event) => setComment(event.target.value)} placeholder="记录批准或拒绝理由（选填）" /></label>
+      <footer>
+        <button type="button" className="danger-button" onClick={() => onDecide('reject', comment)}>拒绝并终止</button>
+        <button type="button" className="secondary-button" onClick={() => onDecide('revise', comment)}>退回重播本阶段</button>
+        <button type="button" className="primary-button" onClick={() => onDecide('approve', comment)}>{gate === 'H3' ? '提交结论授权' : gate === 'H4' ? '批准并封存' : '批准并继续'}</button>
+      </footer>
+    </section>
+  )
+}
+
+const mockArtifactKindText = { figure: '图', table: '表', document: '文档', data: '数据' } as const
+
+export function MockTaskStream({ task, onGateDecision, onOpenDrawer }: {
+  task: MockTask
+  onGateDecision: (gate: MockTask['currentGate'] & string, action: MockGateAction, comment?: string) => void
+  onOpenDrawer: () => void
+}) {
+  const [notes, setNotes] = useState<string[]>([])
+  const [noteDraft, setNoteDraft] = useState('')
+  const progressKey = task.stages.map((stage) => `${stage.status}:${stage.revealed}`).join('|')
+  const endRef = useAutoScroll(`${progressKey}|${notes.length}`)
+
+  function stageVisual(stage: MockStage): 'pending' | 'active' | 'waiting' | 'done' | 'problem' {
+    if (stage.status === 'waiting_gate') return 'waiting'
+    if (stage.status === 'running') return 'active'
+    if (stage.status === 'done') return stage.gateDecision === 'reject' ? 'problem' : 'done'
+    if (stage.status === 'skipped') return 'problem'
+    return 'pending'
+  }
+
+  return (
+    <div className="stream">
+      <div className="stream__scroll">
+        <div className="stream__inner">
+          <p className="stream__demo-badge">演示数据 · 全流程 mock，后端接入后自动替换</p>
+          {task.stages.map((stage) => {
+            const visual = stageVisual(stage)
+            if (stage.status === 'pending' || stage.status === 'skipped') {
+              return (
+                <section className={`stream-stage is-${visual}`} key={stage.key}>
+                  <StageNode state={visual === 'problem' ? 'problem' : 'pending'} gate={stage.gate} />
+                  <div className="stream-stage__body">
+                    <p className="stream-stage__eyebrow">{stage.eyebrow}</p>
+                    <h2>{stage.label}</h2>
+                    <p className="stream-stage__pending">{stage.status === 'skipped' ? '流程已终止，本阶段跳过。' : '等待上游阶段完成。'}</p>
+                  </div>
+                </section>
+              )
+            }
+            return (
+              <section className={`stream-stage is-${visual}`} key={stage.key}>
+                <StageNode state={visual} gate={stage.gate} />
+                <div className="stream-stage__body">
+                  <p className="stream-stage__eyebrow">{stage.eyebrow}</p>
+                  <h2>{stage.label}</h2>
+                  <div className="stream-stage__lines">
+                    {stage.lines.slice(0, stage.revealed).map((line, index) => (
+                      <p className="stream-line" key={index}>{line}</p>
+                    ))}
+                    {stage.status === 'running' && stage.revealed < stage.lines.length && (
+                      <p className="stream-line stream-line--typing"><LoaderCircle size={13} className="spin" />正在推进…</p>
+                    )}
+                  </div>
+                  {stage.revealed >= stage.lines.length && stage.artifacts.length > 0 && (
+                    <div className="stream-stage__artifacts">
+                      {stage.artifacts.map((artifact) => (
+                        <button type="button" className="stream-artifact" key={artifact.id} onClick={onOpenDrawer}>
+                          <span>{mockArtifactKindText[artifact.kind]}</span>
+                          <strong>{artifact.name}</strong>
+                          <small>{artifact.note}</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {stage.status === 'waiting_gate' && stage.gate && (
+                    <MockGateCard stage={stage} onDecide={(action, comment) => onGateDecision(stage.gate!, action, comment)} />
+                  )}
+                  {stage.gateDecision === 'approve' && <p className="stream-stage__decision">已批准{stage.gateComment ? ` · ${stage.gateComment}` : ''}</p>}
+                  {stage.gateDecision === 'reject' && <p className="stream-stage__decision is-reject">已拒绝并终止{stage.gateComment ? ` · ${stage.gateComment}` : ''}</p>}
+                </div>
+              </section>
+            )
+          })}
+          {task.status === 'completed' && (
+            <section className="stream-final">
+              <h2>成果已封存</h2>
+              <p>研究计划、执行结果、Claim 台账与论文初稿已打包（演示数据）。</p>
+              <button type="button" className="secondary-button" onClick={onOpenDrawer}>查看工作区文件</button>
+            </section>
+          )}
+          {notes.map((note, index) => (
+            <div className="stream-note" key={index}><span>备注</span><p>{note}</p></div>
+          ))}
+          <div ref={endRef} />
+        </div>
+      </div>
+      <div className="stream__dock">
+        <form
+          className="composer__box composer__box--mini"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const text = noteDraft.trim()
+            if (!text) return
+            setNotes((current) => [...current, text])
+            setNoteDraft('')
+          }}
+        >
+          <textarea
+            rows={1}
+            value={noteDraft}
+            placeholder={task.status === 'waiting_human' ? `等待 ${task.currentGate} 决策 · 可先记录备注（演示）` : task.status === 'running' ? '任务推进中 · 记录备注（演示）' : '任务已结束 · 记录备注（演示）'}
+            onChange={(event) => setNoteDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault()
+                event.currentTarget.form?.requestSubmit()
+              }
+            }}
+          />
+        </form>
+      </div>
+    </div>
+  )
+}
+
+/* ============================== 真实运行流 ============================== */
+
+const runStatusText: Record<RunSnapshot['status'], string> = {
+  created: '待启动',
+  running: '运行中',
+  waiting_human: '等待人工审核',
+  blocked: '已阻塞',
+  failed: '执行失败',
+  completed: '已完成',
+  stopped: '已终止',
+  cancelled: '已取消',
+}
+
+const providedStages = [
+  { key: 'task_understanding', label: '任务理解' },
+  { key: 'literature', label: '文献调研' },
+  { key: 'hypothesis', label: '假设生成' },
+]
+
+export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision, onSubmitRevision, onRetryWriting, onOpenDrawer }: {
+  definition: WorkflowDefinition
+  run: RunSnapshot
+  busy: boolean
+  busyLabel: string
+  onGateDecision: (gate: string, input: GateDecisionInput) => Promise<void>
+  onSubmitRevision: (gate: 'H1' | 'H2', revision: unknown, comment: string) => Promise<void>
+  onRetryWriting: () => Promise<void>
+  onOpenDrawer: () => void
+}) {
+  const endRef = useAutoScroll(`${run.id}:${run.version}:${run.status}`)
+  const currentNode = definition.nodes.find((node) => node.id === run.currentNodeId)
+  const returnedGate = run.status === 'blocked' ? returnedRevisionGate(run) : undefined
+  const gateStageId = run.currentGate || returnedGate ? currentNode?.stageId : undefined
+  const writingFailed = run.status === 'failed' && run.currentNodeId === 'scientific_writer'
+  const approvedClaims = run.claims.filter((claim) => claim.decision === 'approve' || claim.decision === 'downgrade')
+  const identificationFailure = run.manuscript?.mode === 'identification_failure_report'
+
+  const gateByStage = new Map<string, string>()
+  for (const node of definition.nodes) {
+    if (node.kind !== 'gate') continue
+    const match = /H[1-4]/.exec(node.title) ?? /h([1-4])_gate/i.exec(node.id)
+    if (match) gateByStage.set(node.stageId, match[0].toUpperCase().startsWith('H') ? match[0].toUpperCase() : `H${match[1]}`)
+  }
+
+  function stageVisual(stage: WorkflowStage): 'pending' | 'active' | 'waiting' | 'done' | 'problem' {
+    const state = stageState(stage, definition, run)
+    if (state === 'complete') return 'done'
+    if (state === 'problem') return 'problem'
+    if (state === 'active') return run.status === 'waiting_human' ? 'waiting' : 'active'
+    return 'pending'
+  }
+
+  return (
+    <div className="stream">
+      <div className="stream__scroll">
+        <div className="stream__inner">
+          {run.mode === 'fixture' && <p className="stream__demo-badge"><CircleAlert size={13} />流程演示不会生成实证结论。</p>}
+          {run.upstreamPackage && (
+            <section className={`stream-provided stream-upstream is-${run.intakeReadiness?.status ?? 'conditional'}`}>
+              <p className="stream-stage__eyebrow">上游冻结交接 · {run.upstreamPackage.sourceSystem}</p>
+              <div className="stream-provided__row">
+                <span>{run.upstreamPackage.packageId}</span>
+                <span>{run.upstreamPackage.verifiedArtifactCount} 个 Artifact 哈希已核验</span>
+                {run.upstreamPackage.corpusBoundary && <span>{run.upstreamPackage.corpusBoundary}</span>}
+                <span>{run.intakeReadiness?.canApproveH1 ? 'H1 可审批' : 'H1 暂停'}</span>
+                <span>{run.intakeReadiness?.canExecute ? '统计执行已就绪' : '统计执行前待补'}</span>
+              </div>
+              {run.intakeReadiness?.blockers.length ? (
+                <div className="stream-upstream__pending">
+                  <strong>执行前待解决 · 不阻止 H1/H2 研究设计</strong>
+                  <ul className="stream-upstream__blockers">
+                    {run.intakeReadiness.blockers.slice(0, 4).map((blocker) => <li key={blocker}>{blocker}</li>)}
+                  </ul>
+                </div>
+              ) : <small>上游证据包与当前执行能力均已满足 H1 审批条件。</small>}
+            </section>
+          )}
+          {run.group2Feasibility && (
+            <section className="stream-provided stream-feasibility">
+              <p className="stream-stage__eyebrow">Group 2 可行性接管包</p>
+              <div className="stream-provided__row">
+                <span>交接已接收</span>
+                <span>{run.group2Feasibility.goNoGoDecision}</span>
+                <span>{run.group2Feasibility.dataMatrix.length} 项变量/数据审计</span>
+                <span>{run.group2Feasibility.methodMatrix.length} 项方法审计</span>
+                <span>科学十项 {run.group2Feasibility.scientificTen.length}/10</span>
+              </div>
+              <p className="stream-feasibility__decision">{run.group2Feasibility.decisionRationale}</p>
+              <details className="stream-feasibility__details">
+                <summary>查看科学十项 Proposal 草案</summary>
+                <ol>
+                  {run.group2Feasibility.scientificTen.map((item) => (
+                    <li key={item.itemNo}>
+                      <div><strong>{item.itemNo}. {item.title}</strong><span>{item.status}</span></div>
+                      <p>{item.content}</p>
+                      {item.unresolvedActions.length > 0 && <small>待办：{item.unresolvedActions.join('；')}</small>}
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            </section>
+          )}
+          <section className="stream-provided">
+            <p className="stream-stage__eyebrow">前半程 · 已由用户提供</p>
+            <div className="stream-provided__row">
+              {providedStages.map((stage) => (
+                <span key={stage.key}>{stage.label}</span>
+              ))}
+            </div>
+            <small>研究问题、假设与变量定义随案例包提交；系统从案例接入与 H1 边界确认开始接管。</small>
+          </section>
+          {definition.stages.map((stage) => {
+            const visual = stageVisual(stage)
+            const gate = gateByStage.get(stage.id)
+            const attempts = run.steps.filter((step) => stage.nodeIds.includes(step.nodeId))
+            const isGateHere = gateStageId === stage.id
+            if (visual === 'pending') {
+              return (
+                <section className="stream-stage is-pending" key={stage.id}>
+                  <StageNode state="pending" gate={gate} />
+                  <div className="stream-stage__body">
+                    <p className="stream-stage__eyebrow">阶段 {stage.order}{gate ? ` · ${gate} 人工闸门` : ''}</p>
+                    <h2>{stage.title}</h2>
+                    <p className="stream-stage__pending">等待上游阶段完成。</p>
+                  </div>
+                </section>
+              )
+            }
+            return (
+              <section className={`stream-stage is-${visual}`} key={stage.id}>
+                <StageNode state={visual} gate={gate} />
+                <div className="stream-stage__body">
+                  <p className="stream-stage__eyebrow">阶段 {stage.order}{gate ? ` · ${gate} 人工闸门` : ''}</p>
+                  <h2>{stage.title}</h2>
+                  <p className="stream-stage__desc">{stage.description}</p>
+                  {attempts.length > 0 && (
+                    <div className="stream-stage__steps">
+                      {attempts.map((attempt) => (
+                        <button type="button" className={`stream-step is-${attempt.status}`} key={attempt.id} onClick={onOpenDrawer} title="在工作区文件中查看明细">
+                          <span className={`step-status step-status--${attempt.status}`} />
+                          {definition.nodes.find((node) => node.id === attempt.nodeId)?.title ?? attempt.nodeId}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {visual === 'active' && run.status === 'running' && (
+                    <p className="stream-line stream-line--typing"><LoaderCircle size={13} className="spin" />{busy ? (busyLabel || '正在执行…') : `正在执行 · ${currentNode?.title ?? '处理中'}`}</p>
+                  )}
+                  {visual === 'problem' && run.lastError && stage.id === currentNode?.stageId && (
+                    <div className="stream-error"><CircleAlert size={15} /><div><strong>失败原因</strong>{run.lastError}</div>{writingFailed && <button type="button" className="secondary-button" disabled={busy} onClick={() => void onRetryWriting()}><RotateCcw size={13} />重试写作</button>}</div>
+                  )}
+                  {isGateHere && (
+                    <GateDecisionCard key={`${run.id}:${run.version}:${run.currentGate}`} run={run} busy={busy} onDecision={onGateDecision} onSubmitRevision={onSubmitRevision} />
+                  )}
+                </div>
+              </section>
+            )
+          })}
+          {run.status === 'completed' && (
+            <section className="stream-final">
+              <h2>{run.planOnly ? '研究计划已生成' : identificationFailure ? '识别失败报告已生成' : '成果已封存'}</h2>
+              <p>执行 · {run.executionStatus} · 科学 · {run.scientificStatus}{run.manuscript ? ` · ${run.manuscript.sections.filter((section) => section.status === 'generated').length} 节` : ''}</p>
+              {approvedClaims.slice(0, 3).map((claim) => (
+                <p className="stream-claim" key={claim.id}><b>{claimDecisionText[claim.decision!]}</b>{claim.finalText ?? claim.text}</p>
+              ))}
+              <div className="stream-final__actions">
+                <button type="button" className="secondary-button" onClick={onOpenDrawer}>论文与图表</button>
+                {!run.planOnly && !identificationFailure && (
+                  <button type="button" className="quiet-button" disabled={busy} onClick={() => void onRetryWriting()}><RotateCcw size={14} />重新生成论文</button>
+                )}
+              </div>
+            </section>
+          )}
+          <div ref={endRef} />
+        </div>
+      </div>
+      <div className="stream__dock">
+        <div className="stream__status">
+          {run.status === 'waiting_human'
+            ? `等待 ${run.currentGate} 人工决策 · 请在上方决策卡中操作`
+            : busy
+              ? (busyLabel || '正在执行…')
+              : runStatusText[run.status]}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,14 @@
+{
+  "case": {
+    "dataset_refs": [
+      {
+        "dataset_id": "ds_dad550862bf59b05",
+        "role": "main",
+        "filename": "main_data.csv",
+        "mime_type": "text/csv",
+        "sha256": "dad550862bf59b059e67c9bfadcc7b2659fc75d3e281fde72b3396ca5c1b4714",
+        "size_bytes": 41972980
+      }
+    ]
+  }
+}

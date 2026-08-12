@@ -1,0 +1,167 @@
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
+import { permittedClaimDecisions, returnedRevisionGate, revisionSeed } from '../src/components/GateDecisionCard'
+import { MODEL_CALL_PROTOCOL, ModelCallContract, manuscriptQuality, modelCallStageUsage } from '../src/components/WorkspaceDrawer'
+import type { RunSnapshot, StepAttempt } from '../src/runtime/types'
+
+function step(input: Partial<StepAttempt> & Pick<StepAttempt, 'id' | 'nodeId' | 'status'>): StepAttempt {
+  return {
+    attempt: 1,
+    prompts: [],
+    input: null,
+    output: null,
+    logs: [],
+    ...input,
+  }
+}
+
+function run(steps: StepAttempt[], currentNodeId: string): RunSnapshot {
+  return {
+    id: 'run-revision',
+    version: 4,
+    definitionId: 'app-a',
+    definitionVersion: '1.0.0',
+    caseId: 'case-1',
+    caseName: '修订测试',
+    mode: 'fixture',
+    status: 'blocked',
+    currentNodeId,
+    executionStatus: 'not_started',
+    scientificStatus: 'not_evaluated',
+    planOnly: false,
+    createdAt: '',
+    updatedAt: '',
+    steps,
+    events: [],
+    claims: [],
+    allowedActions: [],
+  }
+}
+
+describe('gate revision recovery', () => {
+  it('separates human gates, logical calls, provider attempts and labels call groups for users', () => {
+    expect(MODEL_CALL_PROTOCOL).toEqual({
+      humanGateCount: 4,
+      logicalCallCount: 9,
+      maxProviderAttempts: 20,
+    })
+    expect(modelCallStageUsage({
+      maxCalls: 20,
+      llmCalls: 7,
+      logicalCalls: 4,
+      providerAttempts: 7,
+      requiredLogicalCalls: 9,
+      retryPolicy: 'shared_bounded',
+      sharedRetrySlots: 11,
+      sharedRetryRemaining: 8,
+      groupUsage: { h1_h2: 7, h3: 0, h4: 0 },
+    })).toEqual([
+      { label: '设计与审查阶段', attempts: 7 },
+      { label: '证据与结论审计阶段', attempts: 0 },
+      { label: '论文写作与复核阶段', attempts: 0 },
+    ])
+
+    const markup = renderToStaticMarkup(createElement(ModelCallContract, {
+      modelUsage: {
+        maxCalls: 20,
+        llmCalls: 7,
+        logicalCalls: 4,
+        providerAttempts: 7,
+        requiredLogicalCalls: 9,
+        retryPolicy: 'shared-retry-v1',
+        retryMode: 'global_shared_retry_pool',
+        sharedRetrySlots: 11,
+        sharedRetryRemaining: 8,
+        groupUsage: { h1_h2: 7, h3: 0, h4: 0 },
+      },
+    }))
+    expect(markup).toContain('个人工 Gate')
+    expect(markup).toContain('个逻辑模型调用')
+    expect(markup).toContain('次 Provider Attempt 上限')
+    expect(markup).toContain('共享重试池剩余')
+    expect(markup).toContain('设计与审查阶段')
+    expect(markup).not.toContain('h1_h2')
+  })
+
+  it('maps Claim Gate status to the only legal H3 actions', () => {
+    const base = {
+      id: 'claim-H1',
+      text: '关联主张',
+      supportingRuns: [],
+      requiredCheckIds: [],
+      gateReasons: [],
+    }
+    expect(permittedClaimDecisions({ ...base, admissionStatus: 'admitted', allowedStrength: 'associational' }, false)).toEqual(['approve', 'downgrade', 'reject', 'hold'])
+    expect(permittedClaimDecisions({ ...base, admissionStatus: 'downgrade_required', allowedStrength: 'mixed' }, false)).toEqual(['downgrade', 'reject', 'hold'])
+    expect(permittedClaimDecisions({ ...base, admissionStatus: 'prohibited', allowedStrength: 'prohibited' }, false)).toEqual(['reject', 'hold'])
+    expect(permittedClaimDecisions({ ...base, admissionStatus: 'admitted', allowedStrength: 'associational' }, true)).toEqual(['reject', 'hold'])
+  })
+
+  it('prefills H1 from the waiting artifact instead of the later decision step', () => {
+    const snapshot = run([
+      step({
+        id: 'h1-waiting',
+        nodeId: 'h1_gate',
+        status: 'waiting_human',
+        input: { case_id: 'case-1', input_conflicts: [], missing_required_information: [] },
+      }),
+      step({
+        id: 'h1-returned',
+        nodeId: 'h1_gate',
+        status: 'succeeded',
+        input: { reviewed_artifacts: { research_package: 'hash' } },
+        output: { gate: 'H1', action: 'revise' },
+      }),
+    ], 'input_validation')
+
+    expect(returnedRevisionGate(snapshot)).toBe('H1')
+    expect(JSON.parse(revisionSeed(snapshot, 'H1'))).toEqual({ case_id: 'case-1' })
+  })
+
+  it('increments the H2 plan version from the waiting analysis plan', () => {
+    const snapshot = run([
+      step({ id: 'h2-waiting', nodeId: 'h2_gate', status: 'waiting_human', input: { analysis_plan: { plan_version: 2, method_family: 'policy_causal' }, critic_report: { critical_issues: [] } } }),
+      step({ id: 'h2-returned', nodeId: 'h2_gate', status: 'succeeded', output: { gate: 'H2', action: 'revise' } }),
+    ], 'analysis_plan_merge')
+
+    expect(returnedRevisionGate(snapshot)).toBe('H2')
+    expect(JSON.parse(revisionSeed(snapshot, 'H2'))).toMatchObject({ plan_version: 3, method_family: 'policy_causal' })
+  })
+
+  it('does not revive an old revision after a newer gate decision', () => {
+    const snapshot = run([
+      step({ id: 'old-return', nodeId: 'h1_gate', status: 'succeeded', output: { gate: 'H1', action: 'revise' } }),
+      step({ id: 'new-approval', nodeId: 'h1_gate', status: 'succeeded', output: { gate: 'H1', action: 'approve' } }),
+    ], 'analysis_plan_merge')
+
+    expect(returnedRevisionGate(snapshot)).toBeUndefined()
+  })
+
+  it('opens an H2 plan revision when the critics block the plan', () => {
+    const snapshot = run([
+      step({ id: 'plan', nodeId: 'analysis_plan_merge', status: 'succeeded', output: { plan_version: 1, method_family: 'panel_association' } }),
+      step({ id: 'critics', nodeId: 'critic_merge', status: 'blocked', output: { verdict: 'blocked', issues: [{ severity: 'critical' }] } }),
+    ], 'critic_merge')
+
+    expect(returnedRevisionGate(snapshot)).toBe('H2')
+    expect(JSON.parse(revisionSeed(snapshot, 'H2'))).toMatchObject({ plan_version: 2, method_family: 'panel_association' })
+  })
+
+  it('does not treat a short result card as a complete manuscript', () => {
+    const snapshot = run([], 'complete')
+    snapshot.status = 'completed'
+    snapshot.manuscript = {
+      version: 1,
+      mode: 'full_manuscript',
+      status: 'ready_for_human_review',
+      researchPlan: '',
+      sections: [{ id: 'abstract', title: '摘要', content: '短结果', status: 'generated', claimIds: [], runIds: [], statements: [] }],
+      disclosures: [],
+      unresolvedIssues: [],
+      auditResult: 'pass_with_no_critical_issues',
+    }
+
+    expect(manuscriptQuality(snapshot)).toEqual({ complete: false, characterCount: 3 })
+  })
+})

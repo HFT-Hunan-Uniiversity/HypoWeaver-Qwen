@@ -1,0 +1,857 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { normalizeBaselineRun, normalizeCaseSubmission, normalizeDefinition, normalizeLocalCaseImport, normalizeRun, normalizeRunList, workflowApi } from '../src/runtime/api'
+
+const definitionPayload = {
+  id: 'app-a',
+  version: '1.0.0',
+  title: 'HypoWeaver App A',
+  steps: [
+    {
+      id: 'intake',
+      title: '案例解析',
+      kind: 'llm',
+      prompt_version: '1.0.0',
+      system_prompt: '只输出 JSON',
+      user_template: '输入：{payload}',
+      input_schema: { type: 'object' },
+      output_schema: { type: 'object', required: ['case_id'] },
+    },
+    {
+      id: 'decompose',
+      title: '假设拆解',
+      kind: 'llm',
+      system_prompt: '拆成可证伪预测',
+      user_template: '输入：{payload}',
+    },
+  ],
+  gates: {
+    H1: { state: 'await_h1', decisions: ['approve', 'revise', 'stop'] },
+  },
+}
+
+const runPayload = {
+  id: 'run-001',
+  case_id: 'green-finance-did',
+  definition: 'app-a',
+  version: 7,
+  current_step: 'await_h3',
+  status: 'waiting',
+  allowed_actions: ['gate:H3'],
+  revision_round: 1,
+  step_attempts: [
+    {
+      id: 'attempt-1',
+      stage: 'intake',
+      status: 'success',
+      attempt: 1,
+      prompt_version: '1.0.0',
+      provider: 'fixture',
+      started_at: '2026-07-14T10:00:00Z',
+      completed_at: '2026-07-14T10:00:01Z',
+    },
+    {
+      id: 'attempt-2',
+      stage: 'build_claims',
+      status: 'success',
+      attempt: 1,
+      provider: 'fixture',
+      started_at: '2026-07-14T10:00:02Z',
+      completed_at: '2026-07-14T10:00:03Z',
+    },
+  ],
+  artifacts: [
+    {
+      id: 'case-artifact',
+      kind: 'case_submission',
+      version: 1,
+      sha256: 'abc',
+      payload: {
+        case_title: '绿色金融试验区政策评估',
+        run_mode: 'preset_demo',
+        execution_mode: 'fixture',
+      },
+      created_at: '2026-07-14T10:00:00Z',
+    },
+    {
+      id: 'claim-artifact',
+      kind: 'claim_ledger',
+      version: 1,
+      sha256: 'def',
+      payload: {
+        claims: [
+          {
+            claim_id: 'claim-1',
+            claim_text: 'Fixture 不得形成实证结论',
+            allowed_strength: 'prohibited',
+            supporting_runs: [],
+          },
+        ],
+      },
+      created_at: '2026-07-14T10:00:03Z',
+    },
+  ],
+  events: [
+    {
+      seq: 1,
+      event_type: 'run.created',
+      from_state: null,
+      to_state: 'intake',
+      payload: { message: 'Run 已创建' },
+      created_at: '2026-07-14T10:00:00Z',
+    },
+    {
+      seq: 2,
+      event_type: 'gate.waiting',
+      from_state: 'build_claims',
+      to_state: 'await_h3',
+      payload: { message: '等待 H3' },
+      created_at: '2026-07-14T10:00:04Z',
+    },
+  ],
+}
+
+const actualBackendRunPayload = {
+  id: 'run-code-native',
+  version: 3,
+  definition_id: 'app-a',
+  definition_version: '1.0.0',
+  case_id: 'green-finance-did',
+  case_name: '绿色金融试验区政策评估',
+  mode: 'fixture',
+  status: 'waiting_human',
+  current_node_id: 'h3_gate',
+  current_gate: 'H3',
+  execution_status: 'fixture_only',
+  scientific_status: 'not_evaluated',
+  plan_only: true,
+  last_error: '示例错误',
+  created_at: '2026-07-14T10:00:00Z',
+  updated_at: '2026-07-14T10:01:00Z',
+  steps: [{
+    id: 'step-h3',
+    node_id: 'h3_gate',
+    attempt: 1,
+    status: 'waiting_human',
+    prompts: [],
+    input: { ledger_id: 'ledger-1' },
+    output: null,
+    logs: ['H3 已暂停'],
+  }],
+  events: [{ seq: 1, type: 'gate.waiting', message: 'H3 等待人工决定。', timestamp: '2026-07-14T10:01:00Z', node_id: 'h3_gate', status: 'waiting_human' }],
+  claims: [{ claim_id: 'claim-H1', claim_text: '尚未检验', final_text: 'H3 最终文本', claim_type: 'associational', allowed_strength: 'prohibited', max_allowed_strength: 'prohibited', admission_status: 'prohibited', required_check_ids: ['check-baseline'], gate_reasons: ['Fixture 禁止实证准入'], supporting_runs: [], opposing_runs: [], evidence_status: 'not_tested', scope: '', robustness_status: 'not_executed', unresolved_risks: [], approval_status: 'downgraded' }],
+  artifacts: {
+    claim_ledger: { artifact_id: 'run:claim_ledger', kind: 'claim_ledger', sha256: 'abc', payload: { claims: [] } },
+    model_usage: {
+      artifact_id: 'run:model_usage',
+      kind: 'model_usage',
+      sha256: 'def',
+      payload: {
+        max_calls: 20,
+        llm_calls: 7,
+        required_logical_calls: 9,
+        retry_policy: 'shared_bounded',
+        shared_retry_slots: 11,
+        group_limits: { h1_h2: 10, h3: 4, h4: 6 },
+        group_usage: { h1_h2: 7, h3: 0, h4: 0 },
+        logical_call_attempts: { hypothesis: 1, candidate_a: 1, candidate_b: 3, reviewer_a: 2 },
+      },
+    },
+  },
+}
+
+const modelCallBudgetSnapshotPayload = {
+  max_calls: 20,
+  llm_calls: 7,
+  input_tokens: 23418,
+  output_tokens: 13540,
+  wall_time_seconds: 454.574874,
+  technical_failures: ['APIConnectionError'],
+  call_receipts: [],
+  group_limits: { h1_h2: 10, h3: 4, h4: 6 },
+  group_usage: { h1_h2: 7, h3: 0, h4: 0 },
+  logical_call_attempts: { hypothesis: 1, candidate_a: 1, candidate_b: 3, reviewer_a: 2 },
+  logical_call_groups: {
+    hypothesis: 'h1_h2',
+    candidate_a: 'h1_h2',
+    candidate_b: 'h1_h2',
+    reviewer_a: 'h1_h2',
+  },
+  shared_retry_policy: {
+    version: 'shared-retry-v1',
+    mode: 'global_shared_retry_pool',
+    legacy_group_limits_enforced: false,
+    required_first_calls: 9,
+    required_first_calls_by_group: { h1_h2: 5, h3: 2, h4: 2 },
+    reserved_for_unstarted_required_first_calls: 5,
+    reserved_for_unstarted_by_group: { h1_h2: 1, h3: 2, h4: 2 },
+    shared_retry_capacity: 11,
+    shared_retry_used: 3,
+    shared_retry_remaining: 8,
+  },
+}
+
+describe('runtime API adapter', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('turns the code definition into the six-stage console graph', () => {
+    const definition = normalizeDefinition(definitionPayload)
+
+    expect(definition.id).toBe('app-a')
+    expect(definition.name).toBe('HypoWeaver App A')
+    expect(definition.stages).toHaveLength(6)
+    expect(definition.nodes.find((node) => node.id === 'intake')?.prompts).toHaveLength(2)
+    expect(definition.nodes.find((node) => node.id === 'decompose')?.stageId).toBe('understanding')
+    expect(definition.nodes.find((node) => node.id === 'await_h1')?.kind).toBe('gate')
+    expect(definition.edges).toHaveLength(definition.nodes.length - 1)
+    expect(definition.gates.H1.decisions).toContain('approve')
+  })
+
+  it('restores a persisted fixture run, attempts, artifacts, claims and events', () => {
+    const run = normalizeRun(runPayload)
+
+    expect(run.id).toBe('run-001')
+    expect(run.version).toBe(7)
+    expect(run.mode).toBe('fixture')
+    expect(run.status).toBe('waiting_human')
+    expect(run.currentGate).toBe('H3')
+    expect(run.caseName).toBe('绿色金融试验区政策评估')
+    expect(run.steps[0].nodeId).toBe('intake')
+    expect(run.steps[1].output).toMatchObject({ claims: expect.any(Array) })
+    expect(run.claims[0].id).toBe('claim-1')
+    expect(run.events.map((event) => event.seq)).toEqual([1, 2])
+  })
+
+  it('normalizes the exact code-native RunState wire contract', () => {
+    const run = normalizeRun(actualBackendRunPayload)
+    expect(run).toMatchObject({
+      id: 'run-code-native',
+      version: 3,
+      currentNodeId: 'h3_gate',
+      currentGate: 'H3',
+      executionStatus: 'fixture_only',
+      scientificStatus: 'not_evaluated',
+      planOnly: true,
+      lastError: '示例错误',
+    })
+    expect(run.steps[0]).toMatchObject({ nodeId: 'h3_gate', status: 'waiting_human' })
+    expect(run.claims[0]).toMatchObject({
+      id: 'claim-H1',
+      finalText: 'H3 最终文本',
+      claimType: 'associational',
+      allowedStrength: 'prohibited',
+      maxAllowedStrength: 'prohibited',
+      admissionStatus: 'prohibited',
+      requiredCheckIds: ['check-baseline'],
+      gateReasons: ['Fixture 禁止实证准入'],
+      evidenceStatus: 'not_tested',
+      robustnessStatus: 'not_executed',
+      decision: 'downgrade',
+    })
+    expect(run.modelUsage).toEqual({
+      maxCalls: 20,
+      llmCalls: 7,
+      logicalCalls: 4,
+      providerAttempts: 7,
+      requiredLogicalCalls: 9,
+      retryPolicy: 'shared_bounded',
+      retryMode: undefined,
+      sharedRetrySlots: 11,
+      sharedRetryRemaining: 8,
+      groupUsage: { h1_h2: 7, h3: 0, h4: 0 },
+    })
+  })
+
+  it('keeps the Group 1 conditional handoff and Group 2 proposal package', () => {
+    const run = normalizeRun({
+      ...actualBackendRunPayload,
+      current_node_id: 'h1_gate',
+      current_gate: 'H1',
+      case_submission: {
+        upstream_provenance: {
+          source_system: 'group1-discovery',
+          bridge_version: 'group1-to-group2-v2',
+          package_id: 'group1-handoff:test',
+          status: 'ready_for_group2_with_conditions',
+          manifest_sha256: 'a'.repeat(64),
+          verified_artifact_count: 12,
+        },
+        intake_readiness: {
+          status: 'conditional',
+          can_approve_h1: true,
+          can_execute: false,
+          blockers: ['Execution data is pending.'],
+          warnings: [],
+          required_inputs: ['Firm emissions'],
+          method_requirements: ['Staggered DID'],
+        },
+        group2_feasibility_package: {
+          package_id: 'group2-feasibility:test',
+          upstream_handoff_id: 'group1-handoff:test',
+          handoff_status: 'accepted_for_group2_design',
+          execution_status: 'not_ready',
+          go_no_go_decision: 'conditional_go_for_design',
+          decision_rationale: 'Design can continue while execution stays closed.',
+          return_to_group1_required: false,
+          data_matrix: [{
+            item_id: 'variable:emissions',
+            construct_name: 'Firm emission intensity',
+            role: 'outcome',
+            candidate_source_ids: [],
+            source_access: 'missing',
+            executable_asset_supplied: false,
+            readiness: 'missing_blocks_execution',
+            next_action: 'Acquire a licensed panel.',
+          }],
+          method_matrix: [{
+            method_id: 'method:did-ddd',
+            name: 'Staggered DID + DDD',
+            purpose: 'Estimate the sign switch.',
+            implementation_status: 'adapter_required',
+            next_action: 'Bind an executor.',
+          }],
+          scientific_ten: Array.from({ length: 10 }, (_, index) => ({
+            item_no: index + 1,
+            title: `Item ${index + 1}`,
+            content: 'Evidence-bounded draft.',
+            status: index < 4 ? 'evidence_bound' : 'conditional',
+            evidence_refs: [],
+            unresolved_actions: [],
+          })),
+        },
+      },
+    })
+
+    expect(run.intakeReadiness).toMatchObject({ status: 'conditional', canApproveH1: true, canExecute: false })
+    expect(run.group2Feasibility).toMatchObject({
+      goNoGoDecision: 'conditional_go_for_design',
+      executionStatus: 'not_ready',
+    })
+    expect(run.group2Feasibility?.dataMatrix[0].constructName).toBe('Firm emission intensity')
+    expect(run.group2Feasibility?.scientificTen).toHaveLength(10)
+  })
+
+  it('normalizes the nested shared retry policy emitted by ModelCallBudget.snapshot', () => {
+    const run = normalizeRun({
+      id: 'run-model-budget-snapshot',
+      artifacts: {
+        model_usage: {
+          kind: 'model_usage',
+          payload: modelCallBudgetSnapshotPayload,
+        },
+      },
+    })
+
+    expect(run.modelUsage).toEqual({
+      maxCalls: 20,
+      llmCalls: 7,
+      logicalCalls: 4,
+      providerAttempts: 7,
+      requiredLogicalCalls: 9,
+      retryPolicy: 'shared-retry-v1',
+      retryMode: 'global_shared_retry_pool',
+      sharedRetrySlots: 11,
+      sharedRetryRemaining: 8,
+      groupUsage: { h1_h2: 7, h3: 0, h4: 0 },
+    })
+  })
+
+  it('normalizes a manuscript stored in the code-native artifact dictionary', () => {
+    const sections = ['abstract', 'introduction', 'theory_hypotheses', 'data_variables', 'research_design', 'empirical_results', 'discussion_limitations', 'conclusion']
+      .map((sectionId) => ({
+        section_id: sectionId,
+        title: sectionId,
+        content_markdown: '正文'.repeat(240),
+        status: 'generated',
+        claim_ids: [],
+        run_ids: [],
+        statements: sectionId === 'abstract' ? [{
+          statement_id: 'statement-claim-1',
+          statement_kind: 'authorized_claim',
+          claim_ids: ['claim-H1'],
+          execution_ids: [],
+          text_template: 'internal-template-must-not-leak',
+          protected_values: [{
+            source_kind: 'claim',
+            source_id: 'claim-H1',
+            source_path: '/claims/0/final_text',
+            raw_value: 'internal-value-must-not-leak',
+          }],
+        }] : [],
+      }))
+    const run = normalizeRun({
+      ...actualBackendRunPayload,
+      mode: 'research',
+      status: 'completed',
+      plan_only: false,
+      artifacts: {
+        manuscript_package: {
+          kind: 'manuscript_package',
+          payload: {
+            version: 2,
+            ir_version: 1,
+            mode: 'full_manuscript',
+            status: 'ready_for_human_review',
+            research_plan_markdown: '后续计划',
+            manuscript_sections: sections,
+            disclosures: ['引文待补'],
+            unresolved_issues: [],
+            audit_result: 'pass_with_no_critical_issues',
+          },
+        },
+      },
+    })
+
+    expect(run.manuscript).toMatchObject({
+      version: 2,
+      irVersion: 1,
+      mode: 'full_manuscript',
+      auditResult: 'pass_with_no_critical_issues',
+    })
+    expect(run.manuscript?.sections).toHaveLength(8)
+    expect(run.manuscript?.sections[0].statements).toEqual([{
+      id: 'statement-claim-1',
+      kind: 'authorized_claim',
+      claimIds: ['claim-H1'],
+      executionIds: [],
+      sources: [{ kind: 'claim', id: 'claim-H1', path: '/claims/0/final_text' }],
+    }])
+    expect(run.manuscript).not.toHaveProperty('contentTemplate')
+    expect(JSON.stringify(run.manuscript)).not.toContain('internal-template-must-not-leak')
+    expect(JSON.stringify(run.manuscript)).not.toContain('internal-value-must-not-leak')
+  })
+
+  it('normalizes the H2 design arena and keeps only viable candidates selectable', () => {
+    const run = normalizeRun({
+      ...actualBackendRunPayload,
+      current_node_id: 'h2_gate',
+      current_gate: 'H2',
+      artifacts: {
+        design_arena: {
+          kind: 'design_arena',
+          payload: {
+            arena_id: 'arena-1',
+            provisional_candidate_id: 'candidate-direct_baseline',
+            recommended_candidate_ids: ['candidate-direct_baseline'],
+            selection_rationale: ['Probe 不读取统计结果。'],
+            candidates: [{
+              candidate_id: 'candidate-direct_baseline',
+              strategy: 'direct_baseline',
+              rationale: '最小可执行基准',
+              plan: {
+                method_family: 'panel_association',
+                baseline_models: [{ estimator: '双向固定效应', formula: 'y ~ x' }],
+              },
+              probe_report: {
+                verdict: 'pass',
+                executor_ready: true,
+                checks: [{ check_id: 'fields', status: 'pass', evidence: '字段齐全' }],
+              },
+            }],
+            reviewer_reports: [{
+              candidate_reviews: [{ candidate_id: 'candidate-direct_baseline', verdict: 'pass', issues: [] }],
+            }],
+          },
+        },
+      },
+    })
+
+    expect(run.currentGate).toBe('H2')
+    expect(run.designArena).toMatchObject({
+      id: 'arena-1',
+      provisionalCandidateId: 'candidate-direct_baseline',
+      recommendedCandidateIds: ['candidate-direct_baseline'],
+    })
+    expect(run.designArena?.candidates[0]).toMatchObject({
+      estimator: '双向固定效应',
+      probeVerdict: 'pass',
+      executorReady: true,
+    })
+  })
+
+  it('normalizes Agent Laboratory baseline progress without pretending it is scientifically audited', () => {
+    const baseline = normalizeBaselineRun({
+      id: 'baseline-1',
+      system_id: 'agent_laboratory_social_science_adapted',
+      case_id: 'case-1',
+      case_name: '案例一',
+      status: 'completed',
+      phases: [{ id: 'plan', title: '研究计划', status: 'succeeded' }],
+      execution_status: 'success',
+      scientific_status: 'not_assessed',
+      method_family: 'panel_association',
+      llm_calls: 7,
+      input_tokens: 1200,
+      output_tokens: 600,
+      wall_time_seconds: 42,
+      created_at: '2026-07-14T00:00:00Z',
+      updated_at: '2026-07-14T00:00:42Z',
+    })
+
+    expect(baseline).toMatchObject({
+      id: 'baseline-1',
+      systemId: 'agent_laboratory_social_science_adapted',
+      status: 'completed',
+      executionStatus: 'success',
+      scientificStatus: 'not_assessed',
+      llmCalls: 7,
+    })
+  })
+
+  it('normalizes list envelopes without leaking wire fields into components', () => {
+    const runs = normalizeRunList({ items: [runPayload] })
+    expect(runs).toEqual([
+      expect.objectContaining({ id: 'run-001', status: 'waiting_human', currentGate: 'H3' }),
+    ])
+  })
+
+  it('normalizes a safe local case import without exposing a source path', async () => {
+    const payload = {
+      case_submission: {
+        case_id: 'case-esg-sdla-dad550862bf5',
+        title: 'ESG 与 SDLA 的企业面板研究',
+        research_question: '企业 ESG 表现是否与 SDLA 存在系统性关联？',
+        hypotheses: [{ hypothesis_id: 'H1', statement: 'ESG 与 SDLA 存在系统性关联。', expected_direction: 'unspecified', mechanism: null }],
+        unit_of_analysis: '企业—年度',
+        sample_period: '2009—2021',
+        data_structure_hint: 'panel',
+        variables: [{ name: 'SDLA', label: 'SDLA（定义待确认）', role: 'outcome', definition: null, source: '案例数据' }],
+        dataset_refs: [{ dataset_id: 'dataset-dad550862bf5', role: 'main', filename: 'ESG-SDLA-数据.csv', mime_type: 'text/csv', sha256: 'a'.repeat(64), size_bytes: 41972980 }],
+        known_policy_facts: [],
+        constraints: ['变量定义待 H1 确认。'],
+      },
+      import_report: {
+        dataset_filename: 'ESG-SDLA-数据.csv',
+        row_count: 30311,
+        column_count: 132,
+        sample_period: '2009—2021',
+        hidden_file_count: 3,
+        excluded_file_count: 2,
+        review_items: ['请确认 SDLA 的定义。'],
+      },
+    }
+    expect(normalizeLocalCaseImport(payload)).toMatchObject({
+      case: { caseId: 'case-esg-sdla-dad550862bf5', dataStructureHint: 'panel' },
+      report: { rowCount: 30311, hiddenFileCount: 3 },
+    })
+    expect(JSON.stringify(normalizeLocalCaseImport(payload))).not.toContain('/Users/')
+
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetchMock)
+    await workflowApi.importLocalCase('/tmp/case-1')
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/case-imports/local', expect.objectContaining({ method: 'POST' }))
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ path: '/tmp/case-1' })
+  })
+
+  it('round-trips the frozen remote-pre years and event-term scaling', async () => {
+    const wireCase = {
+      case_id: 'case-policy-remote-pre',
+      title: '政策事件研究',
+      research_question: '政策是否影响污染强度？',
+      hypotheses: [{ hypothesis_id: 'H1', statement: '政策前后存在差异变化。' }],
+      data_structure_hint: 'panel',
+      variables: [{ name: 'polint1', role: 'outcome' }],
+      dataset_refs: [],
+      policy_design: {
+        policy_date: '2007-07',
+        group_field: 'high_polluting_industry_current_year',
+        time_field: 'year',
+        policy_start_weight: 0.42,
+        post_start_weight: 1,
+        exposure_name: 'policy_exposure',
+        fixed_effects: ['idcode', 'year', 'indcode2', 'areacode2'],
+        cluster_fields: ['indcode', 'areacode2', 'year'],
+        cluster_composition: 'interaction',
+        event_reference_year: 2006,
+        event_years: [2002, 2003, 2004, 2005, 2007],
+        event_remote_pre_years: [1998, 1999, 2000, 2001],
+        event_term_scaling: 'binary_group_year_contrast',
+        placebo_start_year: 2004,
+        placebo_repetitions: 199,
+        permutation_scheme: 'assignment_unit_label',
+        permutation_unit_field: 'idcode',
+        random_seed: 12345,
+      },
+      known_policy_facts: [],
+      constraints: [],
+    }
+    const normalized = normalizeCaseSubmission(wireCase)
+    expect(normalized.policyDesign?.eventRemotePreYears).toEqual([
+      1998, 1999, 2000, 2001,
+    ])
+    expect(normalized.policyDesign?.eventTermScaling).toBe(
+      'binary_group_year_contrast',
+    )
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => runPayload,
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    await workflowApi.createRun({ mode: 'research', case: normalized })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body.case.policy_design.event_remote_pre_years).toEqual([
+      1998, 1999, 2000, 2001,
+    ])
+    expect(body.case.policy_design.event_term_scaling).toBe(
+      'binary_group_year_contrast',
+    )
+  })
+
+  it('uploads one user-selected CSV instead of requiring a filesystem path', async () => {
+    const payload = {
+      case_submission: {
+        case_id: 'case-upload', title: '上传案例', research_question: 'X 是否与 Y 相关？',
+        hypotheses: [{ hypothesis_id: 'H1', statement: 'X 与 Y 相关。', expected_direction: 'unspecified' }],
+        data_structure_hint: 'panel',
+        variables: [{ name: 'Y', role: 'outcome' }],
+        dataset_refs: [{ dataset_id: 'ds-upload', filename: 'main data.csv', role: 'main', mime_type: 'text/csv', sha256: 'b'.repeat(64), size_bytes: 10 }],
+        known_policy_facts: [], constraints: [],
+      },
+      import_report: { main_data_filename: 'main data.csv', row_count: 1, column_count: 1, hidden_file_count: 0, excluded_file_count: 0, human_review_items: [] },
+    }
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetchMock)
+    const file = Object.assign(new Blob(['Y\n1\n'], { type: 'text/csv' }), { name: 'main data.csv' }) as File
+
+    const imported = await workflowApi.uploadCaseFile(file)
+
+    expect(imported.report.datasetFilename).toBe('main data.csv')
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/case-imports/upload?filename=main%20data.csv', expect.objectContaining({
+      method: 'POST',
+      body: file,
+    }))
+  })
+
+  it('uploads a visible spatial matrix as a supplementary dataset', async () => {
+    const payload = {
+      dataset_id: 'ds-weights',
+      role: 'supplementary',
+      filename: 'spatial_weights.csv',
+      mime_type: 'text/csv',
+      sha256: 'c'.repeat(64),
+      size_bytes: 42,
+    }
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetchMock)
+    const file = Object.assign(new Blob(['spatial_id,A\nA,0\n'], { type: 'text/csv' }), { name: 'spatial_weights.csv' }) as File
+
+    const reference = await workflowApi.uploadCaseAsset(file)
+
+    expect(reference).toMatchObject({
+      datasetId: 'ds-weights',
+      role: 'supplementary',
+      filename: 'spatial_weights.csv',
+    })
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/case-imports/assets/upload?filename=spatial_weights.csv', expect.objectContaining({
+      method: 'POST',
+      body: file,
+    }))
+  })
+
+  it('rejects definitions whose explicit edge references a missing node', () => {
+    expect(() => normalizeDefinition({ ...definitionPayload, edges: [{ source: 'intake', target: 'missing' }] }))
+      .toThrow(/不存在的节点/)
+  })
+
+  it('submits preset runs through the backend CreateRunRequest contract', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.createRun({ presetId: 'green-finance-did', mode: 'fixture' })
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/runs', expect.objectContaining({ method: 'POST' }))
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body).toEqual({
+      definition_id: 'app-a',
+      preset_case_id: 'green-finance-did',
+      mode: 'fixture',
+      model_provider: 'fixture',
+      execution_mode: 'fixture',
+    })
+  })
+
+  it('deletes one selected run through the history endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204, json: async () => null })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.deleteRun('run-to-delete')
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/runs/run-to-delete', expect.objectContaining({ method: 'DELETE' }))
+  })
+
+  it('retries only the writing stage through its explicit endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.retryWriting('run-writer')
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/runs/run-writer/writing/retry', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('restores persisted Agent Laboratory runs for the selected case', async () => {
+    const payload = [{
+      id: 'baseline-latest',
+      case_id: 'case with spaces',
+      case_name: '案例',
+      status: 'completed',
+      phases: [],
+      execution_status: 'success',
+      scientific_status: 'not_assessed',
+      llm_calls: 6,
+      input_tokens: 10,
+      output_tokens: 5,
+      wall_time_seconds: 12,
+      created_at: '2026-07-15T00:00:00Z',
+      updated_at: '2026-07-15T00:00:12Z',
+    }]
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const runs = await workflowApi.listAgentLaboratoryRuns('case with spaces')
+
+    expect(runs[0].id).toBe('baseline-latest')
+    expect(runs[0].systemId).toBe('agent_laboratory_upstream_original')
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/baselines/agent-laboratory/runs?case_id=case%20with%20spaces', expect.any(Object))
+  })
+
+  it('does not silently downgrade research mode to fixture mode', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.createRun({ presetId: 'green-finance-did', mode: 'research' })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body).toMatchObject({
+      mode: 'research',
+      model_provider: 'qwen',
+      execution_mode: 'external',
+    })
+  })
+
+  it('submits a detailed custom CaseSubmission instead of forcing a preset', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.createRun({
+      mode: 'fixture',
+      case: {
+        caseId: 'case-custom-001',
+        title: '自定义案例',
+        researchQuestion: '政策是否影响绿色创新？',
+        hypotheses: [{ hypothesisId: 'H1', statement: '政策促进绿色创新。', expectedDirection: 'positive', mechanism: '融资约束' }],
+        unitOfAnalysis: '企业—年度',
+        samplePeriod: '2015—2024',
+        dataStructureHint: 'panel',
+        variables: [{ name: 'green_patent', label: '绿色专利', role: 'outcome', definition: '专利数量', source: 'CNRDS' }],
+        datasetRefs: [],
+        knownPolicyFacts: ['政策于 2017 年实施。'],
+        constraints: ['隐藏结果不可见。'],
+      },
+    })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body.preset_case_id).toBeUndefined()
+    expect(body.case).toMatchObject({
+      case_id: 'case-custom-001',
+      research_question: '政策是否影响绿色创新？',
+      data_structure_hint: 'panel',
+      hypotheses: [{ hypothesis_id: 'H1', expected_direction: 'positive' }],
+      variables: [{ name: 'green_patent', role: 'outcome' }],
+    })
+  })
+
+  it('reads and updates runtime configuration without exposing secret values', async () => {
+    const status = {
+      config_path: 'backend/var/runtime-config.json',
+      environment_precedence: true,
+      workflow_api_token_required: true,
+      qwen_api_key: { configured: true, source: 'file' },
+      qwen_model: { value: 'qwen-plus', source: 'file' },
+      qwen_base_url: { value: 'https://dashscope.example/v1', source: 'file' },
+      research_engine_url: { value: null, source: 'missing' },
+      research_engine_token: { configured: false, source: 'missing' },
+    }
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => status })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await workflowApi.updateRuntimeConfig({ qwenApiKey: 'secret-value', qwenModel: 'qwen-plus' })
+
+    expect(result.qwenApiKey).toEqual({ configured: true, source: 'file' })
+    expect(result.workflowApiTokenRequired).toBe(true)
+    expect(JSON.stringify(result)).not.toContain('secret-value')
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body).toMatchObject({ qwen_api_key: 'secret-value', qwen_model: 'qwen-plus' })
+  })
+
+  it('sends gate decisions with optimistic versioning and fixture claim restrictions', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('crypto', { randomUUID: () => 'decision-001' })
+    const run = normalizeRun(runPayload)
+
+    await workflowApi.decideGate(run, 'H3', {
+      action: 'generate_plan_only',
+      claims: [{ claimId: 'claim-1', decision: 'hold' }],
+    })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body).toMatchObject({
+      action: 'generate_plan_only',
+      expected_run_version: 7,
+      idempotency_key: 'decision-001',
+      claims: [{ claim_id: 'claim-1', decision: 'hold' }],
+    })
+  })
+
+  it('sends the explicitly selected H2 candidate to the server', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('crypto', { randomUUID: () => 'decision-h2' })
+    const run = normalizeRun(runPayload)
+
+    await workflowApi.decideGate(run, 'H2', {
+      action: 'approve',
+      selectedCandidateId: 'candidate-identification_first',
+    })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body.selected_candidate_id).toBe('candidate-identification_first')
+  })
+
+  it('keeps the workflow access token in session storage and sends it on requests', async () => {
+    const values = new Map<string, string>()
+    vi.stubGlobal('window', {
+      sessionStorage: {
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => values.set(key, value),
+        removeItem: (key: string) => values.delete(key),
+      },
+    })
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => definitionPayload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    workflowApi.setAccessToken('browser-session-secret')
+    await workflowApi.getDefinition()
+
+    expect(fetchMock.mock.calls[0][1].headers).toMatchObject({ 'X-Hypoweaver-Token': 'browser-session-secret' })
+  })
+
+  it('submits H1 revisions against the version returned by the revise decision', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('crypto', { randomUUID: () => 'revision-001' })
+    const run = normalizeRun(runPayload)
+
+    await workflowApi.submitRevision(run, 'H1', { case_id: 'revised-case' })
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(body).toMatchObject({
+      gate: 'H1',
+      expected_run_version: 7,
+      idempotency_key: 'revision-001',
+      case: { case_id: 'revised-case' },
+    })
+    expect(body.analysis_plan).toBeUndefined()
+  })
+})

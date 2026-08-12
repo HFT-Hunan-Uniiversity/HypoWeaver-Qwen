@@ -1,0 +1,208 @@
+/*
+ * 壳层：ClawsGO 式布局骨架。
+ * 左侧 240px 侧边栏（可折叠 52px 图标栏，<768px 抽屉）+ 右侧浮起圆角主卡。
+ * 全部消费 theme.css tokens，日/夜双模式自动生效。
+ */
+
+/* ===================== 网格骨架 ===================== */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--surface-bg);
+  color: var(--text);
+  transition: grid-template-columns 0.28s var(--ease);
+}
+.shell.is-collapsed { grid-template-columns: var(--sidebar-w-collapsed) minmax(0, 1fr); }
+
+/* 浮起主卡 */
+.shell-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 12px 12px 12px 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+.shell.theme-day .shell-main,
+.shell.theme-night .shell-main {
+  background-color: var(--surface);
+}
+
+/* 视图容器：页面级不滚动，各视图自行滚动 */
+.shell-view { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.shell-view--scroll { overflow-y: auto; display: block; }
+
+/* ===================== 侧边栏 ===================== */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 14px 10px 12px;
+  gap: 12px;
+  overflow: hidden;
+}
+.sidebar__brand { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 2px; }
+.sidebar__logo { display: flex; align-items: center; gap: 10px; min-width: 0; border: 0; background: transparent; cursor: pointer; text-align: left; padding: 4px; border-radius: var(--radius-sm); }
+.sidebar__logo:hover { background: var(--surface-2); }
+.sidebar__mark {
+  flex: 0 0 auto; width: 28px; height: 28px; display: grid; place-items: center;
+  border-radius: 9px; background: var(--brand); color: var(--on-accent);
+  font-family: var(--font-serif); font-size: 15px; font-weight: 600;
+}
+.sidebar__name { min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.sidebar__name strong { font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.sidebar__name small { font-size: 10px; letter-spacing: 0.08em; color: var(--text-faint); white-space: nowrap; }
+.sidebar__fold { flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--text-faint); cursor: pointer; }
+.sidebar__fold:hover { background: var(--surface-2); color: var(--text); }
+.sidebar.is-collapsed .sidebar__brand { flex-direction: column; gap: 8px; }
+
+.sidebar__nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar__link {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted);
+  font-size: var(--fz-sm); font-weight: 600; cursor: pointer; text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar__link:hover { background: var(--surface-2); color: var(--text); }
+.sidebar__link.is-active { background: var(--brand-soft); color: var(--brand); }
+.sidebar button:focus-visible,
+.main-toolbar button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand) 72%, white);
+  outline-offset: 2px;
+}
+.sidebar.is-collapsed .sidebar__link { justify-content: center; padding: 9px 0; }
+.sidebar__service { width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--attention); }
+.sidebar__service.is-ready { background: var(--positive); }
+
+/* 「项目 / 任务」分组 */
+.sidebar__collections {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--hairline);
+  padding-top: 10px;
+}
+.sidebar__projects,
+.sidebar__tasks {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sidebar__projects { flex: 0 1 42%; padding-bottom: 9px; }
+.sidebar__tasks {
+  flex: 1 1 58%;
+  border-top: 1px solid var(--hairline);
+  padding-top: 10px;
+}
+.sidebar__tasks--collapsed { border-top: 1px solid var(--hairline); }
+.sidebar__group { font-size: var(--fz-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint); font-weight: 600; padding: 0 10px; }
+.sidebar__empty { font-size: var(--fz-xs); line-height: 1.6; color: var(--text-faint); padding: 4px 10px; }
+.sidebar__list { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; scrollbar-width: thin; }
+.sidebar__task {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 7px 10px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; cursor: pointer; text-align: left;
+  transition: background 0.15s;
+}
+.sidebar__task:hover { background: var(--surface-2); }
+.sidebar__task.is-active { background: var(--brand-soft); }
+.sidebar__dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); }
+.sidebar__dot.is-project { background: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.sidebar__dot.is-live { background: var(--brand); }
+.sidebar__dot.is-wait { background: var(--attention); box-shadow: 0 0 0 3px var(--attention-soft); }
+.sidebar__dot.is-done { background: var(--positive); }
+.sidebar__dot.is-problem { background: var(--negative); }
+.sidebar__task-copy { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.sidebar__task-copy strong { font-size: var(--fz-sm); font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar__task.is-active .sidebar__task-copy strong { color: var(--brand); font-weight: 600; }
+.sidebar__task-copy small { font-size: 10px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sidebar__foot { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--hairline); padding-top: 10px; }
+
+/* ===================== 主卡工具条 ===================== */
+.main-toolbar {
+  flex: 0 0 48px; display: flex; align-items: center; gap: 10px;
+  height: 48px; padding: 0 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+.main-toolbar__menu { display: none; place-items: center; width: 28px; height: 28px; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--text-muted); cursor: pointer; }
+.main-toolbar__menu:hover { background: var(--surface-2); color: var(--text); }
+.main-toolbar__sep { display: none; width: 1px; height: 16px; background: var(--hairline-strong); }
+.main-toolbar__title { min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.main-toolbar__title strong { font-size: var(--fz-sm); font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.main-toolbar__title small { font-size: var(--fz-xs); color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.main-toolbar__actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.main-toolbar__actions .quiet-button,
+.main-toolbar__actions .secondary-button { font-size: var(--fz-xs); }
+
+/* ===================== 抽屉页签（工作区文件） ===================== */
+.exec-drawer__tabs { display: flex; gap: 2px; padding: 8px 20px 0; border-bottom: 1px solid var(--hairline); }
+.exec-drawer__tabs button {
+  padding: 8px 12px; border: 0; border-bottom: 2px solid transparent;
+  background: transparent; color: var(--text-muted);
+  font-size: var(--fz-sm); font-weight: 600; cursor: pointer;
+}
+.exec-drawer__tabs button:hover { color: var(--text); }
+.exec-drawer__tabs button.is-active { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* mock 产物清单 */
+.mock-artifacts { display: flex; flex-direction: column; gap: 18px; }
+.mock-artifacts__stage { font-size: var(--fz-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint); font-weight: 600; margin-bottom: 8px; }
+.mock-artifact { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: var(--surface); }
+.mock-artifact + .mock-artifact { margin-top: 6px; }
+.mock-artifact__kind { flex: 0 0 auto; display: grid; place-items: center; min-width: 34px; height: 24px; padding: 0 6px; border-radius: var(--radius-xs); background: var(--brand-soft); color: var(--brand); font-size: 11px; font-weight: 700; }
+.mock-artifact > div { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mock-artifact strong { font-family: var(--font-mono); font-size: var(--fz-sm); color: var(--text); }
+.mock-artifact small { font-size: var(--fz-xs); color: var(--text-muted); }
+
+/* ===================== 既有视图在主卡内的适配 ===================== */
+/* 设置页：原为 100vh-60px 固定高度，改为撑满视图容器 */
+.shell-view .settings { height: 100%; }
+/* 高级输入 / 预检页：在主卡内滚动 */
+.shell-view--scroll .page { padding-bottom: 48px; }
+
+/* ===================== 移动端：侧栏变抽屉 ===================== */
+@media (max-width: 768px) {
+  .shell, .shell.is-collapsed { grid-template-columns: 1fr; }
+  .shell-main { margin: 0; border-radius: 0; border: 0; }
+  .sidebar {
+    display: none;
+    position: fixed; z-index: 60; top: 0; bottom: 0; left: 0;
+    width: min(300px, 84vw);
+    background: var(--surface-bg);
+    border-right: 1px solid var(--hairline);
+  }
+  .shell.is-drawer-open .sidebar { display: flex; }
+  .shell__scrim { position: fixed; z-index: 55; inset: 0; background: rgba(0, 0, 0, 0.34); border: 0; }
+  .main-toolbar__menu { display: grid; }
+  .main-toolbar__sep { display: block; }
+}
+
+@media (max-width: 480px) {
+  .main-toolbar { gap: 6px; padding: 0 8px; }
+  .main-toolbar__title small { display: none; }
+  .main-toolbar__actions { gap: 3px; }
+  .main-toolbar__actions .quiet-button,
+  .main-toolbar__actions .secondary-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    font-size: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell, .sidebar { transition: none; }
+}

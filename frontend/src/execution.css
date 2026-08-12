@@ -1,0 +1,136 @@
+/*
+ * 共享控件与深度内容抽屉 · 去盒子化 / 日夜双模式
+ * 消费 theme.css 的 design tokens。加载顺序须在 styles.css 之后以覆盖旧样式。
+ * 旧 Runs 执行台两栏布局已退役（ClawsGO 式壳层重构）；闸门决策卡/图库/论文/抽屉样式保留。
+ */
+
+/* —— 全局控件主题化（按钮/输入框，供所有视图共享，日夜通用） —— */
+.primary-button { border: 1px solid var(--brand); background: var(--brand); color: var(--on-accent); box-shadow: none; }
+.primary-button:hover:not(:disabled) { background: var(--brand); filter: brightness(1.06); }
+.secondary-button, .test-button { border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--text); }
+.secondary-button:hover:not(:disabled), .test-button:hover:not(:disabled) { background: var(--surface-2); border-color: var(--text-faint); }
+.danger-button { border: 1px solid color-mix(in srgb, var(--negative) 45%, var(--hairline-strong)); background: var(--surface); color: var(--negative); }
+.quiet-button, .text-button { color: var(--text-muted); }
+.quiet-button:hover, .text-button:hover { background: var(--surface-2); color: var(--text); }
+input, textarea, select { background: var(--surface); border-color: var(--hairline-strong); color: var(--text); }
+input::placeholder, textarea::placeholder { color: var(--text-faint); }
+input:focus, textarea:focus, select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+label { color: var(--text-muted); }
+
+/* —— 共享文字样式（抽屉与流视图仍在消费） —— */
+.exec-eyebrow { font-size: var(--fz-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint); font-weight: 600; }
+.exec-sub { font-size: var(--fz-sm); color: var(--text-muted); line-height: 1.5; }
+
+/* —— 深度内容抽屉（点击进入，内部滚动，页面不滚） —— */
+.exec-drawer { position: fixed; inset: 0; z-index: 60; }
+.exec-drawer__scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--surface-bg) 40%, transparent); backdrop-filter: blur(3px); animation: scrimIn 0.3s var(--ease); }
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+.exec-drawer__panel {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(680px, 92vw);
+  background: var(--surface); border-left: 1px solid var(--hairline-strong);
+  box-shadow: var(--shadow-2); display: flex; flex-direction: column;
+  animation: drawerIn 0.4s var(--ease);
+}
+@keyframes drawerIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.exec-drawer__head { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--hairline); }
+.exec-drawer__head h2 { font-family: var(--font-serif); font-weight: 500; font-size: var(--fz-h3); }
+.exec-drawer__head small { color: var(--text-faint); font-size: var(--fz-xs); }
+.exec-drawer__close { margin-left: auto; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--text-muted); display: grid; place-items: center; cursor: pointer; }
+.exec-drawer__close:hover { background: var(--surface-2); color: var(--text); }
+.exec-drawer__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px 22px; }
+
+/* —— 复用子组件的主题化重皮（HumanReview / 结果 / 论文 / 图表 / 指标） —— */
+.human-review-card { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+.human-review-card > header { color: var(--text); }
+.human-review-card > header strong { color: var(--text); }
+.human-review-card > header p { color: var(--text-muted); }
+.review-issue-list li { border: 1px solid var(--hairline); background: var(--surface-2); }
+.review-issue-list li strong { color: var(--negative); }
+.review-issue-list li span { color: var(--text); }
+.review-issue-list li small { color: var(--text-muted); }
+.design-candidate { border: 1px solid var(--hairline); background: var(--surface); }
+.design-candidate.is-selected { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); background: var(--brand-soft); }
+.design-candidate > span strong { color: var(--text); }
+.design-candidate > span small, .design-candidate > em, .design-candidate > p, .design-candidate > code { color: var(--text-muted); }
+.design-arena-note { color: var(--text-faint); }
+.claim-review-list article { border: 1px solid var(--hairline); background: var(--surface); }
+.claim-review-list p { color: var(--text); }
+.claim-review-list small { color: var(--text-muted); }
+.claim-review-list button { border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--text-muted); }
+.claim-review-list button.is-selected { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.revision-editor { border: 1px solid var(--hairline-strong); background: var(--surface-2); }
+.revision-editor > header strong { color: var(--text); }
+.revision-editor > header p { color: var(--text-muted); }
+.fixture-warning, .fixture-banner { background: var(--attention-soft); color: var(--attention); }
+.result-summary { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.result-summary h2 { color: var(--text); }
+.result-summary p { color: var(--text-muted); }
+.result-summary__meta span { border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--text-muted); }
+.result-summary__claims article { border: 1px solid var(--hairline); background: var(--surface); color: var(--text); }
+.result-summary__claims header small, .result-summary__claims footer { color: var(--text-faint); }
+.manuscript-draft { border-top: 1px solid var(--hairline); background: transparent; }
+.manuscript-draft > header { border-bottom: 1px solid var(--hairline); }
+.manuscript-draft > header small { color: var(--text-faint); }
+.manuscript-sections > section { border-bottom: 1px solid var(--hairline); }
+.manuscript-sections h3 { color: var(--text); }
+.manuscript-copy { color: var(--text); font-family: var(--font-serif); }
+.manuscript-section-index, .manuscript-sections footer { color: var(--text-faint); }
+.manuscript-draft > aside { border: 1px solid var(--hairline); background: var(--surface-2); }
+.figure-gallery { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+.figure-gallery > header { border-bottom: 1px solid var(--hairline); }
+.figure-grid article { border: 1px solid var(--hairline); background: var(--surface-2); }
+.figure-copy h3 { color: var(--text); }
+.figure-copy p, .figure-copy small, .figure-recipe { color: var(--text-muted); }
+.figure-downloads a { border: 1px solid var(--hairline-strong); color: var(--text); }
+.model-call-contract { border: 1px solid var(--hairline); background: var(--surface-2); }
+.model-call-contract__totals article { border: 1px solid var(--hairline); background: var(--surface); }
+.model-call-contract__totals article > strong { color: var(--text); }
+.model-call-contract__usage li { background: var(--surface); color: var(--text-muted); }
+.run-error-summary { border: 1px solid color-mix(in srgb, var(--negative) 30%, var(--hairline)); background: color-mix(in srgb, var(--negative) 8%, var(--surface)); color: var(--negative); }
+
+/* —— 抽屉内的阶段流（复用 stage-flow 结构） —— */
+.exec-drawer .stage-flow { margin-top: 0; }
+.exec-drawer .step-attempt { border: 1px solid var(--hairline); background: var(--surface); }
+.exec-drawer .stage-card__content { border-bottom: 1px solid var(--hairline); }
+.exec-drawer .comparison-table { background: var(--surface); }
+.exec-drawer .comparison-table th, .exec-drawer .comparison-table td { border-color: var(--hairline); color: var(--text-muted); }
+.exec-drawer .comparison-table thead th { background: var(--surface-2); color: var(--text); }
+
+/* ===== 闸门决策卡在会话流中的去盒子化清单式排法（原焦点区样式迁移） ===== */
+.stream .human-review-card { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.stream .human-review-card > header { align-items: flex-start; gap: 0; color: var(--text); }
+.stream .human-review-card > header > svg { display: none; }
+.stream .human-review-card > header strong { font-family: var(--font-serif); font-weight: 500; font-size: var(--fz-h2); letter-spacing: -0.01em; color: var(--text); }
+.stream .human-review-card > header p { color: var(--text-muted); font-size: var(--fz-sm); line-height: 1.55; margin-top: 4px; max-width: 620px; }
+
+/* H2 候选：发丝线清单行（紧凑，确保审核说明同屏可见） */
+.stream .design-candidate-list { margin-top: 14px; gap: 0; }
+.stream .design-candidate { border: 0; border-bottom: 1px solid var(--hairline); border-radius: 10px; background: transparent; box-shadow: none; padding: 11px 12px; align-items: center; }
+.stream .design-candidate:hover { background: var(--surface-2); }
+.stream .design-candidate.is-selected { background: var(--brand-soft); border-bottom-color: transparent; box-shadow: none; }
+.stream .design-candidate.is-unavailable { opacity: 0.5; }
+.stream .design-candidate > input { accent-color: var(--brand); width: 16px; height: 16px; margin: 0; }
+.stream .design-candidate > span strong { font-size: var(--fz-body); font-weight: 600; color: var(--text); }
+.stream .design-candidate > span small { font-size: 11px; color: var(--text-muted); }
+.stream .design-candidate > em { font-size: 11px; color: var(--text-faint); font-style: normal; }
+.stream .design-candidate > p { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-top: 4px; }
+.stream .design-candidate > code { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); margin-top: 6px; }
+.stream .design-candidate details summary { color: var(--text-faint); }
+.stream .design-arena-note { color: var(--text-faint); margin-top: 12px; }
+
+/* H3 结论：同样清单化 */
+.stream .claim-review-list { gap: 0; margin-top: 18px; }
+.stream .claim-review-list article { border: 0; border-bottom: 1px solid var(--hairline); border-radius: 0; background: transparent; padding: 16px 4px; }
+
+/* 审核说明输入与修订编辑：轻量化 */
+.stream .human-review-card > label { margin-top: 14px; }
+.stream .revision-editor { border: 1px solid var(--hairline); background: var(--surface); border-radius: var(--radius); }
+
+/* 底部操作：次级动作走文字按钮，仅主操作填色（对齐 daynight） */
+.stream .human-review-card footer { justify-content: flex-end; align-items: center; gap: 16px; margin-top: 16px; }
+.stream .human-review-card footer .danger-button,
+.stream .human-review-card footer .secondary-button { border: 0; background: transparent; padding: 10px 2px; min-height: auto; font-weight: 600; }
+.stream .human-review-card footer .secondary-button { color: var(--text-muted); }
+.stream .human-review-card footer .secondary-button:hover:not(:disabled) { color: var(--text); background: transparent; }
+.stream .human-review-card footer .danger-button { color: var(--negative); }
+.stream .human-review-card footer .danger-button:hover:not(:disabled) { background: transparent; filter: brightness(1.08); }
