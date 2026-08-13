@@ -30,7 +30,15 @@ from .models import (
 BRIDGE_VERSION = "group1-to-group2-v2"
 MAX_JSON_BYTES = 32 * 1024 * 1024
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-WORKSPACE_ROOT = PROJECT_ROOT.parents[2]
+
+
+def _default_workspace_root(project_root: Path) -> Path:
+    """Keep legacy workspace discovery without failing in shallow containers."""
+
+    return project_root.parents[2] if len(project_root.parents) > 2 else project_root
+
+
+WORKSPACE_ROOT = _default_workspace_root(PROJECT_ROOT)
 
 
 class Group1HandoffError(ValueError):

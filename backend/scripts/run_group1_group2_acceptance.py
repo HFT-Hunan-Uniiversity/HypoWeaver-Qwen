@@ -25,7 +25,11 @@ from hypoweaver.runtime_config import RuntimeConfigStore
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-WORKSPACE_ROOT = PROJECT_ROOT.parents[2]
+WORKSPACE_ROOT = (
+    PROJECT_ROOT.parents[2]
+    if len(PROJECT_ROOT.parents) > 2
+    else PROJECT_ROOT
+)
 DEFAULT_HANDOFF = (
     WORKSPACE_ROOT
     / "output"

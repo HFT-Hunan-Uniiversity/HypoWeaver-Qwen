@@ -23,6 +23,8 @@ frontend/node_modules/
 frontend/dist/
 frontend/.acceptance/
 .playwright-cli/
+dist/
+.vercel/
 
 # Runtime state, imported datasets, and generated evidence
 backend/var/
@@ -50,4 +52,3 @@ backend/.test-tmp/
 Thumbs.db
 .idea/
 .vscode/
-

@@ -15,6 +15,7 @@ import hypoweaver.api as api_module
 from hypoweaver.engine import WorkflowEngine, WorkflowTransitionError
 from hypoweaver.group1_handoff import (
     Group1HandoffError,
+    _default_workspace_root,
     import_group1_handoff,
     inspect_verified_group1_bundle,
     verified_group1_bundle_request,
@@ -253,6 +254,11 @@ class Group1HandoffBridgeTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.test_root, ignore_errors=True)
+
+    def test_shallow_container_project_root_is_a_safe_workspace_default(self) -> None:
+        project_root = Path("/app")
+
+        self.assertEqual(_default_workspace_root(project_root), project_root)
 
     def test_verified_package_maps_to_conditional_group2_design_handoff(self) -> None:
         result = import_group1_handoff(self.root)

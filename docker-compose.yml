@@ -1,0 +1,72 @@
+name: hypoweaver-qwen
+
+services:
+  research-engine:
+    build:
+      context: .
+    image: hypoweaver-qwen:local
+    command:
+      - python
+      - -m
+      - uvicorn
+      - hypoweaver.research_api:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8001"
+    environment:
+      HYPOWEAVER_DATASET_REGISTRY_PATH: /app/backend/var/datasets.json
+      RESEARCH_ENGINE_TOKEN: ${RESEARCH_ENGINE_TOKEN:?Set RESEARCH_ENGINE_TOKEN in .env}
+    volumes:
+      - hypoweaver-data:/app/backend/var
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/v1/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  workflow:
+    build:
+      context: .
+    image: hypoweaver-qwen:local
+    environment:
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      HYPOWEAVER_ACTOR: ${HYPOWEAVER_ACTOR:-container_researcher}
+      HYPOWEAVER_API_TOKEN: ${HYPOWEAVER_API_TOKEN:?Set HYPOWEAVER_API_TOKEN in .env}
+      HYPOWEAVER_DATASET_REGISTRY_PATH: /app/backend/var/datasets.json
+      HYPOWEAVER_DB_PATH: /app/backend/var/hypoweaver.db
+      HYPOWEAVER_RUNTIME_CONFIG_PATH: /app/backend/var/runtime-config.json
+      HYPOWEAVER_SEAL_KEY_PATH: /app/backend/var/seal.key
+      HYPOWEAVER_SEAL_SECRET: ${HYPOWEAVER_SEAL_SECRET:?Set HYPOWEAVER_SEAL_SECRET in .env}
+      HYPOWEAVER_UPLOAD_ROOT: /app/backend/var/uploads
+      QWEN_BASE_URL: ${QWEN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      QWEN_MODEL: ${QWEN_MODEL:-qwen-plus}
+      RESEARCH_ENGINE_TOKEN: ${RESEARCH_ENGINE_TOKEN:?Set RESEARCH_ENGINE_TOKEN in .env}
+      RESEARCH_ENGINE_URL: http://research-engine:8001
+    volumes:
+      - hypoweaver-data:/app/backend/var
+    ports:
+      - "${HYPOWEAVER_PORT:-8000}:8000"
+    depends_on:
+      research-engine:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  hypoweaver-data:

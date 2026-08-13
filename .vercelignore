@@ -1,0 +1,13 @@
+.git
+.github
+.test-tmp
+backend
+docs
+examples
+frontend/.acceptance
+frontend/design
+frontend/node_modules
+frontend/tests
+output
+Dockerfile
+docker-compose.yml
