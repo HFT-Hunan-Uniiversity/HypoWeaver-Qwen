@@ -168,6 +168,8 @@ npm --prefix frontend run build
 
 当前基线：后端 572 项测试、前端 61 项测试通过。GitHub Actions 会在每次 push 和 pull request 上重复执行这些检查。
 
+公开 CI 不包含私有企业面板数据；对应的 29,919 行真实回归锚点会明确标记为 `skipped`。在受控环境登记该数据后，同一测试会自动执行完整估计与复现校验。
+
 ## 安全提示
 
 - 对外部署必须设置 `HYPOWEAVER_API_TOKEN`；所有写接口使用 `X-Hypoweaver-Token`。
