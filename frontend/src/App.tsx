@@ -28,7 +28,7 @@ import { normalizeCaseSubmission, workflowApi } from './runtime/api'
 import { selectCaseFolder, type CaseFolderSelection } from './runtime/caseFolder'
 import { hashOf, isProjectView, viewFromHash, type DiscoveryStep, type ShellView } from './runtime/router'
 import { getTheme, toggleTheme, type ThemeMode } from './runtime/theme'
-import type { BaselineRun, CaseImportReport, CaseSubmissionInput, ConnectionTestResult, GateDecisionInput, RunSnapshot, RunSummary, RuntimeConfigStatus, RuntimeConfigUpdate, WorkflowDefinition } from './runtime/types'
+import type { BaselineRun, CaseImportReport, CaseSubmissionInput, ConnectionTestResult, GateDecisionInput, Group1VerifiedBundleStatus, RunSnapshot, RunSummary, RuntimeConfigStatus, RuntimeConfigUpdate, WorkflowDefinition } from './runtime/types'
 
 const isPublicDemo = import.meta.env.VITE_PUBLIC_DEMO === 'true'
 const SIDEBAR_KEY = 'hw-sidebar'
@@ -74,6 +74,7 @@ export function App() {
   const [projects, setProjects] = useState<Project[]>(() => listProjects())
   const [theme, setTheme] = useState<ThemeMode>(() => getTheme())
   const [config, setConfig] = useState<RuntimeConfigStatus | null>(null)
+  const [group1Bundle, setGroup1Bundle] = useState<Group1VerifiedBundleStatus | null>(null)
   const [accessTokenPresent, setAccessTokenPresent] = useState(() => workflowApi.hasAccessToken())
   const [accessTokenVerified, setAccessTokenVerified] = useState(false)
   const [draft, setDraft] = useState<ResearchDraft>(() => emptyResearchDraft())
@@ -109,12 +110,18 @@ export function App() {
       return
     }
     let cancelled = false
-    Promise.all([workflowApi.getDefinition(), workflowApi.getRuntimeConfig(), workflowApi.listRuns()])
-      .then(([nextDefinition, nextConfig, nextRuns]) => {
+    Promise.all([
+      workflowApi.getDefinition(),
+      workflowApi.getRuntimeConfig(),
+      workflowApi.listRuns(),
+      workflowApi.getVerifiedGroup1Bundle(),
+    ])
+      .then(([nextDefinition, nextConfig, nextRuns, nextGroup1Bundle]) => {
         if (cancelled) return
         setDefinition(nextDefinition)
         setConfig(nextConfig)
         setRuns(nextRuns)
+        setGroup1Bundle(nextGroup1Bundle)
       })
       .catch((reason) => {
         if (!cancelled) setError(`无法连接工作流后端（${reason instanceof Error ? reason.message : String(reason)}）。演示任务不受影响；真实研究请先启动后端。`)
@@ -429,6 +436,26 @@ export function App() {
     openTask(nextRun.id)
   }
 
+  async function startVerifiedGroup1Bundle() {
+    if (isPublicDemo) {
+      setError('公开演示版不能启动本机已验证 Group 1 执行包；请在本地版执行。')
+      return
+    }
+    if (group1Bundle?.status !== 'ready') {
+      setError(group1Bundle?.message || '本机尚未发现可启动的 Group 1 已验证执行包。')
+      return
+    }
+    const nextRun = await withBusy(
+      '正在重新核验 Group 1 哈希、绑定真实执行面板并创建新的 H1 run…',
+      () => workflowApi.startVerifiedGroup1Bundle(),
+    )
+    if (!nextRun) return
+    runIdRef.current = nextRun.id
+    setRun(nextRun)
+    await refreshRuns()
+    openTask(nextRun.id)
+  }
+
   async function importCaseFolder(files: File[], target: 'hypoweaver' | 'agent-laboratory') {
     if (isPublicDemo) {
       setError('公开演示版仅用于浏览界面与交互，文件不会上传或保存。请使用本地版处理真实案例。')
@@ -656,11 +683,13 @@ export function App() {
           <div className="shell-view">
             <TaskComposer
               config={config}
+              group1Bundle={group1Bundle}
               importReport={importReport}
               busy={busy}
               busyLabel={busyLabel}
               onImportCaseFolder={importCaseFolder}
               onImportGroup1Handoff={importGroup1Handoff}
+              onStartVerifiedGroup1Bundle={startVerifiedGroup1Bundle}
               onOpenAdvanced={() => setShowAdvancedInput(true)}
               onOpenSettings={() => navigate('settings')}
               onCreateProject={handleCreateProject}

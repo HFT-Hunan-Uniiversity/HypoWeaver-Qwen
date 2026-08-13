@@ -257,6 +257,45 @@ export interface Group2FeasibilityView {
   }>
 }
 
+export interface Group1VerifiedBundleStatus {
+  status: 'ready' | 'unavailable' | 'invalid'
+  message: string
+  bundleId?: string
+  label?: string
+  handoffId?: string
+  handoffManifestSha256?: string
+  verifiedArtifactCount: number
+  datasetFilename?: string
+  datasetSha256?: string
+  datasetSizeBytes?: number
+  panelRows?: number
+  panelColumns?: number
+  sourceConfigSha256?: string
+  acceptanceRunId?: string
+  acceptanceSealSha256?: string
+  verifiedAt?: string
+  executionStatus?: string
+  scientificStatus?: string
+  reproductionStatus?: string
+  reproductionScope?: string
+  modelProvider: 'code_owned'
+  executionMode: 'external'
+}
+
+export interface ReproductionAuditView {
+  status: string
+  independenceScope?: string
+  primaryImplementationId?: string
+  replicationImplementationId?: string
+  replicationRunId?: string
+  differences: string[]
+}
+
+export interface SealedOutputView {
+  sealAlgorithm?: string
+  sealSha256?: string
+}
+
 export interface RunSnapshot {
   id: string
   version: number
@@ -269,6 +308,8 @@ export interface RunSnapshot {
   currentNodeId?: string
   currentGate?: 'H1' | 'H2' | 'H3' | 'H4'
   lastError?: string
+  modelProvider: string
+  executionMode: string
   executionStatus: string
   scientificStatus: string
   planOnly: boolean
@@ -281,6 +322,8 @@ export interface RunSnapshot {
   manuscript?: ManuscriptPackageView
   designArena?: DesignArenaView
   modelUsage?: ModelUsageView
+  reproductionAudit?: ReproductionAuditView
+  sealedOutput?: SealedOutputView
   upstreamPackage?: {
     sourceSystem: string
     bridgeVersion: string

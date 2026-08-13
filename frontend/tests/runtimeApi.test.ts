@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { normalizeBaselineRun, normalizeCaseSubmission, normalizeDefinition, normalizeLocalCaseImport, normalizeRun, normalizeRunList, workflowApi } from '../src/runtime/api'
+import { normalizeBaselineRun, normalizeCaseSubmission, normalizeDefinition, normalizeGroup1VerifiedBundleStatus, normalizeLocalCaseImport, normalizeRun, normalizeRunList, workflowApi } from '../src/runtime/api'
 
 const definitionPayload = {
   id: 'app-a',
@@ -782,6 +782,71 @@ describe('runtime API adapter', () => {
     expect(JSON.stringify(result)).not.toContain('secret-value')
     const body = JSON.parse(fetchMock.mock.calls[0][1].body)
     expect(body).toMatchObject({ qwen_api_key: 'secret-value', qwen_model: 'qwen-plus' })
+  })
+
+  it('normalizes the recorded Group1 verified bundle without exposing local paths', () => {
+    const bundle = normalizeGroup1VerifiedBundleStatus({
+      status: 'ready',
+      message: 'verified',
+      bundle_id: 'group1-verified:test',
+      label: 'Pre-policy capacity',
+      handoff_id: 'group1-handoff:test',
+      verified_artifact_count: 12,
+      dataset_filename: 'panel.csv',
+      dataset_sha256: 'a'.repeat(64),
+      panel_rows: 8640,
+      panel_columns: 34,
+      acceptance_run_id: 'accepted-run',
+      acceptance_seal_sha256: 'b'.repeat(64),
+      reproduction_status: 'matched',
+      reproduction_scope: 'estimator_only',
+      model_provider: 'code_owned',
+      execution_mode: 'external',
+    })
+
+    expect(bundle).toMatchObject({
+      status: 'ready',
+      verifiedArtifactCount: 12,
+      panelRows: 8640,
+      panelColumns: 34,
+      reproductionStatus: 'matched',
+      modelProvider: 'code_owned',
+    })
+    expect(JSON.stringify(bundle)).not.toContain('F:\\')
+  })
+
+  it('launches a new run from the server-managed verified bundle', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ run: runPayload }) })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const run = await workflowApi.startVerifiedGroup1Bundle()
+
+    expect(run.id).toBe('run-001')
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/group1-handoffs/local/verified-bundle/runs')
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'POST' })
+  })
+
+  it('keeps engineering, reproduction and H4 seal separate from scientific status', () => {
+    const run = normalizeRun({
+      ...runPayload,
+      mode: 'research',
+      model_provider: 'code_owned',
+      execution_mode: 'external',
+      execution_status: 'succeeded',
+      scientific_status: 'limited',
+      artifacts: [
+        ...runPayload.artifacts,
+        { kind: 'reproduction_audit', payload: { status: 'matched', independence_scope: 'estimator_only', differences: [] } },
+        { kind: 'sealed_output', payload: { seal_algorithm: 'hmac-sha256', seal_sha256: 'c'.repeat(64) } },
+      ],
+    })
+
+    expect(run.modelProvider).toBe('code_owned')
+    expect(run.executionMode).toBe('external')
+    expect(run.executionStatus).toBe('succeeded')
+    expect(run.scientificStatus).toBe('limited')
+    expect(run.reproductionAudit).toMatchObject({ status: 'matched', independenceScope: 'estimator_only' })
+    expect(run.sealedOutput?.sealSha256).toBe('c'.repeat(64))
   })
 
   it('sends gate decisions with optimistic versioning and fixture claim restrictions', async () => {

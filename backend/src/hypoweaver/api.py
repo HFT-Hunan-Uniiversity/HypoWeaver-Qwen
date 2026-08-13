@@ -29,7 +29,10 @@ from .group1_handoff import (
     Group1BridgeResult,
     Group1LocalHandoffRequest,
     Group1RunLaunchResponse,
+    Group1VerifiedBundleStatus,
     import_group1_handoff,
+    inspect_verified_group1_bundle,
+    verified_group1_bundle_request,
 )
 from .models import CreateRunRequest, DatasetRef, GateDecisionRequest, RevisionRequest, RunState
 from .repository import (
@@ -156,6 +159,30 @@ def preview_group1_handoff(
         raise HTTPException(status_code=422, detail=str(error)) from error
 
 
+@app.get(
+    "/api/v1/group1-handoffs/local/verified-bundle",
+    response_model=Group1VerifiedBundleStatus,
+)
+def get_verified_group1_bundle() -> Group1VerifiedBundleStatus:
+    return inspect_verified_group1_bundle()
+
+
+@app.post(
+    "/api/v1/group1-handoffs/local/verified-bundle/runs",
+    response_model=Group1RunLaunchResponse,
+    status_code=201,
+)
+async def start_verified_group1_bundle_run(
+    _actor: str = Depends(mutation_actor),
+) -> Group1RunLaunchResponse:
+    try:
+        return await _launch_group1_handoff_run(verified_group1_bundle_request())
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except LocalStorageLimitError as error:
+        raise HTTPException(status_code=409, detail=error.detail()) from error
+
+
 @app.post(
     "/api/v1/group1-handoffs/local/runs",
     response_model=Group1RunLaunchResponse,
@@ -166,33 +193,39 @@ async def start_group1_handoff_run(
     _actor: str = Depends(mutation_actor),
 ) -> Group1RunLaunchResponse:
     try:
-        bridge = _group1_bridge_from_request(request)
-        if request.execution_panel_path is not None:
-            main_ref = next(
-                item
-                for item in bridge.case_submission.dataset_refs
-                if item.role == "main"
-            )
-            engine.dataset_registry.register(
-                main_ref,
-                Path(request.execution_panel_path).expanduser().resolve(strict=True),
-            )
-        fixture_mode = request.mode == "fixture"
-        run = await engine.create_run(
-            CreateRunRequest(
-                mode=request.mode,
-                case=bridge.case_submission,
-                model_provider=(
-                    "fixture" if fixture_mode else request.research_model_provider
-                ),
-                execution_mode="fixture" if fixture_mode else "external",
-            )
-        )
-        return Group1RunLaunchResponse(bridge=bridge, run=run)
+        return await _launch_group1_handoff_run(request)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except LocalStorageLimitError as error:
         raise HTTPException(status_code=409, detail=error.detail()) from error
+
+
+async def _launch_group1_handoff_run(
+    request: Group1LocalHandoffRequest,
+) -> Group1RunLaunchResponse:
+    bridge = _group1_bridge_from_request(request)
+    if request.execution_panel_path is not None:
+        main_ref = next(
+            item
+            for item in bridge.case_submission.dataset_refs
+            if item.role == "main"
+        )
+        engine.dataset_registry.register(
+            main_ref,
+            Path(request.execution_panel_path).expanduser().resolve(strict=True),
+        )
+    fixture_mode = request.mode == "fixture"
+    run = await engine.create_run(
+        CreateRunRequest(
+            mode=request.mode,
+            case=bridge.case_submission,
+            model_provider=(
+                "fixture" if fixture_mode else request.research_model_provider
+            ),
+            execution_mode="fixture" if fixture_mode else "external",
+        )
+    )
+    return Group1RunLaunchResponse(bridge=bridge, run=run)
 
 
 def _group1_bridge_from_request(

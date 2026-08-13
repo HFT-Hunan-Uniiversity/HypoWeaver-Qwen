@@ -6,6 +6,7 @@ from pathlib import Path
 LOCAL_VAR_QUOTA_BYTES = 5 * 1024 * 1024 * 1024
 MAX_LOCAL_RUNS = 100
 MAX_UPLOAD_DIRECTORIES = 50
+EPHEMERAL_DIRECTORY_PREFIXES = (".render-",)
 
 
 class LocalStorageLimitError(RuntimeError):
@@ -38,6 +39,8 @@ def directory_size_bytes(root: Path) -> int:
             if entry.is_symlink():
                 continue
             if entry.is_dir():
+                if entry.name.startswith(EPHEMERAL_DIRECTORY_PREFIXES):
+                    continue
                 pending.append(entry)
             elif entry.is_file():
                 total += entry.stat().st_size

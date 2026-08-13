@@ -14,11 +14,11 @@ import { stageState } from './WorkspaceDrawer'
 
 /* ============================== 公共 ============================== */
 
-function useAutoScroll(dependency: unknown) {
+function useAutoScroll(dependency: unknown, enabled = true) {
   const endRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [dependency])
+    if (enabled) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [dependency, enabled])
   return endRef
 }
 
@@ -207,6 +207,22 @@ const runStatusText: Record<RunSnapshot['status'], string> = {
   cancelled: '已取消',
 }
 
+const executionStatusText: Record<string, string> = {
+  not_started: '待启动',
+  succeeded: '成功',
+  fixture_only: '仅流程演示',
+  failed: '失败',
+  blocked: '已阻塞',
+}
+
+const scientificStatusText: Record<string, string> = {
+  not_evaluated: '待评估',
+  not_assessed: '待评估',
+  limited: '受限',
+  supported: '获支持',
+  failed: '未通过',
+}
+
 const providedStages = [
   { key: 'task_understanding', label: '任务理解' },
   { key: 'literature', label: '文献调研' },
@@ -223,13 +239,44 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
   onRetryWriting: () => Promise<void>
   onOpenDrawer: () => void
 }) {
-  const endRef = useAutoScroll(`${run.id}:${run.version}:${run.status}`)
+  const autoScrollEnabled = !['completed', 'blocked', 'failed', 'waiting_human'].includes(run.status)
+  const endRef = useAutoScroll(`${run.id}:${run.version}:${run.status}`, autoScrollEnabled)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!autoScrollEnabled) scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+  }, [autoScrollEnabled, run.id, run.status])
   const currentNode = definition.nodes.find((node) => node.id === run.currentNodeId)
   const returnedGate = run.status === 'blocked' ? returnedRevisionGate(run) : undefined
   const gateStageId = run.currentGate || returnedGate ? currentNode?.stageId : undefined
   const writingFailed = run.status === 'failed' && run.currentNodeId === 'scientific_writer'
   const approvedClaims = run.claims.filter((claim) => claim.decision === 'approve' || claim.decision === 'downgrade')
+  const rejectedClaims = run.claims.filter((claim) => claim.decision === 'reject')
   const identificationFailure = run.manuscript?.mode === 'identification_failure_report'
+  const isEngineeringComplete = run.status === 'completed' && run.executionStatus === 'succeeded'
+  const isScienceLimited = run.scientificStatus === 'limited'
+  const verdictTone = run.status === 'blocked' || run.status === 'failed'
+    ? 'problem'
+    : isEngineeringComplete && isScienceLimited
+      ? 'limited'
+      : isEngineeringComplete
+        ? 'success'
+        : 'active'
+  const verdictTitle = isEngineeringComplete && isScienceLimited
+    ? '工程链路已通过，科学结论受限'
+    : isEngineeringComplete
+      ? '工程链路已通过'
+      : run.status === 'waiting_human' && run.currentGate === 'H1' && run.intakeReadiness?.canExecute
+        ? '真实执行包已绑定，等待 H1 审批'
+        : run.status === 'blocked'
+          ? '本次 run 已阻塞（历史记录）'
+          : run.status === 'failed'
+            ? '本次 run 执行失败'
+            : '真实工作流正在推进'
+  const verdictDescription = isEngineeringComplete && isScienceLimited
+    ? '统计执行、独立估计器复现和 H4 封存均已完成；冻结的 sign-switch 假设未获证据支持，因此不发布因果结论。'
+    : run.status === 'waiting_human' && run.currentGate === 'H1' && run.intakeReadiness?.canExecute
+      ? '这是由已验证 Group 1 执行包创建的新 run，不会覆盖侧栏中的旧阻塞记录；批准 H1/H2 后才启动本机统计执行。'
+      : run.lastError || '工程执行状态与科学结论状态分开记录，后续闸门只允许发布证据支持的主张。'
 
   const gateByStage = new Map<string, string>()
   for (const node of definition.nodes) {
@@ -248,8 +295,27 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
 
   return (
     <div className="stream">
-      <div className="stream__scroll">
+      <div className="stream__scroll" ref={scrollRef}>
         <div className="stream__inner">
+          {run.upstreamPackage && (
+            <section className={`run-verdict is-${verdictTone}`} aria-label="本次真实运行结论">
+              <div className="run-verdict__eyebrow">
+                <span>本次 run · {run.id.slice(0, 8)}</span>
+                <strong>{run.status === 'completed' ? '已完成' : run.currentGate ? `${run.currentGate} 等待人工` : runStatusText[run.status]}</strong>
+              </div>
+              <h2>{verdictTitle}</h2>
+              <p>{verdictDescription}</p>
+              <div className="run-verdict__metrics">
+                <div><span>执行绑定</span><strong>{run.intakeReadiness?.canExecute ? '真实面板已绑定' : '尚未就绪'}</strong></div>
+                <div><span>模型路由</span><strong>{run.modelProvider === 'code_owned' ? '代码拥有' : run.modelProvider}</strong></div>
+                <div><span>工程执行</span><strong>{executionStatusText[run.executionStatus] ?? run.executionStatus}</strong></div>
+                <div><span>独立复现</span><strong>{run.reproductionAudit?.status === 'matched' ? '一致 · 估计器级' : run.reproductionAudit?.status || '待执行'}</strong></div>
+                <div><span>科学状态</span><strong>{scientificStatusText[run.scientificStatus] ?? run.scientificStatus}</strong></div>
+                {run.claims.length > 0 && <div><span>主张闸门</span><strong>{approvedClaims.length} 通过 / {rejectedClaims.length} 拒绝</strong></div>}
+              </div>
+              {run.sealedOutput?.sealSha256 && <small>H4 seal · {run.sealedOutput.sealSha256.slice(0, 16)}…</small>}
+            </section>
+          )}
           {run.mode === 'fixture' && <p className="stream__demo-badge"><CircleAlert size={13} />流程演示不会生成实证结论。</p>}
           {run.upstreamPackage && (
             <section className={`stream-provided stream-upstream is-${run.intakeReadiness?.status ?? 'conditional'}`}>
@@ -281,7 +347,11 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
                 <span>{run.group2Feasibility.methodMatrix.length} 项方法审计</span>
                 <span>科学十项 {run.group2Feasibility.scientificTen.length}/10</span>
               </div>
-              <p className="stream-feasibility__decision">{run.group2Feasibility.decisionRationale}</p>
+              <p className="stream-feasibility__decision">
+                {run.intakeReadiness?.canExecute
+                  ? '冻结核心 sign-switch 合同的真实面板与代码执行器已就绪；科学发布及机制扩展仍受权利、边界、分母口径和缺失变量约束。'
+                  : run.group2Feasibility.decisionRationale}
+              </p>
               <details className="stream-feasibility__details">
                 <summary>查看科学十项 Proposal 草案</summary>
                 <ol>
@@ -355,7 +425,7 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
           {run.status === 'completed' && (
             <section className="stream-final">
               <h2>{run.planOnly ? '研究计划已生成' : identificationFailure ? '识别失败报告已生成' : '成果已封存'}</h2>
-              <p>执行 · {run.executionStatus} · 科学 · {run.scientificStatus}{run.manuscript ? ` · ${run.manuscript.sections.filter((section) => section.status === 'generated').length} 节` : ''}</p>
+              <p>执行 · {executionStatusText[run.executionStatus] ?? run.executionStatus} · 科学 · {scientificStatusText[run.scientificStatus] ?? run.scientificStatus}{run.manuscript ? ` · ${run.manuscript.sections.filter((section) => section.status === 'generated').length} 节` : ''}</p>
               {approvedClaims.slice(0, 3).map((claim) => (
                 <p className="stream-claim" key={claim.id}><b>{claimDecisionText[claim.decision!]}</b>{claim.finalText ?? claim.text}</p>
               ))}

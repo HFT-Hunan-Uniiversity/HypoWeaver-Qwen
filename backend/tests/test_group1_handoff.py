@@ -13,7 +13,12 @@ import httpx
 
 import hypoweaver.api as api_module
 from hypoweaver.engine import WorkflowEngine, WorkflowTransitionError
-from hypoweaver.group1_handoff import Group1HandoffError, import_group1_handoff
+from hypoweaver.group1_handoff import (
+    Group1HandoffError,
+    import_group1_handoff,
+    inspect_verified_group1_bundle,
+    verified_group1_bundle_request,
+)
 from hypoweaver.models import CreateRunRequest, GateDecisionRequest
 from hypoweaver.repository import RunRepository
 
@@ -156,6 +161,91 @@ def build_group1_package(root: Path) -> Path:
     return root
 
 
+def build_verified_execution_bundle(root: Path) -> dict[str, Path]:
+    panel = root / "execution" / "group1_paired_stacked_panel.csv"
+    panel.parent.mkdir(parents=True, exist_ok=True)
+    fields = [
+        "stack_cohort_year",
+        "stack_entity_id",
+        "stack_time_id",
+        "firm_id",
+        "year",
+        "treated",
+        "gfripz_exposure",
+        "treatment_cohort_year",
+        "region_id",
+        "assignment_boundary_precision",
+        "prepolicy_digital_fintech_capacity",
+        "capacity_year_count",
+        "capacity_source_end_year",
+        "greenwashing_gap",
+        "firm_emission_intensity",
+        "firm_size",
+        "leverage",
+        "return_on_assets",
+        "sales_growth",
+        "cash_ratio",
+        "state_owned",
+    ]
+    panel.write_text(
+        ",".join(fields) + "\n" + ",".join("1" for _ in fields) + "\n",
+        encoding="utf-8",
+    )
+    source_config = root / "execution" / "group1_execution_sources.json"
+    _write_json(source_config, {"schema_version": "test-source-config-v1"})
+    manifest = panel.with_suffix(".manifest.json")
+    _write_json(
+        manifest,
+        {
+            "schema_version": "group1-stacked-panel-manifest-v1",
+            "source_config_sha256": _digest(source_config),
+            "scientific_release_blockers": ["Keep scientific release conditional."],
+            "output": {
+                "filename": panel.name,
+                "sha256": _digest(panel),
+                "size_bytes": panel.stat().st_size,
+                "rows": 1,
+                "columns": len(fields),
+                "stack_firm_year_key_unique": True,
+                "paired_outcome_complete": True,
+            },
+        },
+    )
+    receipt = root / "execution" / "acceptance-latest.json"
+    _write_json(
+        receipt,
+        {
+            "schema_version": "group1-group2-acceptance-receipt-v1",
+            "workflow_run_id": "accepted-test-run",
+            "status": "completed",
+            "execution_status": "succeeded",
+            "scientific_status": "limited",
+            "data_hashes": [_digest(panel)],
+            "reproduction": {
+                "status": "matched",
+                "independence_scope": "estimator_only",
+            },
+            "sealed_output": {"seal_sha256": "a" * 64},
+        },
+    )
+    return {
+        "panel": panel,
+        "manifest": manifest,
+        "source_config": source_config,
+        "receipt": receipt,
+    }
+
+
+def verified_bundle_environment(handoff: Path, assets: dict[str, Path]) -> dict[str, str]:
+    return {
+        "HYPOWEAVER_GROUP1_HANDOFF_PATH": str(handoff),
+        "HYPOWEAVER_GROUP1_EXECUTION_PANEL_PATH": str(assets["panel"]),
+        "HYPOWEAVER_GROUP1_EXECUTION_MANIFEST_PATH": str(assets["manifest"]),
+        "HYPOWEAVER_GROUP1_SOURCE_CONFIG_PATH": str(assets["source_config"]),
+        "HYPOWEAVER_GROUP1_ACCEPTANCE_RECEIPT_PATH": str(assets["receipt"]),
+    }
+
+
 class Group1HandoffBridgeTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_root = _local_test_root()
@@ -201,6 +291,39 @@ class Group1HandoffBridgeTests(unittest.TestCase):
 
         with self.assertRaisesRegex(Group1HandoffError, "hash mismatch"):
             import_group1_handoff(self.root)
+
+    def test_verified_local_bundle_is_bound_to_the_acceptance_receipt(self) -> None:
+        assets = build_verified_execution_bundle(self.test_root)
+        with patch.dict(
+            os.environ,
+            verified_bundle_environment(self.root, assets),
+            clear=False,
+        ):
+            status = inspect_verified_group1_bundle()
+            request = verified_group1_bundle_request()
+
+        self.assertEqual(status.status, "ready")
+        self.assertEqual(status.acceptance_run_id, "accepted-test-run")
+        self.assertEqual(status.reproduction_status, "matched")
+        self.assertEqual(status.panel_rows, 1)
+        self.assertEqual(status.panel_columns, 21)
+        self.assertEqual(request.research_model_provider, "code_owned")
+        self.assertEqual(request.execution_panel_path, str(assets["panel"]))
+
+    def test_verified_local_bundle_rejects_a_receipt_for_another_panel(self) -> None:
+        assets = build_verified_execution_bundle(self.test_root)
+        receipt = json.loads(assets["receipt"].read_text(encoding="utf-8"))
+        receipt["data_hashes"] = ["0" * 64]
+        _write_json(assets["receipt"], receipt)
+        with patch.dict(
+            os.environ,
+            verified_bundle_environment(self.root, assets),
+            clear=False,
+        ):
+            status = inspect_verified_group1_bundle()
+
+        self.assertEqual(status.status, "invalid")
+        self.assertIn("not bound", status.message)
 
 
 class Group1HandoffRuntimeTests(unittest.IsolatedAsyncioTestCase):
@@ -378,6 +501,37 @@ class Group1HandoffRuntimeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             len(payload["run"]["case_submission"]["group2_feasibility_package"]["scientific_ten"]),
             10,
+        )
+
+    async def test_local_api_launches_the_recorded_verified_execution_bundle(self) -> None:
+        assets = build_verified_execution_bundle(self.test_root)
+        transport = httpx.ASGITransport(app=api_module.app, client=("127.0.0.1", 12345))
+        with (
+            patch.dict(
+                os.environ,
+                verified_bundle_environment(self.root, assets),
+                clear=False,
+            ),
+            patch.object(api_module, "engine", self.engine),
+        ):
+            async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+                status_response = await client.get(
+                    "/api/v1/group1-handoffs/local/verified-bundle"
+                )
+                launch_response = await client.post(
+                    "/api/v1/group1-handoffs/local/verified-bundle/runs"
+                )
+
+        self.assertEqual(status_response.status_code, 200, status_response.text)
+        self.assertEqual(status_response.json()["status"], "ready")
+        self.assertEqual(launch_response.status_code, 201, launch_response.text)
+        run = launch_response.json()["run"]
+        self.assertEqual(run["model_provider"], "code_owned")
+        self.assertEqual(run["execution_mode"], "external")
+        self.assertTrue(run["case_submission"]["intake_readiness"]["can_execute"])
+        self.assertIn(
+            "frozen core sign-switch execution",
+            run["case_submission"]["group2_feasibility_package"]["decision_rationale"],
         )
 
 

@@ -10,6 +10,7 @@ import type {
   LocalCaseImportResult,
   DesignArenaView,
   FigureBundleView,
+  Group1VerifiedBundleStatus,
   ManuscriptPackageView,
   ManuscriptStatementSourceView,
   ModelCallGroup,
@@ -545,6 +546,10 @@ export function normalizeRun(payload: unknown): RunSnapshot {
   const designArenaPayload = asRecord(designArenaArtifact?.payload)
   const modelUsageArtifact = artifacts.find((artifact) => asString(artifact.kind) === 'model_usage')
   const modelUsagePayload = first(run, 'model_usage', 'modelUsage') ?? modelUsageArtifact?.payload
+  const reproductionArtifact = artifacts.find((artifact) => asString(artifact.kind) === 'reproduction_audit')
+  const reproductionPayload = asRecord(reproductionArtifact?.payload)
+  const sealedOutputArtifact = artifacts.find((artifact) => asString(artifact.kind) === 'sealed_output')
+  const sealedOutputPayload = asRecord(sealedOutputArtifact?.payload)
   const figureBundles = artifacts
     .filter((artifact) => ['evidence_figure_bundle', 'publication_figure_bundle'].includes(asString(artifact.kind)))
     .map((artifact) => normalizeFigureBundle(artifact.payload))
@@ -598,6 +603,8 @@ export function normalizeRun(payload: unknown): RunSnapshot {
     currentNodeId: currentStep || undefined,
     currentGate: ['H1', 'H2', 'H3', 'H4'].includes(currentGate) ? (currentGate as 'H1' | 'H2' | 'H3' | 'H4') : undefined,
     lastError: asString(first(run, 'last_error', 'lastError'), '') || undefined,
+    modelProvider: asString(first(run, 'model_provider', 'modelProvider'), modeValue === 'research' ? 'unknown' : 'fixture'),
+    executionMode: asString(first(run, 'execution_mode', 'executionMode'), modeValue === 'research' ? 'external' : 'fixture'),
     executionStatus: asString(first(run, 'execution_status', 'executionStatus') ?? researchRunPayload.execution_status, 'not_started'),
     scientificStatus: asString(first(run, 'scientific_status', 'scientificStatus') ?? researchRunPayload.scientific_status, 'not_assessed'),
     planOnly: Boolean(first(run, 'plan_only', 'planOnly')) || manuscriptPayload.mode === 'research_plan_only',
@@ -610,6 +617,18 @@ export function normalizeRun(payload: unknown): RunSnapshot {
     manuscript: normalizeManuscript(manuscriptPayload),
     designArena: normalizeDesignArena(designArenaPayload),
     modelUsage: normalizeModelUsage(modelUsagePayload),
+    reproductionAudit: Object.keys(reproductionPayload).length ? {
+      status: asString(reproductionPayload.status),
+      independenceScope: asString(first(reproductionPayload, 'independence_scope', 'independenceScope'), '') || undefined,
+      primaryImplementationId: asString(first(reproductionPayload, 'primary_implementation_id', 'primaryImplementationId'), '') || undefined,
+      replicationImplementationId: asString(first(reproductionPayload, 'replication_implementation_id', 'replicationImplementationId'), '') || undefined,
+      replicationRunId: asString(first(reproductionPayload, 'replication_run_id', 'replicationRunId'), '') || undefined,
+      differences: asArray(reproductionPayload.differences).map(String),
+    } : undefined,
+    sealedOutput: Object.keys(sealedOutputPayload).length ? {
+      sealAlgorithm: asString(first(sealedOutputPayload, 'seal_algorithm', 'sealAlgorithm'), '') || undefined,
+      sealSha256: asString(first(sealedOutputPayload, 'seal_sha256', 'sealSha256'), '') || undefined,
+    } : undefined,
     upstreamPackage: Object.keys(upstreamProvenance).length ? {
       sourceSystem: asString(first(upstreamProvenance, 'source_system', 'sourceSystem')),
       bridgeVersion: asString(first(upstreamProvenance, 'bridge_version', 'bridgeVersion')),
@@ -779,6 +798,37 @@ function serializeCase(input: NonNullable<CreateRunInput['case']>) {
     } : {}),
     known_policy_facts: input.knownPolicyFacts.map((item) => item.trim()).filter(Boolean),
     constraints: input.constraints.map((item) => item.trim()).filter(Boolean),
+  }
+}
+
+export function normalizeGroup1VerifiedBundleStatus(payload: unknown): Group1VerifiedBundleStatus {
+  const bundle = asRecord(payload)
+  const status = asString(bundle.status, 'unavailable')
+  return {
+    status: ['ready', 'unavailable', 'invalid'].includes(status)
+      ? status as Group1VerifiedBundleStatus['status']
+      : 'invalid',
+    message: asString(bundle.message),
+    bundleId: asString(first(bundle, 'bundle_id', 'bundleId'), '') || undefined,
+    label: asString(bundle.label, '') || undefined,
+    handoffId: asString(first(bundle, 'handoff_id', 'handoffId'), '') || undefined,
+    handoffManifestSha256: asString(first(bundle, 'handoff_manifest_sha256', 'handoffManifestSha256'), '') || undefined,
+    verifiedArtifactCount: Number(first(bundle, 'verified_artifact_count', 'verifiedArtifactCount') ?? 0),
+    datasetFilename: asString(first(bundle, 'dataset_filename', 'datasetFilename'), '') || undefined,
+    datasetSha256: asString(first(bundle, 'dataset_sha256', 'datasetSha256'), '') || undefined,
+    datasetSizeBytes: Number(first(bundle, 'dataset_size_bytes', 'datasetSizeBytes') ?? 0) || undefined,
+    panelRows: Number(first(bundle, 'panel_rows', 'panelRows') ?? 0) || undefined,
+    panelColumns: Number(first(bundle, 'panel_columns', 'panelColumns') ?? 0) || undefined,
+    sourceConfigSha256: asString(first(bundle, 'source_config_sha256', 'sourceConfigSha256'), '') || undefined,
+    acceptanceRunId: asString(first(bundle, 'acceptance_run_id', 'acceptanceRunId'), '') || undefined,
+    acceptanceSealSha256: asString(first(bundle, 'acceptance_seal_sha256', 'acceptanceSealSha256'), '') || undefined,
+    verifiedAt: asString(first(bundle, 'verified_at', 'verifiedAt'), '') || undefined,
+    executionStatus: asString(first(bundle, 'execution_status', 'executionStatus'), '') || undefined,
+    scientificStatus: asString(first(bundle, 'scientific_status', 'scientificStatus'), '') || undefined,
+    reproductionStatus: asString(first(bundle, 'reproduction_status', 'reproductionStatus'), '') || undefined,
+    reproductionScope: asString(first(bundle, 'reproduction_scope', 'reproductionScope'), '') || undefined,
+    modelProvider: 'code_owned',
+    executionMode: 'external',
   }
 }
 
@@ -985,6 +1035,12 @@ export const workflowApi = {
     return normalizeDefinition(await request('/definitions/app-a'))
   },
 
+  async getVerifiedGroup1Bundle(): Promise<Group1VerifiedBundleStatus> {
+    return normalizeGroup1VerifiedBundleStatus(
+      await request('/group1-handoffs/local/verified-bundle'),
+    )
+  },
+
   async listRuns(): Promise<RunSummary[]> {
     return normalizeRunList(await request('/runs'))
   },
@@ -1033,6 +1089,14 @@ export const workflowApi = {
     const payload = asRecord(await request('/group1-handoffs/local/runs', {
       method: 'POST',
       body: JSON.stringify({ path: path.trim(), mode }),
+    }))
+    return normalizeRun(payload.run)
+  },
+
+  async startVerifiedGroup1Bundle(): Promise<RunSnapshot> {
+    const payload = asRecord(await request('/group1-handoffs/local/verified-bundle/runs', {
+      method: 'POST',
+      body: JSON.stringify({}),
     }))
     return normalizeRun(payload.run)
   },

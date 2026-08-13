@@ -43,6 +43,27 @@
   font-size: var(--fz-xs); font-weight: 600;
 }
 
+/* 真实 run 结论总览：工程状态与科学状态必须并列，不让“完成”被误读为因果结论成立。 */
+.run-verdict {
+  margin: 0 0 8px 44px; padding: 16px 18px;
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius-lg);
+  background: var(--surface); display: flex; flex-direction: column; gap: 8px;
+}
+.run-verdict.is-success { border-color: color-mix(in srgb, var(--positive) 44%, var(--hairline)); background: color-mix(in srgb, var(--positive) 5%, var(--surface)); }
+.run-verdict.is-limited { border-color: color-mix(in srgb, var(--attention) 44%, var(--hairline)); background: color-mix(in srgb, var(--attention) 6%, var(--surface)); }
+.run-verdict.is-problem { border-color: color-mix(in srgb, var(--negative) 42%, var(--hairline)); background: color-mix(in srgb, var(--negative) 5%, var(--surface)); }
+.run-verdict__eyebrow { display: flex; justify-content: space-between; gap: 12px; color: var(--text-faint); font: 650 10px/1.2 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.run-verdict__eyebrow strong { color: var(--brand); }
+.run-verdict.is-limited .run-verdict__eyebrow strong { color: var(--attention); }
+.run-verdict.is-problem .run-verdict__eyebrow strong { color: var(--negative); }
+.run-verdict h2 { margin: 0; color: var(--text); font-family: var(--font-serif); font-size: var(--fz-h2); font-weight: 500; }
+.run-verdict > p { margin: 0; color: var(--text-muted); font-size: var(--fz-sm); line-height: 1.6; }
+.run-verdict__metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.run-verdict__metrics > div { min-width: 0; padding: 8px 10px; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: var(--surface); }
+.run-verdict__metrics span { display: block; color: var(--text-faint); font-size: 9px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; }
+.run-verdict__metrics strong { display: block; margin-top: 3px; overflow: hidden; color: var(--text); font-size: var(--fz-xs); text-overflow: ellipsis; white-space: nowrap; }
+.run-verdict > small { color: var(--text-faint); font: 500 10px/1.4 var(--font-mono); }
+
 /* ===================== 阶段段落 ===================== */
 .stream-stage { position: relative; display: flex; gap: 16px; padding: 14px 0; }
 .stream-stage + .stream-stage { border-top: 1px solid var(--hairline); }
@@ -188,7 +209,8 @@
 
 @media (max-width: 640px) {
   .stream__inner { width: calc(100% - 28px); }
-  .stream__demo-badge, .stream-provided, .stream-final, .stream-note { margin-left: 0; }
+  .stream__demo-badge, .run-verdict, .stream-provided, .stream-final, .stream-note { margin-left: 0; }
+  .run-verdict__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stream__inner::before, .stream__inner::after { display: none; }
   .stream-node { display: none; }
 }

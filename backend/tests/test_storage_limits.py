@@ -14,6 +14,7 @@ from hypoweaver.storage_limits import (
     MAX_LOCAL_RUNS,
     MAX_UPLOAD_DIRECTORIES,
     LocalStorageLimitError,
+    directory_size_bytes,
 )
 
 
@@ -29,6 +30,16 @@ class _FakeRun:
 
 
 class LocalStorageLimitTests(unittest.IsolatedAsyncioTestCase):
+    async def test_storage_audit_excludes_incomplete_render_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "persisted.bin").write_bytes(b"1234")
+            render_temp = root / ".render-interrupted"
+            render_temp.mkdir()
+            (render_temp / "partial.bin").write_bytes(b"x" * 100)
+
+            self.assertEqual(directory_size_bytes(root), 4)
+
     async def test_create_run_api_returns_structured_conflict(self) -> None:
         client = httpx.AsyncClient(
             transport=httpx.ASGITransport(app=api_module.app),

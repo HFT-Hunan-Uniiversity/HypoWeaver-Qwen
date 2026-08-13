@@ -3,9 +3,9 @@
  * 问候语（逐字 blur 入场）→ 分类 chips → 模板卡片 2 列 → 底部居中输入框。
  * 提交文本 → 创建前端演示项目；导入案例文件夹 → 走真实链路（App 处理）。
  */
-import { ArrowUp, ChevronDown, FolderUp, Link2, Settings2, SlidersHorizontal } from 'lucide-react'
+import { ArrowUp, CheckCircle2, ChevronDown, CircleAlert, Database, FolderUp, Link2, Settings2, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
-import type { CaseImportReport, RuntimeConfigStatus } from '../runtime/types'
+import type { CaseImportReport, Group1VerifiedBundleStatus, RuntimeConfigStatus } from '../runtime/types'
 import type { MockMode } from '../data/mockPipeline'
 
 type LaunchTarget = 'hypoweaver' | 'agent-laboratory'
@@ -73,28 +73,39 @@ const directoryInputAttributes = { webkitdirectory: '', directory: '' }
 
 interface TaskComposerProps {
   config: RuntimeConfigStatus | null
+  group1Bundle: Group1VerifiedBundleStatus | null
   importReport: CaseImportReport | null
   busy: boolean
   busyLabel: string
   onImportCaseFolder: (files: File[], target: LaunchTarget) => Promise<void>
   onImportGroup1Handoff: (path: string, mode: 'research' | 'fixture') => Promise<void>
+  onStartVerifiedGroup1Bundle: () => Promise<void>
   onOpenAdvanced: () => void
   onOpenSettings: () => void
   onCreateProject: (prompt: string, mode: MockMode) => void
 }
 
-export function TaskComposer({ config, importReport, busy, busyLabel, onImportCaseFolder, onImportGroup1Handoff, onOpenAdvanced, onOpenSettings, onCreateProject }: TaskComposerProps) {
+export function TaskComposer({ config, group1Bundle, importReport, busy, busyLabel, onImportCaseFolder, onImportGroup1Handoff, onStartVerifiedGroup1Bundle, onOpenAdvanced, onOpenSettings, onCreateProject }: TaskComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [target, setTarget] = useState<LaunchTarget>('hypoweaver')
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id)
   const [prompt, setPrompt] = useState('')
   const [mode, setMode] = useState<MockMode>('discovery_blind')
   const [moreOpen, setMoreOpen] = useState(false)
+  const [manualGroup1Open, setManualGroup1Open] = useState(false)
   const [group1Path, setGroup1Path] = useState('')
   const [group1Mode, setGroup1Mode] = useState<'research' | 'fixture'>('research')
   const qwenReady = Boolean(config?.qwenApiKey.configured)
   const greeting = useMemo(() => `${greetingByHour()}，研究者`, [])
   const cards = TEMPLATE_CATEGORIES.find((item) => item.id === category)?.cards ?? []
+  const group1Ready = group1Bundle?.status === 'ready'
+  const group1VerifiedAt = useMemo(() => {
+    if (!group1Bundle?.verifiedAt) return ''
+    const date = new Date(group1Bundle.verifiedAt)
+    return Number.isNaN(date.getTime())
+      ? ''
+      : date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  }, [group1Bundle?.verifiedAt])
 
   function chooseFile(nextTarget: LaunchTarget) {
     setTarget(nextTarget)
@@ -173,28 +184,72 @@ export function TaskComposer({ config, importReport, busy, busyLabel, onImportCa
             已导入 {importReport.datasetFilename} · {importReport.rowCount.toLocaleString()} 行 × {importReport.columnCount} 列 · 隔离 {importReport.hiddenFileCount} 份隐藏材料
           </p>
         )}
-        <div className="composer__group1">
-          <div><Link2 size={15} /><span><strong>Group 1 → Group 2</strong> 校验哈希、生成可行性包和科学十项草案，再进入 H1</span></div>
-          <input
-            value={group1Path}
-            placeholder="粘贴 Group 1 pilot 根目录或 I_group1_handoff 路径"
-            aria-label="Group 1 冻结交接包路径"
-            onChange={(event) => setGroup1Path(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && group1Path.trim() && !busy) {
-                event.preventDefault()
-                void onImportGroup1Handoff(group1Path, group1Mode)
-              }
-            }}
-          />
-          <select value={group1Mode} onChange={(event) => setGroup1Mode(event.target.value as 'research' | 'fixture')} aria-label="Group 1 接入运行模式">
-            <option value="research">真实研究 · 调用模型</option>
-            <option value="fixture">离线验收 · 不调用模型</option>
-          </select>
-          <button type="button" disabled={busy || !group1Path.trim()} onClick={() => void onImportGroup1Handoff(group1Path, group1Mode)}>
-            {busy ? (busyLabel || '正在接入…') : '校验并进入 H1'}
-          </button>
-        </div>
+        <section className={`composer__group1-bundle is-${group1Bundle?.status ?? 'loading'}`} aria-label="Group 1 到 Group 2 真实链路">
+          <div className="composer__group1-head">
+            <div>
+              <span className="composer__group1-icon"><Link2 size={16} /></span>
+              <span><strong>Group 1 → Group 2</strong><small>已验证真实执行链路</small></span>
+            </div>
+            <span className="composer__group1-state">
+              {group1Ready ? <><CheckCircle2 size={14} />工程验收通过</> : group1Bundle?.status === 'invalid' ? <><CircleAlert size={14} />执行包校验失败</> : '等待本机执行包'}
+            </span>
+          </div>
+
+          {group1Ready ? (
+            <>
+              <p className="composer__group1-title">{group1Bundle.label}</p>
+              <div className="composer__group1-metrics">
+                <span><ShieldCheck size={13} />{group1Bundle.verifiedArtifactCount} 个 Artifact 哈希</span>
+                <span><Database size={13} />{group1Bundle.panelRows?.toLocaleString()} 行 × {group1Bundle.panelColumns} 列</span>
+                <span>code_owned</span>
+                <span>复现 {group1Bundle.reproductionStatus === 'matched' ? '一致' : group1Bundle.reproductionStatus}</span>
+              </div>
+              <p className="composer__group1-note">
+                新建独立 run，不覆盖旧阻塞记录；H1/H2 批准后由本机 Research Engine 执行。{group1VerifiedAt ? ` 最近验收 ${group1VerifiedAt}。` : ''}
+              </p>
+              <div className="composer__group1-actions">
+                <button type="button" className="composer__group1-primary" disabled={busy} onClick={() => void onStartVerifiedGroup1Bundle()}>
+                  {busy ? (busyLabel || '正在启动…') : '启动新的真实链路'}
+                </button>
+                <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
+                  手动接入其他包
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="composer__group1-note">{group1Bundle?.message || '正在读取本机已验证执行包…'}</p>
+              <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
+                手动接入 Group 1 包
+              </button>
+            </>
+          )}
+
+          {manualGroup1Open && (
+            <div className="composer__group1-manual">
+              <p>手动路径只完成交接与 H1/H2 设计；没有执行面板绑定时，统计执行会保持 fail-closed。</p>
+              <input
+                value={group1Path}
+                placeholder="粘贴 Group 1 pilot 根目录或 I_group1_handoff 路径"
+                aria-label="Group 1 冻结交接包路径"
+                onChange={(event) => setGroup1Path(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && group1Path.trim() && !busy) {
+                    event.preventDefault()
+                    void onImportGroup1Handoff(group1Path, group1Mode)
+                  }
+                }}
+              />
+              <select value={group1Mode} onChange={(event) => setGroup1Mode(event.target.value as 'research' | 'fixture')} aria-label="Group 1 接入运行模式">
+                <option value="research">代码拥有的研究设计</option>
+                <option value="fixture">离线流程演示</option>
+              </select>
+              <button type="button" disabled={busy || !group1Path.trim()} onClick={() => void onImportGroup1Handoff(group1Path, group1Mode)}>
+                {busy ? (busyLabel || '正在接入…') : '仅接入并进入 H1'}
+              </button>
+            </div>
+          )}
+        </section>
         <form
           className="composer__box"
           onSubmit={(event) => { event.preventDefault(); submit() }}

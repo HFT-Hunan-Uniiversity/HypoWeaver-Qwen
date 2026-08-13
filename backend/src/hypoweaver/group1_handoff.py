@@ -3,7 +3,9 @@ from __future__ import annotations
 import hashlib
 import csv
 import json
+import os
 import re
+from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal
 
@@ -27,6 +29,8 @@ from .models import (
 
 BRIDGE_VERSION = "group1-to-group2-v2"
 MAX_JSON_BYTES = 32 * 1024 * 1024
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+WORKSPACE_ROOT = PROJECT_ROOT.parents[2]
 
 
 class Group1HandoffError(ValueError):
@@ -75,6 +79,31 @@ class Group1RunLaunchResponse(StrictModel):
     run: RunState
 
 
+class Group1VerifiedBundleStatus(StrictModel):
+    status: Literal["ready", "unavailable", "invalid"]
+    message: str
+    bundle_id: str | None = None
+    label: str | None = None
+    handoff_id: str | None = None
+    handoff_manifest_sha256: str | None = None
+    verified_artifact_count: int = 0
+    dataset_filename: str | None = None
+    dataset_sha256: str | None = None
+    dataset_size_bytes: int | None = None
+    panel_rows: int | None = None
+    panel_columns: int | None = None
+    source_config_sha256: str | None = None
+    acceptance_run_id: str | None = None
+    acceptance_seal_sha256: str | None = None
+    verified_at: str | None = None
+    execution_status: str | None = None
+    scientific_status: str | None = None
+    reproduction_status: str | None = None
+    reproduction_scope: str | None = None
+    model_provider: Literal["code_owned"] = "code_owned"
+    execution_mode: Literal["external"] = "external"
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -99,6 +128,150 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise Group1HandoffError(f"Group 1 artifact must contain a JSON object: {path.name}")
     return payload
+
+
+def _configured_path(environment_name: str, default: Path) -> Path:
+    configured = os.getenv(environment_name, "").strip()
+    return Path(configured).expanduser() if configured else default
+
+
+def _verified_bundle_request_from_paths() -> Group1LocalHandoffRequest:
+    handoff = _configured_path(
+        "HYPOWEAVER_GROUP1_HANDOFF_PATH",
+        WORKSPACE_ROOT
+        / "output"
+        / "real_pilot"
+        / "2026-08-09_green_finance_decarbonization"
+        / "I_group1_handoff",
+    )
+    panel = _configured_path(
+        "HYPOWEAVER_GROUP1_EXECUTION_PANEL_PATH",
+        PROJECT_ROOT
+        / "backend"
+        / "var"
+        / "group1_execution"
+        / "group1_paired_stacked_panel.csv",
+    )
+    manifest = _configured_path(
+        "HYPOWEAVER_GROUP1_EXECUTION_MANIFEST_PATH",
+        panel.with_suffix(".manifest.json"),
+    )
+    source_config = _configured_path(
+        "HYPOWEAVER_GROUP1_SOURCE_CONFIG_PATH",
+        PROJECT_ROOT / "backend" / "config" / "group1_execution_sources.json",
+    )
+    return Group1LocalHandoffRequest(
+        path=str(handoff),
+        mode="research",
+        research_model_provider="code_owned",
+        execution_panel_path=str(panel),
+        execution_manifest_path=str(manifest),
+        source_config_path=str(source_config),
+    )
+
+
+def _verified_acceptance_receipt_path() -> Path:
+    return _configured_path(
+        "HYPOWEAVER_GROUP1_ACCEPTANCE_RECEIPT_PATH",
+        PROJECT_ROOT
+        / "backend"
+        / "var"
+        / "group1_execution"
+        / "acceptance-latest.json",
+    )
+
+
+def inspect_verified_group1_bundle() -> Group1VerifiedBundleStatus:
+    request = _verified_bundle_request_from_paths()
+    receipt_path = _verified_acceptance_receipt_path()
+    required_paths = {
+        "Group1 handoff": Path(request.path),
+        "execution panel": Path(request.execution_panel_path or ""),
+        "execution manifest": Path(request.execution_manifest_path or ""),
+        "source config": Path(request.source_config_path or ""),
+        "acceptance receipt": receipt_path,
+    }
+    missing = [label for label, path in required_paths.items() if not path.exists()]
+    if missing:
+        return Group1VerifiedBundleStatus(
+            status="unavailable",
+            message="Missing local verified-bundle assets: " + ", ".join(missing),
+        )
+
+    try:
+        bridge = bind_group1_execution_panel(
+            import_group1_handoff(request.path),
+            request.execution_panel_path or "",
+            request.execution_manifest_path or "",
+            request.source_config_path or "",
+        )
+        panel_path = Path(request.execution_panel_path or "").resolve(strict=True)
+        manifest_path = Path(request.execution_manifest_path or "").resolve(strict=True)
+        source_config_path = Path(request.source_config_path or "").resolve(strict=True)
+        manifest = _load_json(manifest_path)
+        receipt = _load_json(receipt_path.resolve(strict=True))
+        output = manifest.get("output")
+        if not isinstance(output, dict):
+            raise Group1HandoffError("execution-panel manifest has no output binding")
+        panel_sha256 = _sha256(panel_path)
+        if receipt.get("schema_version") != "group1-group2-acceptance-receipt-v1":
+            raise Group1HandoffError("unsupported Group1→Group2 acceptance receipt")
+        if receipt.get("status") != "completed" or receipt.get("execution_status") != "succeeded":
+            raise Group1HandoffError("the latest Group1→Group2 acceptance run did not complete successfully")
+        if panel_sha256 not in [str(value) for value in receipt.get("data_hashes", [])]:
+            raise Group1HandoffError("acceptance receipt is not bound to the current execution panel")
+        reproduction = receipt.get("reproduction")
+        if not isinstance(reproduction, dict) or reproduction.get("status") != "matched":
+            raise Group1HandoffError("the latest acceptance receipt has no matched reproduction")
+        sealed_output = receipt.get("sealed_output")
+        if not isinstance(sealed_output, dict) or not sealed_output.get("seal_sha256"):
+            raise Group1HandoffError("the latest acceptance receipt has no H4 seal")
+        source_config_sha256 = _sha256(source_config_path)
+        identity = ":".join(
+            [
+                bridge.integrity.manifest_sha256,
+                panel_sha256,
+                source_config_sha256,
+                str(receipt.get("workflow_run_id", "")),
+            ]
+        )
+        return Group1VerifiedBundleStatus(
+            status="ready",
+            message="The hash-bound Group1 execution bundle passed the recorded H1–H4 acceptance run.",
+            bundle_id=f"group1-verified:{hashlib.sha256(identity.encode('utf-8')).hexdigest()[:24]}",
+            label=bridge.case_submission.title,
+            handoff_id=bridge.integrity.handoff_id,
+            handoff_manifest_sha256=bridge.integrity.manifest_sha256,
+            verified_artifact_count=bridge.integrity.verified_artifact_count,
+            dataset_filename=panel_path.name,
+            dataset_sha256=panel_sha256,
+            dataset_size_bytes=panel_path.stat().st_size,
+            panel_rows=int(output.get("rows", 0)),
+            panel_columns=int(output.get("columns", 0)),
+            source_config_sha256=source_config_sha256,
+            acceptance_run_id=str(receipt.get("workflow_run_id", "")) or None,
+            acceptance_seal_sha256=str(sealed_output.get("seal_sha256", "")) or None,
+            verified_at=datetime.fromtimestamp(
+                receipt_path.stat().st_mtime,
+                tz=timezone.utc,
+            ).isoformat(),
+            execution_status=str(receipt.get("execution_status", "")) or None,
+            scientific_status=str(receipt.get("scientific_status", "")) or None,
+            reproduction_status=str(reproduction.get("status", "")) or None,
+            reproduction_scope=str(reproduction.get("independence_scope", "")) or None,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        return Group1VerifiedBundleStatus(
+            status="invalid",
+            message=str(error),
+        )
+
+
+def verified_group1_bundle_request() -> Group1LocalHandoffRequest:
+    status = inspect_verified_group1_bundle()
+    if status.status != "ready":
+        raise Group1HandoffError(status.message)
+    return _verified_bundle_request_from_paths()
 
 
 def _package_roots(path: str | Path) -> tuple[Path, Path]:
@@ -955,7 +1128,15 @@ def bind_group1_execution_panel(
         for item in bridge.group2_feasibility_package.method_matrix
     ]
     feasibility_package = bridge.group2_feasibility_package.model_copy(
-        update={"method_matrix": method_matrix}
+        update={
+            "method_matrix": method_matrix,
+            "decision_rationale": (
+                "The hash-bound paired stacked panel and code-owned staggered DDD adapter are ready "
+                "for the frozen core sign-switch execution. Scientific release and broader mechanism "
+                "extensions remain conditional on the recorded rights, boundary, denominator and "
+                "additional-variable blockers."
+            ),
+        }
     )
     case = bridge.case_submission.model_copy(
         update={
