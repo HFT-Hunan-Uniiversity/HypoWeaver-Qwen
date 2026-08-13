@@ -105,21 +105,25 @@ python -m uvicorn hypoweaver.research_api:app --host 0.0.0.0 --port 8001
 
 ## 4. Vercel 前端演示
 
-`vercel.json` 会：
+当前 Production：<https://hypoweaver-qwen.vercel.app>
 
-- 在 `frontend/` 安装依赖；
+`frontend/vercel.json` 会：
+
+- 只把 `frontend/` 作为 Vercel 项目根目录；
 - 运行 Vite 生产构建；
-- 设置 `VITE_PUBLIC_DEMO=true`；
+- 让 `/api/*` 明确返回 404；
 - 配置 SPA fallback。
 
 CLI：
 
 ```bash
-npx vercel
+cd frontend
+npx vercel link
+npx vercel env add VITE_PUBLIC_DEMO production,preview --value true --yes --no-sensitive
 npx vercel --prod
 ```
 
-或在 Vercel 控制台导入 GitHub 仓库，根目录保持仓库根目录。无需填写任何研究数据或 API key。
+或在 Vercel 控制台导入 GitHub 仓库，并把 Root Directory 设置为 `frontend`。无需填写任何研究数据或 API key。
 
 限制：
 

@@ -2,7 +2,7 @@
 
 HypoWeaver-Qwen 是一个面向实证研究的代码原生工作流系统。它把案例接入、研究设计、统计执行、独立复现、主张审查和 H1–H4 人工闸门放在同一条可审计链路中，并明确区分“工程执行成功”和“科学结论获支持”。
 
-> 当前公开部署：将在本次发布完成后写入。公开站点是无真实数据、无外部模型调用的交互演示；完整研究执行请使用本地或 Docker 部署。
+> 当前公开部署：[hypoweaver-qwen.vercel.app](https://hypoweaver-qwen.vercel.app)。公开站点是无真实数据、无外部模型调用的交互演示；完整研究执行请使用本地或 Docker 部署。
 
 ## 当前能力
 
@@ -151,11 +151,11 @@ backend/
 frontend/
   src/                   React 工作台
   tests/                 Vitest 回归
+  vercel.json            无真实数据的公开前端演示部署
 docs/                    调用、部署与验收文档
 examples/                可直接运行的 API 客户端
 Dockerfile               工作流与 Research Engine 的共同镜像
 docker-compose.yml       双服务与持久卷编排
-vercel.json              无真实数据的公开前端演示部署
 ```
 
 ## 验证

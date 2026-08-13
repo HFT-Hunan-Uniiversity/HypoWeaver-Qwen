@@ -74,6 +74,7 @@ const directoryInputAttributes = { webkitdirectory: '', directory: '' }
 interface TaskComposerProps {
   config: RuntimeConfigStatus | null
   group1Bundle: Group1VerifiedBundleStatus | null
+  publicDemo: boolean
   importReport: CaseImportReport | null
   busy: boolean
   busyLabel: string
@@ -85,7 +86,7 @@ interface TaskComposerProps {
   onCreateProject: (prompt: string, mode: MockMode) => void
 }
 
-export function TaskComposer({ config, group1Bundle, importReport, busy, busyLabel, onImportCaseFolder, onImportGroup1Handoff, onStartVerifiedGroup1Bundle, onOpenAdvanced, onOpenSettings, onCreateProject }: TaskComposerProps) {
+export function TaskComposer({ config, group1Bundle, publicDemo, importReport, busy, busyLabel, onImportCaseFolder, onImportGroup1Handoff, onStartVerifiedGroup1Bundle, onOpenAdvanced, onOpenSettings, onCreateProject }: TaskComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [target, setTarget] = useState<LaunchTarget>('hypoweaver')
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id)
@@ -188,10 +189,10 @@ export function TaskComposer({ config, group1Bundle, importReport, busy, busyLab
           <div className="composer__group1-head">
             <div>
               <span className="composer__group1-icon"><Link2 size={16} /></span>
-              <span><strong>Group 1 → Group 2</strong><small>已验证真实执行链路</small></span>
+              <span><strong>Group 1 → Group 2</strong><small>{publicDemo ? '界面演示 · 后端未连接' : '已验证真实执行链路'}</small></span>
             </div>
             <span className="composer__group1-state">
-              {group1Ready ? <><CheckCircle2 size={14} />工程验收通过</> : group1Bundle?.status === 'invalid' ? <><CircleAlert size={14} />执行包校验失败</> : '等待本机执行包'}
+              {publicDemo ? <><CircleAlert size={14} />公开演示</> : group1Ready ? <><CheckCircle2 size={14} />工程验收通过</> : group1Bundle?.status === 'invalid' ? <><CircleAlert size={14} />执行包校验失败</> : '等待本机执行包'}
             </span>
           </div>
 
@@ -218,14 +219,16 @@ export function TaskComposer({ config, group1Bundle, importReport, busy, busyLab
             </>
           ) : (
             <>
-              <p className="composer__group1-note">{group1Bundle?.message || '正在读取本机已验证执行包…'}</p>
-              <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
-                手动接入 Group 1 包
-              </button>
+              <p className="composer__group1-note">{publicDemo ? '公开站点仅演示前端交互，不读取本机执行包、研究数据或模型密钥；完整链路请使用 Docker 或本地部署。' : group1Bundle?.message || '正在读取本机已验证执行包…'}</p>
+              {!publicDemo && (
+                <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
+                  手动接入 Group 1 包
+                </button>
+              )}
             </>
           )}
 
-          {manualGroup1Open && (
+          {!publicDemo && manualGroup1Open && (
             <div className="composer__group1-manual">
               <p>手动路径只完成交接与 H1/H2 设计；没有执行面板绑定时，统计执行会保持 fail-closed。</p>
               <input

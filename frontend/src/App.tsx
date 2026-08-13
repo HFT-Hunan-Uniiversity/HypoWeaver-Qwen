@@ -684,6 +684,7 @@ export function App() {
             <TaskComposer
               config={config}
               group1Bundle={group1Bundle}
+              publicDemo={isPublicDemo}
               importReport={importReport}
               busy={busy}
               busyLabel={busyLabel}
