@@ -29,3 +29,6 @@ metadata_extraction_report.json
 
 # 配置目录
 config/
+
+# Windows 全文下载工具（含 token 配置，不进 Git）
+green-finance-fulltext-windows-1.0.0/

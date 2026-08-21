@@ -49,7 +49,13 @@ export HF_ENDPOINT=https://hf-mirror.com
 
 ### 5. 配置环境变量
 
-创建 `.env` 文件（不进 Git）：
+创建 `.env` 文件（不进 Git，权限 0600）：
+
+```bash
+umask 077
+nano .env
+chmod 600 .env
+```
 
 ```bash
 # .env — 不进 Git，权限设为 0600
@@ -57,8 +63,13 @@ export HF_ENDPOINT=https://hf-mirror.com
 # DashScope API Key（用于 qwen-max LLM 调用）
 DASHSCOPE_API_KEY=你的DashScope_API_Key（从 https://dashscope.console.aliyun.com 获取）
 
+# MinerU API Key（PDF 云解析；不解析 PDF 可留空）
+MINERU_API_KEY=
+
 # 可选：VECTOR_BACKEND=hdf5（默认，当前仅支持 hdf5）
 ```
+
+> ⚠️ 密钥禁止提交 Git、禁止粘贴到聊天/日志中。
 
 ## 验证安装
 

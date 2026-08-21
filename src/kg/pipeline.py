@@ -37,7 +37,6 @@ from src.kg.config import (
     ensure_dirs,
     resolve_input_pairs,
 )
-from src.kg.neo4j_client import Neo4jClient
 from src.kg.extractor import extract_relations_from_doc
 from src.kg.concept_edges import extract_co_occur
 from src.status import (
@@ -47,6 +46,15 @@ from src.status import (
     load_status,
     save_status,
 )
+
+
+def _get_neo4j_client():
+    """懒加载 Neo4jClient（neo4j 包可选，未安装时返回 None）。"""
+    try:
+        from src.kg.neo4j_client import Neo4jClient
+        return Neo4jClient
+    except ImportError:
+        return None
 
 
 # ============================================================================
@@ -357,11 +365,15 @@ def run_batch(
         _remove_failed_ids(done_set)
         print(f"⏭️  已跳过 {len(done_set)} 篇（之前成功）")
 
-    # 3. 连接 Neo4j
-    neo4j = Neo4jClient()
-    connected = neo4j.connect()
-    if not connected:
-        print("  ⚠️  Neo4j 未连接，KG 写入本地文件（仅调试）")
+    # 3. 连接 Neo4j（懒加载；未安装 neo4j 包或连接失败时写本地文件）
+    Neo4jClient = _get_neo4j_client()
+    neo4j = Neo4jClient() if Neo4jClient else None
+    if neo4j is not None:
+        connected = neo4j.connect()
+        if not connected:
+            print("  ⚠️  Neo4j 未连接，KG 写入本地文件（仅调试）")
+    else:
+        print("  ⚠️  neo4j 包未安装，KG 写入本地文件（仅调试）")
 
     # 4. 逐篇处理
     success = 0
@@ -408,7 +420,8 @@ def run_batch(
             time.sleep(0.5)  # 请求间隔
 
     # 5. 关闭 Neo4j 连接
-    neo4j.close()
+    if neo4j is not None:
+        neo4j.close()
 
     # 6. 报告
     print(f"\n{'='*60}")
@@ -484,10 +497,12 @@ def main():
             return 1
 
         ensure_dirs()
-        neo4j = Neo4jClient()
-        connected = neo4j.connect()
-        if not connected:
-            print("  ⚠️  Neo4j 未连接，仅保存本地")
+        Neo4jClient = _get_neo4j_client()
+        neo4j = Neo4jClient() if Neo4jClient else None
+        if neo4j is not None:
+            connected = neo4j.connect()
+            if not connected:
+                print("  ⚠️  Neo4j 未连接，仅保存本地")
 
         ok, msg = process_one(
             sid, md_path, meta_path, neo4j=neo4j,
