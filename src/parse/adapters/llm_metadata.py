@@ -3,6 +3,7 @@
 # 模型: qwen-turbo (DashScope compatible-mode)
 
 import json
+import os
 import re
 from typing import Optional, Dict, Any
 
