@@ -55,7 +55,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 # .env — 不进 Git，权限设为 0600
 
 # DashScope API Key（用于 qwen-max LLM 调用）
-DASHSCOPE_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DASHSCOPE_API_KEY=你的DashScope_API_Key（从 https://dashscope.console.aliyun.com 获取）
 
 # 可选：VECTOR_BACKEND=hdf5（默认，当前仅支持 hdf5）
 ```
