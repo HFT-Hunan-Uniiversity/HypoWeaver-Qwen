@@ -27,8 +27,9 @@ batch_report*.json
 llm_batch_result.txt
 metadata_extraction_report.json
 
-# 配置目录
+# 配置目录（数据集配置，不包含 src/parse/ 下的项目配置）
 config/
+!src/parse/config/
 
 # Windows 全文下载工具（含 token 配置，不进 Git）
 green-finance-fulltext-windows-1.0.0/
