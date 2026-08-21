@@ -1,0 +1,31 @@
+# 大文件/数据（不进 Git）
+models_cache/
+.venv/
+PDFs/
+cleaned/
+cleaned_meta/
+artifacts/
+parse_env/
+samples/
+input/
+
+# 环境/密钥 — 绝对不能上传
+.env
+.env.*
+*.local
+
+# 系统/IDE
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# 临时/日志/可再生报告
+logs/
+*.jsonl
+batch_report*.json
+llm_batch_result.txt
+metadata_extraction_report.json
+
+# 配置目录
+config/

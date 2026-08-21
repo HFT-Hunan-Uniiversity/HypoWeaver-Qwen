@@ -1,0 +1,445 @@
+# ============================================================================
+# 概述
+# ============================================================================
+overview:
+  description: |
+    文本分类标准（Group1 共用）。
+    三维度独立打标签，可并列多标签：
+      1. type:       文档类型（与 chunk schema 的 doc_type 一致）
+      2. theme:      研究主题（这段文本属于绿色金融的哪个子方向）
+      3. function:   文本在科研流程中的角色（背景/方法/假设/结果/数据/局限）
+  basis:
+    - 主题维度：综述.docx 中 207 篇样本文献的主题分布与近三年增量热点
+    - 功能维度：综述.docx 中"绿色金融研究范式"标准结构（文献综述 → 理论假设 → 实证模块 → 结论政策）
+
+# ============================================================================
+# 维度一：type 文档类型
+# ============================================================================
+type_dimension:
+  description: 文档类型，与 chunk.json 中的 doc_type 字段对齐
+  values:
+    paper:        学术论文
+    policy:       政策文件
+    esg_report:   ESG 报告 / 年报
+    database:     公开数据库条目（走表格入库后打标）
+    news:         行业资讯 / 研报 / 新闻
+
+# ============================================================================
+# 维度二：theme 研究主题
+# ============================================================================
+# 数据来源：综述.docx 主题方向分布（合计 207 篇）
+#   绿色转型/产业升级   42 篇 (20.3%)
+#   绿色信贷           32 篇 (15.5%)
+#   绿色债券           29 篇 (14.0%)
+#   绿色创新           24 篇 (11.6%)
+#   合计 > 60%，是当前研究主流
+#   近三年增量热点：绿色创新（7）、绿色转型/产业升级（5）、ESG/信息披露（3）
+#   2024 年以来增量热点：转型金融、生物多样性金融、数字金融赋能绿色金融
+# ============================================================================
+theme_dimension:
+  description: 研究主题——文本讨论的绿色金融子方向。一级 8 个，二级按需展开。
+  basis: 综述.docx 主题方向分布 + 近三年增量热点
+  total_papers_estimated: 207
+  level_1:
+
+    green_finance_overall:
+      name_cn: 绿色金融综述与体系
+      description: 综述、体系评估、总体效率、绿色金融体系研究
+      paper_count_estimate: ~15
+      level_2:
+        - total_efficiency_evaluation
+        - system_architecture
+
+    green_finance_policy:
+      name_cn: 绿色金融政策与监管
+      description: 试验区政策、绿色信贷指引、转型金融政策、央行再贷款
+      paper_count_estimate: ~30
+      key_policies:
+        - 银发〔2016〕228 号《关于构建绿色金融体系的指导意见》
+        - 2012 年《绿色信贷指引》
+        - 2017 年绿色金融改革创新试验区
+        - 转型金融标准
+      level_2:
+        - pilot_zone_effectiveness
+        - credit_guideline_2012
+        - transition_finance
+        - central_bank_reloan
+        - mpa_assessment
+
+    green_credit:
+      name_cn: 绿色信贷
+      description: 信贷规模、信贷成本、信贷配置效率、高污染行业影响
+      paper_count_estimate: 32
+      key_research_questions:
+        - H1：绿色信贷政策促进企业绿色创新
+        - H2：绿色信贷通过缓解融资约束提高研发投入
+        - H3：高污染行业企业受绿色信贷影响更明显
+      level_2:
+        - credit_size
+        - credit_cost
+        - credit_allocation_efficiency
+        - high_pollution_industry
+        - financing_constraint_relief
+
+    green_bond:
+      name_cn: 绿色债券
+      description: 发行规模、发行利差、募集资金使用、绿洗风险
+      paper_count_estimate: 29
+      key_research_questions:
+        - H1：绿色债券发行降低企业融资成本
+        - H2：绿色债券提升企业价值
+        - H3：绿色债券通过促进绿色投资改善长期绩效
+      level_2:
+        - issuance_size
+        - yield_spread
+        - use_of_proceeds
+        - greenwashing_risk
+        - certified_vs_uncertified
+
+    green_innovation:
+      name_cn: 企业绿色创新
+      description: 绿色专利、节能减排、转型投资、绿色技术创新激励
+      paper_count_estimate: 24
+      recent_growth: 近三年增量 +7 篇（最热）
+      level_2:
+        - green_patent
+        - energy_efficiency
+        - transition_investment
+        - technology_innovation_incentive
+
+    esg_disclosure:
+      name_cn: ESG 披露
+      description: 强制披露、评级分歧、信息可信度、机构投资者关注
+      paper_count_estimate: ~10
+      recent_growth: 近三年增量 +3 篇
+      key_research_questions:
+        - H1：企业 ESG 表现提升企业价值
+        - H2：ESG 通过降低信息不对称改善融资环境
+        - H3：机构投资者关注强化 ESG 价值效应
+      level_2:
+        - mandatory_disclosure
+        - rating_divergence
+        - information_credibility
+        - institutional_investor_attention
+
+    carbon_market_risk:
+      name_cn: 碳市场与碳风险
+      description: 碳定价、碳风险传染、转型金融、碳排放权交易
+      paper_count_estimate: ~15
+      level_2:
+        - carbon_pricing
+        - carbon_risk_transmission
+        - carbon_emission_trading
+        - climate_finance_tools
+
+    social_governance:
+      name_cn: S/G 维度
+      description: 公司治理、利益相关者、社会责任
+      paper_count_estimate: ~5
+      level_2:
+        - board_diversity
+        - stakeholder_engagement
+        - csr_performance
+
+  # 近一年增量（新晋热点，综述.docx 提到但样本量暂小）
+  emerging_topics:
+    - transition_finance          # 转型金融
+    - biodiversity_finance        # 生物多样性金融
+    - digital_green_finance       # 数字金融赋能绿色金融
+    - inclusive_green_finance     # 普惠-绿色融合
+
+# ============================================================================
+# 维度三：function 文本在科研流程中的角色
+# ============================================================================
+# 数据来源：综述.docx "绿色金融研究范式" + 数据清洗.docx 的输出结构
+# 标准科研流程：文献综述 → 理论假设 → 实证模块 → 结论政策
+# ============================================================================
+function_dimension:
+  description: |
+    文本在科研流程中的角色。可多标签并存（同一段文本可同时承担多个角色）。
+    例如：一段话同时提出假设 + 说明方法 → [hypothesis_statement, methodology]
+  multi_label_allowed: true
+  basis: 综述.docx 绿色金融研究标准流程 + 工程问题.docx 已抽取的 PaperProfile 字段
+  values:
+
+    background:
+      name_cn: 研究背景与综述
+      description: 交代研究背景、梳理前人研究、说明研究缺口
+      sci_phase: 文献综述
+      paper_profile_field: research_question + future_work (综述部分)
+      examples:
+        - "自 2016 年人民银行发布银发 228 号以来..."
+        - "现有研究多聚焦宏观层面,缺乏微观企业层面..."
+        - "关于绿色信贷对融资约束的影响,文献已..."
+      rule_keywords:
+        - "现有研究"
+        - "梳理"
+        - "近年来"
+        - "伴随着...发展"
+        - "本文在...基础上"
+
+    theoretical_framework:
+      name_cn: 理论机制
+      description: 理论推导、经济学解释（波特假说、信号传递、利益相关者等）
+      sci_phase: 理论假设
+      paper_profile_field: theory_basis + mechanisms
+      examples:
+        - "基于波特假说,环境规制可能通过..."
+        - "基于信号传递理论,ESG 评级..."
+        - "现有文献主要依托以下三类机制：第一,融资约束..."
+      rule_keywords:
+        - "基于...理论"
+        - "机制"
+        - "波特假说"
+        - "信号传递"
+        - "利益相关者"
+        - "信息不对称"
+
+    hypothesis_statement:
+      name_cn: 研究假设陈述
+      description: 明确提出 H1/H2/H3
+      sci_phase: 理论假设
+      paper_profile_field: mechanisms (假设陈述部分)
+      examples:
+        - "本文假设 H1:绿色信贷政策..."
+        - "研究假设 2:ESG 表现提升企业价值"
+        - "基于以上分析,本文提出如下假设:"
+      rule_keywords:
+        - "假设 H1"
+        - "假设 H2"
+        - "研究假设"
+        - "本文假设"
+        - "H1:"
+        - "H2:"
+
+    methodology:
+      name_cn: 研究方法
+      description: 识别策略、变量构造、模型设定（DID/PSM-DID/中介效应/空间杜宾等）
+      sci_phase: 实证模块
+      paper_profile_field: method
+      examples:
+        - "本文采用 DID,以 2017 年试验区设立为..."
+        - "采用 PSM-DID,样本为..."
+        - "运用中介效应模型检验..."
+      rule_keywords:
+        - "采用 DID"
+        - "PSM-DID"
+        - "中介效应"
+        - "空间杜宾"
+        - "工具变量"
+        - "识别策略"
+        - "模型设定"
+        - "双向固定效应"
+
+    empirical_result:
+      name_cn: 实证结果
+      description: 回归结果、稳健性、异质性
+      sci_phase: 实证模块
+      paper_profile_field: main_findings
+      examples:
+        - "回归结果显示 X 显著为正..."
+        - "稳健性检验后结论不变..."
+        - "异质性分析表明,国有企业..."
+      rule_keywords:
+        - "回归结果"
+        - "稳健性"
+        - "异质性"
+        - "显著为正"
+        - "1%水平上显著"
+        - "基准回归"
+        - "安慰剂检验"
+
+    data_variable:
+      name_cn: 数据与变量
+      description: 数据来源、变量构造、测度方式
+      sci_phase: 实证模块
+      paper_profile_field: data_source + sample_period
+      examples:
+        - "范围一排放数据来自 CDP..."
+        - "绿色专利数据来自国家知识产权局..."
+        - "财务数据来自 CSMAR 数据库..."
+        - "范围一(Scope 1)直接排放量 | 吨二氧化碳当量"
+      rule_keywords:
+        - "数据来源"
+        - "数据来自"
+        - "样本选择"
+        - "变量定义"
+        - "测度方式"
+        - "CSMAR"
+        - "Wind"
+        - "CNRDS"
+
+    limitation_implication:
+      name_cn: 局限与政策启示
+      description: 研究局限、未来方向、政策建议
+      sci_phase: 结论政策
+      paper_profile_field: limitations + future_work (未来方向部分)
+      examples:
+        - "本文局限是缺乏微观企业层面..."
+        - "未来研究可结合文本分析区分..."
+        - "基于研究结论,本文提出以下政策建议..."
+      rule_keywords:
+        - "研究局限"
+        - "未来研究"
+        - "政策建议"
+        - "政策启示"
+        - "本研究存在以下不足"
+
+  # 常见标签组合参考
+  common_combinations:
+    - [background, theoretical_framework]                # 综述+理论（常出现在引言后半）
+    - [theoretical_framework, hypothesis_statement]      # 理论推导→假设陈述
+    - [hypothesis_statement, methodology]                # 假设+方法（同段列举）
+    - [methodology, data_variable]                       # 方法+数据来源
+    - [empirical_result, methodology]                    # 结果段落常回顾方法
+    - [limitation_implication, empirical_result]         # 结尾展望既有结果讨论又有局限
+    - [background, limitation_implication]               # 引言+结尾展望呼应
+
+# ============================================================================
+# 样例 chunk 标签
+# ============================================================================
+sample_labels:
+  description: 阶段0 手工打标参考样本,覆盖主要主题与功能组合
+  examples:
+
+    - chunk_id: paper_001_intro
+      source: 综述.docx 引用文献示例
+      labels:
+        type: paper
+        theme: [green_finance_policy]
+        sub_theme: [pilot_zone_effectiveness]
+        function: [background]
+      confidence: 0.95
+      classified_by: rule_based
+      rationale: 引言开头,梳理绿色金融试验区政策
+
+    - chunk_id: paper_001_theory
+      labels:
+        type: paper
+        theme: [green_finance_policy]
+        function: [theoretical_framework, hypothesis_statement]
+      confidence: 0.90
+      classified_by: rule_based
+      rationale: 给出理论机制并推导假设
+
+    - chunk_id: paper_001_method
+      labels:
+        type: paper
+        theme: [green_credit]
+        sub_theme: [financing_constraint_relief]
+        function: [methodology, data_variable]
+      confidence: 0.93
+      classified_by: rule_based
+      rationale: 说明 DID 模型 + 数据来自 CSMAR
+
+    - chunk_id: paper_001_result
+      labels:
+        type: paper
+        theme: [green_credit]
+        function: [empirical_result, methodology]
+      confidence: 0.88
+      classified_by: rule_based
+      rationale: 汇报回归结果并回顾变量定义
+
+    - chunk_id: policy_2016228_objective
+      labels:
+        type: policy
+        theme: [green_finance_policy]
+        sub_theme: [credit_guideline_2012]
+        function: [background, theoretical_framework]
+      confidence: 0.91
+      classified_by: rule_based
+      rationale: 银发 228 号 总目标章节（背景+机制）
+
+    - chunk_id: policy_2016228_instrument
+      labels:
+        type: policy
+        theme: [green_finance_policy]
+        sub_theme: [central_bank_reloan]
+        function: [methodology]
+      confidence: 0.85
+      classified_by: rule_based
+      rationale: 政策"通过再贷款机制支持..."对应可构造的 DID 变量
+
+    - chunk_id: esg_2024_citic_env_table
+      labels:
+        type: esg_report
+        theme: [esg_disclosure, carbon_market_risk]
+        function: [data_variable]
+      confidence: 0.92
+      classified_by: rule_based
+      rationale: 范围一/二排放数据表（数据源）
+
+    - chunk_id: esg_2024_ceo_statement
+      labels:
+        type: esg_report
+        theme: [esg_disclosure, green_finance_overall]
+        function: [background]
+      confidence: 0.86
+      classified_by: rule_based
+      rationale: 高管致辞（背景陈述,叙事强度高）
+
+    - chunk_id: news_2026_transition_standard
+      labels:
+        type: news
+        theme: [green_finance_policy]
+        sub_theme: [transition_finance]
+        function: [background]
+      confidence: 0.80
+      classified_by: rule_based
+      rationale: 行业资讯,转型金融新标准发布
+
+# ============================================================================
+# 阶段 0 任务（与 C 协作）
+# ============================================================================
+phase_0_tasks:
+  - B+C 共定:基于本 yaml 锁定主题标签集（先一级）+ 功能标签集
+  - 手工打标 ≥50 chunk,覆盖：
+      - 每个一级主题标签至少出现 3 次
+      - 每个功能标签至少出现 3 次
+  - 与 D 对齐"分类标签 → 检索 query 映射"（D 阶段0 待办）
+  - 起草 chunk schema 的 labels 字段（嵌入此 yaml）
+
+# ============================================================================
+# 实现路径（参考）
+# ============================================================================
+implementation_path:
+  phase_2:
+    - 基于规则:关键词+正则的 rule-based 分类器（每个标签配 rule_keywords）
+    - LLM 兜底:长尾样本用 Qwen + instructor 输出 JSON 标签
+  phase_3:
+    - 全量自动分类
+    - 5% 抽样人工核验,校准阈值
+
+# ============================================================================
+# 与现有 schema 的衔接
+# ============================================================================
+integration:
+  chunk_json_extension: |
+    在 C 已定义的 chunk.json schema 中追加 labels 字段：
+      {
+        "chunk_id": "...",
+        "doc_type": "paper",
+        "content": "...",
+        "labels": {
+          "theme": ["green_credit"],
+          "sub_theme": ["financing_constraint_relief"],
+          "function": ["hypothesis_statement", "methodology"]
+        },
+        "confidence": 0.92,
+        "classified_by": "rule_based"  # rule_based | llm | human
+      }
+
+  parsed_doc_relation: |
+    ParsedDoc IR（B 阶段0 共定）的 blocks 列表中,每个 block 应可单独打标。
+    实际实现:打标在 chunk 阶段（C 阶段2/3）做,不污染 IR。
+
+  paper_profile_relation: |
+    PaperProfile（C 阶段3 抽取）的字段与 function 维度对应：
+      - background → research_question + future_work (综述部分)
+      - theoretical_framework → theory_basis + mechanisms
+      - hypothesis_statement → mechanisms (H1/H2/H3 文字)
+      - methodology → method
+      - empirical_result → main_findings
+      - data_variable → data_source + sample_period
+      - limitation_implication → limitations + future_work (未来方向部分)
