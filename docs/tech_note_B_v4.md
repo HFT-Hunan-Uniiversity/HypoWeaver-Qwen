@@ -1,5 +1,9 @@
 # B 部分技术笔记 v4(技术栈重构·LlamaIndex 版)
 
+> ⚠️ 本文档描述的是早期未采用的方案（LlamaIndex + Neo4j + PG + GROBID），**非当前项目实际架构**。
+> 实际采用的技术栈见 `docs/TECHNICAL_ARCHITECTURE.md`：纯 Python + hdf5 + networkx + qwen-max，无容器依赖。
+> 保留此文档仅作为设计历史参考。
+
 > 作者:B(组总负责 + Tech Lead)
 > 对应分工:步骤 2(解析清洗)→ 3(切片索引)→ 4(检索图谱)
 > 状态:技术栈重构 · **v4.1(吸收 4 项必留修订)**

@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -52,6 +54,214 @@ def _safe_filename(filename: str, max_len: int = 80) -> str:
     name = "".join(c for c in name if c.isalnum() or c in "-_ ")
     name = name.strip()[:max_len]
     return name
+
+
+# ============================================================================
+# XML 正文提取（Elsevier FTR / TEI / HTML）
+# ============================================================================
+def _parse_xml_safe(content: str):
+    """安全解析 XML，失败返回 None。"""
+    try:
+        return ET.fromstring(content.encode("utf-8"))
+    except ET.ParseError:
+        return None
+
+
+def _extract_xml_text(xml_content: str) -> str:
+    """从 XML 中提取纯文本正文，支持 Elsevier FTR / TEI / HTML 三种格式。
+
+    返回纯文本 string（无标签），提取失败时返回空字符串。
+    """
+    root = _parse_xml_safe(xml_content)
+    if root is None:
+        return ""
+
+    local = root.tag.split("}")[-1] if "}" in root.tag else root.tag
+
+    if local == "TEI":
+        return _extract_tei(root)
+    if local == "full-text-retrieval-response":
+        return _extract_ftr(root)
+    if local in ("html", "HTML"):
+        return _extract_html(xml_content)
+
+    # 未知格式，尝试从任意 <p> 抽取
+    paras = []
+    for p in root.iter("{http://www.tei-c.org/ns/1.0}p"):
+        paras.append("".join(p.itertext()).strip())
+    if paras:
+        return "\n\n".join(paras)
+    return ""
+
+
+def _extract_tei(root: ET.Element) -> str:
+    """从 TEI（Grobid）XML 提取全文。"""
+    TEI = "{http://www.tei-c.org/ns/1.0}"
+    parts = []
+
+    # 标题
+    for title in root.iter(f"{TEI}title"):
+        txt = "".join(title.itertext()).strip()
+        if txt and len(txt) > 10:
+            parts.append(f"#【标题】{txt}")
+            break
+
+    # 摘要
+    for ab in root.iter(f"{TEI}abstract"):
+        for p in ab.iter(f"{TEI}p"):
+            txt = "".join(p.itertext()).strip()
+            if txt:
+                parts.append(f"#【摘要】{txt}")
+
+    # 正文段落
+    for p in root.iter(f"{TEI}p"):
+        txt = "".join(p.itertext()).strip()
+        if txt and not _is_tei_metadata(txt):
+            parts.append(txt)
+
+    return "\n\n".join(parts) if parts else ""
+
+
+def _is_tei_metadata(txt: str) -> bool:
+    """判断 TEI 文本是否是元数据而非正文。"""
+    low = txt.lower()
+    if any(kw in low for kw in ["keywords:", "jel classification", "corresponding author",
+                                 "this article is", "© ", "received ", "accepted ",
+                                 "volume ", "issue ", "pages ", "published by",
+                                 "elsevier", "springer", "open access"]):
+        return True
+    if len(txt) < 15:
+        return True
+    return False
+
+
+def _extract_ftr(root: ET.Element) -> str:
+    """从 Elsevier FTR XML 提取标题 + 期刊 + 摘要 + 正文段落。"""
+    FTR = "http://www.elsevier.com/xml/common/dtd"
+    DC = "http://purl.org/dc/elements/1.1/"
+    PRISM = "http://prismstandard.org/namespaces/basic/2.0/"
+    parts = []
+
+    # 标题
+    for title in root.iter(f"{{{DC}}}title"):
+        txt = "".join(title.itertext()).strip()
+        if txt:
+            parts.append(f"#【标题】{txt}")
+
+    # 期刊名
+    for pub in root.iter(f"{{{PRISM}}}publicationName"):
+        txt = "".join(pub.itertext()).strip()
+        if txt:
+            parts.append(f"#【期刊】{txt}")
+
+    # 摘要
+    for ab in root.iter(f"{{{FTR}}}abstract"):
+        for para in ab.iter(f"{{{FTR}}}para"):
+            txt = "".join(para.itertext()).strip()
+            if txt:
+                parts.append(f"#【摘要】{txt}")
+
+    # 正文段落（部分 FTR 有全文）
+    for para in root.iter(f"{{{FTR}}}para"):
+        txt = "".join(para.itertext()).strip()
+        if txt and len(txt) > 50:
+            parts.append(txt)
+
+    return "\n\n".join(parts) if parts else ""
+
+
+def _extract_html(html_content: str) -> str:
+    """简单 HTML 标签剥离。"""
+    text = re.sub(r"<[^>]+>", " ", html_content)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _extract_meta_from_xml(xml_content: str) -> dict:
+    """从 XML 中提取元数据（标题/作者/摘要/关键词/journal/doi/year）。"""
+    root = _parse_xml_safe(xml_content)
+    if root is None:
+        return {}
+
+    meta = {}
+    local = root.tag.split("}")[-1] if "}" in root.tag else root.tag
+
+    if local == "full-text-retrieval-response":
+        _extract_ftr_meta(root, meta)
+    elif local == "TEI":
+        _extract_tei_meta(root, meta)
+
+    return meta
+
+
+def _extract_ftr_meta(root: ET.Element, meta: dict) -> None:
+    """从 Elsevier FTR XML 提取元数据。"""
+    DC = "http://purl.org/dc/elements/1.1/"
+    PRISM = "http://prismstandard.org/namespaces/basic/2.0/"
+    FTR = "http://www.elsevier.com/xml/common/dtd"
+
+    for el in root.iter(f"{{{DC}}}title"):
+        t = "".join(el.itertext()).strip()
+        if t:
+            meta["title"] = t
+            break
+    for el in root.iter(f"{{{PRISM}}}publicationName"):
+        t = "".join(el.itertext()).strip()
+        if t:
+            meta["journal"] = t
+            break
+    for el in root.iter(f"{{{PRISM}}}doi"):
+        t = "".join(el.itertext()).strip()
+        if t:
+            meta["doi"] = t
+            break
+    for ab in root.iter(f"{{{FTR}}}abstract"):
+        paras = []
+        for para in ab.iter(f"{{{FTR}}}para"):
+            paras.append("".join(para.itertext()).strip())
+        if paras:
+            meta["abstract"] = "\n".join(paras)
+
+
+def _extract_tei_meta(root: ET.Element, meta: dict) -> None:
+    """从 TEI XML 提取元数据。"""
+    TEI = "{http://www.tei-c.org/ns/1.0}"
+    for title in root.iter(f"{TEI}title"):
+        t = "".join(title.itertext()).strip()
+        if t and len(t) > 5:
+            meta["title"] = t
+            break
+    authors = []
+    for author in root.iter(f"{TEI}author"):
+        parts = []
+        for fore in author.iter(f"{TEI}forename"):
+            parts.append("".join(fore.itertext()).strip())
+        for sur in author.iter(f"{TEI}surname"):
+            parts.append("".join(sur.itertext()).strip())
+        if parts:
+            authors.append(" ".join(parts))
+    if authors:
+        meta["authors"] = authors
+    for ab in root.iter(f"{TEI}abstract"):
+        paras = []
+        for p in ab.iter(f"{TEI}p"):
+            paras.append("".join(p.itertext()).strip())
+        if paras:
+            meta["abstract"] = "\n".join(paras)
+    for idno in root.iter(f"{TEI}idno"):
+        t = "".join(idno.itertext()).strip()
+        if t.startswith("10."):
+            meta["doi"] = t
+            break
+    for term in root.iter(f"{TEI}term"):
+        t = "".join(term.itertext()).strip()
+        if t:
+            meta.setdefault("keywords", []).append(t)
+
+
+# ============================================================================
+# 文件处理函数
+# ============================================================================
 
 
 def _collect_input_files(input_dir: Path) -> list:
@@ -213,24 +423,38 @@ def process_txt_xml(
         print(f"[{index}/{total}] ❌ 空文件，跳过")
         return None
 
-    # 直接作为 Markdown 保存（无需清洗）
-    cleaned_md_path.write_text(text, encoding="utf-8")
-    print(f"[{index}/{total}] ✅ 已保存: {cleaned_md_path.name} ({len(text)} 字符)")
+    # 提取正文（XML 需解析标签，TXT 直接使用）
+    xml_meta = {}
+    if fmt == "xml":
+        body = _extract_xml_text(text)
+        xml_meta = _extract_meta_from_xml(text)
+        if not body.strip():
+            # 提取不到正文时回退到原始 XML（至少保留元数据字段）
+            body = text[:20000]
+            print(f"[{index}/{total}]   ⚠️  XML 无正文段落，保留元数据片段")
+        else:
+            print(f"[{index}/{total}]   ✅ XML 正文提取: {len(body)} 字符")
+    else:
+        body = text
 
-    # 简易元数据
+    # 保存清洗后的正文
+    cleaned_md_path.write_text(body, encoding="utf-8")
+    print(f"[{index}/{total}] ✅ 已保存: {cleaned_md_path.name} ({len(body)} 字符)")
+
+    # 简易元数据（XML 优先使用提取到的元数据）
     meta = {
-        "title": doc_id,
-        "authors": [],
-        "abstract": "",
-        "keywords": [],
-        "journal": "",
-        "doi": "",
-        "year": "",
+        "title": xml_meta.get("title", doc_id),
+        "authors": xml_meta.get("authors", []),
+        "abstract": xml_meta.get("abstract", ""),
+        "keywords": xml_meta.get("keywords", []),
+        "journal": xml_meta.get("journal", ""),
+        "doi": xml_meta.get("doi", ""),
+        "year": xml_meta.get("year", ""),
         "issuer": None,
         "doc_number": None,
         "date": None,
-        "extraction_method": "direct_read",
-        "extraction_notes": f"直接从 {fmt.upper()} 读取",
+        "extraction_method": "xml_parse" if fmt == "xml" else "direct_read",
+        "extraction_notes": f"从 {fmt.upper()} 提取" if fmt == "xml" else f"直接从 {fmt.upper()} 读取",
     }
     md5 = _compute_md5(str(file_path))
     extra_info = {**meta, "md5": md5}
@@ -241,7 +465,7 @@ def process_txt_xml(
         title=file_path.name,
         source_loc=str(file_path),
         markdown_path=str(cleaned_md_path),
-        normalized_values={},
+        normalized_values=[],
         extra_info=extra_info,
     )
     cleaned_meta_path.write_text(

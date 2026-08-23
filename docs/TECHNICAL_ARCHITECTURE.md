@@ -1,7 +1,6 @@
 # RAG-Graph 技术架构（2026-08-21）
 
-> 本文档反映当前项目的真实技术栈，已移除 GROBID、Neo4j、LlamaIndex、PostgreSQL
-> 等旧规划中但实际未使用的组件。覆盖从全文获取 → 解析 → 清洗 → 切片 → 向量化 → KG 抽取
+> 本文档反映当前项目的真实技术栈。覆盖从全文获取 → 解析 → 清洗 → 切片 → 向量化 → KG 抽取
 > → 混合检索 → HTTP API 服务全链路。
 
 ---
@@ -13,7 +12,7 @@
             │                                        │
             ▼                                        ▼
      input/fulltexts/（.txt / .xml）          input/metadata/（.json）
-      84 TXT + 371 XML = 455 份资产                 1084 条元数据
+      84 TXT + 371 XML = 455 份资产                 1088 条元数据
             │
             ▼
     [parse_all.py]  — TXT/XML 直接读取，PDF 走 MinerU 兜底
@@ -27,7 +26,7 @@
       ┌─────┴──────────────────┬──────────────────────┐
       ▼                        ▼                      ▼
   [切片引擎 chunker]    [KG 抽取 qwen-max]     [元数据摘要向量化]
-  （全文分块）            （有全文才做）          （无全文的 640 篇）
+  （全文分块）            （有全文才做）          （无全文的 714 篇）
       │                        │                      │
       ▼                        ▼                      ▼
   [BGE 嵌入]            artifacts/kg/*.kg.json  [BGE 嵌入]
@@ -58,13 +57,13 @@
 
 | 数据 | 来源 | 数量 | 凭据 | 用途 |
 |---|---|---|---|---|
-| 元数据（Scopus 版） | Feed API `http://127.0.0.1:4173/api/feed` | 1084 条 | 无（公开） | 论文注册中心：标题/摘要/作者/关键词/期刊 |
+| 元数据（Scopus 版） | Feed API `http://127.0.0.1:4173/api/feed` | 1088 条 | 无（公开） | 论文注册中心：标题/摘要/作者/关键词/期刊 |
 | 全文正文 | Windows 下载器（SSH 隧道 + GREEN_FINANCE_RESEARCH_TOKEN） | 455 份资产，443 篇去重 | Token（私下提供） | KG 抽取 + 全文分块向量化 |
 
 **核心关系：Feed API 作为论文注册中心，全文正文是子集。**
 
 ```
-Feed API 元数据（1084 条）
+Feed API 元数据（1088 条）
     ├── 有全文正文（443 篇）→ 全流程：解析 → KG → 向量化（多 chunk）
     └── 无全文正文（~640 篇）→ 轻量处理：摘要向量化（1 chunk/篇，无 KG）
 ```
@@ -78,8 +77,6 @@ Feed API 元数据（1084 条）
 | PDF | 0（后续补充） | MinerU 云 API 解析 | ✅ 2000 页/天 |
 
 > **当前 455 份全文全部为 TXT/XML，零 MinerU 成本。** MinerU 降级为"仅 PDF 补充时兜底"。
-
-### 2.3 获取流程
 
 ```
 Windows 本地：
@@ -97,7 +94,7 @@ Windows 本地：
 ### 2.4 下载脚本
 
 `scripts/download_papers.py` 支持：
-- **路径 A（元数据）**：服务器本地 Feed API，分页拉取 1084 条 Scopus 版元数据
+- **路径 A（元数据）**：服务器本地 Feed API，分页拉取 1088 条 Scopus 版元数据
 - **路径 B（全文）**：调用外部下载工具（Windows 下载器或 npm 工具），产出入 `input/`
 
 ---
@@ -161,16 +158,7 @@ Windows 本地：
 
 #### 为什么现阶段选 hdf5 而不是 Qdrant
 
-| 对比项 | hdf5 | Qdrant |
-|---|---|---|
-| 额外服务 | 无，纯文件读写 | 需运行容器，占用 ~1.5 GB 内存 |
-| 500 篇存储 | ~75 MB（500 篇 × 75 chunks × 512 dims × 4 bytes） | 独立存储 |
-| 检索速度 | 全量暴力扫描，numpy 矩阵运算 < 10 ms | 索引检索，更快 |
-| 部署复杂度 | 零，pip install h5py 即可 | 需 Podman 容器 + 配置 api_key |
-| 过滤能力 | 需自行实现（Python 侧过滤） | 内置 payload 过滤 |
-| 迁移成本 | 文件拷贝即可 | 需导出/导入 |
-
-**结论：现阶段 hdf5 更合适。** 云服务器内存上限 3.5 GB，省掉 Qdrant 容器的 1.5 GB 意味着 Python + BGE 有更充裕的运行空间。500 篇论文的向量总量约 75 MB，hdf5 暴力扫描性能完全够用。未来如果数据量超过 2000 篇或需要生产级高并发，再迁移到 Qdrant。
+hdf5 纯文件读写，无需额外服务；1169 篇论文的向量总量约 45.9 MB，numpy 暴力扫描 < 10 ms，完全够用。省掉 Qdrant 容器的 1.5 GB 内存意味着 Python + BGE 有更充裕的运行空间。未来如果数据量超过 2000 篇或需要生产级高并发，再迁移到 Qdrant。
 
 #### 架构预留
 
@@ -285,9 +273,9 @@ h5py 文件对象**非线程安全**。多请求并发读取同一个 h5py File 
 响应:
 {
   "status": "ok",
-  "graph_nodes": 1234,
-  "graph_edges": 890,
-  "vector_count": 37500,
+  "graph_nodes": 10138,
+  "graph_edges": 13366,
+  "vector_count": 19567,
   "embedder_ready": true
 }
 ```
@@ -320,11 +308,15 @@ uvicorn src.api.server:app --host 0.0.0.0 --port 8002
 |---|---|---|
 | `run_pipeline.sh` | 云上一键跑批，串联以下所有步骤 | `bash run_pipeline.sh --incremental` |
 | `scripts/download_papers.py` | 从 Feed API 获取元数据 + 调用外部工具下载全文 | `python scripts/download_papers.py --output-dir ./input` |
+| `scripts/download_feed_metadata.py` | 分页拉取 Feed API 元数据（1088 条） | `python scripts/download_feed_metadata.py` |
+| `scripts/merge_abstracts.py` | 将 Feed API 摘要合入 cleaned_meta | `python scripts/merge_abstracts.py` |
 | `scripts/parse_all.py` | 批量解析 TXT/XML/PDF → 清洗 Markdown | `python scripts/parse_all.py` |
 | `scripts/report_status.py` | 动态扫描，输出系统状态报告 | `python scripts/report_status.py` |
 | `scripts/rebuild_status.py` | 从已有产出重建 `processed_docs.json` | `python scripts/rebuild_status.py` |
 | `scripts/sample_check.py` | 抽样质检（随机抽取 N 篇检查 KG + 向量） | `python scripts/sample_check.py 10` |
 | `scripts/vectorize_all.py` | 切片 → BGE 嵌入 → 写入向量存储 | `python scripts/vectorize_all.py` |
+| `scripts/vectorize_one.py` | 单文档向量化测试 | `python scripts/vectorize_one.py <doc_id>` |
+| `scripts/qa_remote.py` | SSH 远程问答（服务器跑全量，拉回结果） | `python scripts/qa_remote.py "问题"` |
 
 ---
 
@@ -359,8 +351,8 @@ cleaned/*.md + cleaned_meta/*.json
 | 组件 | 说明 | 原因 |
 |---|---|---|
 | GROBID | 论文元数据/引用抽取 | MinerU 已覆盖正文解析，引用关系暂非核心需求 |
-| Neo4j | 图数据库 | 500 篇 KG 约 10-20k 边，networkx 内存图足够，省一个容器 |
-| Qdrant（当前阶段） | 向量数据库 | hdf5 足够承载 500 篇 ~75 MB 向量，省 1.5 GB 容器内存 |
+| Neo4j | 图数据库 | 1169 篇 KG 约 10-20k 边，networkx 内存图足够，省一个容器 |
+| Qdrant | 向量数据库 | hdf5 足够承载 1169 篇 ~45.9 MB 向量，省 1.5 GB 容器内存 |
 | LlamaIndex | 检索框架 | 自研 chunker/retriever/answer_engine 更灵活，无框架锁定风险 |
 | PostgreSQL / pgvector | 向量数据库 | 本地 hdf5，不引入数据库依赖 |
 | Docling | PDF 解析 | MinerU 统一处理（但当前数据为 TXT/XML，直接读取） |
@@ -401,6 +393,7 @@ Project正式/
 ├── src/
 │   ├── embedding.py              # BGE 嵌入（懒加载 + 规则兜底）
 │   ├── qa_runner.py              # CLI 问答入口
+│   ├── status.py                 # 状态管理
 │   ├── api/
 │   │   └── server.py             # FastAPI HTTP API（端口 8002）
 │   ├── vector/
@@ -409,7 +402,7 @@ Project正式/
 │   │   ├── chunker.py            # 自研切片引擎
 │   │   ├── graph_retriever.py    # networkx 内存图遍历器
 │   │   ├── hybrid.py             # 混合检索 + ChunkCache
-│   │   └── classifier.py         # 论文分类器
+│   │   └── utils/                # 检索工具
 │   ├── kg/
 │   │   ├── pipeline.py           # KG 批量流水线
 │   │   ├── extractor.py          # qwen-max 三元组抽取
@@ -417,27 +410,37 @@ Project正式/
 │   │   ├── config.py             # 路径 + LLM 配置
 │   │   ├── aliases.py            # 概念别名归一
 │   │   ├── concept_edges.py      # 共现边生成
-│   │   ├── neo4j_client.py       # Neo4j 写入层（规划时创建，未实际使用）
+│   │   ├── neo4j_client.py       # Neo4j 写入层（预留，未使用）
 │   │   └── llm_extract_client.py # qwen-max API 调用封装
 │   ├── reason/
 │   │   └── answer_engine.py      # 回答生成引擎
 │   └── parse/
-│       ├── pipeline.py           # 解析流水线
 │       ├── adapters/
 │       │   ├── mineru_api.py     # MinerU 云端 API 封装（PDF 兜底）
-│       │   └── ...
+│       │   ├── metadata_extractor.py  # 元数据抽取
+│       │   └── llm_metadata.py   # LLM 元数据增强
 │       ├── clean/
 │       │   └── cleaning.py       # 清洗 + 章节标记注入
+│       ├── config/
+│       │   ├── doc_types.py      # 文档类型定义
+│       │   └── llm_type_infer.py # LLM 类型推断
 │       └── ir/
 │           └── parsed_doc.py     # ParsedDoc 元数据模型
 ├── scripts/
 │   ├── run_pipeline.sh           # 云上一键跑批
 │   ├── download_papers.py        # 从 Feed API 获取论文
+│   ├── download_feed_metadata.py # Feed API 元数据下载
+│   ├── merge_abstracts.py        # 摘要合并工具
 │   ├── parse_all.py              # 批量解析（TXT/XML/PDF 自动检测）
 │   ├── report_status.py          # 系统状态报告
 │   ├── rebuild_status.py         # 状态文件重建
 │   ├── sample_check.py           # 抽样质检
-│   └── vectorize_all.py          # 批量向量化
+│   ├── vectorize_all.py          # 批量向量化
+│   ├── vectorize_one.py          # 单文档向量化测试
+│   └── qa_remote.py              # SSH 远程问答
+├── schemas/
+│   ├── __init__.py
+│   └── chunk_schema.py           # ChunkPayload 数据模型
 ├── cleaned/                      # 清洗后 Markdown（不进 Git）
 ├── cleaned_meta/                 # 元数据 JSON（不进 Git）
 ├── input/                        # 下载的全文（不进 Git）
@@ -447,10 +450,14 @@ Project正式/
 ├── models_cache/                 # BGE 模型权重（不进 Git）
 ├── docs/
 │   ├── TECHNICAL_ARCHITECTURE.md # 本文件
-│   └── EXECUTION_PLAN_STATUS.md  # 执行计划状态
+│   ├── EXECUTION_PLAN_STATUS.md  # 执行计划状态
+│   ├── Graph Schema.md           # 图谱 Schema
+│   └── tech_note_B_v4.md         # 早期方案笔记
 ├── .gitignore
 ├── requirements.txt
-└── INSTALL.md
+├── INSTALL.md
+├── README.md
+└── .env.example
 ```
 
 ---
@@ -459,14 +466,14 @@ Project正式/
 
 ### 9.1 为什么不用 Neo4j
 
-- 500 篇论文的 KG 约有 10,000-20,000 条边，networkx 内存图 < 300 MB
+- 1169 篇论文的 KG 约有 13,366 条边（10,138 节点），networkx 内存图 < 300 MB
 - 检索模式是 `get_concept_relations()` / `search_entity()` / `in_edges()`，全部是内存图 O(1) 操作
-- 去掉 Neo4j 容器省下 2 GB 内存（云服务器 3.5 GB 硬上限的关键让步）
+- 去掉 Neo4j 容器省下 2 GB 内存（云服务器 8 GB RAM 的关键让步）
 - 持久化靠 `artifacts/kg/*.kg.json`，重启时全部重载，加载 < 2 秒
 
 ### 9.2 为什么现阶段选 hdf5 而不是 Qdrant
 
-- 500 篇论文向量总量约 75 MB，hdf5 暴力扫描 < 10 ms，性能完全够用
+- 1169 篇论文向量总量约 45.9 MB（19567 条，512 维），hdf5 暴力扫描 < 10 ms，性能完全够用
 - 省掉 Qdrant 容器 1.5 GB 内存，Python + BGE 有更充裕的运行空间
 - 零额外服务依赖，部署时只需 `pip install h5py`
 - 工厂函数 `get_store()` 已预留切换能力，未来可无缝迁移
@@ -495,7 +502,7 @@ Project正式/
 | 层级 | 覆盖范围 | 数据来源 | 处理内容 | 是否有 KG | 向量化方式 |
 |---|---|---|---|---|---|
 | 全文层 | 443 篇 | fulltexts/（TXT/XML） | 全文清洗 → 分块 → 嵌入 | ✅ | 多 chunk/篇 |
-| 摘要层 | ~640 篇 | Feed API 元数据 | 摘要直接嵌入 | ❌ | 1 条/篇 |
+| 摘要层 | ~645 篇 | Feed API 元数据 | 摘要直接嵌入 | ❌ | 1 条/篇 |
 
 向量库合并，`has_fulltext` 字段区分。检索时全文层优先。
 
@@ -504,10 +511,10 @@ Project正式/
 | 组件 | 内存 |
 |---|---|
 | Python + BGE 模型（批处理/服务） | ~1.5-2 GB |
-| networkx 内存图（500 篇） | < 300 MB |
+| networkx 内存图（1169 篇） | < 300 MB |
 | hdf5 向量存储 | < 10 MB（按需读取，非全量加载） |
 | 操作系统 + 其他 | ~500 MB |
-| **合计** | **< 3 GB（安全运行）** |
+| **合计** | **< 3 GB（8 GB 实例上安全运行）** |
 
 > 对比旧方案：Qdrant（1.5 GB）+ Neo4j（2 GB）+ Python = 必 OOM。
 > 现方案：纯 Python 进程 + hdf5 文件 + networkx 内存图，无外部容器依赖。

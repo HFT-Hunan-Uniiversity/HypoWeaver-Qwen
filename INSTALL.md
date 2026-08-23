@@ -83,17 +83,32 @@ python src/qa_runner.py "绿色金融政策如何影响企业技术创新"
 
 ## 数据下载
 
-论文元数据从服务器本地 Feed API 获取，无需额外凭据：
+论文元数据从 Feed API 获取，无需额外凭据：
 
 ```bash
+# 服务器本地（127.0.0.1 需 SSH 隧道或本机运行）
+python scripts/download_feed_metadata.py
+# 或直接 curl
 curl -fsS 'http://127.0.0.1:4173/api/feed/articles?scope=green&limit=500'
 ```
 
-全文 PDF 下载需要 `green-finance-reader` COS 凭据，详见 `INTERNAL_FULLTEXT_API.md`。
+全文正文通过 Windows 下载器（SSH 隧道 + Token）获取，产物放入 `input/fulltexts/`。
+
+> 详见 `docs/TECHNICAL_ARCHITECTURE.md` 第 2 节。
+
+## 远程问答（推荐，无需本地数据）
+
+```bash
+# 前提: 服务器已部署全量数据 + 本机已配置免密 SSH
+python scripts/qa_remote.py "绿色金融政策如何影响企业技术创新"
+python scripts/qa_remote.py        # 交互模式
+```
+
+Windows 终端如遇中文乱码，先执行 `chcp 65001`。
 
 ## 云上部署
 
-云服务器 Ubuntu 24.04，rootless Podman 模式。详见 `VECTOR_GRAPH_SERVER_HANDOFF.md`。
+云服务器 Ubuntu 24.04，纯 Python 进程，无容器依赖。详见 `docs/TECHNICAL_ARCHITECTURE.md`。
 
 一键跑批：
 

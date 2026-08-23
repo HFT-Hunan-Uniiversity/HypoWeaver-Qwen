@@ -51,6 +51,9 @@ class VectorStoreH5:
     # ---------------- 生命周期 ----------------
     def open(self) -> "VectorStoreH5":
         """打开 hdf5 文件（不存在则创建）。"""
+        # 跨平台兼容：Windows 上关闭 hdf5 文件锁，避免 Linux→Windows 拷贝的文件锁冲突
+        if os.name == "nt":
+            os.environ.setdefault("HDF5_USE_FILE_LOCKING", "FALSE")
         self._h5 = h5py.File(self.path, "a")
         if "vectors" not in self._h5:
             self._h5.create_dataset("vectors", shape=(0, 512), maxshape=(None, 512),
