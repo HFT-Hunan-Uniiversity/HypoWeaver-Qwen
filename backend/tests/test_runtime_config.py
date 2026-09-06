@@ -377,6 +377,27 @@ class RuntimeConnectionTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("模型 ID", result.message)
         self.assertIn("区分大小写", result.message)
 
+    async def test_workspace_key_on_legacy_host_explains_api_host_pairing(self) -> None:
+        workspace_store = RuntimeConfigStore(self.path)
+        workspace_store.update(
+            RuntimeConfigUpdate(
+                qwen_api_key="sk-ws-secret-never-returned",
+                qwen_model="qwen-plus",
+                qwen_base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            )
+        )
+        result = await run_runtime_connection_test(
+            RuntimeConnectionTestRequest(target="qwen"),
+            workspace_store,
+            transport=httpx.MockTransport(lambda _request: httpx.Response(401)),
+        )
+
+        self.assertFalse(result.success)
+        self.assertEqual(result.status_code, 401)
+        self.assertIn("sk-ws", result.message)
+        self.assertIn("API Host", result.message)
+        self.assertNotIn("secret-never-returned", result.model_dump_json())
+
     async def test_executor_connection_uses_v1_health_contract(self) -> None:
         def handler(request: httpx.Request) -> httpx.Response:
             self.assertEqual(request.url.path, "/v1/health")
@@ -455,7 +476,9 @@ class RuntimeConnectionTests(unittest.IsolatedAsyncioTestCase):
 
         create_completion.assert_not_awaited()
 
-    async def test_qwen_gateway_accepts_writer_model_override(self) -> None:
+
+class QwenGatewayConstructionTests(unittest.TestCase):
+    def test_qwen_gateway_accepts_writer_model_override(self) -> None:
         effective = SimpleNamespace(
             qwen_api_key="test-key",
             qwen_model="qwen3.7-plus",
@@ -464,11 +487,18 @@ class RuntimeConnectionTests(unittest.IsolatedAsyncioTestCase):
         with (
             patch("hypoweaver.adapters.RuntimeConfigStore") as store_class,
             patch("hypoweaver.adapters.AsyncOpenAI") as client_class,
+            patch("hypoweaver.adapters.httpx.AsyncClient"),
         ):
             store_class.return_value.resolve.return_value = effective
-            gateway = QwenModelGateway(model_override="qwen3.7-max")
+            gateway = QwenModelGateway(
+                model_override="qwen3.7-max",
+                seed=20260901,
+                temperature=0.2,
+            )
 
         self.assertEqual(gateway.model, "qwen3.7-max")
+        self.assertEqual(gateway.seed, 20260901)
+        self.assertEqual(gateway.temperature, 0.2)
         self.assertEqual(client_class.call_args.kwargs["api_key"], "test-key")
         self.assertEqual(
             client_class.call_args.kwargs["base_url"],
@@ -511,11 +541,29 @@ class RuntimeConnectionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(receipt["response_sha256"]), 64)
         self.assertNotIn("status", str(receipt))
 
-    async def test_official_qwen_gateway_bypasses_environment_proxy(self) -> None:
+    def test_official_qwen_gateway_bypasses_environment_proxy(self) -> None:
         effective = SimpleNamespace(
             qwen_api_key="test-key",
             qwen_model="qwen3.7-plus",
             qwen_base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )
+        with (
+            patch("hypoweaver.adapters.RuntimeConfigStore") as store_class,
+            patch("hypoweaver.adapters.AsyncOpenAI"),
+            patch("hypoweaver.adapters.httpx.AsyncClient") as http_client_class,
+        ):
+            store_class.return_value.resolve.return_value = effective
+            QwenModelGateway()
+
+        http_client_class.assert_called_once_with(trust_env=False)
+
+    def test_workspace_qwen_gateway_bypasses_environment_proxy(self) -> None:
+        effective = SimpleNamespace(
+            qwen_api_key="test-key",
+            qwen_model="qwen3.7-plus",
+            qwen_base_url=(
+                "https://workspace-id.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+            ),
         )
         with (
             patch("hypoweaver.adapters.RuntimeConfigStore") as store_class,

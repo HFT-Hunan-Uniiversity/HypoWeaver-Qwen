@@ -27,6 +27,13 @@ from .seal import canonical_sha256
 
 FigureStage = Literal["evidence", "publication"]
 FigureStatus = Literal["succeeded", "not_generated", "failed"]
+FigureProvenance = Literal[
+    "conceptual",
+    "observed",
+    "estimated",
+    "simulated",
+    "demo",
+]
 
 _FORMATS = ["svg", "png", "pdf", "csv"]
 _HEX_SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -61,6 +68,7 @@ class FigureRequest(StrictModel):
     contract_hash: str = Field(min_length=1)
     recipe_id: RecipeId
     recipe_version: Literal["1.0"] = "1.0"
+    provenance: FigureProvenance | None = None
     source: FigureSource
     data_sources: list[FigureSource] = Field(default_factory=list)
     execution_ids: list[str] = Field(default_factory=list)
@@ -75,6 +83,8 @@ class FigureRequest(StrictModel):
 
     @model_validator(mode="after")
     def validate_references(self) -> "FigureRequest":
+        if self.provenance is None:
+            self.provenance = _default_figure_provenance(self.recipe_id)
         if len(self.execution_ids) != len(set(self.execution_ids)):
             raise ValueError("execution_ids must be unique")
         if len(self.claim_ids) != len(set(self.claim_ids)):
@@ -119,6 +129,7 @@ class FigureArtifact(StrictModel):
     figure_id: str = Field(min_length=1)
     recipe_id: RecipeId
     recipe_version: Literal["1.0"]
+    provenance: FigureProvenance
     title: str = Field(min_length=1)
     caption: str = Field(min_length=1)
     alt_text: str = Field(min_length=1)
@@ -194,6 +205,28 @@ class LocalFigureRenderer:
         return bundle
 
 
+class ChineseEconJournalFigureRenderer:
+    """Use the repository's journal-figure Skill with a built-in recipe fallback."""
+
+    def __init__(
+        self,
+        artifact_root: Path | None = None,
+    ) -> None:
+        self.artifact_root = artifact_root
+
+    async def render(self, request: FigureRequest) -> FigureBundle:
+        from .plot_agent.skill_renderer import render_request_with_skill
+
+        payload = await asyncio.to_thread(
+            render_request_with_skill,
+            request.model_dump(mode="json"),
+            artifact_root=self.artifact_root,
+        )
+        bundle = FigureBundle.model_validate(payload)
+        _validate_renderer_response(request, bundle)
+        return bundle
+
+
 def _validate_renderer_response(
     request: FigureRequest,
     bundle: FigureBundle,
@@ -210,6 +243,8 @@ def _validate_renderer_response(
         raise RuntimeError("Figure recipe identity does not match request")
     if figure.execution_ids != request.execution_ids:
         raise RuntimeError("Figure execution_ids do not match request")
+    if figure.provenance != request.provenance:
+        raise RuntimeError("Figure provenance does not match request")
     if figure.claim_ids != request.claim_ids:
         raise RuntimeError("Figure claim_ids do not match request")
     expected_sources = [request.source, *request.data_sources]
@@ -1026,6 +1061,7 @@ async def render_figure_requests(
 ) -> FigureBundle:
     figures: list[FigureArtifact] = []
     warnings = list(initial_warnings or [])
+    renderer_receipts: list[dict[str, Any]] = []
     for request in requests:
         try:
             bundle = await renderer.render(request)
@@ -1036,6 +1072,8 @@ async def render_figure_requests(
             continue
         figures.extend(bundle.figures)
         warnings.extend(bundle.warnings)
+        if bundle.renderer not in renderer_receipts:
+            renderer_receipts.append(bundle.renderer)
     status: FigureStatus = "succeeded" if figures else "failed"
     identity = {
         "stage": stage,
@@ -1049,7 +1087,11 @@ async def render_figure_requests(
         stage=stage,
         status=status,
         figures=figures,
-        renderer={"name": "hypoweaver-plot-orchestrator", "version": "1.2"},
+        renderer={
+            "name": "hypoweaver-plot-orchestrator",
+            "version": "1.3",
+            "delegates": renderer_receipts,
+        },
         warnings=list(dict.fromkeys(warnings)),
     )
 
@@ -1065,7 +1107,7 @@ def empty_figure_bundle(
         bundle_id=f"figure-bundle-{canonical_sha256(identity)[:24]}",
         stage=stage,
         status=status,
-        renderer={"name": "hypoweaver-plot-orchestrator", "version": "1.2"},
+        renderer={"name": "hypoweaver-plot-orchestrator", "version": "1.3"},
         warnings=[reason],
     )
 
@@ -1110,6 +1152,7 @@ def _figure_request(
         "contract_hash": run.contract_hash,
         "recipe_id": recipe_id,
         "recipe_version": "1.0",
+        "provenance": _default_figure_provenance(recipe_id),
         "source": source.model_dump(mode="json"),
         "data_sources": [
             item.model_dump(mode="json") for item in (data_sources or [])
@@ -1125,6 +1168,19 @@ def _figure_request(
         request_id=f"figure-request-{canonical_sha256(payload)[:24]}",
         **payload,
     )
+
+
+def _default_figure_provenance(recipe_id: RecipeId) -> FigureProvenance:
+    if recipe_id == "mechanism_evidence_graph":
+        return "conceptual"
+    if recipe_id in {
+        "coefficient_forest",
+        "event_study",
+        "heterogeneity_forest",
+        "specification_curve",
+    }:
+        return "estimated"
+    return "observed"
 
 
 def _claim_ids_for_executions(

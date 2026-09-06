@@ -1,0 +1,89 @@
+{
+  "schema_version": "track1b-adaptive-social-science-protocol/1.0.0",
+  "experiment_id": "track1b-case009-pm25-adaptive-did-v1",
+  "phase": "round1",
+  "frozen_at": "2026-09-05T01:39:09+08:00",
+  "purpose": "以公开城市月度面板数据执行一轮冻结的绿色金融政策与 PM2.5 关联分析，并让第一轮结果决定第二轮诊断任务；本实验用于赛道一方向1B的真实反馈闭环，不替代原论文结论。",
+  "research_question": "绿色金融改革创新试验区设立后，试点城市的月度 PM2.5 指标是否相对非试点城市下降？",
+  "hypothesis": {
+    "estimand": "双向固定效应模型中 treat × post（数据字段 dudt）的系数",
+    "directional_h1": "dudt 系数小于 0",
+    "null": "dudt 系数等于 0",
+    "alpha": 0.05,
+    "claim_rule": "只有估计方向符合 H1、双侧 p<0.05，且联合前趋势检验 p>=0.05 时，才允许把结果表述为与假设一致；任何识别门失败都禁止因果表述。"
+  },
+  "data_contract": {
+    "source": "Harvard Dataverse",
+    "persistent_id": "doi:10.7910/DVN/LEOXAK",
+    "source_url": "https://doi.org/10.7910/DVN/LEOXAK",
+    "datafile_id": 7094197,
+    "source_filename": "data.xlsx",
+    "local_path": "experiments/fixtures/case009_harvard_dataverse_data_v1.xlsx",
+    "official_md5": "51a94dfef15bc522a950908a510cc025",
+    "local_sha256": "e1d8ed21af33e7be474198366c802209f41a67617659eb50177a8106188acc0a",
+    "license": "CC0-1.0",
+    "sheet": "Sheet1",
+    "declared_scope": "146个地级市，2015年1月至2019年12月，城市—月面板",
+    "outcome": "PM2.5",
+    "outcome_unit": "源工作簿未在列名或元数据中编码单位；结果仅称为源数据单位，不擅自补写单位",
+    "treatment_group": "treat=1",
+    "post_period": "time=1；并校验其与 month>=31 一致",
+    "interaction": "dudt；并校验其等于 treat × time",
+    "entity_key": "id",
+    "time_key": "month"
+  },
+  "round1_tasks": [
+    "校验文件 MD5/SHA-256、工作表、行列数、城市—月唯一键、treat/time/dudt 编码和缺失情况。",
+    "在 PM2.5、dudt、Temp、lnGDP、lngdp2、greenration、fdi、pop 均非缺失的完整样本上估计城市固定效应与月份固定效应模型。",
+    "标准误按城市 id 聚类；报告系数、聚类标准误、95%置信区间、双侧 p 值、样本量、城市数与处理城市数。",
+    "执行事件研究：month=30（政策前一期）为参照，合并 month<=19 为远期前置组，显式估计 month=20..29 的处理组前置项；联合检验所有前置项等于0。",
+    "按冻结决策规则生成机器可读反馈，不在第一轮结果出来前选择第二轮分支。"
+  ],
+  "estimator": {
+    "family": "OLS two-way fixed effects",
+    "formula": "PM2.5 ~ dudt + Temp + lnGDP + lngdp2 + greenration_pct + fdi + pop + city FE + month FE",
+    "covariance": "city-clustered sandwich covariance with finite-sample correction",
+    "complete_case_fields": [
+      "PM2.5",
+      "dudt",
+      "Temp",
+      "lnGDP",
+      "lngdp2",
+      "greenration_pct",
+      "fdi",
+      "pop",
+      "id",
+      "month"
+    ]
+  },
+  "adaptive_decision_rules": [
+    {
+      "rule_id": "R1_PRETREND",
+      "condition": "联合前趋势检验 p<0.05",
+      "round2_requirement": "切换为识别失败诊断：估计政策前处理组差异趋势、加入处理组线性趋势的敏感性模型，并禁止因果结论。"
+    },
+    {
+      "rule_id": "R1_MISSINGNESS",
+      "condition": "完整样本损失超过10%，或完整样本处理城市少于原始处理城市",
+      "round2_requirement": "执行无控制变量的全样本双向固定效应模型，比较系数方向和幅度；只作缺失选择敏感性，不把模型变更当作更优主结果。"
+    },
+    {
+      "rule_id": "R1_SMALL_TREATED_CLUSTER",
+      "condition": "完整样本处理城市少于10",
+      "round2_requirement": "执行固定随机种子的处理组标签置换诊断，并明确小处理组限制。"
+    },
+    {
+      "rule_id": "R1_SUPPORTIVE",
+      "condition": "方向符合H1、p<0.05、前趋势未拒绝且不存在上述数据完整性警报",
+      "round2_requirement": "执行短窗口与替代污染指标的稳健性检验；不得根据显著性挑选结果。"
+    }
+  ],
+  "reproducibility": {
+    "random_seed": 20260905,
+    "software": "Python + pandas + numpy + statsmodels；版本由执行结果自动记录",
+    "raw_data_immutable": true,
+    "round1_output": "output/experiments/track1b_case009_two_round_v1/round1_result.json",
+    "event_study_output": "output/experiments/track1b_case009_two_round_v1/round1_event_study.csv",
+    "privacy": "公开城市级汇总数据，不含个人信息；输出不保存密钥或模型原始响应"
+  }
+}

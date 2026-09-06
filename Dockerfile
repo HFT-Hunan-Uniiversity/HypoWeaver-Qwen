@@ -24,6 +24,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements-lock.txt
 COPY backend/src/ ./backend/src/
 COPY backend/config/ ./backend/config/
 COPY backend/scripts/ ./backend/scripts/
+COPY skills/chinese-econ-journal-figures/ ./skills/chinese-econ-journal-figures/
 COPY --from=frontend-build /build/dist/ ./dist/
 
 RUN useradd --create-home --uid 10001 hypoweaver \

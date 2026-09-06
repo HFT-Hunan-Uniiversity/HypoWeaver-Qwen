@@ -29,6 +29,8 @@ dist/
 # Runtime state, imported datasets, and generated evidence
 backend/var/
 output/
+tmp/
+knowledge-data/
 .test-tmp/
 backend/.test-tmp/
 *.db

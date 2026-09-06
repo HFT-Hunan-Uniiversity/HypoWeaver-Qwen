@@ -386,15 +386,39 @@ async def test_runtime_connection(
                 ),
                 status_code=404,
             )
+        if request.target == "qwen" and response.status_code == 401:
+            legacy_hosts = {
+                "dashscope.aliyuncs.com",
+                "dashscope-intl.aliyuncs.com",
+                "cn-hongkong.dashscope.aliyuncs.com",
+            }
+            workspace_key_on_legacy_host = (
+                config.qwen_api_key.startswith("sk-ws-")
+                and urlsplit(config.qwen_base_url).hostname in legacy_hosts
+            )
+            return RuntimeConnectionTestResult(
+                target="qwen",
+                success=False,
+                message=(
+                    "Qwen 返回 HTTP 401：当前是 sk-ws 工作空间密钥，但 API 地址仍是旧公共域名。"
+                    "请在阿里云百炼 API Key 创建或重置页面复制与该密钥同屏显示的 API Host，"
+                    "并把 QWEN_BASE_URL 与该 Host 配套更新。"
+                    if workspace_key_on_legacy_host
+                    else "Qwen 返回 HTTP 401：API Key 与 API Host、区域或计费类型不匹配。"
+                ),
+                status_code=401,
+            )
         return RuntimeConnectionTestResult(
             target=request.target,
             success=False,
             message=f"连接返回 HTTP {response.status_code}。",
             status_code=response.status_code,
         )
-    except httpx.HTTPError:
+    except httpx.RequestError as error:
         return RuntimeConnectionTestResult(
             target=request.target,
             success=False,
-            message="连接失败，请检查地址、网络与凭据。",
+            message=(
+                f"连接失败（{type(error).__name__}），请检查地址、代理与 TLS。"
+            ),
         )

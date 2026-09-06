@@ -1,0 +1,13 @@
+{
+  "figure_id": "carbon_market_event_study",
+  "kind": "event_study",
+  "provenance": "estimated",
+  "spec_sha256": "9281ee184ae45aed90d7c5fcadc8339de9d49431b1c87a83715d51c26253aad0",
+  "generated_at": "2026-09-04T19:30:28.809414+00:00",
+  "spec": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_event_study.json",
+  "outputs": {
+    "png": "carbon_market_event_study.png",
+    "svg": "carbon_market_event_study.svg",
+    "pdf": "carbon_market_event_study.pdf"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "track1b-adaptive-social-science-protocol/1.0.0",
+  "experiment_id": "track1b-case009-pm25-adaptive-did-v1",
+  "phase": "round2",
+  "frozen_at": "2026-09-05T01:45:08+08:00",
+  "purpose": "根据第一轮冻结决策规则，对平行趋势失败、完整样本损失和小处理组问题执行针对性诊断；第二轮不追求显著性，不替换第一轮主结果。",
+  "feedback_binding": {
+    "round1_result_path": "output/experiments/track1b_case009_two_round_v1/round1_result.json",
+    "round1_result_sha256": "e730e2b68c72e1c73afea94bd28233a929a93860f156bdba34e31ba5b08e9bd6",
+    "round1_executed_at": "2026-09-05T01:44:51.129064+08:00",
+    "triggered_rules": [
+      "R1_MISSINGNESS",
+      "R1_PRETREND",
+      "R1_SMALL_TREATED_CLUSTER"
+    ],
+    "observed_feedback": {
+      "round1_dudt_coefficient": 0.3973844221,
+      "round1_dudt_p_value": 0.808809171,
+      "joint_pretrend_p_value": 1.5e-09,
+      "complete_case_loss_rate": 0.173973,
+      "raw_treated_cities": 9,
+      "complete_case_treated_cities": 7,
+      "causal_claim_authorized_after_round1": false
+    }
+  },
+  "plan_adjustment": {
+    "from": "单一完整样本控制变量 TWFE 主模型与事件研究",
+    "to": "识别失败与样本选择诊断",
+    "why": [
+      "联合前趋势检验显著拒绝平行趋势，不能把 DID 系数解释为政策因果效应。",
+      "控制变量缺失使完整样本损失17.4%，且处理城市由9个降到7个，需要检验结果对完整样本筛选是否敏感。",
+      "处理城市少于10个，常规城市聚类推断可能不稳定，需要固定种子的处理标签置换诊断。"
+    ],
+    "prohibited_adjustment": "不得删除不利时期、改换显著结果为主结果、扩充样本后隐去第一轮，或把第二轮敏感性模型表述为预注册主模型。"
+  },
+  "data_contract": {
+    "source": "Harvard Dataverse",
+    "persistent_id": "doi:10.7910/DVN/LEOXAK",
+    "source_url": "https://doi.org/10.7910/DVN/LEOXAK",
+    "datafile_id": 7094197,
+    "source_filename": "data.xlsx",
+    "local_path": "experiments/fixtures/case009_harvard_dataverse_data_v1.xlsx",
+    "official_md5": "51a94dfef15bc522a950908a510cc025",
+    "local_sha256": "e1d8ed21af33e7be474198366c802209f41a67617659eb50177a8106188acc0a",
+    "license": "CC0-1.0",
+    "sheet": "Sheet1",
+    "declared_scope": "146个地级市，2015年1月至2019年12月，城市—月面板",
+    "outcome": "PM2.5",
+    "outcome_unit": "源工作簿未在列名或元数据中编码单位；结果仅称为源数据单位，不擅自补写单位",
+    "treatment_group": "treat=1",
+    "post_period": "time=1；并校验其与 month>=31 一致",
+    "interaction": "dudt；并校验其等于 treat × time",
+    "entity_key": "id",
+    "time_key": "month"
+  },
+  "round2_tasks": {
+    "missingness_sensitivity": "在PM2.5无缺失的8,760行全样本上估计不含缺失控制变量的城市与月份固定效应模型，并与第一轮完整样本主模型并列报告。",
+    "treated_trend_sensitivity": "在第一轮完整样本中加入 treat × (month-30) 处理组线性趋势，同时保留dudt与全部冻结控制变量。",
+    "pre_policy_trend_test": "仅使用month<=30的政策前完整样本，估计 treat × (month-30) 差异线性趋势。",
+    "short_window_sensitivity": "限定month=19..42的对称24个月窗口，复算带控制变量的TWFE模型。",
+    "permutation_diagnostic": "在PM2.5全样本中保持9个处理城市数量不变，随机置换城市处理标签；以双向去均值TWFE系数构造双侧描述性安慰剂p值。",
+    "permutation_repetitions": 999,
+    "random_seed": 20260905
+  },
+  "decision_rule": {
+    "causal_claim_authorized": "只有第一轮未拒绝前趋势、未触发缺失规则且第二轮规格方向稳定时才可能为true；本轮因第一轮前趋势与缺失规则已触发，最终必须保持false。",
+    "sign_instability": "任一预设规格的dudt系数符号与其他规格不一致即记为方向不稳定。",
+    "reporting": "同时报告全部预设模型、置信区间和失败理由，不按显著性筛选。"
+  },
+  "outputs": {
+    "result": "output/experiments/track1b_case009_two_round_v1/round2_result.json",
+    "model_table": "output/experiments/track1b_case009_two_round_v1/round2_model_comparison.csv",
+    "figure": "output/experiments/track1b_case009_two_round_v1/round2_model_comparison.png"
+  }
+}

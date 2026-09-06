@@ -1,0 +1,5 @@
+# Knowledge-service additions. The workflow dependencies are shared so both
+# services validate exactly the same EvidenceBundle contract.
+-r requirements-lock.txt
+h5py==3.16.0
+sentence-transformers==5.2.2

@@ -6,7 +6,7 @@ from pathlib import Path
 LOCAL_VAR_QUOTA_BYTES = 5 * 1024 * 1024 * 1024
 MAX_LOCAL_RUNS = 100
 MAX_UPLOAD_DIRECTORIES = 50
-EPHEMERAL_DIRECTORY_PREFIXES = (".render-",)
+EPHEMERAL_DIRECTORY_PREFIXES = (".render-", ".test-tmp", "test-tmp", "test-temp")
 
 
 class LocalStorageLimitError(RuntimeError):

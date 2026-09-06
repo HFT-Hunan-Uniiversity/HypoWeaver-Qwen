@@ -14,7 +14,7 @@ function fixture(
 }
 
 export const LITERATURE_FIXTURES: ResourceDetail[] = [
-  fixture('literature', 'lit-001', '绿色金融改革与企业绿色创新', '基于地区政策差异讨论绿色金融与企业创新之间的关系。', '公开文献元数据快照', ['绿色金融', '企业创新', '政策评估'], 'available', { scope: '企业', conclusion: '促进创新', topics: ['绿色金融', '绿色创新'], year: 2024, journal: '金融研究' }),
+  fixture('literature', 'lit-001', '绿色金融改革与企业绿色创新', '基于地区政策差异讨论绿色金融与企业创新之间的关系。', '公开文献元数据快照', ['绿色金融', '企业创新', '政策评估'], 'metadata_only', { scope: '企业', conclusion: '促进创新', topics: ['绿色金融', '绿色创新'], year: 2024, journal: '金融研究' }),
   fixture('literature', 'lit-002', '绿色信贷政策的资源配置效应', '考察信贷约束如何改变高污染行业的融资与投资。', '公开文献元数据快照', ['绿色信贷', '融资约束'], 'available', { scope: '企业', conclusion: '调整资源配置', topics: ['绿色信贷', '融资约束'], year: 2023, journal: '经济研究' }),
   fixture('literature', 'lit-003', '环境规制与企业技术升级', '比较不同环境规制工具对技术升级的影响。', '公开文献元数据快照', ['环境规制', '技术升级'], 'available', { scope: '企业', conclusion: '异质性影响', topics: ['环境规制', '技术升级'], year: 2022, journal: '管理世界' }),
   fixture('literature', 'lit-004', '绿色金融试验区的区域溢出', '从城市层面评估试验区政策的空间关联。', '公开文献元数据快照', ['试验区', '空间溢出'], 'available', { scope: '城市', conclusion: '存在区域溢出', topics: ['绿色金融', '空间效应'], year: 2024, journal: '中国工业经济' }),
@@ -29,10 +29,10 @@ export const LITERATURE_FIXTURES: ResourceDetail[] = [
 ]
 
 export const POLICY_FIXTURES: ResourceDetail[] = [
-  fixture('policy', 'policy-001', '绿色金融改革创新试验区总体方案', '明确试验区建设目标、地区安排与重点任务。', '国务院公开政策', ['绿色金融', '试验区'], 'available', { issuer: '国务院', administrativeLevel: '国家', region: '多地区', topic: '绿色金融', effectiveDate: '2017-06-14', status: '现行' }),
-  fixture('policy', 'policy-002', '关于构建绿色金融体系的指导意见', '提出绿色信贷、绿色债券和环境信息披露等制度方向。', '中央部门公开政策', ['绿色金融体系'], 'available', { issuer: '中国人民银行等部门', administrativeLevel: '国家', region: '全国', topic: '绿色金融', effectiveDate: '2016-08-31', status: '现行' }),
-  fixture('policy', 'policy-003', '绿色信贷指引', '规定银行业金融机构绿色信贷管理要求。', '金融监管公开政策', ['绿色信贷', '银行'], 'available', { issuer: '原银监会', administrativeLevel: '国家', region: '全国', topic: '绿色信贷', effectiveDate: '2012-02-24', status: '现行' }),
-  fixture('policy', 'policy-004', '银行业保险业绿色金融指引', '完善银行保险机构绿色金融治理和风险管理要求。', '金融监管公开政策', ['绿色金融', '风险管理'], 'available', { issuer: '原银保监会', administrativeLevel: '国家', region: '全国', topic: '绿色金融', effectiveDate: '2022-06-01', status: '现行' }),
+  fixture('policy', 'policy-001', '浙江省湖州市、衢州市建设绿色金融改革创新试验区总体方案', '经国务院同意，由人民银行等七部门印发，明确湖州、衢州试验区建设目标、十项主要任务与保障措施。', '中央部门公开政策', ['绿色金融', '试验区', '政策原文'], 'available', { issuer: '中国人民银行等七部门', administrativeLevel: '国家', region: '浙江湖州、衢州', topic: '绿色金融', effectiveDate: '2017-06-23', status: '现行', documentNumber: '银发〔2017〕153号' }),
+  fixture('policy', 'policy-002', '关于构建绿色金融体系的指导意见', '经国务院同意，由人民银行等七部门联合印发，系统部署绿色信贷、绿色债券、绿色基金、绿色保险和碳金融等制度安排。', '中央部门公开政策', ['绿色金融体系', '顶层设计', '政策原文'], 'available', { issuer: '中国人民银行等七部门', administrativeLevel: '国家', region: '全国', topic: '绿色金融', effectiveDate: '2016-08-31', status: '现行', documentNumber: '银发〔2016〕228号' }),
+  fixture('policy', 'policy-003', '绿色信贷指引', '规定银行业金融机构绿色信贷的组织管理、风险评估、授信流程、信息披露与监督检查要求。', '金融监管公开政策', ['绿色信贷', '银行', '政策原文'], 'available', { issuer: '中国银行业监督管理委员会', administrativeLevel: '国家', region: '全国', topic: '绿色信贷', effectiveDate: '2012-02-24', status: '现行', documentNumber: '银监发〔2012〕4号' }),
+  fixture('policy', 'policy-004', '银行业保险业绿色金融指引', '从组织管理、制度能力、投融资流程、信息披露和监管评价等方面规范银行保险机构绿色金融活动。', '金融监管公开政策', ['绿色金融', '风险管理', '政策原文'], 'available', { issuer: '中国银行保险监督管理委员会', administrativeLevel: '国家', region: '全国', topic: '绿色金融', effectiveDate: '2022-06-01', status: '现行', documentNumber: '银保监发〔2022〕15号' }),
   fixture('policy', 'policy-005', '绿色产业指导目录（2019年版）', '界定绿色产业、项目与服务的分类范围。', '中央部门公开目录', ['绿色产业', '分类目录'], 'available', { issuer: '国家发展改革委等部门', administrativeLevel: '国家', region: '全国', topic: '绿色产业', effectiveDate: '2019-02-14', status: '已更新' }),
   fixture('policy', 'policy-006', '绿色债券支持项目目录（2021年版）', '统一绿色债券支持项目的认定边界。', '中央部门公开目录', ['绿色债券', '项目目录'], 'available', { issuer: '中国人民银行等部门', administrativeLevel: '国家', region: '全国', topic: '绿色债券', effectiveDate: '2021-07-01', status: '现行' }),
   fixture('policy', 'policy-007', '碳排放权交易管理办法（试行）', '规范全国碳排放权登记、交易与履约。', '生态环境部公开政策', ['碳交易', '减排'], 'available', { issuer: '生态环境部', administrativeLevel: '国家', region: '全国', topic: '碳交易', effectiveDate: '2021-02-01', status: '现行' }),
@@ -56,6 +56,7 @@ export const DATASET_FIXTURES: ResourceDetail[] = [
   fixture('dataset', 'dataset-010', '企业环境处罚公开记录', '企业环境行政处罚决定的公开字段目录。', '政府公开信息', ['环境处罚', '企业'], 'available', { region: '全国', frequency: '事件', coverage: '动态更新', access: '公开查询', variables: ['企业名', '处罚日期', '处罚金额'], license: '公开信息合理使用', qualityStatus: '需实体匹配' }),
   fixture('dataset', 'dataset-011', '地级市气象观测指标', undefined, '气象公开数据目录', ['气象', '城市'], 'metadata_only', { region: '全国站点', frequency: '日度', coverage: '1951–至今', access: '注册申请', variables: ['温度', '降水', '风速'], license: '依申请条款', qualityStatus: '待核验' }),
   fixture('dataset', 'dataset-012', '省级能源消费平衡表', '省级能源生产、调入、消费与损失指标。', '能源统计公开资料', ['能源', '省级'], 'unavailable', { region: '全国省级', frequency: '年度', coverage: '2000–2022', access: '年鉴获取', variables: ['能源消费', '能源结构', '碳强度'], license: '依来源条款', qualityStatus: '口径需对齐' }),
+  fixture('dataset', 'dataset-013', '碳政策与企业绿色创新公开复现面板', '包含企业—年份政策暴露、六类绿色专利、融资约束、企业财务与行业竞争字段的公开许可面板。', 'Mendeley Data · DOI 10.17632/rrfwny7byp.1', ['碳市场', '绿色创新', '公开复现'], 'available', { region: '中国上市公司', frequency: '年度', coverage: '2010–2021', access: '公开下载', variables: ['政策暴露', '绿色发明专利', '绿色实用新型', 'SA融资约束', '行业HHI'], license: 'CC BY 4.0', qualityStatus: '已校验 · 14,208条观测' }),
 ]
 
 export const METHOD_FIXTURES: ResourceDetail[] = [

@@ -1,0 +1,13 @@
+{
+  "figure_id": "carbon_market_model_comparison",
+  "kind": "coefficient",
+  "provenance": "estimated",
+  "spec_sha256": "e389d1412421c715c0beb13101ac088ef5beb55459f143b80cba30b2b86db1b2",
+  "generated_at": "2026-09-04T19:30:30.604991+00:00",
+  "spec": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_model_comparison.json",
+  "outputs": {
+    "png": "carbon_market_model_comparison.png",
+    "svg": "carbon_market_model_comparison.svg",
+    "pdf": "carbon_market_model_comparison.pdf"
+  }
+}

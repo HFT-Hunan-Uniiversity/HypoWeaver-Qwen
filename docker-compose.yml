@@ -1,6 +1,39 @@
 name: hypoweaver-qwen
 
 services:
+  knowledge:
+    build:
+      context: .
+      dockerfile: Dockerfile.knowledge
+    image: hypoweaver-knowledge:local
+    environment:
+      KNOWLEDGE_SERVICE_TOKEN: ${KNOWLEDGE_SERVICE_TOKEN:?Set KNOWLEDGE_SERVICE_TOKEN in .env}
+      HYPOWEAVER_KNOWLEDGE_CATALOG_PATH: ${HYPOWEAVER_KNOWLEDGE_CATALOG_PATH:-/app/knowledge/evidence.jsonl}
+      HYPOWEAVER_KNOWLEDGE_CHUNK_CATALOG_PATH: ${HYPOWEAVER_KNOWLEDGE_CHUNK_CATALOG_PATH:-/app/knowledge/chunks.jsonl}
+      HYPOWEAVER_KNOWLEDGE_CLEANED_DIR: ${HYPOWEAVER_KNOWLEDGE_CLEANED_DIR:-/app/knowledge/cleaned}
+      HYPOWEAVER_KNOWLEDGE_METADATA_DIR: ${HYPOWEAVER_KNOWLEDGE_METADATA_DIR:-/app/knowledge/cleaned_meta}
+      HYPOWEAVER_KNOWLEDGE_DOCUMENT_REGISTRY_PATH: ${HYPOWEAVER_KNOWLEDGE_DOCUMENT_REGISTRY_PATH:-/app/knowledge/manifests/doc_registry.csv}
+      HYPOWEAVER_KNOWLEDGE_VECTOR_PATH: ${HYPOWEAVER_KNOWLEDGE_VECTOR_PATH:-/app/knowledge/all_store.h5}
+      HYPOWEAVER_KNOWLEDGE_GRAPH_DIR: ${HYPOWEAVER_KNOWLEDGE_GRAPH_DIR:-/app/knowledge/kg}
+      HYPOWEAVER_KNOWLEDGE_MANIFEST_PATH: ${HYPOWEAVER_KNOWLEDGE_MANIFEST_PATH:-/app/knowledge/manifest.json}
+      HYPOWEAVER_KNOWLEDGE_CORPUS_SNAPSHOT_ID: ${HYPOWEAVER_KNOWLEDGE_CORPUS_SNAPSHOT_ID:-}
+      HYPOWEAVER_KNOWLEDGE_EMBEDDING_BACKEND: ${HYPOWEAVER_KNOWLEDGE_EMBEDDING_BACKEND:-auto}
+      HYPOWEAVER_KNOWLEDGE_EMBEDDING_MODEL: ${HYPOWEAVER_KNOWLEDGE_EMBEDDING_MODEL:-BAAI/bge-small-zh-v1.5}
+      HYPOWEAVER_KNOWLEDGE_EMBEDDING_REVISION: ${HYPOWEAVER_KNOWLEDGE_EMBEDDING_REVISION:-7999e1d3359715c523056ef9478215996d62a620}
+    volumes:
+      - ${HYPOWEAVER_KNOWLEDGE_DATA_DIR:-./knowledge-data}:/app/knowledge:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/v1/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
   research-engine:
     build:
       context: .
@@ -45,6 +78,9 @@ services:
       HYPOWEAVER_SEAL_KEY_PATH: /app/backend/var/seal.key
       HYPOWEAVER_SEAL_SECRET: ${HYPOWEAVER_SEAL_SECRET:?Set HYPOWEAVER_SEAL_SECRET in .env}
       HYPOWEAVER_UPLOAD_ROOT: /app/backend/var/uploads
+      HYPOWEAVER_LITERATURE_ROOT: /app/backend/var/literature
+      KNOWLEDGE_SERVICE_TOKEN: ${KNOWLEDGE_SERVICE_TOKEN:?Set KNOWLEDGE_SERVICE_TOKEN in .env}
+      KNOWLEDGE_SERVICE_URL: http://knowledge:8002
       QWEN_BASE_URL: ${QWEN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
       QWEN_MODEL: ${QWEN_MODEL:-qwen-plus}
       RESEARCH_ENGINE_TOKEN: ${RESEARCH_ENGINE_TOKEN:?Set RESEARCH_ENGINE_TOKEN in .env}
@@ -52,8 +88,10 @@ services:
     volumes:
       - hypoweaver-data:/app/backend/var
     ports:
-      - "${HYPOWEAVER_PORT:-8000}:8000"
+      - "${HYPOWEAVER_BIND_HOST:-127.0.0.1}:${HYPOWEAVER_PORT:-8000}:8000"
     depends_on:
+      knowledge:
+        condition: service_healthy
       research-engine:
         condition: service_healthy
     healthcheck:

@@ -9,24 +9,32 @@ import {
   MAX_LOCAL_PROJECTS,
   addProjectResource,
   buildDiscoveryHandoff,
+  confirmScientificTen,
   createProject,
+  deleteProjects,
   frontendDataSource,
   getEvidenceBundle,
   getProject,
+  generateScientificFigures,
+  generateScientificTen,
   migrateProductState,
   queryResources,
   readProductState,
   removeProjectResource,
   resetProductStore,
   selectDiscoveryIdea,
+  setScientificFigureLanguage,
   setProductStorageForTests,
   subscribeProductStore,
   updateDiscoveryDraft,
+  updateScientificFigureCopy,
+  updateScientificTenItem,
 } from '../src/product'
 import {
   MOCK_TASK_STORE_KEY,
   MOCK_TASK_STORE_VERSION,
   MAX_LOCAL_DEMO_TASKS,
+  SHOWCASE_TASK_ID,
 } from '../src/data/mockPipeline'
 import type { ProductStorage } from '../src/product'
 
@@ -85,12 +93,12 @@ describe('versioned product store', () => {
 
     expect(state.version).toBe(PRODUCT_STORE_VERSION)
     expect(state.selectedProjectId).toBe('legacy-project')
-    expect(state.projects[0]).toMatchObject({
+    expect(state.projects.find((project) => project.id === 'legacy-project')).toMatchObject({
       id: 'legacy-project',
       mode: 'discovery_blind',
       status: 'draft',
     })
-    expect(state.projects[0].resources[0]).toMatchObject({
+    expect(state.projects.find((project) => project.id === 'legacy-project')?.resources[0]).toMatchObject({
       projectId: 'legacy-project',
       kind: 'policy',
       resourceId: 'policy-001',
@@ -119,9 +127,20 @@ describe('versioned product store', () => {
   it('returns a deterministic seed when migration input is invalid', () => {
     const migrated = migrateProductState(null)
     expect(migrated.projects[0]).toMatchObject({
-      id: 'project-green-finance-demo',
+      id: 'project-carbon-market-showcase',
       mode: 'discovery_blind',
+      status: 'handoff_ready',
     })
+  })
+
+  it('deletes only selected projects and keeps a valid selected project', () => {
+    const first = createProject({ title: '保留项目' })
+    const second = createProject({ title: '删除项目' })
+
+    expect(deleteProjects([second.id, 'missing-project'])).toBe(1)
+    expect(getProject(second.id)).toBeNull()
+    expect(getProject(first.id)?.title).toBe('保留项目')
+    expect(readProductState().selectedProjectId).toBe(first.id)
   })
 })
 
@@ -266,6 +285,154 @@ describe('discovery handoff', () => {
   })
 })
 
+describe('scientific ten proposal', () => {
+  function createProposalProject() {
+    const project = createProject({
+      title: '科学十项测试',
+      brief: {
+        researchQuestion: '政策是否改善企业创新？',
+        goal: '形成可审查的因果研究方案。',
+        unitOfAnalysis: '企业—年度',
+        samplePeriod: '2018–2024',
+        dataStructureHint: 'panel',
+        constraints: ['只使用已授权输入。'],
+      },
+    })
+    updateDiscoveryDraft(project.id, {
+      gapCards: [{
+        id: 'gap-ten',
+        title: '机制证据仍不完整',
+        evidence: '当前资源支持总体效应，但机制证据不足。',
+        opportunity: '区分融资约束与创新激励路径。',
+        resourceIds: ['lit-001'],
+      }],
+      ideaCards: [{
+        id: 'idea-ten',
+        title: '政策、融资约束与创新',
+        hypothesis: '政策通过缓解融资约束促进企业创新。',
+        expectedDirection: 'positive',
+        mechanism: '融资约束缓解提高研发投入。',
+        variables: [{
+          name: 'innovation',
+          label: '创新产出',
+          role: 'outcome',
+          definition: '企业年度专利产出',
+          source: '待绑定的企业数据',
+        }],
+        pareto: {
+          novelty: 4,
+          feasibility: 3,
+          identification: 4,
+          dataReadiness: 2,
+          policyValue: 5,
+        },
+      }],
+    })
+    selectDiscoveryIdea(project.id, 'idea-ten')
+    addProjectResource(project.id, 'literature', 'lit-001')
+    addProjectResource(project.id, 'dataset', 'dataset-001')
+    addProjectResource(project.id, 'method', 'method-001')
+    return project
+  }
+
+  it('generates ten evidence-bounded items and persists them with the project', () => {
+    const project = createProposalProject()
+    const generated = generateScientificTen(project.id)
+    const proposal = generated?.discovery.scientificTen
+
+    expect(proposal?.items).toHaveLength(10)
+    expect(proposal?.sourceIdeaId).toBe('idea-ten')
+    expect(proposal?.figureLanguage).toBe('zh')
+    expect(proposal?.figures.map((figure) => figure.kind)).toEqual([
+      'mechanism',
+      'coefficient',
+      'event_study',
+      'trend',
+    ])
+    expect(proposal?.figures[0]).toMatchObject({
+      role: 'research_design',
+      dataStatus: 'project_bound',
+    })
+    expect(proposal?.figures[1]).toMatchObject({
+      role: 'planned_result',
+      dataStatus: 'awaiting_estimates',
+    })
+    expect(proposal?.figures[0].copy.zh.title).toContain('研究机制')
+    expect(proposal?.figures[0].copy.en.title).toContain('Research mechanism')
+    expect(proposal?.items.map((item) => item.itemNo)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    expect(proposal?.items[1]).toMatchObject({
+      title: '研究空白与贡献边界',
+      status: 'evidence_bound',
+    })
+    expect(proposal?.items[6]).toMatchObject({
+      title: '数据、授权与连接可行性',
+      status: 'pending',
+      confirmed: false,
+    })
+    expect(readProductState().projects[0].discovery.scientificTen?.items).toHaveLength(10)
+  })
+
+  it('requires every item confirmation, then invalidates confirmation after an edit', () => {
+    const project = createProposalProject()
+    generateScientificTen(project.id)
+
+    expect(confirmScientificTen(project.id)).toBeNull()
+    for (let itemNo = 1; itemNo <= 10; itemNo += 1) {
+      expect(updateScientificTenItem(project.id, itemNo, { confirmed: true })).not.toBeNull()
+    }
+
+    const confirmed = confirmScientificTen(project.id)
+    expect(confirmed?.discovery.scientificTen).toMatchObject({
+      status: 'confirmed',
+    })
+    expect(confirmed?.discovery.completedSteps).toContain(6)
+
+    updateScientificTenItem(project.id, 3, { content: '修订后的核心假设与证伪标准。' })
+    const revised = getProject(project.id)
+    expect(revised?.discovery.scientificTen).toMatchObject({ status: 'draft' })
+    expect(revised?.discovery.scientificTen?.items[2].confirmed).toBe(false)
+    expect(revised?.discovery.completedSteps).not.toContain(6)
+  })
+
+  it('invalidates a generated proposal when its evidence basket changes', () => {
+    const project = createProposalProject()
+    expect(generateScientificTen(project.id)?.discovery.scientificTen).toBeDefined()
+
+    addProjectResource(project.id, 'policy', 'policy-001')
+
+    expect(getProject(project.id)?.discovery.scientificTen).toBeUndefined()
+  })
+
+  it('adds figures to a legacy proposal and edits bilingual copy without invalidating confirmation', () => {
+    const project = createProposalProject()
+    const generated = generateScientificTen(project.id)
+    const proposal = generated?.discovery.scientificTen
+    expect(proposal).toBeDefined()
+    updateDiscoveryDraft(project.id, {
+      scientificTen: proposal ? { ...proposal, figures: [] } : undefined,
+    })
+    expect(generateScientificFigures(project.id)?.discovery.scientificTen?.figures).toHaveLength(4)
+
+    for (let itemNo = 1; itemNo <= 10; itemNo += 1) {
+      updateScientificTenItem(project.id, itemNo, { confirmed: true })
+    }
+    expect(confirmScientificTen(project.id)?.discovery.scientificTen?.status).toBe('confirmed')
+
+    setScientificFigureLanguage(project.id, 'en')
+    updateScientificFigureCopy(project.id, 'coefficient-plan', 'en', {
+      title: 'Custom coefficient figure',
+      legend: ['Estimate', '95% CI'],
+    })
+    const updated = getProject(project.id)?.discovery.scientificTen
+    expect(updated?.figureLanguage).toBe('en')
+    expect(updated?.figures[1].copy.en).toMatchObject({
+      title: 'Custom coefficient figure',
+      legend: ['Estimate', '95% CI'],
+    })
+    expect(updated?.status).toBe('confirmed')
+  })
+})
+
 describe('frontend-only research flow', () => {
   it('blocks new demo tasks at the hard limit without pruning stored tasks', () => {
     const tasks = Array.from({ length: MAX_LOCAL_DEMO_TASKS }, (_, index) => ({
@@ -367,9 +534,13 @@ describe('frontend-only research flow', () => {
     expect(frontendDataSource.getDemoTask(task.id)?.stages.map((stage) => stage.gate))
       .toEqual(expect.arrayContaining(['H1', 'H2', 'H3', 'H4']))
     expect(frontendDataSource.getProject(project.id)?.taskIds).toEqual([task.id])
-    expect(JSON.parse(storage.getItem(MOCK_TASK_STORE_KEY) ?? '{}')).toMatchObject({
-      version: MOCK_TASK_STORE_VERSION,
-      tasks: [{ id: task.id }],
-    })
+    const mockStore = JSON.parse(storage.getItem(MOCK_TASK_STORE_KEY) ?? '{}') as {
+      version?: number
+      tasks?: Array<{ id: string }>
+    }
+    expect(mockStore.version).toBe(MOCK_TASK_STORE_VERSION)
+    expect(mockStore.tasks?.map((candidate) => candidate.id)).toEqual(
+      expect.arrayContaining([SHOWCASE_TASK_ID, task.id]),
+    )
   })
 })

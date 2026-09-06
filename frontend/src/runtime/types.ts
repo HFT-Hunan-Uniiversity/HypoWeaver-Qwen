@@ -315,6 +315,7 @@ export interface RunSnapshot {
   planOnly: boolean
   createdAt: string
   updatedAt: string
+  caseSubmission?: CaseSubmissionInput
   steps: StepAttempt[]
   events: RunEvent[]
   claims: ClaimRecord[]
@@ -331,6 +332,7 @@ export interface RunSnapshot {
     status: string
     manifestSha256: string
     verifiedArtifactCount: number
+    evidenceRefCount?: number
     hypothesisId?: string
     gapId?: string
     corpusBoundary?: string
@@ -505,6 +507,47 @@ export interface ConnectionTestResult {
   statusCode?: number
 }
 
+export interface OriginalLiteraturePageSummary {
+  pageNumber: number
+  characterCount: number
+  textSha256: string
+}
+
+export interface OriginalLiteratureDocument {
+  documentId: string
+  filename: string
+  title: string
+  author?: string
+  sha256: string
+  sizeBytes: number
+  pageCount: number
+  extractedPageCount: number
+  extractedCharacterCount: number
+  uploadedAt: string
+  pages: OriginalLiteraturePageSummary[]
+  isShowcase: boolean
+  publicationYear?: number
+  journal?: string
+  doi?: string
+  sourceUrl?: string
+  license?: string
+  showcaseOrder?: number
+}
+
+export interface OriginalLiteraturePage extends OriginalLiteraturePageSummary {
+  text: string
+}
+
+export interface OriginalLiteratureAnswer {
+  documentId: string
+  documentSha256: string
+  answer: string
+  citedPages: number[]
+  model: string
+  usedPages: number[]
+  usedCharacters: number
+}
+
 export interface BaselinePhase {
   id: string
   title: string
@@ -528,4 +571,256 @@ export interface BaselineRun {
   error?: string
   createdAt: string
   updatedAt: string
+}
+
+export interface KnowledgeSourceLocator {
+  page_start?: number | null
+  page_end?: number | null
+  section?: string | null
+  paragraph?: number | null
+}
+
+export interface KnowledgeEvidenceHit {
+  document_id: string
+  chunk_id: string
+  title: string
+  text: string
+  source_type: string
+  source_locator: KnowledgeSourceLocator
+  source_url?: string | null
+  doi?: string | null
+  retrieval_score: number
+  evidence_status: string
+  publication_year?: number | null
+}
+
+export interface KnowledgeEvidenceBundle {
+  schema_version: 'evidence-bundle/1.0.0'
+  bundle_id: string
+  question: string
+  as_of: string
+  generated_at: string
+  corpus_snapshot_id: string
+  evidence_hits: KnowledgeEvidenceHit[]
+  graph_edges: Array<Record<string, unknown>>
+  retrieval_diagnostics: {
+    requested_top_k: number
+    returned_hits: number
+    unique_document_count: number
+    max_hits_from_one_document: number
+    diversity_mode: 'none' | 'per_document_cap'
+    max_hits_per_document: number
+    effective_min_unique_documents: number
+    diversity_gate_passed: boolean
+    skipped_by_document_cap: number
+  }
+  warnings: string[]
+}
+
+export interface KnowledgeCatalogDocument {
+  document_id: string
+  title: string
+  title_source: 'metadata' | 'derived' | 'identifier'
+  authors: string[]
+  abstract?: string | null
+  journal?: string | null
+  doi?: string | null
+  publication_year?: number | null
+  has_fulltext: boolean
+  content_kind: 'indexed_fulltext' | 'metadata_only'
+  source_format: string
+  access_level?: string | null
+  original_pdf_available: boolean
+  reading_available: boolean
+}
+
+export interface KnowledgeCatalogPage {
+  corpus_snapshot_id: string
+  total_documents: number
+  fulltext_documents: number
+  readable_documents: number
+  metadata_only_documents: number
+  declared_source_asset_documents: number
+  available_source_asset_documents: number
+  original_pdf_documents: number
+  vector_count: number
+  graph_document_count: number
+  graph_edge_count: number
+  matched_documents: number
+  offset: number
+  limit: number
+  next_offset?: number | null
+  data_updated_at?: string | null
+  access_level?: string | null
+  source_format_counts: Record<string, number>
+  collection_status: 'snapshot_only' | 'connected'
+  collection_message: string
+  items: KnowledgeCatalogDocument[]
+  warnings: string[]
+}
+
+export interface KnowledgeDocumentTextSlice {
+  document_id: string
+  title: string
+  source_format: string
+  access_level?: string | null
+  content_sha256: string
+  total_characters: number
+  offset: number
+  limit: number
+  next_offset?: number | null
+  text: string
+}
+
+export interface DiscoveryFindingDraft {
+  key: string
+  statement: string
+  direction: 'positive' | 'negative' | 'null' | 'mixed' | 'nonlinear' | 'heterogeneous' | 'unknown'
+  role: 'support' | 'challenge'
+  evidence_chunk_ids: string[]
+}
+
+export interface DiscoveryConstructDraft {
+  key: string
+  label: string
+  definition: string
+  granularity: string
+  role: 'predictor' | 'outcome' | 'mediator' | 'moderator' | 'control'
+  expected_direction: 'positive' | 'negative' | 'nonlinear' | 'heterogeneous' | 'unspecified'
+  evidence_chunk_ids: string[]
+}
+
+export interface DiscoveryPlanWire {
+  schema_version: 'discovery-plan/1.0.0'
+  field_label: string
+  stream_label: string
+  stream_description: string
+  findings: DiscoveryFindingDraft[]
+  constructs: DiscoveryConstructDraft[]
+  gap_type: string
+  gap_title: string
+  gap_statement: string
+  current_state: string
+  missing_piece: string
+  why_important: string
+  candidate_research_question: string
+  hypothesis_title: string
+  hypothesis_statement: string
+  falsifiable_form: string
+  rationale: string
+  mechanism_chain: Array<{
+    source_key: string
+    relation: string
+    target_key: string
+    statement: string
+    evidence_chunk_ids: string[]
+  }>
+  predictions: Array<{
+    key: string
+    statement: string
+    observable_pattern: string
+    would_falsify: string
+  }>
+  boundary_conditions: string[]
+  unresolved_conflicts: string[]
+  unit_of_analysis: string
+  baseline_specification: string
+  major_threats: string[]
+  required_inputs: string[]
+  blocking_questions: string[]
+  validation_acceptance_criteria: string[]
+  novelty_queries: string[]
+  novelty_remaining_difference: string
+  scores: {
+    novelty: number
+    theory: number
+    evidence: number
+    data: number
+    method: number
+    policy_value: number
+  }
+  [key: string]: unknown
+}
+
+export interface DiscoveryPlanGeneration {
+  originalQuestion: string
+  evidenceBundle: KnowledgeEvidenceBundle
+  plan: DiscoveryPlanWire
+  modelUsage: Record<string, unknown>
+  consistencyReview: QuestionPlanConsistencyReviewWire | null
+  consistencyReviews: QuestionPlanConsistencyReviewWire[]
+  retrievalRounds: DiscoveryRetrievalRoundWire[]
+  repairCount: number
+  finalConsistencyPassed: boolean
+  executionReadiness: DiscoveryExecutionReadinessWire | null
+  warnings: string[]
+}
+
+export interface QuestionPlanConsistencyReviewWire {
+  schema_version: string
+  decision: 'pass' | 'requery'
+  exposure_preserved: boolean
+  outcome_preserved: boolean
+  qualifiers_preserved: boolean
+  missing_concepts: string[]
+  requery_terms: string[]
+  rationale: string
+}
+
+export interface DiscoveryRetrievalRoundWire {
+  round_index: number
+  query: string
+  bundle_id: string
+  evidence_hit_count: number
+  unique_document_count: number
+  diversity_gate_passed: boolean
+  candidate_research_question: string
+  hypothesis_statement: string
+  construct_labels: string[]
+  consistency_decision: 'pass' | 'requery' | null
+  repair_feedback_applied: boolean
+  repair_directive_sha256?: string | null
+}
+
+export interface DiscoveryExecutionReadinessWire {
+  schema_version: string
+  status: 'ready' | 'blocked'
+  can_execute: boolean
+  dataset_candidates: Array<{
+    candidate_id: string
+    label: string
+    status: 'ready' | 'blocked'
+    blockers: string[]
+  }>
+  variable_dictionary: Array<{
+    construct_key: string
+    construct_label: string
+    role: 'predictor' | 'outcome' | 'mediator' | 'moderator' | 'control'
+    status: 'bound' | 'unbound'
+    blocker?: string | null
+  }>
+  identification_strategies: Array<{
+    strategy_id: string
+    label: string
+    status: 'candidate_ready_for_h1_review' | 'blocked'
+    blocker?: string | null
+  }>
+  blockers: string[]
+  warnings: string[]
+}
+
+export interface DiscoveryReleasePreviewWire {
+  schema_version: string
+  final_research_graph: Record<string, unknown>
+  gap_cards: Array<Record<string, unknown>>
+  hypothesis_cards: Array<Record<string, unknown>>
+  validation_warnings: string[]
+  reviewer: string
+  review_note: string
+  [key: string]: unknown
+}
+
+export interface DiscoveryLaunchResult {
+  discoveryRelease: DiscoveryReleasePreviewWire
+  run: RunSnapshot
 }

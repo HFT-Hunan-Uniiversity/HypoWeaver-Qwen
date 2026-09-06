@@ -14,6 +14,7 @@ export type ShellView =
   | { kind: 'project'; id: string; section: 'overview' }
   | { kind: 'discovery'; id: string; step: DiscoveryStep }
   | { kind: 'library'; resourceKind: LibraryKind }
+  | { kind: 'reader'; id: string }
   | { kind: 'settings' }
   | { kind: 'task'; id: string }
 
@@ -49,6 +50,10 @@ export function viewFromHash(hash = window.location.hash): ShellView {
     return { kind: 'project', id, section: 'overview' }
   }
 
+  if (segments[0] === 'library' && segments[1] === 'literature' && segments[2] && segments[3] === 'read') {
+    return { kind: 'reader', id: decodeSegment(segments[2]) }
+  }
+
   if (segments[0] === 'library') {
     const requested = segments[1] as LibraryKind | undefined
     return {
@@ -73,6 +78,8 @@ export function hashOf(view: ShellView): string {
       return `#project/${encodeURIComponent(view.id)}/discovery/${view.step}`
     case 'library':
       return `#library/${view.resourceKind}`
+    case 'reader':
+      return `#library/literature/${encodeURIComponent(view.id)}/read`
     default:
       return `#${view.kind}`
   }

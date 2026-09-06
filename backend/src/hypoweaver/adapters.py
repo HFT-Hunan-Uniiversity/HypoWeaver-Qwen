@@ -74,6 +74,60 @@ MODEL_CALL_RETRY_BACKOFF_SECONDS = {2: 2.0, 3: 8.0}
 SCHEMA_ERROR_SUMMARY_LIMIT = 20
 SCHEMA_ERROR_LOCATION_LIMIT = 12
 
+# Pydantic deliberately reports model-level validators as the generic
+# ``value_error`` type. Persisting the raw validation message would risk
+# leaking provider output through receipts, while returning only
+# ``root:value_error`` gives the model no actionable repair signal. This
+# allow-list converts only code-owned, exact validator messages into stable,
+# non-sensitive error types.
+_SAFE_MODEL_VALIDATION_ERROR_TYPES = {
+    "discovery plan keys must be globally unique": "discovery_keys_not_unique",
+    "discovery plan requires exactly one predictor and one outcome": (
+        "discovery_role_cardinality"
+    ),
+    "discovery plan requires at least one supporting finding": (
+        "discovery_support_finding_missing"
+    ),
+    "mechanism chain references an unknown construct or mechanism": (
+        "discovery_mechanism_endpoint_unknown"
+    ),
+    "novelty queries must be unique": "discovery_novelty_queries_not_unique",
+    "pass requires exposure, outcome, and qualifiers to be preserved": (
+        "consistency_pass_contract_failed"
+    ),
+    "requery requires at least one concrete retrieval term": (
+        "consistency_requery_terms_missing"
+    ),
+}
+
+_SAFE_SCHEMA_REPAIR_HINTS = {
+    "discovery_keys_not_unique": (
+        "findings、constructs、mechanisms、datasets、methods、models 和 "
+        "identification_strategies 的 key 必须全局唯一。"
+    ),
+    "discovery_role_cardinality": (
+        "constructs 中必须恰好有一个 predictor 和一个 outcome；其余只能是 "
+        "mediator、moderator 或 control。"
+    ),
+    "discovery_support_finding_missing": (
+        "findings 中至少保留一项 role=support，且必须引用允许的 evidence_chunk_ids。"
+    ),
+    "discovery_mechanism_endpoint_unknown": (
+        "mechanism_chain 的 source_key 与 target_key 只能引用 constructs 或 "
+        "mechanisms 中已经声明的 key。"
+    ),
+    "discovery_novelty_queries_not_unique": (
+        "novelty_queries 至少三项且逐项唯一，不得重复相同查询。"
+    ),
+    "consistency_pass_contract_failed": (
+        "decision=pass 时 exposure_preserved、outcome_preserved、"
+        "qualifiers_preserved 必须全部为 true，且 missing_concepts 必须为空。"
+    ),
+    "consistency_requery_terms_missing": (
+        "decision=requery 时必须给出至少一个可直接检索的具体 requery_terms。"
+    ),
+}
+
 
 def _safe_token_count(value: Any) -> int:
     try:
@@ -240,6 +294,16 @@ def _safe_schema_error_details(
             location[-1:] = ["truncated"]
         raw_type = detail.get("type", "invalid")
         error_type = str(raw_type)
+        if error_type == "value_error":
+            context = detail.get("ctx")
+            validation_error = (
+                context.get("error") if isinstance(context, dict) else None
+            )
+            mapped_type = _SAFE_MODEL_VALIDATION_ERROR_TYPES.get(
+                str(validation_error).strip()
+            )
+            if mapped_type is not None:
+                error_type = mapped_type
         if (
             not error_type
             or len(error_type) > 64
@@ -274,6 +338,23 @@ def _safe_schema_error_summary(
     if total_count > len(details):
         rendered += f"; truncated: {total_count - len(details)}"
     return rendered or "validation failed"
+
+
+def _safe_schema_repair_guidance(
+    details: list[SchemaValidationIssue],
+) -> str:
+    """Render only allow-listed, code-owned repair hints for the next attempt."""
+
+    hints = list(
+        dict.fromkeys(
+            _SAFE_SCHEMA_REPAIR_HINTS[detail.type]
+            for detail in details
+            if detail.type in _SAFE_SCHEMA_REPAIR_HINTS
+        )
+    )
+    if not hints:
+        return ""
+    return "\n修复清单：\n" + "\n".join(f"- {hint}" for hint in hints)
 
 
 def _model_call_error_category(error: BaseException) -> str:
@@ -1408,6 +1489,9 @@ class QwenModelGateway:
         budget: ModelCallBudget | None = None,
         config_store: RuntimeConfigStore | None = None,
         retry_sleep: Callable[[float], Awaitable[None]] | None = None,
+        seed: int | None = None,
+        temperature: float = 0.0,
+        schema_repair_enabled: bool = True,
     ) -> None:
         config = (config_store or RuntimeConfigStore()).resolve()
         if not config.qwen_api_key:
@@ -1415,11 +1499,24 @@ class QwenModelGateway:
                 "Qwen API Key is required; configure runtime settings or DASHSCOPE_API_KEY"
             )
         self.model = model_override or config.qwen_model
+        if seed is not None and not 0 <= seed <= 2_147_483_647:
+            raise ValueError("Qwen seed must be between 0 and 2^31-1")
+        if not 0 <= temperature < 2:
+            raise ValueError("Qwen temperature must be in [0, 2)")
+        self.seed = seed
+        self.temperature = temperature
+        self.schema_repair_enabled = schema_repair_enabled
         self.budget = budget or ModelCallBudget()
         self.retry_sleep = retry_sleep or asyncio.sleep
+        qwen_hostname = (urlsplit(config.qwen_base_url).hostname or "").casefold()
         self.http_client = httpx.AsyncClient(
-            trust_env=urlsplit(config.qwen_base_url).hostname
-            != "dashscope.aliyuncs.com"
+            # Both the public DashScope endpoint and workspace-specific Model
+            # Studio endpoints are first-party Aliyun services. A stale local
+            # proxy must not make one endpoint reachable and the other fail.
+            trust_env=not (
+                qwen_hostname == "dashscope.aliyuncs.com"
+                or qwen_hostname.endswith(".maas.aliyuncs.com")
+            )
         )
         self.client = AsyncOpenAI(
             api_key=config.qwen_api_key,
@@ -1474,16 +1571,22 @@ class QwenModelGateway:
             started_at = utc_now()
             started = time.monotonic()
             try:
+                request_options: dict[str, Any] = {
+                    "model": self.model,
+                    "messages": messages,
+                    "response_format": {"type": "json_object"},
+                    "stream": True,
+                    "stream_options": {"include_usage": True},
+                    "extra_body": {"enable_thinking": False},
+                    "temperature": getattr(self, "temperature", 0.0),
+                    "max_tokens": prompt.max_tokens,
+                    "timeout": prompt.timeout_seconds,
+                }
+                seed = getattr(self, "seed", None)
+                if seed is not None:
+                    request_options["seed"] = seed
                 stream = await self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    response_format={"type": "json_object"},
-                    stream=True,
-                    stream_options={"include_usage": True},
-                    extra_body={"enable_thinking": False},
-                    temperature=0,
-                    max_tokens=prompt.max_tokens,
-                    timeout=prompt.timeout_seconds,
+                    **request_options,
                 )
                 response = await _aggregate_qwen_stream(stream)
             except asyncio.CancelledError as error:
@@ -1609,7 +1712,10 @@ class QwenModelGateway:
                     schema_error_summary=tuple(schema_error_summary),
                     schema_error_count=schema_error_count,
                 )
-                if attempt_index < context.max_attempts:
+                if (
+                    attempt_index < context.max_attempts
+                    and getattr(self, "schema_repair_enabled", True)
+                ):
                     messages.append(
                         {
                             "role": "user",
@@ -1618,6 +1724,7 @@ class QwenModelGateway:
                                 "只修复结构，不改变研究判断。"
                                 "\n错误: "
                                 f"{_safe_schema_error_summary(schema_error_summary, schema_error_count)}"
+                                f"{_safe_schema_repair_guidance(schema_error_summary)}"
                             ),
                         }
                     )

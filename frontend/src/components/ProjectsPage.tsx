@@ -1,10 +1,13 @@
 import {
   ArrowRight,
+  CheckSquare2,
   CircleAlert,
   Clock3,
   FolderKanban,
   Plus,
+  Square,
   Sparkles,
+  Trash2,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -33,17 +36,18 @@ const STEP_ROUTE: Record<DiscoveryStep, DiscoveryRouteStep> = {
 
 const STEP_LABEL: Record<DiscoveryStep, string> = {
   1: '研究简报',
-  2: '资源收集',
-  3: '图谱与缺口',
-  4: '候选构想',
-  5: '比较与选择',
-  6: '交接预览',
+  2: '数据中心检索',
+  3: '趋势与空白',
+  4: '候选假设',
+  5: '假设选择',
+  6: '方案输入',
 }
 
 export interface ProjectsPageProps {
   onCreateProject: () => void
   onOpenProject: (projectId: string) => void
   onOpenDiscovery: (projectId: string, step: DiscoveryRouteStep) => void
+  onDeleteProjects: (projectIds: string[]) => Promise<boolean>
 }
 
 function useProductRevision(): void {
@@ -75,22 +79,39 @@ function ProjectCard({
   project,
   onOpenProject,
   onOpenDiscovery,
+  selecting,
+  selected,
+  onToggleSelection,
 }: {
   project: Project
   onOpenProject: (projectId: string) => void
   onOpenDiscovery: (projectId: string, step: DiscoveryRouteStep) => void
+  selecting: boolean
+  selected: boolean
+  onToggleSelection: (projectId: string) => void
 }) {
   const status = STATUS_COPY[project.status]
   const progress = progressOf(project)
   const nextStep = project.discovery.currentStep
 
   return (
-    <article className="project-card">
+    <article className={`project-card ${selecting ? 'is-selecting' : ''} ${selected ? 'is-selected' : ''}`}>
+      {selecting ? (
+        <label className="project-card__selector">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelection(project.id)}
+            aria-label={`选择项目：${project.title}`}
+          />
+          {selected ? <CheckSquare2 size={16} aria-hidden="true" /> : <Square size={16} aria-hidden="true" />}
+        </label>
+      ) : null}
       <button
         type="button"
         className="project-card__main"
-        onClick={() => onOpenProject(project.id)}
-        aria-label={`打开项目：${project.title}`}
+        onClick={() => selecting ? onToggleSelection(project.id) : onOpenProject(project.id)}
+        aria-label={selecting ? `选择项目：${project.title}` : `打开项目：${project.title}`}
       >
         <span className="project-card__topline">
           <span className={`product-status ${status.tone}`}>{status.label}</span>
@@ -113,7 +134,7 @@ function ProjectCard({
           <i><b style={{ width: `${progress}%` }} /></i>
         </span>
       </button>
-      <div className="project-card__action">
+      {!selecting ? <div className="project-card__action">
         <span>
           下一步
           <strong>{STEP_LABEL[nextStep]}</strong>
@@ -126,7 +147,7 @@ function ProjectCard({
         >
           <ArrowRight size={16} aria-hidden="true" />
         </button>
-      </div>
+      </div> : null}
     </article>
   )
 }
@@ -135,9 +156,51 @@ export function ProjectsPage({
   onCreateProject,
   onOpenProject,
   onOpenDiscovery,
+  onDeleteProjects,
 }: ProjectsPageProps) {
   useProductRevision()
   const projects = frontendDataSource.listProjects()
+  const [selectingProjects, setSelectingProjects] = useState(false)
+  const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(() => new Set())
+  const [deletingProjects, setDeletingProjects] = useState(false)
+  const projectIdKey = projects.map((project) => project.id).join('|')
+  const allProjectsSelected = projects.length > 0 && selectedProjectIds.size === projects.length
+
+  useEffect(() => {
+    const availableIds = new Set(projects.map((project) => project.id))
+    setSelectedProjectIds((current) => {
+      const next = new Set([...current].filter((id) => availableIds.has(id)))
+      return next.size === current.size ? current : next
+    })
+    if (!projects.length) setSelectingProjects(false)
+    // projectIdKey is a stable membership signature; project metadata updates do not reset selection.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectIdKey])
+
+  function toggleProjectSelection(projectId: string) {
+    setSelectedProjectIds((current) => {
+      const next = new Set(current)
+      if (next.has(projectId)) next.delete(projectId)
+      else next.add(projectId)
+      return next
+    })
+  }
+
+  function exitProjectSelection() {
+    setSelectingProjects(false)
+    setSelectedProjectIds(new Set())
+  }
+
+  async function deleteSelectedProjects() {
+    if (!selectedProjectIds.size || deletingProjects) return
+    setDeletingProjects(true)
+    try {
+      const completed = await onDeleteProjects([...selectedProjectIds])
+      if (completed) exitProjectSelection()
+    } finally {
+      setDeletingProjects(false)
+    }
+  }
 
   const summary = useMemo(() => {
     let needsAttention = 0
@@ -170,7 +233,7 @@ export function ProjectsPage({
     <main className="product-page projects-page">
       <header className="product-page__header">
         <div>
-          <span className="product-eyebrow">PROJECTS · 前端演示</span>
+          <span className="product-eyebrow">PROJECTS</span>
           <h1>研究项目</h1>
           <p>在一个项目里连接研究发现、资源证据与正式 H1–H4 任务。</p>
         </div>
@@ -192,12 +255,12 @@ export function ProjectsPage({
         <div>
           <span>需要处理</span>
           <strong>{summary.needsAttention}</strong>
-          <small>继续发现流程或完成交接</small>
+          <small>继续研究发现或补齐方案输入</small>
         </div>
         <div>
-          <span>等待交接</span>
+          <span>等待方案</span>
           <strong>{summary.handoffReady}</strong>
-          <small>已生成案例草稿，尚未建任务</small>
+          <small>输入已齐备，尚未进入正式任务</small>
         </div>
         <div>
           <span>正式任务</span>
@@ -228,7 +291,7 @@ export function ProjectsPage({
                 <span>{project.title}</span>
                 <strong>
                   {project.status === 'handoff_ready'
-                    ? '创建本地演示任务'
+                    ? '进入后续研究任务'
                     : `继续${STEP_LABEL[project.discovery.currentStep]}`}
                 </strong>
                 <ArrowRight size={14} aria-hidden="true" />
@@ -238,12 +301,39 @@ export function ProjectsPage({
         </section>
       ) : null}
 
-      <section className="product-section-heading">
+      <section className="product-section-heading projects-heading">
         <div>
           <span className="product-eyebrow">全部项目</span>
           <h2>从问题到可执行任务</h2>
         </div>
-        <span>{projects.length} 个项目</span>
+        <div className="projects-heading__actions">
+          {selectingProjects ? (
+            <>
+              <button
+                type="button"
+                className="product-button"
+                onClick={() => setSelectedProjectIds(allProjectsSelected ? new Set() : new Set(projects.map((project) => project.id)))}
+              >
+                {allProjectsSelected ? <CheckSquare2 size={15} aria-hidden="true" /> : <Square size={15} aria-hidden="true" />}
+                {allProjectsSelected ? '取消全选' : '全选'}
+              </button>
+              <button
+                type="button"
+                className="product-button is-danger"
+                disabled={!selectedProjectIds.size || deletingProjects}
+                onClick={() => void deleteSelectedProjects()}
+              >
+                <Trash2 size={15} aria-hidden="true" />
+                {deletingProjects ? '删除中…' : `删除已选 (${selectedProjectIds.size})`}
+              </button>
+            </>
+          ) : <span>{projects.length} 个项目</span>}
+          {projects.length ? (
+            <button type="button" className="product-button" onClick={() => selectingProjects ? exitProjectSelection() : setSelectingProjects(true)}>
+              {selectingProjects ? '取消' : '多选管理'}
+            </button>
+          ) : null}
+        </div>
       </section>
 
       {projects.length > 0 ? (
@@ -254,6 +344,9 @@ export function ProjectsPage({
               project={project}
               onOpenProject={onOpenProject}
               onOpenDiscovery={onOpenDiscovery}
+              selecting={selectingProjects}
+              selected={selectedProjectIds.has(project.id)}
+              onToggleSelection={toggleProjectSelection}
             />
           ))}
         </div>
@@ -261,7 +354,7 @@ export function ProjectsPage({
         <section className="product-empty">
           <FolderKanban size={28} aria-hidden="true" />
           <h2>还没有研究项目</h2>
-          <p>先用一句研究问题创建项目，再逐步补齐资源、缺口与候选构想。</p>
+          <p>先用一句研究问题创建项目，再逐步完成检索、研究空白、候选假设与科学十项。</p>
           <button type="button" className="product-button is-primary" onClick={onCreateProject}>
             <Plus size={16} aria-hidden="true" />
             创建第一个项目

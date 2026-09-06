@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/research_graph.schema.json",
+  "title": "GreenFin temporal evidence-grounded research graph",
+  "description": "Target graph contract for evidence, landscape analytics, gap discovery and hypothesis handoff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "graph_id",
+    "snapshot_id",
+    "as_of",
+    "domain",
+    "scope",
+    "build",
+    "nodes",
+    "edges",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.2.0" },
+    "graph_id": { "type": "string", "minLength": 1 },
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "as_of": { "type": "string", "format": "date-time" },
+    "domain": { "const": "green_finance" },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["themes", "languages", "document_types"],
+      "properties": {
+        "themes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "languages": { "type": "array", "items": { "type": "string", "minLength": 2 } },
+        "document_types": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "year_start": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+        "year_end": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at", "generator", "graph_schema_version", "input_contract_versions", "pipeline_run_id", "source_watermarks"],
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "generator": { "type": "string", "minLength": 1 },
+        "graph_schema_version": { "const": "0.2.0" },
+        "input_contract_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "pipeline_run_id": { "type": "string", "minLength": 1 },
+        "source_watermarks": {
+          "type": "object",
+          "description": "Latest successfully ingested timestamp or cursor per source.",
+          "additionalProperties": { "type": ["string", "null"] }
+        },
+        "base_graph_id": { "type": ["string", "null"] },
+        "base_graph_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "parent_snapshot_id": { "type": ["string", "null"] },
+        "code_version": { "type": ["string", "null"] },
+        "config_hash": { "type": ["string", "null"] },
+        "input_manifest_hash": { "type": ["string", "null"], "minLength": 8 },
+        "input_profile_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "coverage_certificate_id": { "type": ["string", "null"] },
+        "retrieval_index_snapshot_id": { "type": ["string", "null"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+    "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+    "quality_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "source_document_count": { "type": "integer", "minimum": 0 },
+        "fact_edge_traceability_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "verified_evidence_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unresolved_entity_count": { "type": "integer", "minimum": 0 },
+        "rejected_item_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "description": "Derived and reproducible counts or metrics; never treated as source evidence.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*:[a-z0-9][a-z0-9._:-]*$"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_at"],
+      "properties": {
+        "observed_at": { "type": "string", "format": "date-time" },
+        "valid_from": { "type": ["string", "null"] },
+        "valid_to": { "type": ["string", "null"] }
+      }
+    },
+    "derivation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["method", "method_version", "input_snapshot_id", "input_node_ids", "input_edge_ids", "parameters"],
+      "properties": {
+        "method": { "type": "string", "minLength": 1 },
+        "method_version": { "type": "string", "minLength": 1 },
+        "input_snapshot_id": { "type": "string", "minLength": 1 },
+        "input_node_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+        "input_edge_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+        "parameters": { "type": "object", "additionalProperties": true },
+        "prompt_hash": { "type": ["string", "null"] },
+        "code_ref": { "type": ["string", "null"] }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "layer",
+        "label",
+        "normalized_label",
+        "origin",
+        "review_status",
+        "confidence",
+        "version",
+        "validity",
+        "source_profile_ids",
+        "evidence_ids",
+        "derivation",
+        "properties"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": {
+          "enum": [
+            "paper",
+            "policy_document",
+            "report",
+            "dataset",
+            "author",
+            "institution",
+            "venue",
+            "research_field",
+            "topic",
+            "theory",
+            "mechanism",
+            "variable",
+            "measure",
+            "method",
+            "model",
+            "identification_strategy",
+            "policy_instrument",
+            "finding",
+            "limitation",
+            "population",
+            "context",
+            "research_stream",
+            "trend_snapshot",
+            "controversy",
+            "research_gap",
+            "hypothesis"
+          ]
+        },
+        "layer": { "enum": ["source", "knowledge", "analytics", "discovery"] },
+        "label": { "type": "string", "minLength": 1 },
+        "normalized_label": { "type": "string", "minLength": 1 },
+        "aliases": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "description": { "type": ["string", "null"] },
+        "origin": { "enum": ["extracted", "curated", "computed", "inferred"] },
+        "review_status": { "enum": ["unreviewed", "auto_validated", "human_verified", "rejected"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "validity": { "$ref": "#/$defs/validity" },
+        "source_profile_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "evidence_ids": { "$ref": "#/$defs/evidenceRefs" },
+        "derivation": { "$ref": "#/$defs/derivation" },
+        "properties": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "target",
+        "type",
+        "layer",
+        "origin",
+        "review_status",
+        "confidence",
+        "version",
+        "validity",
+        "evidence_ids",
+        "derivation",
+        "context",
+        "properties"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "source": { "$ref": "#/$defs/id" },
+        "target": { "$ref": "#/$defs/id" },
+        "type": {
+          "enum": [
+            "AUTHORED_BY",
+            "AFFILIATED_WITH",
+            "PUBLISHED_IN",
+            "CITES",
+            "REFERENCES_POLICY",
+            "AMENDS",
+            "SUPERSEDES",
+            "CONTAINS_INSTRUMENT",
+            "TARGETS",
+            "IMPLEMENTED_IN",
+            "STUDIES_FIELD",
+            "STUDIES_TOPIC",
+            "USES_THEORY",
+            "PROPOSES_MECHANISM",
+            "USES_VARIABLE",
+            "USES_MEASURE",
+            "USES_METHOD",
+            "USES_MODEL",
+            "USES_IDENTIFICATION_STRATEGY",
+            "USES_DATASET",
+            "EVALUATES_POLICY",
+            "REPORTS_FINDING",
+            "REPORTS_LIMITATION",
+            "STUDIES_POPULATION",
+            "STUDIES_CONTEXT",
+            "HAS_PREDICTOR",
+            "HAS_OUTCOME",
+            "HAS_MEDIATOR",
+            "HAS_MODERATOR",
+            "HAS_MECHANISM",
+            "MEASURED_BY",
+            "DERIVED_FROM",
+            "PROXIED_BY",
+            "SUPPORTS",
+            "CONTRADICTS",
+            "ASSIGNED_TO_STREAM",
+            "STREAM_IN_FIELD",
+            "STREAM_FOCUSES_ON",
+            "STREAM_USES_THEORY",
+            "STREAM_USES_METHOD",
+            "STREAM_USES_MODEL",
+            "EVOLVES_INTO",
+            "TREND_OF",
+            "INDICATES_CONTROVERSY",
+            "INDICATES_GAP",
+            "GAP_CONCERNS",
+            "ENABLED_BY",
+            "ADDRESSES_GAP",
+            "SUPPORTED_BY_EVIDENCE",
+            "CHALLENGED_BY_EVIDENCE",
+            "RECOMMENDS_METHOD",
+            "RECOMMENDS_MODEL",
+            "RECOMMENDS_IDENTIFICATION_STRATEGY",
+            "RECOMMENDS_DATASET",
+            "SUBTOPIC_OF",
+            "SAME_AS",
+            "RELATED_TO",
+            "APPLIES_TO",
+            "SUITABLE_FOR"
+          ]
+        },
+        "layer": { "enum": ["source", "knowledge", "analytics", "discovery"] },
+        "origin": { "enum": ["extracted", "curated", "computed", "inferred"] },
+        "review_status": { "enum": ["unreviewed", "auto_validated", "human_verified", "rejected"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "validity": { "$ref": "#/$defs/validity" },
+        "evidence_ids": { "$ref": "#/$defs/evidenceRefs" },
+        "derivation": { "$ref": "#/$defs/derivation" },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile_id": { "type": ["string", "null"] },
+            "paper_id": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "policy_document_id": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "report_id": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "snapshot_id": { "type": ["string", "null"] },
+            "variable_roles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "enum": ["independent", "dependent", "mediator", "moderator", "control", "instrument", "treatment", "outcome", "other"] }
+            },
+            "effect_direction": { "enum": ["positive", "negative", "null", "mixed", "nonlinear", "heterogeneous", "unknown", null] },
+            "significance": { "enum": ["significant", "not_significant", "mixed", "not_reported", "not_applicable", null] },
+            "identification_strength": { "enum": ["descriptive", "associational", "quasi_experimental", "experimental", "unknown", null] },
+            "population_or_subsample": { "type": ["string", "null"] },
+            "conditions": { "type": ["string", "null"] }
+          }
+        },
+        "properties": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_type",
+        "evidence_type",
+        "evidence_level",
+        "source_document_id",
+        "document_version",
+        "content",
+        "content_hash",
+        "retrieved_at",
+        "verification_status",
+        "locator"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "source_type": {
+          "enum": [
+            "paper_fulltext",
+            "paper_abstract",
+            "policy_text",
+            "report_text",
+            "dataset_registry",
+            "metadata_api",
+            "graph_snapshot",
+            "project_spec",
+            "human_curation"
+          ]
+        },
+        "evidence_type": { "enum": ["direct_quote", "metadata_record", "table_cell", "derived_statistic", "human_annotation", "design_decision"] },
+        "evidence_level": { "enum": ["primary_source", "metadata", "derived", "design"] },
+        "source_document_id": { "type": "string", "minLength": 1 },
+        "document_version": { "type": "string", "minLength": 1 },
+        "profile_id": { "type": ["string", "null"] },
+        "upstream_evidence_id": { "type": ["string", "null"] },
+        "chunk_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_id": { "type": ["string", "null"] },
+        "release_id": { "type": ["string", "null"] },
+        "content_sha256": { "type": ["string", "null"], "minLength": 8 },
+        "content": { "type": ["string", "number", "boolean", "object", "array"], "minLength": 1 },
+        "content_hash": { "type": "string", "minLength": 8 },
+        "source_ref": { "type": ["string", "null"] },
+        "published_at": { "type": ["string", "null"] },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "verification_status": { "enum": ["unverified", "source_located", "cross_checked", "not_applicable", "rejected"] },
+        "access_level": { "enum": ["open", "restricted", "commercial", "unknown", null] },
+        "license": { "type": ["string", "null"] },
+        "locator": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "oneOf": [
+                { "type": "integer", "minimum": 1 },
+                { "type": "string", "minLength": 1 },
+                { "type": "null" }
+              ]
+            },
+            "section": { "type": ["string", "null"], "minLength": 1 },
+            "start_char": { "type": ["integer", "null"], "minimum": 0 },
+            "end_char": { "type": ["integer", "null"], "minimum": 0 },
+            "table_id": { "type": ["string", "null"] },
+            "row": { "type": ["integer", "null"], "minimum": 0 },
+            "column": { "type": ["integer", "null"], "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -680,6 +680,45 @@ describe('runtime API adapter', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/runs/run-to-delete', expect.objectContaining({ method: 'DELETE' }))
   })
 
+  it('loads a bounded system-paper text slice', async () => {
+    const payload = {
+      document_id: 'paper-green',
+      title: '绿色金融与绿色创新',
+      source_format: 'txt',
+      content_sha256: 'a'.repeat(64),
+      total_characters: 120,
+      offset: 0,
+      limit: 40,
+      next_offset: 40,
+      text: '系统论文正文',
+    }
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await workflowApi.getKnowledgeDocumentText('paper-green', { limit: 40 })
+
+    expect(result.document_id).toBe('paper-green')
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/knowledge/catalog/paper-green/text?offset=0&limit=40',
+      expect.any(Object),
+    )
+  })
+
+  it('deletes one selected original PDF', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ deleted_document_id: 'pdf_123' }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await workflowApi.deleteLiteratureDocument('pdf_123')
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/literature/documents/pdf_123',
+      expect.objectContaining({ method: 'DELETE' }),
+    )
+  })
+
   it('retries only the writing stage through its explicit endpoint', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => runPayload })
     vi.stubGlobal('fetch', fetchMock)

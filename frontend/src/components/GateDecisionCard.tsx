@@ -29,6 +29,20 @@ const designStrategyLabels = {
   measurement_robustness: '测量稳健性优先',
 } as const
 
+const gateTitles = {
+  H1: '确认研究边界并继续设计',
+  H2: '确认研究方案并冻结',
+  H3: '审核证据与结论',
+  H4: '确认最终交付并封存',
+} as const
+
+const gateNotes = {
+  H1: '确认研究问题、假设、变量和样本边界；这一步不代表科学结论获批。',
+  H2: '执行前冻结数据、识别策略、模型与诊断，避免事后改变研究口径。',
+  H3: '逐条核对复现结果与证据强度，只有获得支持的主张可以进入论文。',
+  H4: '核对报告、限制说明和复现材料，确认后生成不可变的最终成果包。',
+} as const
+
 const statementKindText: Record<ManuscriptStatementSourceView['kind'], string> = {
   authorized_claim: '获批结论',
   estimate_fact: '估计事实',
@@ -142,6 +156,21 @@ export function GateDecisionCard({ run, busy, onDecision, onSubmitRevision }: {
     const decision = decisions[claim.id] ?? claim.decision ?? 'reject'
     return decision === 'approve' || decision === 'downgrade'
   })
+  const caseInput = run.caseSubmission
+  const exposure = caseInput?.variables.find((item) => item.role === 'treatment' || item.role === 'exposure')
+  const outcomes = caseInput?.variables.filter((item) => item.role === 'outcome') ?? []
+  const analysisUnit = caseInput?.unitOfAnalysis === 'firm-region-year' ? '企业—地区—年份' : caseInput?.unitOfAnalysis
+  const samplePeriod = caseInput?.samplePeriod.replace(/^Literature coverage\s*/i, '文献覆盖 ')
+  const reviewTitle = blockedByCritic
+    ? '处理关键审查问题后重新提交'
+    : returnedForRevision
+      ? `继续修改${gate === 'H1' ? '研究边界' : '研究方案'}`
+      : gateTitles[gate]
+  const reviewNote = blockedByCritic
+    ? '当前方案未通过审查。请按意见修改并重新提交；通过后才会开放下一步。'
+    : returnedForRevision
+      ? '上一次退回已经记录；修改结构化内容后可重新提交，刷新页面也不会丢失任务状态。'
+      : gateNotes[gate]
 
   async function submitH3() {
     const claimDecisions = run.claims.map((claim) => ({
@@ -183,7 +212,16 @@ export function GateDecisionCard({ run, busy, onDecision, onSubmitRevision }: {
 
   return (
     <section className="human-review-card">
-      <header><ShieldCheck size={22} /><div><strong>{gate} · {blockedByCritic ? '请处理关键审查问题' : returnedForRevision ? '请继续提交修订' : gate === 'H1' ? '请确认研究边界' : gate === 'H2' ? '请选择并冻结分析计划' : gate === 'H3' ? '请逐条授权结论' : '请审核最终论文初稿'}</strong><p>{blockedByCritic ? '当前不能直接批准。请按 Reviewer 意见修改分析计划并重新审查；通过后系统会开放 H2。' : returnedForRevision ? '上一次“退回”已经记录在服务端。请修改结构化内容并重新提交，刷新页面后也可以从这里继续。' : gate === 'H1' ? '批准后系统才会拆解假设并设计方法。' : gate === 'H2' ? 'Reviewer 只淘汰硬失败方案；请从可行候选中明确选择一个，批准后才冻结合同。' : gate === 'H3' ? 'Writer 只能读取本次明确授权的结论。' : '一致性审计已经通过，但只有你批准后成果才会封存并进入盲测比较。'}</p></div></header>
+      <header><ShieldCheck size={22} /><div><div className="review-card__title-row"><strong>{reviewTitle}</strong><span>{gate}</span></div><p>{reviewNote}</p></div></header>
+      {gate === 'H1' && caseInput && (
+        <section className="gate-scope" aria-label="本次研究边界摘要">
+          <div className="gate-scope__wide"><span>研究问题</span><strong>{caseInput.researchQuestion}</strong></div>
+          <div><span>主要假设</span><strong>{caseInput.hypotheses[0]?.statement ?? '尚未提供候选假设'}</strong></div>
+          <div><span>核心变量</span><strong>{[exposure?.label, ...outcomes.map((item) => item.label)].filter(Boolean).join(' → ') || `${caseInput.variables.length} 个候选变量`}</strong></div>
+          <div><span>分析单位</span><strong>{analysisUnit || '待确认'}</strong></div>
+          <div><span>时间边界</span><strong>{samplePeriod || '待确认'}</strong></div>
+        </section>
+      )}
       {blockedByCritic && Array.isArray(criticIssues) && <ul className="review-issue-list">{criticIssues.map((issue, index) => {
         const item = issue && typeof issue === 'object' && !Array.isArray(issue) ? issue as Record<string, unknown> : {}
         return <li key={`${String(item.issue_id ?? 'issue')}-${index}`}><strong>{String(item.severity ?? 'issue')}</strong><span>{String(item.evidence ?? item.why_it_matters ?? '请查看 CriticReport 输出。')}</span><small>需要修改：{String(item.required_fix ?? '请根据审查意见补充研究设计。')}</small></li>
@@ -220,9 +258,9 @@ export function GateDecisionCard({ run, busy, onDecision, onSubmitRevision }: {
       })}</div>}
       {gate === 'H4' && run.manuscript && <section className="h4-manuscript-review"><p><strong>{run.manuscript.mode === 'identification_failure_report' ? '识别失败报告' : '论文初稿'} v{run.manuscript.version}</strong> · IR {run.manuscript.irVersion} · {run.manuscript.sections.length} 节 · {run.manuscript.auditResult === 'pass_with_no_critical_issues' ? '一致性审计通过' : '需要修订'}</p>{run.manuscript.sections.map((section) => <details key={section.id}><summary>{section.title}</summary><div className="manuscript-copy">{section.content}</div><StatementProvenance statements={section.statements} /></details>)}</section>}
       {fixtureH3 && <p className="fixture-warning">本次没有真实实证结果，每条 Claim 只能拒绝或暂缓；提交后仅生成研究计划。</p>}
-      {!returnedForRevision && <label>审核说明<textarea rows={3} value={comment} onChange={(event) => setComment(event.target.value)} placeholder={gate === 'H4' ? '退回重写时，请写明需要修改的章节和具体问题' : '记录批准或拒绝理由（选填）'} /></label>}
+      {!returnedForRevision && <label>你的备注（可选）<textarea rows={3} value={comment} onChange={(event) => setComment(event.target.value)} placeholder={gate === 'H4' ? '如需退回，请写明需要修改的章节和具体问题' : '补充边界、风险或需要修改的内容'} /></label>}
       {showRevision && (gate === 'H1' || gate === 'H2') && <section className="revision-editor"><header><div><strong>{gate} 结构化修订</strong><p>{gate === 'H1' ? '修改 CaseSubmission 后，系统会重新执行 Intake 与输入校验，再回到 H1。' : '修改 AnalysisPlan 后，系统会重新执行四类 Critic；plan_version 已自动加一。'}</p></div></header><textarea aria-label={`${gate} 结构化修订 JSON`} rows={18} spellCheck={false} value={revisionText} onChange={(event) => setRevisionText(event.target.value)} />{revisionError && <p className="revision-error" role="alert">{revisionError}</p>}<footer>{!returnedForRevision && <button type="button" className="secondary-button" disabled={busy} onClick={() => setShowRevision(false)}>取消修订</button>}<button type="button" className="primary-button" disabled={busy} onClick={submitRevision}>提交修订并重新校验</button></footer></section>}
-      {!returnedForRevision && <footer><button type="button" className="danger-button" disabled={busy} onClick={() => onDecision(gate, { action: 'reject', comment })}>拒绝并终止</button>{gate !== 'H3' && <button type="button" className="secondary-button" disabled={busy || (gate === 'H4' && !comment.trim())} onClick={() => gate === 'H4' ? onDecision('H4', { action: 'revise', comment }) : openRevision()}>{gate === 'H4' ? '退回重写' : '退回并编辑'}</button>}{gate === 'H3' ? <button type="button" className="primary-button" disabled={busy || !allClaimsReady} onClick={submitH3}>{fixtureH3 ? '生成 plan-only 成果' : willGenerateFailureReport ? '生成识别失败报告' : '提交结论授权'}</button> : <button type="button" className="primary-button" disabled={busy || !selectedCandidateReady} onClick={() => onDecision(gate, { action: 'approve', comment, ...(gate === 'H2' && selectedCandidateId ? { selectedCandidateId } : {}) })}>{gate === 'H4' ? '批准并封存' : '批准并继续'}</button>}</footer>}
+      {!returnedForRevision && <footer><button type="button" className="danger-button" disabled={busy} onClick={() => onDecision(gate, { action: 'reject', comment })}>终止研究</button>{gate !== 'H3' && <button type="button" className="secondary-button" disabled={busy || (gate === 'H4' && !comment.trim())} onClick={() => gate === 'H4' ? onDecision('H4', { action: 'revise', comment }) : openRevision()}>{gate === 'H4' ? '退回重写' : '退回修改'}</button>}{gate === 'H3' ? <button type="button" className="primary-button" disabled={busy || !allClaimsReady} onClick={submitH3}>{fixtureH3 ? '生成研究计划成果' : willGenerateFailureReport ? '生成识别失败报告' : '确认授权结论'}</button> : <button type="button" className="primary-button" disabled={busy || !selectedCandidateReady} onClick={() => onDecision(gate, { action: 'approve', comment, ...(gate === 'H2' && selectedCandidateId ? { selectedCandidateId } : {}) })}>{gate === 'H1' ? '确认并继续' : gate === 'H2' ? '冻结方案并执行' : '确认交付并封存'}</button>}</footer>}
     </section>
   )
 }

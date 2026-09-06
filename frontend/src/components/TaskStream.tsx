@@ -5,7 +5,7 @@
  *   闸门用 GateDecisionCard（走真实 API）。
  * 左侧纵向进度轨道 + 彗星拖尾指示当前进行位置；等待人工的闸门节点呼吸环。
  */
-import { CircleAlert, LoaderCircle, RotateCcw, ShieldCheck } from 'lucide-react'
+import { ArrowUp, CircleAlert, LoaderCircle, RotateCcw, ShieldCheck } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { GateDecisionInput, RunSnapshot, WorkflowDefinition, WorkflowStage } from '../runtime/types'
 import { MOCK_H2_CANDIDATES, MOCK_H3_CLAIMS, type MockGateAction, type MockStage, type MockTask } from '../data/mockPipeline'
@@ -39,9 +39,15 @@ function MockGateCard({ stage, onDecide }: { stage: MockStage; onDecide: (action
     () => Object.fromEntries(MOCK_H3_CLAIMS.map((claim) => [claim.id, 'approve' as const])),
   )
   const gate = stage.gate!
+  const gateTitle = {
+    H1: '确认研究边界并继续设计',
+    H2: '确认研究方案并冻结',
+    H3: '审核证据与结论',
+    H4: '确认最终交付并封存',
+  }[gate]
   return (
     <section className="human-review-card stream-gate-card">
-      <header><ShieldCheck size={22} /><div><strong>{stage.gateTitle}</strong><p>{stage.gateHint}（演示决策，仅更新本地状态）</p></div></header>
+      <header><ShieldCheck size={22} /><div><div className="review-card__title-row"><strong>{gateTitle}</strong><span>{gate}</span></div><p>{stage.gateHint}（演示决策，仅更新本地状态）</p></div></header>
       {gate === 'H2' && (
         <section className="design-candidate-list" aria-label="可行研究设计候选（演示）">
           {MOCK_H2_CANDIDATES.map((candidate) => (
@@ -69,11 +75,11 @@ function MockGateCard({ stage, onDecide }: { stage: MockStage; onDecide: (action
           ))}
         </div>
       )}
-      <label>审核说明<textarea rows={2} value={comment} onChange={(event) => setComment(event.target.value)} placeholder="记录批准或拒绝理由（选填）" /></label>
+      <label>你的备注（可选）<textarea rows={2} value={comment} onChange={(event) => setComment(event.target.value)} placeholder="补充边界、风险或需要修改的内容" /></label>
       <footer>
-        <button type="button" className="danger-button" onClick={() => onDecide('reject', comment)}>拒绝并终止</button>
-        <button type="button" className="secondary-button" onClick={() => onDecide('revise', comment)}>退回重播本阶段</button>
-        <button type="button" className="primary-button" onClick={() => onDecide('approve', comment)}>{gate === 'H3' ? '提交结论授权' : gate === 'H4' ? '批准并封存' : '批准并继续'}</button>
+        <button type="button" className="danger-button" onClick={() => onDecide('reject', comment)}>终止研究</button>
+        <button type="button" className="secondary-button" onClick={() => onDecide('revise', comment)}>退回修改</button>
+        <button type="button" className="primary-button" onClick={() => onDecide('approve', comment)}>{gate === 'H1' ? '确认并继续' : gate === 'H2' ? '冻结方案并执行' : gate === 'H3' ? '确认授权结论' : '确认交付并封存'}</button>
       </footer>
     </section>
   )
@@ -103,7 +109,7 @@ export function MockTaskStream({ task, onGateDecision, onOpenDrawer }: {
     <div className="stream">
       <div className="stream__scroll">
         <div className="stream__inner">
-          <p className="stream__demo-badge">演示数据 · 全流程 mock，后端接入后自动替换</p>
+          <p className="stream__demo-badge">预置示范研究 · 完整流程已封存，可稳定复现</p>
           {task.stages.map((stage) => {
             const visual = stageVisual(stage)
             if (stage.status === 'pending' || stage.status === 'skipped') {
@@ -155,7 +161,7 @@ export function MockTaskStream({ task, onGateDecision, onOpenDrawer }: {
           {task.status === 'completed' && (
             <section className="stream-final">
               <h2>成果已封存</h2>
-              <p>研究计划、执行结果、Claim 台账与论文初稿已打包（演示数据）。</p>
+              <p>研究计划、执行结果、结论台账与研究报告初稿已完成封存。</p>
               <button type="button" className="secondary-button" onClick={onOpenDrawer}>查看工作区文件</button>
             </section>
           )}
@@ -179,7 +185,7 @@ export function MockTaskStream({ task, onGateDecision, onOpenDrawer }: {
           <textarea
             rows={1}
             value={noteDraft}
-            placeholder={task.status === 'waiting_human' ? `等待 ${task.currentGate} 决策 · 可先记录备注（演示）` : task.status === 'running' ? '任务推进中 · 记录备注（演示）' : '任务已结束 · 记录备注（演示）'}
+            placeholder={task.status === 'waiting_human' ? `等待 ${task.currentGate} 决策 · 可先记录工作备注` : task.status === 'running' ? '任务推进中 · 记录工作备注' : '任务已结束 · 记录工作备注'}
             onChange={(event) => setNoteDraft(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -229,6 +235,23 @@ const providedStages = [
   { key: 'hypothesis', label: '假设生成' },
 ]
 
+function readableAnalysisUnit(value: string | undefined): string {
+  return value === 'firm-region-year' ? '企业—地区—年份' : value || '等待确认'
+}
+
+const plainNodeTitles: Record<string, string> = {
+  case_input: '研究材料已接收',
+  intake_agent: '研究问题已规范化',
+  input_validation: '边界与数据已检查',
+  h1_gate: '等待确认研究边界',
+  hypothesis_decomposer: '候选假设已拆解',
+  data_profiler: '数据结构已检查',
+  method_router: '识别策略已初选',
+  h2_gate: '等待冻结研究方案',
+  h3_gate: '等待审核证据结论',
+  h4_gate: '等待确认最终交付',
+}
+
 export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision, onSubmitRevision, onRetryWriting, onOpenDrawer }: {
   definition: WorkflowDefinition
   run: RunSnapshot
@@ -242,8 +265,17 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
   const autoScrollEnabled = !['completed', 'blocked', 'failed', 'waiting_human'].includes(run.status)
   const endRef = useAutoScroll(`${run.id}:${run.version}:${run.status}`, autoScrollEnabled)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [notes, setNotes] = useState<string[]>([])
+  const [noteDraft, setNoteDraft] = useState('')
   useEffect(() => {
-    if (!autoScrollEnabled) scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+    if (autoScrollEnabled) return
+    if (run.status === 'waiting_human') {
+      window.requestAnimationFrame(() => {
+        scrollRef.current?.querySelector('.human-review-card')?.scrollIntoView({ block: 'center', behavior: 'auto' })
+      })
+      return
+    }
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
   }, [autoScrollEnabled, run.id, run.status])
   const currentNode = definition.nodes.find((node) => node.id === run.currentNodeId)
   const returnedGate = run.status === 'blocked' ? returnedRevisionGate(run) : undefined
@@ -264,19 +296,19 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
   const verdictTitle = isEngineeringComplete && isScienceLimited
     ? '工程链路已通过，科学结论受限'
     : isEngineeringComplete
-      ? '工程链路已通过'
-      : run.status === 'waiting_human' && run.currentGate === 'H1' && run.intakeReadiness?.canExecute
-        ? '真实执行包已绑定，等待 H1 审批'
+      ? '研究执行与复现已完成'
+      : run.status === 'waiting_human' && run.currentGate === 'H1'
+        ? '研究边界已整理，等待你确认'
         : run.status === 'blocked'
-          ? '本次 run 已阻塞（历史记录）'
+          ? '研究已暂停，需要处理阻断项'
           : run.status === 'failed'
-            ? '本次 run 执行失败'
-            : '真实工作流正在推进'
+            ? '研究执行遇到问题'
+            : '研究正在推进'
   const verdictDescription = isEngineeringComplete && isScienceLimited
     ? '统计执行、独立估计器复现和 H4 封存均已完成；冻结的 sign-switch 假设未获证据支持，因此不发布因果结论。'
-    : run.status === 'waiting_human' && run.currentGate === 'H1' && run.intakeReadiness?.canExecute
-      ? '这是由已验证 Group 1 执行包创建的新 run，不会覆盖侧栏中的旧阻塞记录；批准 H1/H2 后才启动本机统计执行。'
-      : run.lastError || '工程执行状态与科学结论状态分开记录，后续闸门只允许发布证据支持的主张。'
+    : run.status === 'waiting_human' && run.currentGate === 'H1'
+      ? '我已核对研究问题、候选假设、变量与样本范围。确认后才会继续设计方法；此时还不会批准任何科学结论。'
+      : run.lastError || '系统会把执行状态与科学结论分开记录，只允许发布得到证据支持的主张。'
 
   const gateByStage = new Map<string, string>()
   for (const node of definition.nodes) {
@@ -300,41 +332,37 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
           {run.upstreamPackage && (
             <section className={`run-verdict is-${verdictTone}`} aria-label="本次真实运行结论">
               <div className="run-verdict__eyebrow">
-                <span>本次 run · {run.id.slice(0, 8)}</span>
-                <strong>{run.status === 'completed' ? '已完成' : run.currentGate ? `${run.currentGate} 等待人工` : runStatusText[run.status]}</strong>
+                <span>HypoWeaver 研究助手</span>
+                <strong>{run.status === 'completed' ? '已完成' : run.currentGate ? `${run.currentGate} · 等待人工确认` : runStatusText[run.status]}</strong>
               </div>
               <h2>{verdictTitle}</h2>
               <p>{verdictDescription}</p>
               <div className="run-verdict__metrics">
-                <div><span>执行绑定</span><strong>{run.intakeReadiness?.canExecute ? '真实面板已绑定' : '尚未就绪'}</strong></div>
-                <div><span>模型路由</span><strong>{run.modelProvider === 'code_owned' ? '代码拥有' : run.modelProvider}</strong></div>
-                <div><span>工程执行</span><strong>{executionStatusText[run.executionStatus] ?? run.executionStatus}</strong></div>
-                <div><span>独立复现</span><strong>{run.reproductionAudit?.status === 'matched' ? '一致 · 估计器级' : run.reproductionAudit?.status || '待执行'}</strong></div>
-                <div><span>科学状态</span><strong>{scientificStatusText[run.scientificStatus] ?? run.scientificStatus}</strong></div>
-                {run.claims.length > 0 && <div><span>主张闸门</span><strong>{approvedClaims.length} 通过 / {rejectedClaims.length} 拒绝</strong></div>}
+                <div><span>证据来源</span><strong>{run.upstreamPackage.evidenceRefCount ?? run.upstreamPackage.verifiedArtifactCount} 条已接入</strong></div>
+                <div><span>分析单位</span><strong>{readableAnalysisUnit(run.caseSubmission?.unitOfAnalysis)}</strong></div>
+                <div><span>数据状态</span><strong>{run.intakeReadiness?.canExecute ? '已具备执行条件' : '执行前需补充'}</strong></div>
+                {run.claims.length > 0 && <div><span>结论审核</span><strong>{approvedClaims.length} 通过 / {rejectedClaims.length} 拒绝</strong></div>}
               </div>
-              {run.sealedOutput?.sealSha256 && <small>H4 seal · {run.sealedOutput.sealSha256.slice(0, 16)}…</small>}
             </section>
           )}
-          {run.mode === 'fixture' && <p className="stream__demo-badge"><CircleAlert size={13} />流程演示不会生成实证结论。</p>}
+          {run.mode === 'fixture' && <p className="stream__demo-badge"><CircleAlert size={13} />当前未接入可执行数据，本次只能形成研究设计，不会生成实证结论。</p>}
           {run.upstreamPackage && (
             <section className={`stream-provided stream-upstream is-${run.intakeReadiness?.status ?? 'conditional'}`}>
-              <p className="stream-stage__eyebrow">上游冻结交接 · {run.upstreamPackage.sourceSystem}</p>
+              <p className="stream-stage__eyebrow">已检索证据</p>
               <div className="stream-provided__row">
-                <span>{run.upstreamPackage.packageId}</span>
-                <span>{run.upstreamPackage.verifiedArtifactCount} 个 Artifact 哈希已核验</span>
-                {run.upstreamPackage.corpusBoundary && <span>{run.upstreamPackage.corpusBoundary}</span>}
-                <span>{run.intakeReadiness?.canApproveH1 ? 'H1 可审批' : 'H1 暂停'}</span>
-                <span>{run.intakeReadiness?.canExecute ? '统计执行已就绪' : '统计执行前待补'}</span>
+                <span>{run.upstreamPackage.evidenceRefCount ?? run.upstreamPackage.verifiedArtifactCount} 条证据来源</span>
+                <span>{run.caseSubmission?.hypotheses.length ?? 0} 条候选假设</span>
+                <span>{run.caseSubmission?.variables.length ?? 0} 个候选变量</span>
+                <span>{run.intakeReadiness?.canApproveH1 ? '可以确认研究边界' : '边界信息仍不完整'}</span>
               </div>
               {run.intakeReadiness?.blockers.length ? (
                 <div className="stream-upstream__pending">
-                  <strong>执行前待解决 · 不阻止 H1/H2 研究设计</strong>
+                  <strong>执行前还需补充 · 不阻止当前研究设计</strong>
                   <ul className="stream-upstream__blockers">
                     {run.intakeReadiness.blockers.slice(0, 4).map((blocker) => <li key={blocker}>{blocker}</li>)}
                   </ul>
                 </div>
-              ) : <small>上游证据包与当前执行能力均已满足 H1 审批条件。</small>}
+              ) : <small>证据材料与执行数据均已满足当前阶段要求。</small>}
             </section>
           )}
           {run.group2Feasibility && (
@@ -367,13 +395,13 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
             </section>
           )}
           <section className="stream-provided">
-            <p className="stream-stage__eyebrow">前半程 · 已由用户提供</p>
+            <p className="stream-stage__eyebrow">研究基础</p>
             <div className="stream-provided__row">
               {providedStages.map((stage) => (
                 <span key={stage.key}>{stage.label}</span>
               ))}
             </div>
-            <small>研究问题、假设与变量定义随案例包提交；系统从案例接入与 H1 边界确认开始接管。</small>
+            <small>研究问题、候选假设与变量定义已经接入；系统从研究边界确认开始继续推进。</small>
           </section>
           {definition.stages.map((stage) => {
             const visual = stageVisual(stage)
@@ -385,7 +413,7 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
                 <section className="stream-stage is-pending" key={stage.id}>
                   <StageNode state="pending" gate={gate} />
                   <div className="stream-stage__body">
-                    <p className="stream-stage__eyebrow">阶段 {stage.order}{gate ? ` · ${gate} 人工闸门` : ''}</p>
+                    <p className="stream-stage__eyebrow">研究进度 {stage.order}{gate ? ` · ${gate} 人工确认` : ''}</p>
                     <h2>{stage.title}</h2>
                     <p className="stream-stage__pending">等待上游阶段完成。</p>
                   </div>
@@ -396,7 +424,7 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
               <section className={`stream-stage is-${visual}`} key={stage.id}>
                 <StageNode state={visual} gate={gate} />
                 <div className="stream-stage__body">
-                  <p className="stream-stage__eyebrow">阶段 {stage.order}{gate ? ` · ${gate} 人工闸门` : ''}</p>
+                  <p className="stream-stage__eyebrow">研究进度 {stage.order}{gate ? ` · ${gate} 人工确认` : ''}</p>
                   <h2>{stage.title}</h2>
                   <p className="stream-stage__desc">{stage.description}</p>
                   {attempts.length > 0 && (
@@ -404,7 +432,7 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
                       {attempts.map((attempt) => (
                         <button type="button" className={`stream-step is-${attempt.status}`} key={attempt.id} onClick={onOpenDrawer} title="在工作区文件中查看明细">
                           <span className={`step-status step-status--${attempt.status}`} />
-                          {definition.nodes.find((node) => node.id === attempt.nodeId)?.title ?? attempt.nodeId}
+                          {plainNodeTitles[attempt.nodeId] ?? definition.nodes.find((node) => node.id === attempt.nodeId)?.title ?? attempt.nodeId}
                         </button>
                       ))}
                     </div>
@@ -437,17 +465,40 @@ export function RunTaskStream({ definition, run, busy, busyLabel, onGateDecision
               </div>
             </section>
           )}
+          {notes.map((note, index) => (
+            <div className="stream-note" key={`${run.id}-note-${index}`}><span>你的备注</span><p>{note}</p></div>
+          ))}
           <div ref={endRef} />
         </div>
       </div>
       <div className="stream__dock">
-        <div className="stream__status">
-          {run.status === 'waiting_human'
-            ? `等待 ${run.currentGate} 人工决策 · 请在上方决策卡中操作`
-            : busy
-              ? (busyLabel || '正在执行…')
-              : runStatusText[run.status]}
-        </div>
+        <form
+          className="composer__box composer__box--mini task-note-composer"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const text = noteDraft.trim()
+            if (!text) return
+            setNotes((current) => [...current, text])
+            setNoteDraft('')
+          }}
+        >
+          <textarea
+            rows={1}
+            value={noteDraft}
+            placeholder={run.status === 'waiting_human' ? `请先处理上方 ${run.currentGate} 人工确认，也可以在这里记录备注` : '补充研究要求或记录你的判断…'}
+            onChange={(event) => setNoteDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault()
+                event.currentTarget.form?.requestSubmit()
+              }
+            }}
+          />
+          <div className="task-note-composer__row">
+            <small>{busy ? (busyLabel || '正在执行…') : run.status === 'waiting_human' ? `${run.currentGate} 等待你的确认` : runStatusText[run.status]}</small>
+            <button type="submit" className="composer__send" disabled={!noteDraft.trim()} aria-label="记录备注"><ArrowUp size={15} /></button>
+          </div>
+        </form>
       </div>
     </div>
   )

@@ -133,6 +133,7 @@ from .test_dag import (
     validate_policy_did_execution_plan,
 )
 from .visualization import (
+    ChineseEconJournalFigureRenderer,
     FigureBundle,
     FigureRenderer,
     FigureSource,
@@ -2536,7 +2537,7 @@ class WorkflowEngine:
             )
             return bundle
 
-        renderer = self.visualization_renderer or LocalFigureRenderer()
+        renderer = self.visualization_renderer or ChineseEconJournalFigureRenderer()
 
         envelope = self._artifact_envelope(state, "research_run")
         assert envelope is not None
@@ -2610,7 +2611,7 @@ class WorkflowEngine:
             output_value=bundle,
             logs=[
                 (
-                    f"内置绘图模块返回 {len(bundle.figures)} 张可追溯图形。"
+                    f"期刊图表 Skill/内置绘图模块返回 {len(bundle.figures)} 张可追溯图形。"
                     if succeeded
                     else "内置绘图模块未返回通过契约校验的图形；写作链路继续。"
                 )

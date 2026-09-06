@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/group1_literature_review.schema.json",
+  "title": "Group 1 nearest-work scientific review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "review_id", "as_of", "novelty_search_id", "scope",
+    "methodology", "works", "conflict_summary", "conclusion", "limitations", "reviewer"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "review_id": { "type": "string", "pattern": "^group1-review:[a-z0-9._:-]+$" },
+    "as_of": { "type": "string", "format": "date-time" },
+    "novelty_search_id": { "type": "string", "pattern": "^novelty:[a-z0-9._:-]+$" },
+    "scope": { "type": "string", "minLength": 1 },
+    "methodology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query_families", "sources", "deduplication_key", "evidence_rule", "status_rule"],
+      "properties": {
+        "query_families": { "type": "array", "minItems": 3, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "sources": { "type": "array", "minItems": 3, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "deduplication_key": { "type": "string", "minLength": 1 },
+        "evidence_rule": { "type": "string", "minLength": 1 },
+        "status_rule": { "type": "string", "minLength": 1 }
+      }
+    },
+    "works": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "$ref": "#/$defs/work" }
+    },
+    "conflict_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_greenwashing_directions", "closest_work_doi", "interpretation"],
+      "properties": {
+        "policy_greenwashing_directions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["increase", "decrease", "conditional_or_mixed"],
+          "properties": {
+            "increase": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "decrease": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "conditional_or_mixed": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "closest_work_doi": { "type": "string", "minLength": 1 },
+        "interpretation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "conclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage_status", "bounded_gap", "hypothesis_implication", "prohibited_claim"],
+      "properties": {
+        "coverage_status": { "enum": ["open", "partially_covered", "covered", "uncertain"] },
+        "bounded_gap": { "type": "string", "minLength": 1 },
+        "hypothesis_implication": { "type": "string", "minLength": 1 },
+        "prohibited_claim": { "type": "string", "minLength": 1 }
+      }
+    },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "review_status", "reviewed_at"],
+      "properties": {
+        "workflow": { "type": "string", "minLength": 1 },
+        "review_status": { "enum": ["accepted", "revise", "rejected"] },
+        "reviewed_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "doi", "title", "year", "journal", "classification", "formal_nearest",
+        "source_tier", "access_level", "identity_status", "publication_status_check",
+        "source_urls", "dimensions", "direction_summary", "overlap", "remaining_difference", "limitations"
+      ],
+      "properties": {
+        "doi": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+        "journal": { "type": "string", "minLength": 1 },
+        "classification": { "enum": ["direct", "edge"] },
+        "formal_nearest": { "type": "boolean" },
+        "source_tier": { "enum": ["T1", "T2", "T3"] },
+        "access_level": { "enum": ["publisher_full_text", "official_abstract", "publisher_abstract_and_snippets"] },
+        "identity_status": { "enum": ["verified", "partially_verified", "rejected"] },
+        "publication_status_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "as_of", "checked_sources"],
+          "properties": {
+            "status": { "enum": ["current", "no_notice_observed", "corrected", "retracted", "unknown"] },
+            "as_of": { "type": "string", "format": "date-time" },
+            "checked_sources": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "source_urls": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "format": "uri" } },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gfripz", "innovation", "epie", "greenwashing", "firm_carbon", "prepolicy_digital"],
+          "properties": {
+            "gfripz": { "$ref": "#/$defs/dimension" },
+            "innovation": { "$ref": "#/$defs/dimension" },
+            "epie": { "$ref": "#/$defs/dimension" },
+            "greenwashing": { "$ref": "#/$defs/dimension" },
+            "firm_carbon": { "$ref": "#/$defs/dimension" },
+            "prepolicy_digital": { "$ref": "#/$defs/dimension" }
+          }
+        },
+        "direction_summary": { "type": "string", "minLength": 1 },
+        "overlap": { "type": "string", "minLength": 1 },
+        "remaining_difference": { "type": "string", "minLength": 1 },
+        "limitations": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "formal_nearest": { "const": true } },
+            "required": ["formal_nearest"]
+          },
+          "then": {
+            "properties": {
+              "identity_status": { "const": "verified" },
+              "publication_status_check": {
+                "properties": {
+                  "status": { "enum": ["current", "no_notice_observed", "corrected"] }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dimension": { "enum": ["exact", "adjacent", "absent", "unverified"] }
+  }
+}

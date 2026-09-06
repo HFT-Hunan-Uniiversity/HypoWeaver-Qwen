@@ -90,7 +90,7 @@ export function SystemConfigPanel({ status, accessTokenPresent, accessTokenVerif
             <label>API 密钥<input type="password" autoComplete="off" value={qwenApiKey} onChange={(event) => setQwenApiKey(event.target.value)} placeholder={status?.qwenApiKey.configured ? '已配置；留空表示不修改' : '输入 DASHSCOPE_API_KEY'} /></label>
             <div className="settings__grid">
               <label>模型 ID<input value={qwenModel} onChange={(event) => setQwenModel(event.target.value)} placeholder="qwen-plus" spellCheck={false} /><small className="field-help">区分大小写；百炼公共模型用小写 ID，例如 qwen-plus。</small></label>
-              <label>API 地址<input value={qwenBaseUrl} onChange={(event) => setQwenBaseUrl(event.target.value)} /></label>
+              <label>API 地址<input value={qwenBaseUrl} onChange={(event) => setQwenBaseUrl(event.target.value)} /><small className="field-help">新建的 sk-ws 密钥必须填写创建或重置密钥时同屏显示的专属 API Host。</small></label>
             </div>
             {status?.qwenApiKey.configured && qwenBaseUrl.trim() !== status.qwenBaseUrl.value && <p className="config-field-warning">{status.qwenApiKey.source === 'environment' ? '千问密钥来自环境变量；为避免密钥被转发到其他地址，请同时在后端环境变量 QWEN_BASE_URL 中修改地址。页面不能修改这一组合。' : '切换 API 地址时需要重新输入千问 API 密钥，避免把已有密钥误发给新的服务地址。'}</p>}
             <button type="button" className="test-button" onClick={() => test('qwen')} disabled={busy || !status?.qwenApiKey.configured}><TestTube2 size={15} />测试千问连接</button>

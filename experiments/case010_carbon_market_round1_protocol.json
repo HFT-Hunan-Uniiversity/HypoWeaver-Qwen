@@ -1,0 +1,104 @@
+{
+  "schema_version": "case010-adaptive-ai-scientist-protocol/1.0.0",
+  "experiment_id": "case010-carbon-market-green-innovation-adaptive-v1",
+  "phase": "round1",
+  "frozen_at": "2026-09-05T03:16:12+08:00",
+  "purpose": "复现系统从文献证据发现、问题—计划一致性审查到数据执行门的完整链路，并让数据审计结果决定第二轮是直接检验全国碳市场、收窄为区域碳市场公开复现，还是安全停止。",
+  "original_research_question": "全国碳排放权交易市场能否促进企业高质量绿色技术创新？",
+  "hypotheses": [
+    "H1：全国碳排放权交易市场显著促进纳入配额管理企业的高质量绿色技术创新。",
+    "H2：融资约束缓解是碳市场促进高质量绿色技术创新的重要机制。",
+    "H3：碳市场的创新效应随企业产权性质和市场竞争程度而异。"
+  ],
+  "qwen_contract": {
+    "generation_path": "tmp/group2_intake_2026-08-11/hypoweaver-workflow/output/carbon-market-qwen-live-zh-20260905/qwen-generation.json",
+    "generation_sha256": "be7963c9beb946947d659f236585757a0513b064b32cecb6dd7a0bebbe954e11",
+    "receipt_path": "tmp/group2_intake_2026-08-11/hypoweaver-workflow/output/carbon-market-qwen-live-zh-20260905/qwen-e2e-receipt.json",
+    "receipt_sha256": "5ff8f93d344f3e3008b8631cce7f51861ae7d2fde581890118a9dbdf3d423c53",
+    "showcase_manifest_path": "tmp/group2_intake_2026-08-11/hypoweaver-workflow/output/carbon-market-qwen-live-zh-20260905/showcase-manifest.json",
+    "showcase_manifest_sha256": "eb1cccb674545ae0a63f46bd476cb0c677743b620215e216558669a0d176b810",
+    "required_provider": "qwen",
+    "required_model": "qwen3.7-plus",
+    "required_generation_source": "live_qwen_call",
+    "minimum_unique_documents": 3,
+    "maximum_hits_per_document": 2,
+    "require_question_plan_consistency": true,
+    "require_anonymized_receipt": true
+  },
+  "candidate_data_contracts": [
+    {
+      "candidate_id": "plos-financing-green-innovation-supplement",
+      "persistent_id": "doi:10.1371/journal.pone.0319997.s001",
+      "source_url": "https://plos.figshare.com/articles/dataset/28591607",
+      "license": "CC BY 4.0",
+      "local_path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1.zip",
+      "sha256": "88cea8df65ef9fa8e8bc6d56bf19e1b409d8f56cb8a09eb370188c65ec981c0b",
+      "official_md5": "89afad101bcea6e9160096cc23d9e2c1",
+      "required_checks": [
+        "企业键",
+        "年份键",
+        "绿色创新结果字段",
+        "融资约束字段",
+        "可与碳市场处理名单连接的键"
+      ]
+    },
+    {
+      "candidate_id": "mendeley-carbon-green-innovation-panel",
+      "persistent_id": "doi:10.17632/rrfwny7byp.1",
+      "source_url": "https://data.mendeley.com/datasets/rrfwny7byp/1",
+      "license": "CC BY 4.0",
+      "local_path": "experiments/fixtures/case010_mendeley_carbon_green_innovation_candidate_v1.dta",
+      "sha256": "15bbce1ca0b7f3ab2adf8381c0fa57c335c6fcd42fd99285b0a3f59a5b7d819e",
+      "analysis_extract_path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.csv",
+      "analysis_extract_sha256": "5470c52e8e6712984a78b6959bf56ca016aa9fc0c9577b3e9765ed832975e967",
+      "analysis_extract_manifest_sha256": "324dbc14b5d9c099f938536ed7e3f7eaa5e1bb94f5bc183c969d0a04d20d172b",
+      "required_checks": [
+        "企业—年份唯一键",
+        "2022年及以后结果",
+        "全国碳市场履约企业名单绑定",
+        "绿色发明专利字段",
+        "融资约束字段",
+        "处理编码可追溯性"
+      ]
+    }
+  ],
+  "source_audit_contract": {
+    "path": "output/experiments/case010_carbon_market_adaptive_v1/source_audit.json",
+    "sha256": "c49571b27d121753e5c47e16fa79d3c11ad77306d2243bf5f76fbc14e59ec573",
+    "audit_script": "scripts/experiments/audit_case010_carbon_candidate.py"
+  },
+  "round1_tasks": [
+    "逐项校验 Qwen 生成结果、匿名回执、知识库快照、证据片段和模型调用哈希。",
+    "验证检索多样性门与问题—计划一致性审查是否通过。",
+    "审计两个公开数据候选的许可、哈希、粒度、时间键、连接键、处理字段、结果字段和机制字段。",
+    "严格按冻结规则生成第二轮任务，不读取任何绿色专利回归结果。"
+  ],
+  "adaptive_decision_rules": [
+    {
+      "rule_id": "R1_NATIONAL_EXECUTABLE",
+      "condition": "存在2022年及以后企业结果、官方全国碳市场履约企业绑定、企业—年份唯一键、高质量绿色专利字段和融资约束字段",
+      "round2_requirement": "冻结并执行全国碳市场企业层面识别协议。"
+    },
+    {
+      "rule_id": "R1_SCOPE_ADAPT_REGIONAL",
+      "condition": "全国市场数据门失败，但存在2010—2021年区域碳市场源定义处理编码、企业—年份唯一键、绿色发明专利和融资约束字段",
+      "round2_requirement": "保持碳市场—融资约束—高质量绿色创新理论链不变，将估计对象收窄为区域碳市场公开复现，并保留全国市场问题为待验证扩展。"
+    },
+    {
+      "rule_id": "R1_SOURCE_DEFINITION_CAVEAT",
+      "condition": "处理编码未与独立下载的官方企业名单逐条复核",
+      "round2_requirement": "只允许表述为原作者公开数据编码下的复现证据；即使统计门通过，也不得声称已独立重建全国或区域履约企业名单。"
+    },
+    {
+      "rule_id": "R1_STOP",
+      "condition": "不存在同时具备企业—年份键、处理字段和绿色发明专利结果的许可数据",
+      "round2_requirement": "保持H1阻断，不执行回归。"
+    }
+  ],
+  "reproducibility": {
+    "raw_data_immutable": true,
+    "no_outcome_model_before_round2_freeze": true,
+    "round1_output": "output/experiments/case010_carbon_market_adaptive_v1/round1_result.json",
+    "privacy": "仅使用公开企业级研究数据；输出不保存API密钥、模型原始密钥字段或个人信息。"
+  }
+}

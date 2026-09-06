@@ -3,6 +3,7 @@ import { FileStack, Trash2 } from 'lucide-react'
 import { AppSidebar, sidebarTasks, type ShellNav } from './components/AppSidebar'
 import { DiscoveryPage } from './components/DiscoveryPage'
 import { MainToolbar } from './components/MainToolbar'
+import { LiteratureReaderPage } from './components/LiteratureReaderPage'
 import { PreflightPanel } from './components/PreflightPanel'
 import { ProjectOverviewPage } from './components/ProjectOverviewPage'
 import { ProjectsPage } from './components/ProjectsPage'
@@ -10,6 +11,7 @@ import { ResearchInputForm } from './components/ResearchInputForm'
 import { ResourceLibraryPage } from './components/ResourceLibraryPage'
 import { SystemConfigPanel } from './components/SystemConfigPanel'
 import { TaskComposer } from './components/TaskComposer'
+import { TaskResearchRail } from './components/TaskResearchRail'
 import { MockTaskStream, RunTaskStream } from './components/TaskStream'
 import { WorkspaceDrawer } from './components/WorkspaceDrawer'
 import { demoResearchDraft, emptyResearchDraft, preflightResearch, type ResearchDraft } from './data/researchDraft'
@@ -21,6 +23,8 @@ import {
 } from './data/mockPipeline'
 import {
   frontendDataSource,
+  SHOWCASE_PROJECT_ID,
+  SHOWCASE_TASK_ID,
   type DiscoveryHandoff,
   type Project,
 } from './product'
@@ -34,6 +38,7 @@ const isPublicDemo = import.meta.env.VITE_PUBLIC_DEMO === 'true'
 const SIDEBAR_KEY = 'hw-sidebar'
 const {
   createProject,
+  deleteProjects: removeProjects,
   getProject,
   getSelectedProjectId,
   listProjects,
@@ -51,11 +56,11 @@ const {
 } = frontendDataSource
 const DISCOVERY_STEP_LABELS: Record<DiscoveryStep, string> = {
   brief: '研究简报',
-  resources: '资源收集',
-  gaps: '图谱与缺口',
-  ideas: '候选构想',
-  decision: '比较与选择',
-  handoff: '交接预览',
+  resources: '数据中心检索',
+  gaps: '趋势与空白',
+  ideas: '候选假设',
+  decision: '假设选择',
+  handoff: '方案输入',
 }
 const LIBRARY_LABELS = {
   literature: '文献库',
@@ -63,6 +68,16 @@ const LIBRARY_LABELS = {
   dataset: '数据库',
   method: '方法库',
 } as const
+
+function displayResearchTitle(value: string): string {
+  const normalized = value
+    .replace(/[？?。.]$/u, '')
+    .replace('如何影响', '与')
+    .replace(/改革创新试验区/u, '')
+    .replace(/政策政策/u, '政策')
+    .trim()
+  return normalized.length > 28 ? `${normalized.slice(0, 28)}…` : normalized
+}
 
 export function App() {
   const [view, setView] = useState<ShellView>(() => viewFromHash())
@@ -260,6 +275,10 @@ export function App() {
     changeView({ kind: 'library', resourceKind })
   }
 
+  function openLiteratureReader(resourceId: string) {
+    changeView({ kind: 'reader', id: resourceId })
+  }
+
   function openTask(id: string) {
     changeView({ kind: 'task', id })
   }
@@ -286,6 +305,24 @@ export function App() {
     const normalized = prompt.replace(/\s+/g, ' ').trim()
     const title = normalized.length > 30 ? `${normalized.slice(0, 30)}…` : normalized
     try {
+      const normalizedShowcasePrompt = normalized.replace(/[？?]/g, '')
+      const showcaseProject = getProject(SHOWCASE_PROJECT_ID)
+      if (
+        normalizedShowcasePrompt === '碳市场如何影响企业绿色创新'
+        && showcaseProject
+      ) {
+        frontendDataSource.updateDiscoveryDraft(SHOWCASE_PROJECT_ID, {
+          currentStep: 1,
+          completedSteps: [],
+          selectedIdeaId: undefined,
+          scientificTen: showcaseProject.discovery.scientificTen,
+        })
+        updateProject(SHOWCASE_PROJECT_ID, { status: 'active' })
+        setSelectedProjectId(SHOWCASE_PROJECT_ID)
+        setProjects(listProjects())
+        openDiscovery(SHOWCASE_PROJECT_ID)
+        return
+      }
       const project = createProject({
         title,
         summary: normalized,
@@ -302,6 +339,16 @@ export function App() {
   function handleCreateDemoTask(projectId: string, handoff: DiscoveryHandoff) {
     const project = getProject(projectId)
     if (!project) return
+    if (projectId === SHOWCASE_PROJECT_ID && getMockTask(SHOWCASE_TASK_ID)) {
+      updateProject(projectId, {
+        status: 'handoff_ready',
+        taskIds: Array.from(new Set([...project.taskIds, SHOWCASE_TASK_ID])),
+      })
+      setMockTasks(listMockTasks())
+      setProjects(listProjects())
+      openTask(SHOWCASE_TASK_ID)
+      return
+    }
     let task: MockTask
     try {
       task = createMockTask(handoff.caseInput.title || project.title, project.mode)
@@ -456,6 +503,15 @@ export function App() {
     openTask(nextRun.id)
   }
 
+  async function openLaunchedDiscoveryRun(nextRun: RunSnapshot) {
+    runIdRef.current = nextRun.id
+    setRun(nextRun)
+    await refreshRuns().catch((reason) => {
+      setError(reason instanceof Error ? reason.message : String(reason))
+    })
+    openTask(nextRun.id)
+  }
+
   async function importCaseFolder(files: File[], target: 'hypoweaver' | 'agent-laboratory') {
     if (isPublicDemo) {
       setError('公开演示版仅用于浏览界面与交互，文件不会上传或保存。请使用本地版处理真实案例。')
@@ -483,6 +539,91 @@ export function App() {
     setRun(null)
     setBaselineRun(null)
     changeView({ kind: 'new' })
+  }
+
+  async function deleteTasks(taskIds: string[]): Promise<boolean> {
+    const availableIds = new Set(sidebarItems.map((item) => item.id))
+    const uniqueIds = [...new Set(taskIds)].filter((id) => availableIds.has(id))
+    if (!uniqueIds.length) return false
+
+    const confirmed = window.confirm(
+      `确定删除已选择的 ${uniqueIds.length} 条任务吗？此操作不会删除案例数据文件。`,
+    )
+    if (!confirmed) return false
+
+    const result = await withBusy(`正在删除 ${uniqueIds.length} 条任务…`, async () => {
+      const mockIds = uniqueIds.filter((id) => isMockTaskId(id))
+      const runIds = uniqueIds.filter((id) => !isMockTaskId(id))
+      const deletedIds = new Set<string>()
+      const failures: string[] = []
+
+      mockIds.forEach((id) => {
+        deleteMockTask(id)
+        deletedIds.add(id)
+      })
+
+      if (runIds.length && isPublicDemo) {
+        failures.push('公开演示版不能删除真实研究任务')
+      } else {
+        const outcomes = await Promise.allSettled(
+          runIds.map((id) => workflowApi.deleteRun(id)),
+        )
+        outcomes.forEach((outcome, index) => {
+          if (outcome.status === 'fulfilled') deletedIds.add(runIds[index])
+          else failures.push(`${sidebarItems.find((item) => item.id === runIds[index])?.title ?? runIds[index]}：删除失败`)
+        })
+      }
+
+      for (const project of listProjects()) {
+        if (!project.taskIds.some((id) => deletedIds.has(id))) continue
+        updateProject(project.id, {
+          taskIds: project.taskIds.filter((id) => !deletedIds.has(id)),
+        })
+      }
+
+      setMockTasks(listMockTasks())
+      setProjects(listProjects())
+      if (!isPublicDemo) setRuns(await workflowApi.listRuns())
+      else setRuns((current) => current.filter((item) => !deletedIds.has(item.id)))
+
+      return { deletedIds, failures }
+    })
+
+    if (!result) return false
+    if (taskId && result.deletedIds.has(taskId)) {
+      runIdRef.current = null
+      setRun(null)
+      setMockTask(null)
+      setBaselineRun(null)
+      changeView({ kind: 'new' })
+    }
+    if (result.failures.length) {
+      setError(`部分任务未删除：${result.failures.join('；')}`)
+      return false
+    }
+    return true
+  }
+
+  async function deleteProjects(projectIds: string[]): Promise<boolean> {
+    const availableProjects = listProjects()
+    const availableIds = new Set(availableProjects.map((project) => project.id))
+    const uniqueIds = [...new Set(projectIds)].filter((id) => availableIds.has(id))
+    if (!uniqueIds.length) return false
+
+    const confirmed = window.confirm(
+      `确定删除已选择的 ${uniqueIds.length} 个项目吗？项目中的研究任务和本地数据文件将保留，可在任务列表中继续访问。`,
+    )
+    if (!confirmed) return false
+
+    const deleted = removeProjects(uniqueIds)
+    if (!deleted) return false
+    const nextProjects = listProjects()
+    setProjects(nextProjects)
+    const activeId = isProjectView(view) ? view.id : null
+    if (activeId && uniqueIds.includes(activeId)) {
+      changeView({ kind: 'projects' })
+    }
+    return true
   }
 
   async function decideGate(gate: string, input: GateDecisionInput) {
@@ -558,9 +699,17 @@ export function App() {
   const activeRealRun = view.kind === 'task' && !isMockTaskId(view.id) ? run : null
   const activeProjectId = isProjectView(view) ? view.id : getSelectedProjectId()
   const activeProject = activeProjectId ? getProject(activeProjectId) : null
+  const isShowcaseReplay = activeProject?.id === SHOWCASE_PROJECT_ID
+    && activeProject.status !== 'handoff_ready'
+  const sidebarItemsForDisplay = isShowcaseReplay
+    ? sidebarItems.filter((item) => item.id !== SHOWCASE_TASK_ID)
+    : sidebarItems
   const caseReady = Boolean(draft.case.datasetRefs.length
     && (!activeRealRun || draft.case.caseId === activeRealRun.caseId)
     && (!baselineRun || draft.case.caseId === baselineRun.caseId))
+  const pendingReviewTask = sidebarItems.find((item) => item.status === 'waiting_human')
+  const activeTaskTitle = mockTask?.title
+    ?? (activeRealRun ? displayResearchTitle(activeRealRun.caseSubmission?.researchQuestion ?? activeRealRun.caseName) : undefined)
 
   const toolbarTitle = view.kind === 'new'
     ? '新研究'
@@ -572,20 +721,28 @@ export function App() {
           ? DISCOVERY_STEP_LABELS[view.step]
           : view.kind === 'library'
             ? LIBRARY_LABELS[view.resourceKind]
+          : view.kind === 'reader'
+            ? 'AI 读论文'
       : view.kind === 'settings'
         ? '设置'
-        : mockTask?.title ?? activeRealRun?.caseName ?? '任务'
+        : activeTaskTitle ?? '任务'
   const toolbarSubtitle = view.kind === 'discovery'
-    ? `${activeProject?.title ?? '研究发现'} · 前端演示`
+    ? `${activeProject?.title ?? '研究发现'} · ${isPublicDemo
+      ? '公开界面演示'
+      : isShowcaseReplay
+        ? '知识服务 + Qwen 研究引擎'
+        : '知识服务 + Group1 发现引擎'}`
     : view.kind === 'library'
-      ? '研究资源库 · 前端 fixture'
+      ? view.resourceKind === 'literature' ? '找论文、读全文，并把证据加入当前项目' : '研究资源检索与项目资料管理'
+      : view.kind === 'reader'
+        ? '全文阅读 · AI 辅助理解 · 证据定位'
       : view.kind === 'project'
         ? '研究发现与正式任务进度'
-        : view.kind === 'task'
+    : view.kind === 'task'
     ? mockTask
-      ? '演示流程 · 全链路 mock'
+      ? `${mockTask.currentGate ? `${mockTask.currentGate} · ` : ''}研究进行中`
       : activeRealRun
-        ? activeRealRun.mode === 'fixture' ? '流程演示' : '真实研究'
+        ? activeRealRun.currentGate ? `${activeRealRun.currentGate} · 等待人工确认` : '研究进行中'
         : undefined
     : undefined
 
@@ -594,7 +751,7 @@ export function App() {
       <AppSidebar
         nav={view.kind === 'new' || view.kind === 'projects' || view.kind === 'settings'
           ? view.kind
-          : view.kind === 'library'
+          : view.kind === 'library' || view.kind === 'reader'
             ? 'library'
             : null}
         activeTaskId={taskId}
@@ -606,10 +763,13 @@ export function App() {
             ? '可交接'
             : project.status === 'archived'
               ? '已归档'
-              : `发现 ${project.discovery.currentStep}/6`,
+              : project.discovery.completedSteps.includes(6)
+                ? '发现完成'
+                : `发现 ${new Set(project.discovery.completedSteps).size}/6`,
           updatedAt: project.updatedAt,
         }))}
-        tasks={sidebarItems}
+        tasks={sidebarItemsForDisplay.map((item) => item.id === activeRealRun?.id ? { ...item, title: activeTaskTitle ?? item.title, meta: '研究任务' } : item)}
+        pendingReviewCount={sidebarItemsForDisplay.filter((item) => item.status === 'waiting_human').length}
         config={config}
         theme={theme}
         collapsed={collapsed}
@@ -618,13 +778,16 @@ export function App() {
         onNavigate={navigate}
         onOpenProject={openProject}
         onOpenTask={openTask}
+        onDeleteProjects={deleteProjects}
+        onDeleteTasks={deleteTasks}
+        onOpenPendingReview={() => { if (pendingReviewTask) openTask(pendingReviewTask.id) }}
       />
       {drawerOpen && <button type="button" className="shell__scrim" aria-label="关闭侧边栏" onClick={() => setDrawerOpen(false)} />}
       <main className="shell-main">
         <MainToolbar title={toolbarTitle} subtitle={toolbarSubtitle} onToggleSidebar={toggleMobileSidebar}>
           {view.kind === 'task' && (mockTask || activeRealRun) && (
             <>
-              <button type="button" className="secondary-button" onClick={() => setWorkspaceOpen(true)}><FileStack size={14} />工作区文件</button>
+              <button type="button" className="secondary-button" onClick={() => setWorkspaceOpen(true)}><FileStack size={14} />证据与文件</button>
               {mockTask && <button type="button" className="quiet-button" onClick={handleDeleteMockTask}><Trash2 size={14} />删除</button>}
               {activeRealRun && <button type="button" className="quiet-button" disabled={busy} onClick={() => void deleteRun()}><Trash2 size={14} />删除</button>}
             </>
@@ -643,6 +806,7 @@ export function App() {
               onCreateProject={() => navigate('new')}
               onOpenProject={openProject}
               onOpenDiscovery={openDiscovery}
+              onDeleteProjects={deleteProjects}
             />
           </div>
         )}
@@ -666,6 +830,8 @@ export function App() {
               onOpenOverview={openProject}
               onOpenLibrary={openLibrary}
               onCreateDemoTask={(handoff) => handleCreateDemoTask(view.id, handoff)}
+              onLaunchRun={(nextRun) => void openLaunchedDiscoveryRun(nextRun)}
+              publicDemo={isPublicDemo}
             />
           </div>
         )}
@@ -676,6 +842,16 @@ export function App() {
               activeProjectId={activeProjectId}
               onKindChange={openLibrary}
               onOpenProject={openProject}
+              onOpenReader={openLiteratureReader}
+            />
+          </div>
+        )}
+        {view.kind === 'reader' && (
+          <div className="shell-view">
+            <LiteratureReaderPage
+              resourceId={view.id}
+              activeProjectId={activeProjectId}
+              onBack={() => openLibrary('literature')}
             />
           </div>
         )}
@@ -709,21 +885,27 @@ export function App() {
         )}
         {view.kind === 'task' && mockTask && (
           <div className="shell-view">
-            <MockTaskStream task={mockTask} onGateDecision={handleMockGate} onOpenDrawer={() => setWorkspaceOpen(true)} />
+            <div className="task-workspace">
+              <MockTaskStream task={mockTask} onGateDecision={handleMockGate} onOpenDrawer={() => setWorkspaceOpen(true)} />
+              <TaskResearchRail mockTask={mockTask} onOpenDrawer={() => setWorkspaceOpen(true)} />
+            </div>
           </div>
         )}
         {view.kind === 'task' && !mockTask && activeRealRun && definition && (
           <div className="shell-view">
-            <RunTaskStream
-              definition={definition}
-              run={activeRealRun}
-              busy={busy}
-              busyLabel={busyLabel}
-              onGateDecision={decideGate}
-              onSubmitRevision={submitGateRevision}
-              onRetryWriting={retryWriting}
-              onOpenDrawer={() => setWorkspaceOpen(true)}
-            />
+            <div className="task-workspace">
+              <RunTaskStream
+                definition={definition}
+                run={activeRealRun}
+                busy={busy}
+                busyLabel={busyLabel}
+                onGateDecision={decideGate}
+                onSubmitRevision={submitGateRevision}
+                onRetryWriting={retryWriting}
+                onOpenDrawer={() => setWorkspaceOpen(true)}
+              />
+              <TaskResearchRail run={activeRealRun} onOpenDrawer={() => setWorkspaceOpen(true)} />
+            </div>
           </div>
         )}
         {view.kind === 'task' && !mockTask && !activeRealRun && (
@@ -736,7 +918,7 @@ export function App() {
       <WorkspaceDrawer
         open={workspaceOpen}
         onClose={() => setWorkspaceOpen(false)}
-        caseName={mockTask?.title ?? activeRealRun?.caseName ?? ''}
+        caseName={activeTaskTitle ?? ''}
         definition={definition}
         run={activeRealRun}
         baselineRun={baselineRun}

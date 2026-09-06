@@ -1,0 +1,110 @@
+{
+  "schema_version": "ai-scientist-component-ablation-campaign/1.0.0",
+  "frozen_at": "2026-09-05T05:40:04+08:00",
+  "source_protocol": {
+    "path": "experiments/ai_scientist_system_capability_v3_protocol.json",
+    "canonical_json_sha256": "89ed67bf5271d7c1a999a59e36fbccf07cca5872a55081bb53a5c03b4c36007e"
+  },
+  "purpose": "在同一10个绿色金融问题、3个供应商seed和同一知识库快照下，每次只关闭一个系统组件，测量来源去重、结构纠错和审阅反馈回写的独立作用。",
+  "public_vocabulary": {
+    "historical_baseline": "基础门控流程",
+    "historical_enhanced": "增强审阅闭环",
+    "complete_loop": "完整审阅闭环",
+    "no_document_diversification": "关闭来源去重",
+    "no_schema_repair": "关闭结构纠错",
+    "no_reviewer_feedback": "关闭审阅反馈回写"
+  },
+  "question_labels": {
+    "Q01_green_patent_quality": "绿色专利质量与数量",
+    "Q02_esg_real_reduction": "ESG披露与真实减排",
+    "Q03_investment_scale_efficiency": "环保投资规模与效率",
+    "Q04_digital_green_synergy": "数字经济与绿色金融协同",
+    "Q05_green_credit_regional_heterogeneity": "绿色信贷的区域差异",
+    "Q06_financing_constraint_mechanism": "融资约束与绿色创新",
+    "Q07_institutional_attention_greenwashing": "机构监督与绿色漂洗",
+    "Q08_carbon_productivity_channels": "绿色金融与碳生产率",
+    "Q09_pilot_did_pretrend": "试验区政策识别",
+    "Q10_efficiency_vs_absolute_emissions": "碳效率与绝对排放"
+  },
+  "fixed_conditions": {
+    "questions": 10,
+    "seeds": [20260901, 20260902, 20260903],
+    "temperature": 0.2,
+    "retrieval_top_k": 6,
+    "max_graph_edges": 12,
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "embedding_revision": "7999e1d3359715c523056ef9478215996d62a620",
+    "model": "qwen3.7-plus via Alibaba Cloud Bailian",
+    "provider_attempt_ceiling_per_logical_call": 3,
+    "analysis": "intention-to-treat; all 30 question-seed cells remain in the denominator",
+    "execution_assets": "no license-complete immutable empirical dataset is supplied; readiness should fail closed"
+  },
+  "run_policy": {
+    "interleave_arms": true,
+    "maximum_concurrency": 3,
+    "retain_all_terminal_cells": true,
+    "overwrite_terminal_cells": false,
+    "provider_seed_semantics": "best-effort rather than strict determinism"
+  },
+  "arms": {
+    "complete_loop": {
+      "public_label": "完整审阅闭环",
+      "description": "来源去重、Schema结构纠错、问题保真审阅和一次审阅反馈回写全部开启。",
+      "retrieval_overrides": {
+        "diversity_mode": "per_document_cap",
+        "max_hits_per_document": 2,
+        "min_unique_documents": 3
+      },
+      "generation_overrides": {
+        "schema_repair_enabled": true,
+        "max_consistency_repairs": 1
+      }
+    },
+    "no_document_diversification": {
+      "public_label": "关闭来源去重",
+      "description": "仅关闭每篇文献最多命中2个证据块的限制，其余流程保持不变。",
+      "retrieval_overrides": {
+        "diversity_mode": "none",
+        "max_hits_per_document": 2,
+        "min_unique_documents": 3
+      },
+      "generation_overrides": {
+        "schema_repair_enabled": true,
+        "max_consistency_repairs": 1
+      }
+    },
+    "no_schema_repair": {
+      "public_label": "关闭结构纠错",
+      "description": "仅关闭模型输出未通过JSON Schema后的定向结构纠错，网络瞬时失败仍按原预算有界重试。",
+      "retrieval_overrides": {
+        "diversity_mode": "per_document_cap",
+        "max_hits_per_document": 2,
+        "min_unique_documents": 3
+      },
+      "generation_overrides": {
+        "schema_repair_enabled": false,
+        "max_consistency_repairs": 1
+      }
+    },
+    "no_reviewer_feedback": {
+      "public_label": "关闭审阅反馈回写",
+      "description": "保留问题保真Reviewer，但Reviewer首次拒绝后不再把缺失概念和检索词回写给规划器。",
+      "retrieval_overrides": {
+        "diversity_mode": "per_document_cap",
+        "max_hits_per_document": 2,
+        "min_unique_documents": 3
+      },
+      "generation_overrides": {
+        "schema_repair_enabled": true,
+        "max_consistency_repairs": 0
+      }
+    }
+  },
+  "reporting_rules": [
+    "对外只使用public_label和中文问题名称；内部ID仅保留在复现索引中。",
+    "系统通过率、主题忠实、来源分散、正确阻断和安全停止属于系统能力指标。",
+    "任何回归系数、显著性或科学结论均不得计入本消融的系统能力分数。",
+    "云端运行时间和token仅作描述，不作质量结论。",
+    "单因素消融与历史整包升级比较分开报告。"
+  ]
+}

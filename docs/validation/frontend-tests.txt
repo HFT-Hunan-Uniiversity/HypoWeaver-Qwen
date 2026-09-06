@@ -1,0 +1,13 @@
+
+> hypoweaver-workflow@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 <PACKAGE>/frontend
+
+
+ Test Files  6 passed (6)
+      Tests  69 passed (69)
+   Start at  21:23:03
+   Duration  918ms (transform 989ms, setup 0ms, import 1.62s, tests 137ms, environment 1ms)
+

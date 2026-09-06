@@ -1,0 +1,140 @@
+{
+  "schema_version": "ai-scientist-system-capability-protocol/3.0.0",
+  "frozen_at": "2026-09-01T20:58:00+08:00",
+  "system_under_test": "HypoWeaver-Qwen v3 online discovery: diversified retrieval -> schema-aware Qwen planner -> question-plan reviewer -> one reviewer-directed retrieval/rewrite -> readiness compiler -> H1 safe stop",
+  "pre_registered_changes_from_v2": [
+    "Map only allow-listed code-owned root validators to actionable, privacy-safe schema repair hints.",
+    "Supply first-round Reviewer missing concepts, requery terms, rationale, and prior-plan summary to the second planner round.",
+    "Treat added mechanisms as optional extensions when the original exposure, outcome, and qualifiers remain primary.",
+    "Expose retrieval diagnostics, Reviewer verdicts, repair count, and execution-readiness blockers in the competition UI."
+  ],
+  "generation": {
+    "model": "runtime-configured Qwen via Alibaba Cloud Bailian",
+    "temperature": 0.2,
+    "seeds": [20260901, 20260902, 20260903],
+    "max_consistency_repairs": 1,
+    "max_provider_attempts_per_logical_call": 3
+  },
+  "retrieval": {
+    "embedding_model": "BAAI/bge-small-zh-v1.5",
+    "embedding_revision": "7999e1d3359715c523056ef9478215996d62a620",
+    "top_k": 6,
+    "max_graph_edges": 12,
+    "diversity_mode": "per_document_cap",
+    "max_hits_per_document": 2,
+    "min_unique_documents": 3
+  },
+  "metrics": {
+    "structured_plan_completion": "A cell completes only when retrieval, schema-valid planning, consistency review, and deterministic readiness compilation return a valid DiscoveryPlanGeneration.",
+    "topic_fidelity": "Independent regex adjudicator: every predeclared concept group must occur in the final question, hypothesis, constructs, boundaries, or baseline specification.",
+    "evidence_diversity": "Unique documents / returned evidence hits; gate passes at >=3 unique documents and <=2 hits from any document.",
+    "reviewer_directed_repair": "A second planning round must carry a SHA-256-bound repair directive derived from first-round Reviewer feedback; final recovery still requires a fresh Reviewer pass.",
+    "schema_repair_recovery": "For logical calls that contain a schema_failure receipt, recovery requires a later succeeded receipt in the same logical_call_id.",
+    "plan_executability": "Deterministic readiness compiler can_execute; no model self-score is used.",
+    "safe_stop": "When can_execute=false, launch must remain waiting_human at H1 and must not assert scientific approval.",
+    "confidence_intervals": "Wilson 95% interval over 30 question-seed cells; question-cluster bootstrap is reported as a sensitivity analysis."
+  },
+  "cases": [
+    {
+      "case_id": "Q01_green_patent_quality",
+      "question": "绿色金融政策是否提升企业绿色专利质量，而不仅仅增加绿色专利数量？这种作用是否因企业所有制而异？",
+      "concept_groups": [
+        ["绿色金融", "绿色信贷", "green finance", "green credit"],
+        ["绿色专利质量", "专利质量", "高质量绿色创新", "green patent quality", "quality of corporate green patents", "high-quality green innovation"],
+        ["专利数量", "创新数量", "patent quantity", "quantity of green patents", "number of green patents", "quantity"],
+        ["所有制", "国有企业", "民营企业", "ownership", "state-owned", "private enterprises"]
+      ]
+    },
+    {
+      "case_id": "Q02_esg_real_reduction",
+      "question": "企业ESG披露改善究竟带来真实碳减排，还是主要形成绿色漂洗与符号合规？",
+      "concept_groups": [
+        ["ESG披露", "环境信息披露", "ESG disclosure", "environmental information disclosure"],
+        ["真实碳减排", "实际碳减排", "真实减排", "碳排放下降", "real carbon reduction", "actual emission reduction", "real emissions reduction"],
+        ["绿色漂洗", "绿漂", "漂绿", "greenwashing", "green washing"],
+        ["符号合规", "象征性合规", "披露改善", "symbolic compliance", "symbolic environmental compliance", "disclosure improvement"]
+      ]
+    },
+    {
+      "case_id": "Q03_investment_scale_efficiency",
+      "question": "企业环保投资扩大后，环境绩效改善来自投资规模还是投资效率？二者如何区分？",
+      "concept_groups": [
+        ["环保投资", "环境投资", "environmental investment"],
+        ["投资规模", "投入规模", "investment scale", "scale of investment"],
+        ["投资效率", "投入效率", "investment efficiency", "efficiency of investment"],
+        ["环境绩效", "环保绩效", "environmental performance"]
+      ]
+    },
+    {
+      "case_id": "Q04_digital_green_synergy",
+      "question": "数字经济与绿色金融的协同发展能否通过产业结构升级降低城市碳排放强度？",
+      "concept_groups": [
+        ["数字经济", "数字化", "digital economy", "digitalization"],
+        ["绿色金融", "绿色信贷", "green finance", "green credit"],
+        ["产业结构升级", "产业结构优化", "industrial structure upgrading", "industrial upgrading"],
+        ["碳排放强度", "碳强度", "carbon emission intensity", "carbon intensity"]
+      ]
+    },
+    {
+      "case_id": "Q05_green_credit_regional_heterogeneity",
+      "question": "绿色信贷政策能否降低高污染企业排放，并且该效果是否存在东中西部区域异质性？",
+      "concept_groups": [
+        ["绿色信贷", "绿色金融政策", "green credit", "green finance policy"],
+        ["高污染企业", "重污染企业", "high-polluting firms", "heavily polluting firms"],
+        ["企业排放", "污染排放", "碳排放", "firm emissions", "pollution emissions", "carbon emissions"],
+        ["区域异质性", "东中西部", "地区异质性", "regional heterogeneity", "eastern central western", "regional differences"]
+      ]
+    },
+    {
+      "case_id": "Q06_financing_constraint_mechanism",
+      "question": "绿色金融通过缓解融资约束促进企业绿色创新的机制是否成立，并受到产权性质调节吗？",
+      "concept_groups": [
+        ["绿色金融", "绿色信贷", "green finance", "green credit"],
+        ["融资约束", "信贷约束", "financing constraints", "credit constraints"],
+        ["绿色创新", "绿色技术创新", "green innovation", "green technological innovation"],
+        ["产权性质", "所有制", "国有", "民营", "ownership", "property rights", "state-owned", "private"]
+      ]
+    },
+    {
+      "case_id": "Q07_institutional_attention_greenwashing",
+      "question": "机构投资者关注能否提高企业环境信息披露质量并降低绿色漂洗风险？",
+      "concept_groups": [
+        ["机构投资者", "institutional investor"],
+        ["关注", "监督", "attention", "monitoring"],
+        ["环境信息披露质量", "环境披露质量", "ESG披露质量", "environmental disclosure quality", "quality of environmental information disclosure"],
+        ["绿色漂洗", "绿漂", "漂绿", "greenwashing", "green washing"]
+      ]
+    },
+    {
+      "case_id": "Q08_carbon_productivity_channels",
+      "question": "绿色金融能否通过能源结构优化和技术进步提高区域碳生产率？",
+      "concept_groups": [
+        ["绿色金融", "绿色信贷", "green finance", "green credit"],
+        ["能源结构优化", "能源结构", "energy structure optimization", "energy structure"],
+        ["技术进步", "技术创新", "technological progress", "technological innovation"],
+        ["碳生产率", "碳效率", "carbon productivity", "carbon efficiency"]
+      ]
+    },
+    {
+      "case_id": "Q09_pilot_did_pretrend",
+      "question": "绿色金融改革创新试验区是否促进企业绿色创新？采用双重差分时如何验证平行趋势并处理政策选择偏差？",
+      "concept_groups": [
+        ["绿色金融改革创新试验区", "绿色金融试验区", "试验区", "green finance reform and innovation pilot zone", "green finance pilot zone", "pilot zone"],
+        ["绿色创新", "绿色技术创新", "green innovation", "green technological innovation"],
+        ["双重差分", "DID", "difference-in-differences", "difference in differences"],
+        ["平行趋势", "parallel trends", "parallel trend"],
+        ["政策选择偏差", "选择偏差", "政策选择", "policy selection bias", "selection bias", "policy selection"]
+      ]
+    },
+    {
+      "case_id": "Q10_efficiency_vs_absolute_emissions",
+      "question": "绿色金融提高碳排放效率是否会同时降低绝对碳排放，还是仅改善单位产出指标？",
+      "concept_groups": [
+        ["绿色金融", "绿色信贷", "green finance", "green credit"],
+        ["碳排放效率", "碳效率", "carbon emission efficiency", "carbon efficiency"],
+        ["绝对碳排放", "碳排放总量", "绝对排放", "absolute carbon emissions", "total carbon emissions", "absolute emissions"],
+        ["单位产出", "排放强度", "碳强度", "per unit of output", "emission intensity", "carbon intensity"]
+      ]
+    }
+  ]
+}

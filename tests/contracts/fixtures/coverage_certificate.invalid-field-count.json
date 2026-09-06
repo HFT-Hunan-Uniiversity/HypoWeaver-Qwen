@@ -1,0 +1,13 @@
+{
+  "description": "Mutation applied to the valid seed: remove one observed-absent abstract without changing the 100-document target.",
+  "path": [
+    "coverage",
+    "field_observability",
+    "fields",
+    0,
+    "status_counts",
+    "observed_absent"
+  ],
+  "value": 9,
+  "expected_error_substring": "field status counts do not close"
+}

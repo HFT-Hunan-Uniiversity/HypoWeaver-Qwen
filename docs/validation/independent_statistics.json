@@ -1,0 +1,323 @@
+{
+  "case009": {
+    "assertions": {
+      "all_four_coefficients_match_within_1e_8": true,
+      "event_pretrend_decision_matches": true,
+      "round2_binds_round1_hash": true,
+      "source_md5_matches_official": true
+    },
+    "coefficient_absolute_differences": {
+      "round1_controlled_complete_case": 2.1497692515026756e-11,
+      "round2_controlled_short_window_month19_42": 1.237254743102767e-11,
+      "round2_controlled_with_treated_linear_trend": 7.665423851221931e-12,
+      "round2_no_controls_full_sample": 2.3985258224001882e-11
+    },
+    "event_pretrend": {
+      "df": 11,
+      "p_value_chi_square": 3.180593358838315e-09,
+      "pretrend_terms": [
+        "event_remote_pre",
+        "event_m11",
+        "event_m10",
+        "event_m9",
+        "event_m8",
+        "event_m7",
+        "event_m6",
+        "event_m5",
+        "event_m4",
+        "event_m3",
+        "event_m2"
+      ],
+      "statistic": 62.493419769122724
+    },
+    "event_pretrend_p_absolute_difference": 1.6805933588383152e-09,
+    "generated_at": "2026-09-05T13:21:35.308820+00:00",
+    "implementation": "NumPy explicit city/month dummy OLS with independently implemented CR1 city-cluster sandwich covariance",
+    "independence_scope": "Does not import the primary AbsorbingLS executor; shares only the frozen data and model specification.",
+    "maximum_coefficient_absolute_difference": 2.3985258224001882e-11,
+    "models": {
+      "round1_controlled_complete_case": {
+        "clustered_standard_error_cr1": 1.6644118961114638,
+        "clusters": 132,
+        "coefficient": 0.3973844221214977,
+        "columns": 198,
+        "nobs": 7236,
+        "p_value_t_cluster_df": 0.8116697058529474,
+        "rank": 198
+      },
+      "round2_controlled_short_window_month19_42": {
+        "clustered_standard_error_cr1": 1.3718978126733694,
+        "clusters": 129,
+        "coefficient": 1.7448587239876274,
+        "columns": 159,
+        "nobs": 2928,
+        "p_value_t_cluster_df": 0.20572964874700211,
+        "rank": 159
+      },
+      "round2_controlled_with_treated_linear_trend": {
+        "clustered_standard_error_cr1": 1.4058522085306995,
+        "clusters": 132,
+        "coefficient": 1.8490388555076653,
+        "columns": 199,
+        "nobs": 7236,
+        "p_value_t_cluster_df": 0.1907253682409735,
+        "rank": 199
+      },
+      "round2_no_controls_full_sample": {
+        "clustered_standard_error_cr1": 1.437762268637715,
+        "clusters": 146,
+        "coefficient": 2.1677210056760146,
+        "columns": 206,
+        "nobs": 8760,
+        "p_value_t_cluster_df": 0.13380579593554393,
+        "rank": 206
+      }
+    },
+    "note": "CR1 standard errors are reported for audit but need not exactly equal AbsorbingLS because absorbed-degree corrections differ; coefficient equality and the pretrend decision are the hard checks.",
+    "schema_version": "track1b-independent-recompute/1.0.0",
+    "source_hashes": {
+      "data_sha256": "e1d8ed21af33e7be474198366c802209f41a67617659eb50177a8106188acc0a",
+      "round1_result_sha256": "e730e2b68c72e1c73afea94bd28233a929a93860f156bdba34e31ba5b08e9bd6",
+      "round2_result_sha256": "5a89804e296850c22ab912416fdf3f6db70244385c9010c63f794af25e7eb5be"
+    }
+  },
+  "case010": {
+    "checks": {
+      "all_event_coefficients_match": true,
+      "all_primary_and_robustness_models_match": true,
+      "claim_gate_remains_closed": true,
+      "event_pretrend_p_value_matches": true,
+      "event_pretrend_statistic_matches": true,
+      "heterogeneity_model_matches": true,
+      "mechanism_model_matches": true,
+      "no_secret_markers_in_text_outputs": true,
+      "output_hashes_match": true,
+      "placebo_distribution_matches": true,
+      "placebo_p_value_matches": true,
+      "raw_source_hash_unchanged": true,
+      "round1_binding_matches": true,
+      "round1_protocol_hash_matches_record": true,
+      "round2_binding_verified_in_result": true,
+      "round2_protocol_hash_matches_result": true
+    },
+    "environment": {
+      "numpy": "2.2.6",
+      "pandas": "2.2.3",
+      "python": "3.12.4",
+      "scipy": "1.17.1",
+      "verifier_sha256": "dd5689e898f3c0ea4406fa24d11e9734960e8ec661064dc1c649e0cd490be506"
+    },
+    "event_comparisons": {
+      "event_ge_p4": {
+        "coefficient_abs_difference": 4.778288875684211e-11,
+        "p_value_abs_difference": 3.3576463658036015e-11,
+        "passed": true,
+        "standard_error_abs_difference": 3.303363832474204e-11
+      },
+      "event_le_m4": {
+        "coefficient_abs_difference": 2.789728864582841e-11,
+        "p_value_abs_difference": 3.4904940049429456e-11,
+        "passed": true,
+        "standard_error_abs_difference": 1.6377489642227516e-11
+      },
+      "event_m2": {
+        "coefficient_abs_difference": 2.3881532168479325e-11,
+        "p_value_abs_difference": 2.6103091910201215e-11,
+        "passed": true,
+        "standard_error_abs_difference": 2.3076016791856446e-11
+      },
+      "event_m3": {
+        "coefficient_abs_difference": 4.3359701246137305e-11,
+        "p_value_abs_difference": 3.126654490870351e-11,
+        "passed": true,
+        "standard_error_abs_difference": 4.687999641261875e-11
+      },
+      "event_p0": {
+        "coefficient_abs_difference": 2.3420931860584915e-11,
+        "p_value_abs_difference": 6.259992524348945e-13,
+        "passed": true,
+        "standard_error_abs_difference": 2.181251707034093e-11
+      },
+      "event_p1": {
+        "coefficient_abs_difference": 3.114265789694315e-11,
+        "p_value_abs_difference": 2.2764061469171537e-11,
+        "passed": true,
+        "standard_error_abs_difference": 4.613508186590565e-11
+      },
+      "event_p2": {
+        "coefficient_abs_difference": 4.7674100778216655e-11,
+        "p_value_abs_difference": 3.348733183111685e-11,
+        "passed": true,
+        "standard_error_abs_difference": 3.335345888366703e-12
+      },
+      "event_p3": {
+        "coefficient_abs_difference": 2.736071091913317e-11,
+        "p_value_abs_difference": 7.17197221750121e-12,
+        "passed": true,
+        "standard_error_abs_difference": 4.2748415918225646e-11
+      }
+    },
+    "event_pretrend_recompute": {
+      "chi2": 2.4004296880803304,
+      "p_value": 0.49355464142259386
+    },
+    "generated_at": "2026-09-05T13:21:33.689585+00:00",
+    "heterogeneity_comparison": {
+      "coefficient_abs_difference": 3.178120960845021e-11,
+      "p_value_abs_difference": 2.560701650722308e-11,
+      "passed": true,
+      "standard_error_abs_difference": 1.0203528993946165e-11
+    },
+    "mechanism_comparison": {
+      "coefficient_abs_difference": 3.4331565368361794e-11,
+      "p_value_abs_difference": 3.154080122080849e-11,
+      "passed": true,
+      "standard_error_abs_difference": 1.768983484001785e-11
+    },
+    "method": "Independent NumPy OLS after two-way alternating-projection residualization, with a separately reconstructed firm-clustered sandwich covariance.",
+    "model_comparisons": {
+      "M1_PRIMARY_ASSOCIATION": {
+        "coefficient_abs_difference": 1.2717951691776364e-11,
+        "p_value_abs_difference": 4.381355803335929e-11,
+        "passed": true,
+        "standard_error_abs_difference": 2.7310858435880547e-11
+      },
+      "R_ADD_INDUSTRY_HHI": {
+        "coefficient_abs_difference": 4.976193068717549e-11,
+        "p_value_abs_difference": 1.813816523192624e-11,
+        "passed": true,
+        "standard_error_abs_difference": 3.3891618678172364e-11
+      },
+      "R_EXCLUDE_2021": {
+        "coefficient_abs_difference": 4.6820547439097027e-11,
+        "p_value_abs_difference": 8.025799317669391e-12,
+        "passed": true,
+        "standard_error_abs_difference": 2.39810254987205e-12
+      },
+      "R_INDEPENDENT_INVENTIONS": {
+        "coefficient_abs_difference": 4.0698583392284604e-11,
+        "p_value_abs_difference": 2.741956284962356e-11,
+        "passed": true,
+        "standard_error_abs_difference": 4.843393394682316e-11
+      },
+      "R_MONOTONE_PATHS": {
+        "coefficient_abs_difference": 3.9979339283569004e-11,
+        "p_value_abs_difference": 2.7571190339484297e-11,
+        "passed": true,
+        "standard_error_abs_difference": 5.321323243157039e-12
+      },
+      "R_NO_CONTROLS": {
+        "coefficient_abs_difference": 3.17803006133488e-11,
+        "p_value_abs_difference": 2.98133838038013e-11,
+        "passed": true,
+        "standard_error_abs_difference": 2.1725066190469988e-11
+      },
+      "R_TOTAL_GREEN_PATENTS": {
+        "coefficient_abs_difference": 1.178480923957892e-12,
+        "p_value_abs_difference": 1.096665640243355e-11,
+        "passed": true,
+        "standard_error_abs_difference": 3.0618580587615796e-11
+      },
+      "R_UTILITY_MODEL_CONTRAST": {
+        "coefficient_abs_difference": 4.6839549600052877e-11,
+        "p_value_abs_difference": 2.6178864631631882e-11,
+        "passed": true,
+        "standard_error_abs_difference": 2.736019744098428e-11
+      }
+    },
+    "output_hash_records": [
+      {
+        "expected_sha256": "eb5d156fa12264464035eca824e521999534e432afe5c1153487553ed03b6b3b",
+        "observed_sha256": "eb5d156fa12264464035eca824e521999534e432afe5c1153487553ed03b6b3b",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\event_study.csv"
+      },
+      {
+        "expected_sha256": "7d5971300797715ab16dc3ada2522ebd7643816b7701c2ea6e2d32b7a18ecc89",
+        "observed_sha256": "7d5971300797715ab16dc3ada2522ebd7643816b7701c2ea6e2d32b7a18ecc89",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figure_manifest.json"
+      },
+      {
+        "expected_sha256": "de28bba711078c7d3b5158a000e3a83681dd68f42bcad51196409cb680acdf78",
+        "observed_sha256": "de28bba711078c7d3b5158a000e3a83681dd68f42bcad51196409cb680acdf78",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\mechanism_and_heterogeneity.csv"
+      },
+      {
+        "expected_sha256": "4690809864588d9bbf82763187cc234afec4a268da160c963a4c48e2c914e2f4",
+        "observed_sha256": "4690809864588d9bbf82763187cc234afec4a268da160c963a4c48e2c914e2f4",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\model_comparison.csv"
+      },
+      {
+        "expected_sha256": "b00a77db7e84954c879d9a6dcf704229513442e9a53ad971d0c7f230d2950bf5",
+        "observed_sha256": "b00a77db7e84954c879d9a6dcf704229513442e9a53ad971d0c7f230d2950bf5",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\placebo_distribution.csv"
+      },
+      {
+        "expected_sha256": "bf95fe1535b5799cd5794cea3745850a79b14416bc4c53f2f02e05118ee5813c",
+        "observed_sha256": "bf95fe1535b5799cd5794cea3745850a79b14416bc4c53f2f02e05118ee5813c",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_event_study.pdf"
+      },
+      {
+        "expected_sha256": "b6d3a5cce90888813eb475a3dbe8434e1d531762413624be539431d5e4842feb",
+        "observed_sha256": "b6d3a5cce90888813eb475a3dbe8434e1d531762413624be539431d5e4842feb",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_event_study.png"
+      },
+      {
+        "expected_sha256": "41332831cf1cbaac51e59f40b33915782e7bf16442bee4e7c94fdf2ecd6af44f",
+        "observed_sha256": "41332831cf1cbaac51e59f40b33915782e7bf16442bee4e7c94fdf2ecd6af44f",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_event_study.svg"
+      },
+      {
+        "expected_sha256": "24509703651a63ed63c2741f85205bfa2ffb080b0b5a7ec559d2fc20ab89ec06",
+        "observed_sha256": "24509703651a63ed63c2741f85205bfa2ffb080b0b5a7ec559d2fc20ab89ec06",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_model_comparison.pdf"
+      },
+      {
+        "expected_sha256": "f56f8be9b5dceb41e73a77b90a14d5b529e199133cbf5cd4faafb9a830ecc25b",
+        "observed_sha256": "f56f8be9b5dceb41e73a77b90a14d5b529e199133cbf5cd4faafb9a830ecc25b",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_model_comparison.png"
+      },
+      {
+        "expected_sha256": "989f69fffb8b59a62928ebba1324850ef4ea7241b645317f43e36be5dbe4ac0d",
+        "observed_sha256": "989f69fffb8b59a62928ebba1324850ef4ea7241b645317f43e36be5dbe4ac0d",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_model_comparison.svg"
+      },
+      {
+        "expected_sha256": "aa7cfef6f703392fd6ab437410b665fdb46beecffd2c9f4bbb1e8592e9b30193",
+        "observed_sha256": "aa7cfef6f703392fd6ab437410b665fdb46beecffd2c9f4bbb1e8592e9b30193",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_mechanism_framework.pdf"
+      },
+      {
+        "expected_sha256": "250203e555f673a18c205d029b788e768cc3bb68a21ad292bd06710e7f044296",
+        "observed_sha256": "250203e555f673a18c205d029b788e768cc3bb68a21ad292bd06710e7f044296",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_mechanism_framework.png"
+      },
+      {
+        "expected_sha256": "88c8313ec0d19670f77c946aeb4c96486b7fac8e9a81a14a05fbb4fa0de66dcd",
+        "observed_sha256": "88c8313ec0d19670f77c946aeb4c96486b7fac8e9a81a14a05fbb4fa0de66dcd",
+        "passed": true,
+        "path": "output\\experiments\\case010_carbon_market_adaptive_v1\\figures\\carbon_market_mechanism_framework.svg"
+      }
+    ],
+    "placebo_recompute": {
+      "exceedances": 1,
+      "maximum_coefficient_difference": 9.8879238130678e-17,
+      "p_value": 0.004
+    },
+    "schema_version": "case010-independent-recompute/1.0.0",
+    "secret_findings": [],
+    "verification_passed": true
+  }
+}

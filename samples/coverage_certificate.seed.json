@@ -1,0 +1,652 @@
+{
+  "schema_version": "1.0.0",
+  "certificate_id": "coverage-green-finance-20260809-001",
+  "generated_at": "2026-08-09T12:00:00+08:00",
+  "as_of": "2026-08-09T11:30:00+08:00",
+  "supersedes_certificate_id": null,
+  "subject": {
+    "corpus_id": "green-finance-demo-corpus",
+    "release_id": "release-20260809T033000Z",
+    "manifest_sha256": "5c1c78e12d80a0ed18b9c50c268f890f19bb62879bdb846cf52cbd01378483ac",
+    "graph_snapshot_id": "graph-20260809-001",
+    "index_snapshot_id": "index-20260809-001"
+  },
+  "scope": {
+    "description": "Synthetic, internally consistent certificate for 100 green-finance journal articles published from 2020 through 2024 in English or Chinese.",
+    "inclusion_criteria": [
+      "Document type is journal_article.",
+      "Publication year is between 2020 and 2024 inclusive.",
+      "Language is English or Chinese.",
+      "Latest screening decision is include or review."
+    ],
+    "exclusion_criteria": [
+      "Retracted records are excluded.",
+      "Records outside the declared year or language scope are excluded."
+    ],
+    "source_ids": ["openalex", "crossref"],
+    "languages": ["en", "zh"],
+    "year_start": 2020,
+    "year_end": 2024,
+    "document_types": ["journal_article"],
+    "target_document_count": 100
+  },
+  "pipeline_versions": {
+    "source_registry": "source-registry/1.0.0",
+    "ingestion": "ingestion/1.3.0",
+    "deduplication": "dedup/1.1.0",
+    "fulltext_resolver": "fulltext-resolver/1.2.0",
+    "parser": "document-parser/2.0.0",
+    "field_extractor": "graph-profile-extractor/0.2.0",
+    "indexer": "hybrid-index/1.0.0",
+    "retrieval_protocol": "gap-retrieval/1.0.0",
+    "coverage_evaluator": "coverage-certificate/1.0.0"
+  },
+  "coverage_status": "coverage_ready",
+  "thresholds": {
+    "required_source_coverage_rate": 1.0,
+    "language_coverage_rate": 0.99,
+    "year_coverage_rate": 0.99,
+    "fulltext_coverage_rate": 0.85,
+    "parsing_success_rate": 0.95,
+    "indexing_success_rate": 0.98,
+    "critical_field_observability_rate": 0.8,
+    "dedup_resolution_rate": 0.99,
+    "retrieval_marginal_gain_max": 0.02,
+    "retrieval_consecutive_low_gain_rounds": 2
+  },
+  "coverage": {
+    "sources": {
+      "status": "observed_present",
+      "registered_source_count": 2,
+      "required_source_count": 1,
+      "covered_required_source_count": 1,
+      "missing_required_source_count": 0,
+      "required_coverage_rate": 1.0,
+      "items": [
+        {
+          "source_id": "openalex",
+          "required": true,
+          "status": "observed_present",
+          "query_executed": true,
+          "observed_record_count": 110,
+          "checked_at": "2026-08-09T10:00:00+08:00",
+          "evidence_refs": ["report:source-openalex-20260809"],
+          "note": "The required discovery source was queried successfully."
+        },
+        {
+          "source_id": "crossref",
+          "required": false,
+          "status": "source_missing",
+          "query_executed": true,
+          "observed_record_count": 0,
+          "checked_at": "2026-08-09T10:05:00+08:00",
+          "evidence_refs": ["report:source-crossref-20260809"],
+          "note": "The optional corroboration source timed out and does not reduce required-source coverage."
+        }
+      ]
+    },
+    "languages": {
+      "status": "observed_present",
+      "target_document_count": 100,
+      "covered_document_count": 100,
+      "unknown_language_count": 0,
+      "coverage_rate": 1.0,
+      "items": [
+        { "language": "en", "document_count": 60, "status": "observed_present" },
+        { "language": "zh", "document_count": 40, "status": "observed_present" }
+      ]
+    },
+    "years": {
+      "status": "observed_present",
+      "target_document_count": 100,
+      "known_year_count": 100,
+      "missing_year_count": 0,
+      "coverage_rate": 1.0,
+      "bins": [
+        { "year": 2020, "document_count": 20, "status": "observed_present" },
+        { "year": 2021, "document_count": 20, "status": "observed_present" },
+        { "year": 2022, "document_count": 20, "status": "observed_present" },
+        { "year": 2023, "document_count": 20, "status": "observed_present" },
+        { "year": 2024, "document_count": 20, "status": "observed_present" }
+      ]
+    },
+    "fulltext": {
+      "status": "observed_present",
+      "target_document_count": 100,
+      "fulltext_available_count": 90,
+      "metadata_only_count": 10,
+      "rights_blocked_count": 4,
+      "source_missing_count": 6,
+      "not_applicable_count": 0,
+      "coverage_rate": 0.9
+    },
+    "parsing": {
+      "status": "observed_present",
+      "target_document_count": 100,
+      "input_document_count": 90,
+      "success_count": 88,
+      "failed_count": 2,
+      "not_applicable_count": 10,
+      "success_rate": 0.9777777778,
+      "parser_versions": ["document-parser/2.0.0"]
+    },
+    "indexing": {
+      "status": "observed_present",
+      "target_document_count": 100,
+      "input_document_count": 88,
+      "indexed_document_count": 88,
+      "failed_count": 0,
+      "not_applicable_count": 12,
+      "success_rate": 1.0,
+      "index_snapshot_id": "index-20260809-001"
+    },
+    "field_observability": {
+      "target_document_count": 100,
+      "critical_field_min_observability": 0.8,
+      "fields": [
+        {
+          "field_path": "document.abstract",
+          "description": "Article abstract from the certified metadata record.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 100,
+          "status_counts": {
+            "observed_present": 90,
+            "observed_absent": 10,
+            "not_extracted": 0,
+            "source_missing": 0,
+            "not_applicable": 0
+          },
+          "observability_rate": 1.0,
+          "presence_rate": 0.9,
+          "extraction_version": "ingestion/1.3.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.methods",
+          "description": "Methods explicitly extracted from full text.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 85,
+          "status_counts": {
+            "observed_present": 70,
+            "observed_absent": 15,
+            "not_extracted": 5,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.85,
+          "presence_rate": 0.8235294118,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.mechanisms",
+          "description": "Mechanisms explicitly asserted or tested in the document.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 80,
+          "status_counts": {
+            "observed_present": 50,
+            "observed_absent": 30,
+            "not_extracted": 10,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.8,
+          "presence_rate": 0.625,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.sample.population",
+          "description": "Study population or unit of analysis.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 80,
+          "status_counts": {
+            "observed_present": 60,
+            "observed_absent": 20,
+            "not_extracted": 10,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.8,
+          "presence_rate": 0.75,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.findings.effect_direction",
+          "description": "Direction of an extracted empirical finding.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 80,
+          "status_counts": {
+            "observed_present": 55,
+            "observed_absent": 25,
+            "not_extracted": 10,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.8,
+          "presence_rate": 0.6875,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.research_fields",
+          "description": "Normalized research-field assignments used for cross-stream analysis.",
+          "critical": true,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 100,
+          "status_counts": {
+            "observed_present": 100,
+            "observed_absent": 0,
+            "not_extracted": 0,
+            "source_missing": 0,
+            "not_applicable": 0
+          },
+          "observability_rate": 1.0,
+          "presence_rate": 1.0,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.sample.geographies",
+          "description": "Geographic context extracted from the study sample.",
+          "critical": false,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 75,
+          "status_counts": {
+            "observed_present": 55,
+            "observed_absent": 20,
+            "not_extracted": 15,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.75,
+          "presence_rate": 0.7333333333,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.datasets",
+          "description": "Datasets named or described in the study.",
+          "critical": false,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 78,
+          "status_counts": {
+            "observed_present": 58,
+            "observed_absent": 20,
+            "not_extracted": 12,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.78,
+          "presence_rate": 0.7435897436,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.models",
+          "description": "Statistical or conceptual models used by the study.",
+          "critical": false,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 78,
+          "status_counts": {
+            "observed_present": 50,
+            "observed_absent": 28,
+            "not_extracted": 12,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.78,
+          "presence_rate": 0.641025641,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "profile.policies",
+          "description": "Policies explicitly linked to the research question or finding.",
+          "critical": false,
+          "target_document_count": 100,
+          "applicable_document_count": 100,
+          "observable_document_count": 70,
+          "status_counts": {
+            "observed_present": 40,
+            "observed_absent": 30,
+            "not_extracted": 20,
+            "source_missing": 10,
+            "not_applicable": 0
+          },
+          "observability_rate": 0.7,
+          "presence_rate": 0.5714285714,
+          "extraction_version": "graph-profile-extractor/0.2.0",
+          "evidence_refs": ["report:field-observability-20260809"]
+        },
+        {
+          "field_path": "policy.effective_date",
+          "description": "Policy effective date; outside the journal-article-only scope of this certificate.",
+          "critical": false,
+          "target_document_count": 100,
+          "applicable_document_count": 0,
+          "observable_document_count": 0,
+          "status_counts": {
+            "observed_present": 0,
+            "observed_absent": 0,
+            "not_extracted": 0,
+            "source_missing": 0,
+            "not_applicable": 100
+          },
+          "observability_rate": null,
+          "presence_rate": null,
+          "extraction_version": null,
+          "evidence_refs": ["report:field-observability-20260809"]
+        }
+      ]
+    },
+    "deduplication": {
+      "status": "observed_present",
+      "input_record_count": 110,
+      "canonical_document_count": 100,
+      "exact_duplicate_record_count": 7,
+      "near_duplicate_record_count": 3,
+      "duplicate_candidate_pair_count": 10,
+      "resolved_pair_count": 10,
+      "unresolved_pair_count": 0,
+      "manual_review_pending_count": 0,
+      "resolution_rate": 1.0,
+      "deduplication_version": "dedup/1.1.0"
+    },
+    "retrieval_saturation": {
+      "observation_status": "observed_present",
+      "saturation_status": "saturated",
+      "query_set_sha256": "ab5c78e12d80a0ed18b9c50c268f890f19bb62879bdb846cf52cbd01378483cd",
+      "search_space_description": "All certified sources searched with topic, method, mechanism, population, and citation-expansion query families.",
+      "minimum_rounds": 4,
+      "executed_rounds": 5,
+      "required_consecutive_low_gain_rounds": 2,
+      "marginal_gain_threshold": 0.02,
+      "last_round_marginal_gain": 0.0,
+      "unique_retrieved_document_count": 100,
+      "stopping_rule": "Stop after at least four rounds when two consecutive rounds add no more than 2 percent of cumulative unique documents.",
+      "rounds": [
+        {
+          "round": 1,
+          "query_family": "topic-core",
+          "candidate_count": 70,
+          "new_unique_document_count": 70,
+          "cumulative_unique_document_count": 70,
+          "marginal_gain": 1.0
+        },
+        {
+          "round": 2,
+          "query_family": "method-and-mechanism-expansion",
+          "candidate_count": 30,
+          "new_unique_document_count": 22,
+          "cumulative_unique_document_count": 92,
+          "marginal_gain": 0.2391304348
+        },
+        {
+          "round": 3,
+          "query_family": "citation-expansion",
+          "candidate_count": 15,
+          "new_unique_document_count": 7,
+          "cumulative_unique_document_count": 99,
+          "marginal_gain": 0.0707070707
+        },
+        {
+          "round": 4,
+          "query_family": "synonym-and-translation-expansion",
+          "candidate_count": 5,
+          "new_unique_document_count": 1,
+          "cumulative_unique_document_count": 100,
+          "marginal_gain": 0.01
+        },
+        {
+          "round": 5,
+          "query_family": "adversarial-gap-query",
+          "candidate_count": 4,
+          "new_unique_document_count": 0,
+          "cumulative_unique_document_count": 100,
+          "marginal_gain": 0.0
+        }
+      ],
+      "evidence_refs": ["report:retrieval-saturation-20260809"]
+    }
+  },
+  "gates": [
+    {
+      "gate_id": "gate:required-sources",
+      "dimension": "sources",
+      "metric": "required_coverage_rate",
+      "comparator": ">=",
+      "threshold": 1.0,
+      "observed": 1.0,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:source-openalex-20260809"],
+      "notes": "The unavailable Crossref source is optional in this synthetic scope."
+    },
+    {
+      "gate_id": "gate:languages",
+      "dimension": "languages",
+      "metric": "coverage_rate",
+      "comparator": ">=",
+      "threshold": 0.99,
+      "observed": 1.0,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:coverage-run-20260809"],
+      "notes": null
+    },
+    {
+      "gate_id": "gate:years",
+      "dimension": "years",
+      "metric": "coverage_rate",
+      "comparator": ">=",
+      "threshold": 0.99,
+      "observed": 1.0,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:coverage-run-20260809"],
+      "notes": null
+    },
+    {
+      "gate_id": "gate:fulltext",
+      "dimension": "fulltext",
+      "metric": "coverage_rate",
+      "comparator": ">=",
+      "threshold": 0.85,
+      "observed": 0.9,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:fulltext-coverage-20260809"],
+      "notes": "Ten metadata-only documents remain explicitly represented as unavailable, not absent."
+    },
+    {
+      "gate_id": "gate:parsing",
+      "dimension": "parsing",
+      "metric": "success_rate",
+      "comparator": ">=",
+      "threshold": 0.95,
+      "observed": 0.9777777778,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:parser-20260809"],
+      "notes": null
+    },
+    {
+      "gate_id": "gate:indexing",
+      "dimension": "indexing",
+      "metric": "success_rate",
+      "comparator": ">=",
+      "threshold": 0.98,
+      "observed": 1.0,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:index-20260809"],
+      "notes": null
+    },
+    {
+      "gate_id": "gate:critical-fields",
+      "dimension": "field_observability",
+      "metric": "critical_field_min_observability",
+      "comparator": ">=",
+      "threshold": 0.8,
+      "observed": 0.8,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:field-observability-20260809"],
+      "notes": "Only gap types backed by fields meeting their own requirements are allowed."
+    },
+    {
+      "gate_id": "gate:deduplication",
+      "dimension": "deduplication",
+      "metric": "resolution_rate",
+      "comparator": ">=",
+      "threshold": 0.99,
+      "observed": 1.0,
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:dedup-20260809"],
+      "notes": null
+    },
+    {
+      "gate_id": "gate:retrieval-saturation",
+      "dimension": "retrieval_saturation",
+      "metric": "saturation_status",
+      "comparator": "==",
+      "threshold": "saturated",
+      "observed": "saturated",
+      "status": "passed",
+      "blocking": true,
+      "evidence_refs": ["report:retrieval-saturation-20260809"],
+      "notes": "The final two rounds are at or below the declared marginal-gain threshold."
+    }
+  ],
+  "claim_gate": {
+    "status": "claim_ready",
+    "claim_ceiling": "corpus_bounded_gap",
+    "required_scope_qualifier": "Within the certified sources, English/Chinese journal articles from 2020-2024, and evidence available as of 2026-08-09T11:30:00+08:00",
+    "allowed_gap_types": [
+      "mechanism",
+      "population",
+      "method",
+      "controversy",
+      "temporal",
+      "cross_stream"
+    ],
+    "conditional_gap_types": ["data", "context", "model"],
+    "blocked_gap_types": ["policy"],
+    "gap_type_decisions": [
+      {
+        "gap_type": "mechanism",
+        "decision": "allowed",
+        "required_dimensions": ["fulltext", "parsing", "indexing", "field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.mechanisms"],
+        "blocked_by": [],
+        "rationale": "Mechanism observability meets the declared critical-field threshold."
+      },
+      {
+        "gap_type": "data",
+        "decision": "conditional",
+        "required_dimensions": ["field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.datasets"],
+        "blocked_by": ["profile.datasets:observability_below_0.8"],
+        "rationale": "Dataset mentions are observable in only 78 percent of applicable documents."
+      },
+      {
+        "gap_type": "population",
+        "decision": "allowed",
+        "required_dimensions": ["fulltext", "field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.sample.population"],
+        "blocked_by": [],
+        "rationale": "Population observability meets the declared critical-field threshold."
+      },
+      {
+        "gap_type": "context",
+        "decision": "conditional",
+        "required_dimensions": ["field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.sample.geographies"],
+        "blocked_by": ["profile.sample.geographies:observability_below_0.8"],
+        "rationale": "Geographic context extraction does not yet meet the threshold."
+      },
+      {
+        "gap_type": "method",
+        "decision": "allowed",
+        "required_dimensions": ["fulltext", "parsing", "field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.methods"],
+        "blocked_by": [],
+        "rationale": "Method observability exceeds the declared threshold."
+      },
+      {
+        "gap_type": "model",
+        "decision": "conditional",
+        "required_dimensions": ["field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.models"],
+        "blocked_by": ["profile.models:observability_below_0.8"],
+        "rationale": "Model extraction covers 78 percent of applicable documents."
+      },
+      {
+        "gap_type": "policy",
+        "decision": "blocked",
+        "required_dimensions": ["sources", "field_observability", "retrieval_saturation"],
+        "required_field_paths": ["profile.policies", "policy.effective_date"],
+        "blocked_by": ["profile.policies:observability_below_0.8", "policy.effective_date:not_applicable"],
+        "rationale": "The certificate covers journal articles only and cannot support policy-universe absence claims."
+      },
+      {
+        "gap_type": "controversy",
+        "decision": "allowed",
+        "required_dimensions": ["fulltext", "field_observability", "deduplication", "retrieval_saturation"],
+        "required_field_paths": ["profile.findings.effect_direction"],
+        "blocked_by": [],
+        "rationale": "Finding-direction observability meets the threshold and duplicates are resolved."
+      },
+      {
+        "gap_type": "temporal",
+        "decision": "allowed",
+        "required_dimensions": ["years", "deduplication", "retrieval_saturation"],
+        "required_field_paths": ["document.published_date"],
+        "blocked_by": [],
+        "rationale": "All documents have an observed year within the certified window."
+      },
+      {
+        "gap_type": "cross_stream",
+        "decision": "allowed",
+        "required_dimensions": ["field_observability", "deduplication", "retrieval_saturation"],
+        "required_field_paths": ["profile.research_fields", "profile.methods"],
+        "blocked_by": [],
+        "rationale": "Research-field and method assignments meet the required observability thresholds."
+      }
+    ],
+    "prohibited_claim_forms": [
+      "No research exists on X.",
+      "The literature has never studied X.",
+      "A null or missing field proves that X is absent.",
+      "A gap outside the certified source, language, year, document-type, or as-of scope."
+    ]
+  },
+  "evidence_refs": [
+    "manifest:release-20260809T033000Z",
+    "report:coverage-run-20260809",
+    "report:retrieval-saturation-20260809"
+  ],
+  "blockers": [],
+  "warnings": [
+    "Crossref was unavailable in this synthetic run but was declared optional before execution.",
+    "Policy-gap claims remain blocked because policy documents are outside this certificate scope.",
+    "This seed is synthetic and demonstrates contract consistency; it is not a production coverage claim."
+  ]
+}

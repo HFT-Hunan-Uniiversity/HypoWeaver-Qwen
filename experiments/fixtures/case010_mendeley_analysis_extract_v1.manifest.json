@@ -1,0 +1,102 @@
+{
+  "environment": {
+    "pandas": "3.0.1",
+    "pyreadstat": "1.3.6",
+    "python": "3.12.14"
+  },
+  "generated_at": "2026-09-04T19:16:03.380452+00:00",
+  "output": {
+    "columns": [
+      "firm_id",
+      "year",
+      "industry_code",
+      "province_code",
+      "city_code",
+      "source_policy_post",
+      "leverage",
+      "return_on_assets",
+      "total_assets",
+      "state_ownership_code",
+      "industry_hhi_a",
+      "financing_constraint_fc",
+      "financing_constraint_kz",
+      "financing_constraint_sa",
+      "financing_constraint_ww",
+      "green_patent_independent_all",
+      "green_invention_independent",
+      "green_utility_independent",
+      "green_patent_joint_all",
+      "green_invention_joint",
+      "green_utility_joint"
+    ],
+    "duplicate_firm_year_rows": 0,
+    "path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.csv",
+    "rows": 14208,
+    "sha256": "5470c52e8e6712984a78b6959bf56ca016aa9fc0c9577b3e9765ed832975e967",
+    "unique_firms": 1184,
+    "year_max": 2021,
+    "year_min": 2010
+  },
+  "schema_version": "case010-analysis-extract/1.0.0",
+  "source": {
+    "license": "CC BY 4.0",
+    "path": "experiments/fixtures/case010_mendeley_carbon_green_innovation_candidate_v1.dta",
+    "persistent_id": "doi:10.17632/rrfwny7byp.1",
+    "sha256": "15bbce1ca0b7f3ab2adf8381c0fa57c335c6fcd42fd99285b0a3f59a5b7d819e"
+  },
+  "transformation": {
+    "encoding": "utf-8",
+    "outcome_filter": "none",
+    "renamed_fields": {
+      "CITYCODE": "city_code",
+      "FC_index": "financing_constraint_fc",
+      "HHI_A": "industry_hhi_a",
+      "IndustryCode": "industry_code",
+      "KZ_index": "financing_constraint_kz",
+      "Lev": "leverage",
+      "PROVINCECODE": "province_code",
+      "ROA": "return_on_assets",
+      "SA_index": "financing_constraint_sa",
+      "SOE": "state_ownership_code",
+      "Size": "total_assets",
+      "Symbol": "firm_id",
+      "WW_index": "financing_constraint_ww",
+      "carbon_post": "source_policy_post",
+      "green_patent1": "green_patent_independent_all",
+      "green_patent2": "green_invention_independent",
+      "green_patent3": "green_utility_independent",
+      "green_patent4": "green_patent_joint_all",
+      "green_patent5": "green_invention_joint",
+      "green_patent6": "green_utility_joint",
+      "year": "year"
+    },
+    "row_filter": "none",
+    "selected_source_fields": [
+      "Symbol",
+      "year",
+      "PROVINCECODE",
+      "CITYCODE",
+      "IndustryCode",
+      "carbon_post",
+      "green_patent1",
+      "green_patent2",
+      "green_patent3",
+      "green_patent4",
+      "green_patent5",
+      "green_patent6",
+      "FC_index",
+      "KZ_index",
+      "SA_index",
+      "WW_index",
+      "Size",
+      "SOE",
+      "Lev",
+      "ROA",
+      "HHI_A"
+    ],
+    "sort": [
+      "firm_id",
+      "year"
+    ]
+  }
+}

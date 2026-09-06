@@ -10,6 +10,7 @@ from .models import (
     CandidatePlanBatch,
     ClaimLedger,
     CriticReport,
+    DiscoveryPlan,
     DesignReviewerReport,
     EvidenceAssessment,
     EvidenceClaimBundle,
@@ -18,6 +19,7 @@ from .models import (
     ManuscriptSection,
     MethodRoute,
     ModelCallGroup,
+    QuestionPlanConsistencyReview,
     ResearchPackage,
     ReviewerReportBatch,
     ScientificAudit,
@@ -134,6 +136,44 @@ COMMON_GUARDRAILS = """你是 HypoWeaver-Qwen 中受约束的社会科学研究�
 
 
 PROMPTS: dict[str, PromptSpec] = {
+    "discovery_planning": PromptSpec(
+        "discovery_planning",
+        "证据约束的研究发现规划",
+        "1.3.0",
+        COMMON_GUARDRAILS
+        + """
+你位于正式 H1 之前，只能根据输入 EvidenceBundle 起草研究发现方案。
+每个 finding、construct、mechanism、dataset、method、model、identification strategy 和机制步骤必须引用输入中真实存在的 evidence chunk_id；不得引用 RAG 图谱关系作为独立科学证据。
+研究空白必须限定为当前语料范围，不能声称全球文献从未研究。假设必须可证伪，并明确可观察预测、证伪条件、边界、数据需求和主要威胁。
+候选研究问题、假设、predictor 与 outcome 必须保留原始问题中明确命名的暴露、结果和限定语（如“真实减排而非披露改善”“区域异质性”“政策试点”等），不得用相邻主题替换。证据不足时，把缺口写入 required_inputs 或 blocking_questions，不得悄悄改题。
+若输入包含 consistency_repair，说明独立 Reviewer 已拒绝上一方案。必须把 original_question 作为主问题，逐项恢复 missing_concepts；上一方案只能作为失败参照。新增机制可以作为扩展，但不得替换原暴露、结果或限定语。
+若证据支持数据集、变量或识别策略，必须填入对应结构；若不支持则保持为空并明确阻塞条件，不得凭空补齐。
+finding.direction 只能使用 positive、negative、null、mixed、nonlinear、heterogeneous、unknown 之一。
+evidence_chunk_ids 必须逐字复制输入 evidence_hits 中出现的完整 chunk_id；不得根据编号规律补写相邻 chunk，不得缩写或改写 ID。
+只生成一个内部一致的候选方案；该方案仍需 H0 人工审阅，不代表科学批准。key 只能使用小写英文字母、数字和下划线。
+除 JSON Schema 固定枚举、key、变量名、公式、DOI 和 evidence chunk_id 外，所有面向研究者的自然语言字段必须使用简体中文；即使证据原文为英文，也不得把候选问题、研究假设、机制、边界、数据需求或阻塞问题切换成英文。
+输出前逐项自检：所有实体 key 跨类别全局唯一；constructs 中恰好一个 predictor 和一个 outcome；findings 至少一项 role=support；mechanism_chain 的每个端点均已在 constructs 或 mechanisms 声明；novelty_queries 至少三项且逐项唯一。""",
+        "请根据以下研究问题、研究者边界与可追溯证据生成 DiscoveryPlan：\n{{input_json}}",
+        DiscoveryPlan,
+        max_tokens=8192,
+        timeout_seconds=240,
+    ),
+    "discovery_consistency_review": PromptSpec(
+        "discovery_consistency_review",
+        "问题与计划一致性审阅",
+        "1.1.0",
+        COMMON_GUARDRAILS
+        + """
+你是独立于规划智能体的问题—计划一致性 Reviewer。只比较原始问题和候选计划，不评价研究结论是否正确。
+逐项检查原始问题中明确命名的暴露、结果以及限定语是否都保留在候选研究问题、假设和构念中。语义等价表述可以通过；相邻主题替换、只保留上位概念、删除“而非/异质性/机制/时间/样本”等限定语必须判 requery。
+如果原暴露、结果和限定语仍是主研究问题，候选计划额外提出一个机制、边界或异质性扩展本身不构成失败；只有扩展替代、删除或转移原问题焦点时才判 requery。原问题没有明确提出的限定语不应被凭空设为必保留项。
+若判 requery，给出可直接用于补充检索的具体中文术语；不得建议直接放行或编造证据。""",
+        "请审阅以下原始问题与候选计划：\n{{input_json}}",
+        QuestionPlanConsistencyReview,
+        max_provider_attempts=2,
+        max_tokens=1536,
+        timeout_seconds=120,
+    ),
     "intake": PromptSpec(
         "intake",
         "案例解析",

@@ -1,0 +1,274 @@
+{
+  "assertions": {
+    "complete_contract_is_ready": true,
+    "missing_contract_is_blocked": true,
+    "no_scientific_claim_authorized": true,
+    "no_statistics_executed": true
+  },
+  "generated_at": "2026-09-05T13:21:30.288310+00:00",
+  "negative_control": {
+    "blockers": [
+      "Frozen panel identification contract: dataset or variable bindings are incomplete",
+      "未提供带不可变哈希、许可、粒度、时间键和连接键的数据资产",
+      "构念“Enterprise Ownership Type”未精确绑定到许可数据字段",
+      "构念“Green Finance Policy Exposure”未精确绑定到许可数据字段",
+      "构念“Green Patent Quality”未精确绑定到许可数据字段",
+      "构念“Green R&D and Investment”未精确绑定到许可数据字段"
+    ],
+    "can_execute": false,
+    "dataset_candidates": [
+      {
+        "blockers": [
+          "required input has no bound immutable dataset resource"
+        ],
+        "candidate_id": "required-input:01",
+        "filename": null,
+        "granularity": null,
+        "join_keys": [],
+        "label": "Firm-level green patent data with quality indicators (citations, claims).",
+        "license_status": "unknown",
+        "mime_type": null,
+        "required_input": "Firm-level green patent data with quality indicators (citations, claims).",
+        "resource_id": null,
+        "sha256": null,
+        "size_bytes": null,
+        "status": "blocked",
+        "time_key": null
+      },
+      {
+        "blockers": [
+          "required input has no bound immutable dataset resource"
+        ],
+        "candidate_id": "required-input:02",
+        "filename": null,
+        "granularity": null,
+        "join_keys": [],
+        "label": "Detailed data on firm ownership structure (SOE vs. Private).",
+        "license_status": "unknown",
+        "mime_type": null,
+        "required_input": "Detailed data on firm ownership structure (SOE vs. Private).",
+        "resource_id": null,
+        "sha256": null,
+        "size_bytes": null,
+        "status": "blocked",
+        "time_key": null
+      },
+      {
+        "blockers": [
+          "required input has no bound immutable dataset resource"
+        ],
+        "candidate_id": "required-input:03",
+        "filename": null,
+        "granularity": null,
+        "join_keys": [],
+        "label": "Precise mapping of firms to green finance pilot zones and policy implementation dates.",
+        "license_status": "unknown",
+        "mime_type": null,
+        "required_input": "Precise mapping of firms to green finance pilot zones and policy implementation dates.",
+        "resource_id": null,
+        "sha256": null,
+        "size_bytes": null,
+        "status": "blocked",
+        "time_key": null
+      },
+      {
+        "blockers": [
+          "required input has no bound immutable dataset resource"
+        ],
+        "candidate_id": "required-input:04",
+        "filename": null,
+        "granularity": null,
+        "join_keys": [],
+        "label": "Firm-level financial data for controls (size, leverage, etc.).",
+        "license_status": "unknown",
+        "mime_type": null,
+        "required_input": "Firm-level financial data for controls (size, leverage, etc.).",
+        "resource_id": null,
+        "sha256": null,
+        "size_bytes": null,
+        "status": "blocked",
+        "time_key": null
+      },
+      {
+        "blockers": [
+          "required input has no bound immutable dataset resource"
+        ],
+        "candidate_id": "required-input:05",
+        "filename": null,
+        "granularity": null,
+        "join_keys": [],
+        "label": "Data on firm green R&D expenditure to test the mechanism.",
+        "license_status": "unknown",
+        "mime_type": null,
+        "required_input": "Data on firm green R&D expenditure to test the mechanism.",
+        "resource_id": null,
+        "sha256": null,
+        "size_bytes": null,
+        "status": "blocked",
+        "time_key": null
+      }
+    ],
+    "identification_strategies": [
+      {
+        "blocker": "dataset or variable bindings are incomplete",
+        "description": "A deterministic H1 contract fixture used only to verify that complete data metadata and variable bindings can pass the readiness compiler.",
+        "evidence_chunk_ids": [
+          "gf-56f33deb2eda6004-fulltext-6d5d02a4d5e2e9a13f1224ab8f258500185fc4326d824e33a6e__sliding_0021"
+        ],
+        "label": "Frozen panel identification contract",
+        "status": "blocked",
+        "strategy_id": "identification:readiness_control_identification"
+      }
+    ],
+    "schema_version": "discovery-execution-readiness/1.0.0",
+    "status": "blocked",
+    "variable_dictionary": [
+      {
+        "blocker": "构念“Green Finance Policy Exposure”未精确绑定到许可数据字段",
+        "construct_key": "green_finance_policy",
+        "construct_label": "Green Finance Policy Exposure",
+        "field_label": null,
+        "field_name": null,
+        "granularity": "Firm-region-year level, based on policy implementation status in the firm's registered region and industry classification.",
+        "resource_id": null,
+        "role": "predictor",
+        "status": "unbound"
+      },
+      {
+        "blocker": "构念“Green Patent Quality”未精确绑定到许可数据字段",
+        "construct_key": "green_patent_quality",
+        "construct_label": "Green Patent Quality",
+        "field_label": null,
+        "field_name": null,
+        "granularity": "Firm-year level, aggregated from individual patent records.",
+        "resource_id": null,
+        "role": "outcome",
+        "status": "unbound"
+      },
+      {
+        "blocker": "构念“Enterprise Ownership Type”未精确绑定到许可数据字段",
+        "construct_key": "enterprise_ownership",
+        "construct_label": "Enterprise Ownership Type",
+        "field_label": null,
+        "field_name": null,
+        "granularity": "Firm level, time-invariant or slowly changing.",
+        "resource_id": null,
+        "role": "moderator",
+        "status": "unbound"
+      },
+      {
+        "blocker": "构念“Green R&D and Investment”未精确绑定到许可数据字段",
+        "construct_key": "green_rnd_investment",
+        "construct_label": "Green R&D and Investment",
+        "field_label": null,
+        "field_name": null,
+        "granularity": "Firm-year level.",
+        "resource_id": null,
+        "role": "mediator",
+        "status": "unbound"
+      }
+    ],
+    "warnings": []
+  },
+  "positive_control": {
+    "blockers": [],
+    "can_execute": true,
+    "dataset_candidates": [
+      {
+        "blockers": [],
+        "candidate_id": "dataset-candidate:synthetic-readiness-contract-panel-v1",
+        "filename": "readiness_contract_panel_v1.csv",
+        "granularity": "firm-region-year",
+        "join_keys": [
+          "firm_id",
+          "region_id"
+        ],
+        "label": "Synthetic firm-region-year readiness contract panel",
+        "license_status": "verified_open",
+        "mime_type": "text/csv",
+        "required_input": null,
+        "resource_id": "synthetic-readiness-contract-panel-v1",
+        "sha256": "95d1ffac391acf68450e4f54ec2114795c9b882a910f4fd1f9791889911470dc",
+        "size_bytes": 261,
+        "status": "ready",
+        "time_key": "year"
+      }
+    ],
+    "identification_strategies": [
+      {
+        "blocker": null,
+        "description": "A deterministic H1 contract fixture used only to verify that complete data metadata and variable bindings can pass the readiness compiler.",
+        "evidence_chunk_ids": [
+          "gf-56f33deb2eda6004-fulltext-6d5d02a4d5e2e9a13f1224ab8f258500185fc4326d824e33a6e__sliding_0021"
+        ],
+        "label": "Frozen panel identification contract",
+        "status": "candidate_ready_for_h1_review",
+        "strategy_id": "identification:readiness_control_identification"
+      }
+    ],
+    "schema_version": "discovery-execution-readiness/1.0.0",
+    "status": "ready",
+    "variable_dictionary": [
+      {
+        "blocker": null,
+        "construct_key": "green_finance_policy",
+        "construct_label": "Green Finance Policy Exposure",
+        "field_label": "Green Finance Policy Exposure",
+        "field_name": "green_finance_policy",
+        "granularity": "Firm-region-year level, based on policy implementation status in the firm's registered region and industry classification.",
+        "resource_id": "synthetic-readiness-contract-panel-v1",
+        "role": "predictor",
+        "status": "bound"
+      },
+      {
+        "blocker": null,
+        "construct_key": "green_patent_quality",
+        "construct_label": "Green Patent Quality",
+        "field_label": "Green Patent Quality",
+        "field_name": "green_patent_quality",
+        "granularity": "Firm-year level, aggregated from individual patent records.",
+        "resource_id": "synthetic-readiness-contract-panel-v1",
+        "role": "outcome",
+        "status": "bound"
+      },
+      {
+        "blocker": null,
+        "construct_key": "enterprise_ownership",
+        "construct_label": "Enterprise Ownership Type",
+        "field_label": "Enterprise Ownership Type",
+        "field_name": "enterprise_ownership",
+        "granularity": "Firm level, time-invariant or slowly changing.",
+        "resource_id": "synthetic-readiness-contract-panel-v1",
+        "role": "moderator",
+        "status": "bound"
+      },
+      {
+        "blocker": null,
+        "construct_key": "green_rnd_investment",
+        "construct_label": "Green R&D and Investment",
+        "field_label": "Green R&D and Investment",
+        "field_name": "green_rnd_investment",
+        "granularity": "Firm-year level.",
+        "resource_id": "synthetic-readiness-contract-panel-v1",
+        "role": "mediator",
+        "status": "bound"
+      }
+    ],
+    "warnings": [
+      "5 prose required inputs were compiled against 1 declared dataset resources"
+    ]
+  },
+  "schema_version": "execution-readiness-contract-control/1.0.0",
+  "scope": "deterministic compiler contract test; not scientific execution",
+  "source_generation": {
+    "bundle_id": "evidence-bundle:f62511745a869e6ada8594eb",
+    "path": "<PACKAGE>\\output\\experiments\\ai_scientist_system_capability_v2\\cells\\Q01_green_patent_quality__seed_20260901\\generation_public.json",
+    "sha256": "e26eb515710b2e0634523eabf237dd0f42835b0c58f06ca0ea1718f829975f95"
+  },
+  "synthetic_fixture": {
+    "license_id": "CC0-1.0",
+    "path": "<PACKAGE>\\experiments\\fixtures\\readiness_contract_panel_v1.csv",
+    "sha256": "95d1ffac391acf68450e4f54ec2114795c9b882a910f4fd1f9791889911470dc",
+    "size_bytes": 261
+  }
+}

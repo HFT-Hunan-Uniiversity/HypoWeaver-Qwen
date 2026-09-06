@@ -7,6 +7,7 @@ import './views.css'
 import './shell.css'
 import './composer.css'
 import './stream.css'
+import './reader.css'
 import { App } from './App'
 import { initTheme } from './runtime/theme'
 

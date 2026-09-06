@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/chunk.schema.json",
+  "title": "Research-semantic JATS chunk",
+  "description": "A deterministic, rights-aware full-text chunk with a source XML and character locator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "chunk_schema_version",
+    "chunk_id",
+    "evidence_id",
+    "release_id",
+    "batch_id",
+    "document_id",
+    "document_version",
+    "asset_id",
+    "doi",
+    "pmcid",
+    "source_type",
+    "access_level",
+    "license",
+    "rights_status",
+    "content_sha256",
+    "raw_sha256",
+    "block_id",
+    "block_type",
+    "section",
+    "section_path",
+    "xml_id",
+    "xml_path",
+    "locator",
+    "source_ref",
+    "part_index",
+    "part_count",
+    "word_start",
+    "word_end",
+    "word_count",
+    "text",
+    "text_sha256",
+    "content_hash",
+    "chunk_label",
+    "qc_status",
+    "retrieved_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "greenfin-chunk/1.0.0"
+    },
+    "chunk_schema_version": {
+      "const": "jats-block-word-window-cs01"
+    },
+    "chunk_id": {
+      "type": "string",
+      "pattern": "^chk_[0-9a-f]{24}$"
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^evd:[0-9a-f]{20}$"
+    },
+    "release_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "batch_id": {
+      "type": "string",
+      "pattern": "^batch-[0-9]{8}-[0-9]{3}$"
+    },
+    "document_id": {
+      "type": "string",
+      "pattern": "^doi:10\\.[^\\s]+$"
+    },
+    "document_version": {
+      "type": "string",
+      "pattern": "^v[0-9]{3}$"
+    },
+    "asset_id": {
+      "type": "string",
+      "pattern": "^asset:epmc:pmc[0-9]+:fulltext-xml:[0-9a-f]{16}$"
+    },
+    "doi": {
+      "type": "string",
+      "pattern": "^10\\.[^\\s]+$"
+    },
+    "pmcid": {
+      "type": "string",
+      "pattern": "^PMC[0-9]+$"
+    },
+    "source_type": {
+      "enum": ["paper_fulltext", "paper_abstract"]
+    },
+    "access_level": {
+      "enum": ["open", "restricted", "commercial", "unknown"]
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rights_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "raw_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{24}$"
+    },
+    "block_type": {
+      "enum": ["paragraph", "table", "figure_caption"]
+    },
+    "section": {
+      "type": "string",
+      "minLength": 1
+    },
+    "section_path": {
+      "$ref": "#/$defs/sectionPath"
+    },
+    "xml_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "xml_path": {
+      "type": "string",
+      "pattern": "^/article\\[1\\]/"
+    },
+    "locator": {
+      "$ref": "#/$defs/locator"
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "part_index": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "part_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "word_start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "word_end": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "word_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "chunk_label": {
+      "const": "research_semantic"
+    },
+    "qc_status": {
+      "enum": ["pass", "warn", "fail"]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sectionPath": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinate_system",
+        "block_id",
+        "section",
+        "section_path",
+        "xml_id",
+        "xml_path",
+        "start_char",
+        "end_char",
+        "document_start_char",
+        "document_end_char",
+        "source_ref"
+      ],
+      "properties": {
+        "coordinate_system": {
+          "const": "normalized_block_text"
+        },
+        "block_id": {
+          "type": "string",
+          "pattern": "^blk_[0-9a-f]{24}$"
+        },
+        "section": {
+          "type": "string",
+          "minLength": 1
+        },
+        "section_path": {
+          "$ref": "#/$defs/sectionPath"
+        },
+        "xml_id": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "xml_path": {
+          "type": "string",
+          "pattern": "^/article\\[1\\]/"
+        },
+        "start_char": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_char": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "document_start_char": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "document_end_char": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/source_registry.schema.json",
+  "title": "Data-center collection source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_version", "updated_at", "sources"],
+  "properties": {
+    "schema_version": { "const": "0.2.0" },
+    "registry_version": { "type": "string", "minLength": 1 },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "name", "source_kind", "authority", "content_types", "entrypoints", "access", "coverage", "update_policy", "incremental_strategy", "acquisition", "parser_route", "owner", "priority", "status", "quality_contract"],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "source_kind": { "enum": ["literature_metadata", "literature_fulltext", "policy_portal", "corporate_disclosure", "exchange_announcement", "research_report", "news", "structured_database", "manual_upload"] },
+        "authority": { "type": "string", "minLength": 1 },
+        "content_types": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["paper", "policy", "esg_report", "annual_report", "announcement", "prospectus", "research_report", "news", "table"] } },
+        "entrypoints": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "access": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["access_level", "auth_required", "license_known", "license", "permitted_uses"],
+          "properties": {
+            "access_level": { "enum": ["open", "restricted", "commercial", "manual", "unknown"] },
+            "auth_required": { "type": "boolean" },
+            "license_known": { "type": "boolean" },
+            "license": { "type": ["string", "null"] },
+            "permitted_uses": { "type": "array", "items": { "enum": ["metadata_store", "fulltext_store", "text_mining", "embedding", "model_input", "redistribution", "unknown"] } }
+          }
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["languages", "geographies", "year_start", "year_end", "notes"],
+          "properties": {
+            "languages": { "type": "array", "items": { "type": "string", "minLength": 2 } },
+            "geographies": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "year_start": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+            "year_end": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+            "notes": { "type": ["string", "null"] }
+          }
+        },
+        "update_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cadence", "freshness_sla_hours", "schedule"],
+          "properties": {
+            "cadence": { "enum": ["hourly", "daily", "weekly", "monthly", "manual"] },
+            "freshness_sla_hours": { "type": ["integer", "null"], "minimum": 1 },
+            "schedule": { "type": ["string", "null"] }
+          }
+        },
+        "incremental_strategy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "watermark_field", "cursor_state_key", "lookback_days"],
+          "properties": {
+            "mode": { "enum": ["cursor", "updated_since", "published_since", "listing_diff", "full_rescan", "manual"] },
+            "watermark_field": { "type": ["string", "null"] },
+            "cursor_state_key": { "type": ["string", "null"] },
+            "lookback_days": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "acquisition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "rate_limit_per_minute", "retry_policy", "fallback_source_ids"],
+          "properties": {
+            "method": { "enum": ["api", "rss", "sitemap", "html", "browser", "file_drop", "database_export"] },
+            "rate_limit_per_minute": { "type": ["integer", "null"], "minimum": 1 },
+            "retry_policy": { "type": "string", "minLength": 1 },
+            "fallback_source_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "parser_route": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "priority": { "enum": ["mvp", "high", "normal", "later"] },
+        "status": { "enum": ["planned", "probing", "active", "degraded", "paused", "retired"] },
+        "quality_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity_fields", "expected_success_rate", "duplicate_key", "fulltext_expected", "known_risks"],
+          "properties": {
+            "identity_fields": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+            "expected_success_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "duplicate_key": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+            "fulltext_expected": { "type": "boolean" },
+            "known_risks": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    }
+  }
+}
+

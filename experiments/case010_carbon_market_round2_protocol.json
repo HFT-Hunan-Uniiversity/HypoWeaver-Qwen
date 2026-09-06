@@ -1,0 +1,205 @@
+{
+  "schema_version": "case010-adaptive-ai-scientist-protocol/1.0.0",
+  "experiment_id": "case010-carbon-market-green-innovation-adaptive-v1",
+  "phase": "round2",
+  "frozen_at": "2026-09-05T03:24:08.2851279+08:00",
+  "round1_binding": {
+    "path": "output/experiments/case010_carbon_market_adaptive_v1/round1_result.json",
+    "sha256": "b3d3f7a018bb42d851dfafda6ed99b534b72ea02adc57d008a251bd5d584554c",
+    "required_triggered_rules": [
+      "R1_SCOPE_ADAPT_REGIONAL",
+      "R1_SOURCE_DEFINITION_CAVEAT"
+    ],
+    "required_next_scope": "regional_source_defined_replication"
+  },
+  "scope_adaptation": {
+    "original_question": "全国碳排放权交易市场能否促进企业高质量绿色技术创新？",
+    "adapted_question": "在公开复现样本及其原数据政策暴露编码下，区域碳市场暴露是否与企业高质量绿色技术创新增加相一致？",
+    "retained_theory_chain": "碳市场约束与价格信号—金融资源配置和合规激励—高质量绿色技术创新",
+    "reason": "公开许可面板止于2021年，不能形成全国碳市场启动后的结果期；但其2010—2021年企业面板、源定义政策暴露、绿色发明专利和融资约束字段允许开展区域碳市场范围的公开复现。",
+    "national_question_status": "保留为取得2022年以后结果与官方履约企业名单后的确认性扩展，不在本轮估计。"
+  },
+  "data_contract": {
+    "persistent_id": "doi:10.17632/rrfwny7byp.1",
+    "license": "CC BY 4.0",
+    "source_path": "experiments/fixtures/case010_mendeley_carbon_green_innovation_candidate_v1.dta",
+    "source_sha256": "15bbce1ca0b7f3ab2adf8381c0fa57c335c6fcd42fd99285b0a3f59a5b7d819e",
+    "analysis_extract_path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.csv",
+    "analysis_extract_sha256": "5470c52e8e6712984a78b6959bf56ca016aa9fc0c9577b3e9765ed832975e967",
+    "analysis_extract_manifest_path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.manifest.json",
+    "analysis_extract_manifest_sha256": "324dbc14b5d9c099f938536ed7e3f7eaa5e1bb94f5bc183c969d0a04d20d172b",
+    "granularity": "上市公司—年份",
+    "firm_key": "firm_id",
+    "time_key": "year",
+    "expected_years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+    "expected_rows": 14208,
+    "expected_firms": 1184,
+    "immutable": true
+  },
+  "variable_contract": {
+    "exposure": {
+      "field": "source_policy_post",
+      "definition": "公开数据发布者提供的企业—年份碳政策暴露编码。",
+      "provenance_limit": "未与独立下载的官方企业名单逐条复核；不得改写为全国碳市场履约状态或官方处理名单。"
+    },
+    "primary_outcome": {
+      "name": "ln_high_quality_green_invention",
+      "formula": "log(1 + green_invention_independent + green_invention_joint)",
+      "interpretation": "绿色发明专利申请的对数化计数；发明专利用于表征相对高质量的绿色技术创新。"
+    },
+    "alternative_outcomes": [
+      {
+        "name": "ln_independent_green_invention",
+        "formula": "log(1 + green_invention_independent)"
+      },
+      {
+        "name": "ln_total_green_patents",
+        "formula": "log(1 + green_patent_independent_all + green_patent_joint_all)"
+      },
+      {
+        "name": "ln_green_utility_models",
+        "formula": "log(1 + green_utility_independent + green_utility_joint)",
+        "role": "质量区分的对照结果，不替代高质量创新主结果。"
+      }
+    ],
+    "controls": [
+      {
+        "name": "ln_total_assets",
+        "formula": "log(total_assets)"
+      },
+      {
+        "name": "leverage",
+        "field": "leverage"
+      },
+      {
+        "name": "return_on_assets",
+        "field": "return_on_assets"
+      }
+    ],
+    "mechanism_proxy": {
+      "name": "abs_sa_financing_constraint",
+      "formula": "abs(financing_constraint_sa)",
+      "expected_direction": "政策暴露系数为负表示融资约束代理值下降。",
+      "claim_limit": "仅作为机制一致性诊断，不以单一中介回归宣称完成因果机制识别。"
+    },
+    "competition_proxy": {
+      "field": "industry_hhi_a",
+      "high_competition": "同年度HHI低于或等于年度中位数",
+      "expected_interaction": "source_policy_post × high_competition 为正"
+    },
+    "ownership_status": "state_ownership_code取值1—5但公开文件未提供可靠值标签；产权异质性不执行。"
+  },
+  "sample_contract": {
+    "primary_sample": "保留2010—2021年12期齐全且主结果、政策暴露和三项控制变量均无缺失的企业，形成平衡面板。",
+    "outlier_handling": "主模型不删除结果零值、不按显著性剔除样本、不事后缩尾。",
+    "non_monotone_policy_paths": "主模型按企业—年份当期暴露保留；事件研究和单调路径稳健性排除任何出现1→0回退的企业。",
+    "national_launch_sensitivity": "稳健性模型剔除2021年。"
+  },
+  "estimands": [
+    {
+      "id": "M1_PRIMARY_ASSOCIATION",
+      "outcome": "ln_high_quality_green_invention",
+      "regressors": ["source_policy_post", "ln_total_assets", "leverage", "return_on_assets"],
+      "fixed_effects": ["firm_id", "year"],
+      "standard_errors": "firm_id聚类",
+      "sample": "primary_sample",
+      "interpretation": "同一企业内政策暴露变化与高质量绿色创新变化的条件关联。"
+    },
+    {
+      "id": "M2_EVENT_STUDY_DIAGNOSTIC",
+      "outcome": "ln_high_quality_green_invention",
+      "event_time": "year - first_exposed_year",
+      "bins": ["<=-4", "-3", "-2", "-1 omitted", "0", "1", "2", "3", ">=4"],
+      "sample": "primary_sample中政策路径单调的企业；从未暴露企业作为比较组",
+      "controls": ["ln_total_assets", "leverage", "return_on_assets"],
+      "fixed_effects": ["firm_id", "year"],
+      "standard_errors": "firm_id聚类",
+      "joint_pretrend_terms": ["<=-4", "-3", "-2"],
+      "interpretation_limit": "传统错位处理TWFE事件研究仅作趋势与动态模式诊断，不单独授权因果结论。"
+    },
+    {
+      "id": "M3_FINANCING_CONSTRAINT_DIAGNOSTIC",
+      "outcome": "abs_sa_financing_constraint",
+      "regressors": ["source_policy_post", "leverage", "return_on_assets"],
+      "fixed_effects": ["firm_id", "year"],
+      "standard_errors": "firm_id聚类"
+    },
+    {
+      "id": "M4_COMPETITION_HETEROGENEITY",
+      "outcome": "ln_high_quality_green_invention",
+      "regressors": ["source_policy_post", "high_competition", "source_policy_post_x_high_competition", "ln_total_assets", "leverage", "return_on_assets"],
+      "fixed_effects": ["firm_id", "year"],
+      "standard_errors": "firm_id聚类",
+      "interpretation_limit": "探索性异质性结果，不替代主效应识别。"
+    }
+  ],
+  "robustness_contract": [
+    {
+      "id": "R_NO_CONTROLS",
+      "change": "移除全部控制变量"
+    },
+    {
+      "id": "R_EXCLUDE_2021",
+      "change": "剔除2021年，避免全国市场启动年与区域复制范围混同"
+    },
+    {
+      "id": "R_MONOTONE_PATHS",
+      "change": "排除政策暴露出现1→0回退的企业"
+    },
+    {
+      "id": "R_INDEPENDENT_INVENTIONS",
+      "change": "结果改为绿色发明专利独立申请"
+    },
+    {
+      "id": "R_TOTAL_GREEN_PATENTS",
+      "change": "结果改为全部绿色专利申请"
+    },
+    {
+      "id": "R_UTILITY_MODEL_CONTRAST",
+      "change": "结果改为绿色实用新型专利，作为质量区分对照"
+    },
+    {
+      "id": "R_ADD_INDUSTRY_HHI",
+      "change": "加入行业HHI控制并按完整观测重新估计"
+    }
+  ],
+  "placebo_contract": {
+    "method": "在平衡面板中以企业为单位随机置换完整政策暴露轨迹，保持每条轨迹的年度结构，重复估计无控制企业与年份固定效应模型。",
+    "repetitions": 499,
+    "seed": 20260905,
+    "statistic": "abs(placebo coefficient) >= abs(observed no-control coefficient)",
+    "p_value": "(1 + exceedances) / (1 + repetitions)"
+  },
+  "decision_contract": {
+    "directional_support": "主模型政策暴露系数>0且p<0.05。",
+    "pretrend_pass": "事件研究三个处理前系数联合检验p>=0.10。",
+    "robustness_support": "R_NO_CONTROLS、R_EXCLUDE_2021、R_MONOTONE_PATHS、R_INDEPENDENT_INVENTIONS中至少3项系数为正。",
+    "replication_evidence": {
+      "supportive": "directional_support、pretrend_pass、robustness_support均成立。",
+      "mixed": "至少一项成立但未全部成立。",
+      "not_supportive": "三项均不成立。"
+    },
+    "causal_claim_authorized": false,
+    "causal_blockers": [
+      "样本止于2021年，不能检验全国碳市场启动后的企业结果。",
+      "政策暴露字段来自公开数据发布者，尚未与官方企业名单独立逐条绑定。",
+      "传统错位处理TWFE及源字段回退路径不足以单独完成严格因果识别。"
+    ],
+    "allowed_wording": "在2010—2021年公开上市公司复现样本及原数据政策暴露编码下，企业政策暴露与绿色发明专利申请呈现何种条件关联；结果需结合前趋势、稳健性和置换检验解释。",
+    "forbidden_wording": [
+      "全国碳市场已经促进企业绿色创新",
+      "本研究独立识别了官方区域碳市场处理企业",
+      "融资约束是已经得到因果识别的中介机制"
+    ]
+  },
+  "reproducibility": {
+    "independent_recompute_required": true,
+    "round2_outputs": {
+      "result": "output/experiments/case010_carbon_market_adaptive_v1/round2_result.json",
+      "model_table": "output/experiments/case010_carbon_market_adaptive_v1/model_comparison.csv",
+      "event_table": "output/experiments/case010_carbon_market_adaptive_v1/event_study.csv",
+      "mechanism_table": "output/experiments/case010_carbon_market_adaptive_v1/mechanism_and_heterogeneity.csv",
+      "figure_directory": "output/experiments/case010_carbon_market_adaptive_v1/figures"
+    }
+  }
+}

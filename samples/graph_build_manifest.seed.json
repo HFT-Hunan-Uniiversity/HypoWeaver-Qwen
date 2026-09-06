@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1.0",
+  "graph_id": "greenfin-research-graph",
+  "as_of": "2026-07-15T00:00:00+08:00",
+  "build_timestamp": "2026-07-15T00:00:00+08:00",
+  "scope": {
+    "themes": ["绿色金融"],
+    "languages": ["zh", "en"],
+    "document_types": ["paper"],
+    "year_start": null,
+    "year_end": 2026
+  },
+  "source_watermarks": {
+    "data_center_release": "replace-with-release-id"
+  },
+  "input_manifest_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "profile_set_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "base_snapshot_id": null,
+  "base_graph_sha256": null,
+  "coverage_certificate_id": "coverage:pilot",
+  "retrieval_index_snapshot_id": null,
+  "pipeline_run_id": "run:replace-before-formal-build",
+  "code_version": null,
+  "config_hash": null,
+  "notes": "Template only; replace the zero/one hashes and run ID before a formal run."
+}

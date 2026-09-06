@@ -1,0 +1,13 @@
+{
+  "figure_id": "carbon_market_mechanism_framework",
+  "kind": "mechanism",
+  "provenance": "conceptual",
+  "spec_sha256": "6c6178ebfeab4e3c920839054f67599f3e035bf93fb081c56ff5d9ed55cc19eb",
+  "generated_at": "2026-09-04T19:30:32.363458+00:00",
+  "spec": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_mechanism_framework.json",
+  "outputs": {
+    "png": "carbon_market_mechanism_framework.png",
+    "svg": "carbon_market_mechanism_framework.svg",
+    "pdf": "carbon_market_mechanism_framework.pdf"
+  }
+}

@@ -317,6 +317,296 @@ class VariableSpec(StrictModel):
     source: str | None = None
 
 
+class DiscoveryFindingDraft(StrictModel):
+    key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    statement: str = Field(min_length=10, max_length=4000)
+    direction: Literal[
+        "positive",
+        "negative",
+        "null",
+        "mixed",
+        "nonlinear",
+        "heterogeneous",
+        "unknown",
+    ]
+    role: Literal["support", "challenge"]
+    evidence_chunk_ids: list[str] = Field(min_length=1, max_length=20)
+
+
+class DiscoveryConstructDraft(StrictModel):
+    key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    label: str = Field(min_length=1, max_length=500)
+    definition: str = Field(min_length=10, max_length=4000)
+    granularity: str = Field(min_length=1, max_length=500)
+    role: Literal["predictor", "outcome", "mediator", "moderator", "control"]
+    expected_direction: Literal[
+        "positive", "negative", "nonlinear", "heterogeneous", "unspecified"
+    ] = "unspecified"
+    evidence_chunk_ids: list[str] = Field(min_length=1, max_length=20)
+
+
+class DiscoveryEntityDraft(StrictModel):
+    key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    label: str = Field(min_length=1, max_length=500)
+    description: str = Field(min_length=10, max_length=4000)
+    evidence_chunk_ids: list[str] = Field(min_length=1, max_length=20)
+
+
+class DiscoveryMechanismStepDraft(StrictModel):
+    source_key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    relation: str = Field(min_length=1, max_length=200)
+    target_key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    statement: str = Field(min_length=10, max_length=2000)
+    evidence_chunk_ids: list[str] = Field(min_length=1, max_length=20)
+
+
+class DiscoveryPredictionDraft(StrictModel):
+    key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    statement: str = Field(min_length=10, max_length=2000)
+    observable_pattern: str = Field(min_length=5, max_length=2000)
+    would_falsify: str = Field(min_length=5, max_length=2000)
+
+
+class DiscoveryScores(StrictModel):
+    novelty: float = Field(ge=0, le=5)
+    theory: float = Field(ge=0, le=5)
+    evidence: float = Field(ge=0, le=5)
+    data: float = Field(ge=0, le=5)
+    method: float = Field(ge=0, le=5)
+    policy_value: float = Field(ge=0, le=5)
+
+
+class DiscoveryPlan(StrictModel):
+    """A model-generated, evidence-referenced draft awaiting the H0 review."""
+
+    schema_version: Literal["discovery-plan/1.0.0"] = "discovery-plan/1.0.0"
+    field_label: str = Field(min_length=1, max_length=500)
+    stream_label: str = Field(min_length=1, max_length=500)
+    stream_description: str = Field(min_length=10, max_length=4000)
+    findings: list[DiscoveryFindingDraft] = Field(min_length=1, max_length=20)
+    constructs: list[DiscoveryConstructDraft] = Field(min_length=2, max_length=30)
+    mechanisms: list[DiscoveryEntityDraft] = Field(min_length=1, max_length=20)
+    datasets: list[DiscoveryEntityDraft] = Field(default_factory=list, max_length=20)
+    methods: list[DiscoveryEntityDraft] = Field(default_factory=list, max_length=20)
+    models: list[DiscoveryEntityDraft] = Field(default_factory=list, max_length=20)
+    identification_strategies: list[DiscoveryEntityDraft] = Field(
+        default_factory=list,
+        max_length=20,
+    )
+    gap_type: Literal[
+        "mechanism",
+        "data",
+        "population",
+        "context",
+        "method",
+        "model",
+        "policy",
+        "controversy",
+        "temporal",
+        "cross_stream",
+    ]
+    gap_title: str = Field(min_length=1, max_length=500)
+    gap_statement: str = Field(min_length=10, max_length=4000)
+    current_state: str = Field(min_length=10, max_length=4000)
+    missing_piece: str = Field(min_length=10, max_length=4000)
+    why_important: str = Field(min_length=10, max_length=4000)
+    candidate_research_question: str = Field(min_length=5, max_length=4000)
+    hypothesis_title: str = Field(min_length=1, max_length=500)
+    hypothesis_statement: str = Field(min_length=10, max_length=4000)
+    falsifiable_form: str = Field(min_length=10, max_length=4000)
+    rationale: str = Field(min_length=10, max_length=4000)
+    mechanism_chain: list[DiscoveryMechanismStepDraft] = Field(
+        min_length=1,
+        max_length=20,
+    )
+    predictions: list[DiscoveryPredictionDraft] = Field(min_length=1, max_length=20)
+    boundary_conditions: list[str] = Field(default_factory=list, max_length=30)
+    unresolved_conflicts: list[str] = Field(default_factory=list, max_length=30)
+    unit_of_analysis: str = Field(min_length=1, max_length=500)
+    baseline_specification: str = Field(min_length=10, max_length=4000)
+    major_threats: list[str] = Field(min_length=1, max_length=30)
+    required_inputs: list[str] = Field(min_length=1, max_length=30)
+    blocking_questions: list[str] = Field(default_factory=list, max_length=30)
+    validation_acceptance_criteria: list[str] = Field(min_length=1, max_length=30)
+    novelty_queries: list[str] = Field(min_length=3, max_length=12)
+    novelty_remaining_difference: str = Field(min_length=10, max_length=4000)
+    scores: DiscoveryScores
+
+    @model_validator(mode="after")
+    def validate_discovery_references(self) -> "DiscoveryPlan":
+        groups = [
+            self.findings,
+            self.constructs,
+            self.mechanisms,
+            self.datasets,
+            self.methods,
+            self.models,
+            self.identification_strategies,
+        ]
+        keys = [item.key for group in groups for item in group]
+        if len(keys) != len(set(keys)):
+            raise ValueError("discovery plan keys must be globally unique")
+        roles = [item.role for item in self.constructs]
+        if roles.count("predictor") != 1 or roles.count("outcome") != 1:
+            raise ValueError("discovery plan requires exactly one predictor and one outcome")
+        if not any(item.role == "support" for item in self.findings):
+            raise ValueError("discovery plan requires at least one supporting finding")
+        mechanism_keys = {item.key for item in [*self.constructs, *self.mechanisms]}
+        for step in self.mechanism_chain:
+            if step.source_key not in mechanism_keys or step.target_key not in mechanism_keys:
+                raise ValueError("mechanism chain references an unknown construct or mechanism")
+        if len(set(self.novelty_queries)) != len(self.novelty_queries):
+            raise ValueError("novelty queries must be unique")
+        return self
+
+
+class QuestionPlanConsistencyReview(StrictModel):
+    """Qwen reviewer verdict before a discovery draft may reach H0."""
+
+    schema_version: Literal["question-plan-consistency/1.0.0"] = (
+        "question-plan-consistency/1.0.0"
+    )
+    decision: Literal["pass", "requery"]
+    exposure_preserved: bool
+    outcome_preserved: bool
+    qualifiers_preserved: bool
+    missing_concepts: list[str] = Field(default_factory=list, max_length=20)
+    requery_terms: list[str] = Field(default_factory=list, max_length=20)
+    rationale: str = Field(min_length=10, max_length=4000)
+
+    @model_validator(mode="after")
+    def validate_decision(self) -> "QuestionPlanConsistencyReview":
+        all_preserved = (
+            self.exposure_preserved
+            and self.outcome_preserved
+            and self.qualifiers_preserved
+            and not self.missing_concepts
+        )
+        if self.decision == "pass" and not all_preserved:
+            raise ValueError("pass requires exposure, outcome, and qualifiers to be preserved")
+        if self.decision == "requery" and not self.requery_terms:
+            raise ValueError("requery requires at least one concrete retrieval term")
+        return self
+
+
+class DiscoveryDatasetField(StrictModel):
+    name: str = Field(min_length=1, max_length=300)
+    label: str = Field(min_length=1, max_length=500)
+    aliases: list[str] = Field(default_factory=list, max_length=30)
+    role: Literal[
+        "predictor",
+        "outcome",
+        "mediator",
+        "moderator",
+        "control",
+        "id",
+        "time",
+        "other",
+    ] = "other"
+
+
+class DiscoveryDatasetResource(StrictModel):
+    """Immutable data asset metadata supplied before H1 execution."""
+
+    resource_id: str = Field(min_length=1, max_length=300)
+    label: str = Field(min_length=1, max_length=500)
+    filename: str = Field(min_length=1, max_length=500)
+    mime_type: str = Field(default="text/csv", min_length=1, max_length=200)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    size_bytes: int = Field(ge=1)
+    license_status: Literal["verified_open", "verified_restricted", "unknown"]
+    license_id: str | None = Field(default=None, max_length=500)
+    access_approval_ref: str | None = Field(default=None, max_length=1000)
+    granularity: str = Field(min_length=1, max_length=500)
+    time_key: str = Field(min_length=1, max_length=300)
+    join_keys: list[str] = Field(min_length=1, max_length=20)
+    fields: list[DiscoveryDatasetField] = Field(min_length=1, max_length=500)
+
+    @model_validator(mode="after")
+    def validate_resource_metadata(self) -> "DiscoveryDatasetResource":
+        names = {item.name for item in self.fields}
+        if self.time_key not in names:
+            raise ValueError("dataset time_key must name a declared field")
+        missing_join_keys = sorted(set(self.join_keys) - names)
+        if missing_join_keys:
+            raise ValueError(
+                "dataset join_keys must name declared fields: " + ", ".join(missing_join_keys)
+            )
+        if self.license_status != "unknown" and not self.license_id:
+            raise ValueError("verified dataset licensing requires license_id")
+        if self.license_status == "verified_restricted" and not self.access_approval_ref:
+            raise ValueError("restricted dataset execution requires access_approval_ref")
+        return self
+
+
+class CompiledDatasetCandidate(StrictModel):
+    candidate_id: str
+    required_input: str | None = None
+    resource_id: str | None = None
+    label: str
+    filename: str | None = None
+    mime_type: str | None = None
+    sha256: str | None = None
+    size_bytes: int | None = Field(default=None, ge=1)
+    license_status: Literal["verified_open", "verified_restricted", "unknown"]
+    granularity: str | None = None
+    time_key: str | None = None
+    join_keys: list[str] = Field(default_factory=list)
+    status: Literal["ready", "blocked"]
+    blockers: list[str] = Field(default_factory=list)
+
+
+class CompiledVariableDictionaryEntry(StrictModel):
+    construct_key: str
+    construct_label: str
+    role: Literal["predictor", "outcome", "mediator", "moderator", "control"]
+    granularity: str
+    resource_id: str | None = None
+    field_name: str | None = None
+    field_label: str | None = None
+    status: Literal["bound", "unbound"]
+    blocker: str | None = None
+
+
+class CompiledIdentificationStrategy(StrictModel):
+    strategy_id: str
+    label: str
+    description: str
+    evidence_chunk_ids: list[str] = Field(default_factory=list)
+    status: Literal["candidate_ready_for_h1_review", "blocked"]
+    blocker: str | None = None
+
+
+class DiscoveryExecutionReadiness(StrictModel):
+    schema_version: Literal["discovery-execution-readiness/1.0.0"] = (
+        "discovery-execution-readiness/1.0.0"
+    )
+    status: Literal["ready", "blocked"]
+    can_execute: bool
+    dataset_candidates: list[CompiledDatasetCandidate]
+    variable_dictionary: list[CompiledVariableDictionaryEntry]
+    identification_strategies: list[CompiledIdentificationStrategy]
+    blockers: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_execution_flags(self) -> "DiscoveryExecutionReadiness":
+        if self.can_execute != (self.status == "ready"):
+            raise ValueError("readiness status and can_execute must agree")
+        if self.can_execute and self.blockers:
+            raise ValueError("execution-ready package cannot contain blockers")
+        if self.can_execute and (
+            any(item.status != "ready" for item in self.dataset_candidates)
+            or any(item.status != "bound" for item in self.variable_dictionary)
+            or any(
+                item.status != "candidate_ready_for_h1_review"
+                for item in self.identification_strategies
+            )
+        ):
+            raise ValueError("execution-ready package contains an unresolved component")
+        return self
+
+
 class DatasetRef(StrictModel):
     dataset_id: str
     role: Literal["main", "supplementary"] = "main"

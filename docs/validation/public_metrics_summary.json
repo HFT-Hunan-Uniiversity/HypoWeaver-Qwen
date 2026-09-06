@@ -1,0 +1,332 @@
+{
+  "v2": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 20,
+        "total": 30,
+        "rate": 0.666667,
+        "lower": 0.487801,
+        "upper": 0.807695,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 14,
+        "total": 30,
+        "rate": 0.466667,
+        "lower": 0.302324,
+        "upper": 0.638577,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 17,
+        "total": 30,
+        "rate": 0.566667,
+        "lower": 0.391973,
+        "upper": 0.726225,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 20,
+        "total": 30,
+        "rate": 0.666667,
+        "lower": 0.487801,
+        "upper": 0.807695,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  },
+  "v3": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 29,
+        "total": 30,
+        "rate": 0.966667,
+        "lower": 0.833296,
+        "upper": 0.994091,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 27,
+        "total": 30,
+        "rate": 0.9,
+        "lower": 0.743789,
+        "upper": 0.9654,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 26,
+        "total": 30,
+        "rate": 0.866667,
+        "lower": 0.703187,
+        "upper": 0.946903,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 29,
+        "total": 30,
+        "rate": 0.966667,
+        "lower": 0.833296,
+        "upper": 0.994091,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  },
+  "complete_loop": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 29,
+        "total": 30,
+        "rate": 0.966667,
+        "lower": 0.833296,
+        "upper": 0.994091,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  },
+  "no_document_diversification": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 28,
+        "total": 30,
+        "rate": 0.933333,
+        "lower": 0.786765,
+        "upper": 0.981523,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 15,
+        "total": 30,
+        "rate": 0.5,
+        "lower": 0.331541,
+        "upper": 0.668459,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  },
+  "no_schema_repair": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 26,
+        "total": 30,
+        "rate": 0.866667,
+        "lower": 0.703187,
+        "upper": 0.946903,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 26,
+        "total": 30,
+        "rate": 0.866667,
+        "lower": 0.703187,
+        "upper": 0.946903,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 23,
+        "total": 30,
+        "rate": 0.766667,
+        "lower": 0.590717,
+        "upper": 0.882076,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 26,
+        "total": 30,
+        "rate": 0.866667,
+        "lower": 0.703187,
+        "upper": 0.946903,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  },
+  "no_reviewer_feedback": {
+    "cells": 30,
+    "all_six_metrics_match": true,
+    "metrics": {
+      "cell_completed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "final_consistency_passed": {
+        "successes": 28,
+        "total": 30,
+        "rate": 0.933333,
+        "lower": 0.786765,
+        "upper": 0.981523,
+        "method": "Wilson 95%"
+      },
+      "topic_fidelity": {
+        "successes": 27,
+        "total": 30,
+        "rate": 0.9,
+        "lower": 0.743789,
+        "upper": 0.9654,
+        "method": "Wilson 95%"
+      },
+      "readiness_blocked_correctly": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "diversity_gate_passed": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      },
+      "safe_stop": {
+        "successes": 30,
+        "total": 30,
+        "rate": 1.0,
+        "lower": 0.886487,
+        "upper": 1.0,
+        "method": "Wilson 95%"
+      }
+    },
+    "source_text_integrity": "NOT_RECHECKED_RESTRICTED_TEXT_NOT_DISTRIBUTED"
+  }
+}

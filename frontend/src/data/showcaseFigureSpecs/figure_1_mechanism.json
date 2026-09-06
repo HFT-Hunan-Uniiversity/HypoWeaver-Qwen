@@ -1,0 +1,81 @@
+{
+  "edges": [
+    {
+      "from": "exposure",
+      "label": "金融资源配置",
+      "to": "finance"
+    },
+    {
+      "from": "finance",
+      "label": "长期研发投入",
+      "to": "innovation"
+    },
+    {
+      "from": "exposure",
+      "label": "规制与价格信号",
+      "to": "incentive"
+    },
+    {
+      "from": "incentive",
+      "label": "创新补偿与转型",
+      "to": "innovation"
+    },
+    {
+      "connection": "arc3,rad=-0.12",
+      "from": "competition",
+      "label": "调节",
+      "style": "dashed",
+      "to": "innovation"
+    }
+  ],
+  "id": "carbon_market_mechanism_framework",
+  "kind": "mechanism",
+  "nodes": [
+    {
+      "fill": "#FFFFFF",
+      "height": 0.16,
+      "id": "exposure",
+      "label": "碳市场政策暴露",
+      "width": 0.2,
+      "x": 0.13,
+      "y": 0.55
+    },
+    {
+      "fill": "#F2F2F2",
+      "height": 0.18,
+      "id": "finance",
+      "label": "融资约束缓解\n绿色融资可得性提高",
+      "width": 0.25,
+      "x": 0.48,
+      "y": 0.75
+    },
+    {
+      "fill": "#F2F2F2",
+      "height": 0.18,
+      "id": "incentive",
+      "label": "合规压力与碳价信号\n创新收益相对上升",
+      "width": 0.25,
+      "x": 0.48,
+      "y": 0.34
+    },
+    {
+      "fill": "#FFFFFF",
+      "height": 0.18,
+      "id": "innovation",
+      "label": "高质量绿色技术创新\n绿色发明专利申请",
+      "width": 0.24,
+      "x": 0.84,
+      "y": 0.55
+    },
+    {
+      "fill": "#FFFFFF",
+      "height": 0.14,
+      "id": "competition",
+      "label": "市场竞争程度\n边界条件",
+      "width": 0.19,
+      "x": 0.66,
+      "y": 0.1
+    }
+  ],
+  "provenance": "conceptual"
+}

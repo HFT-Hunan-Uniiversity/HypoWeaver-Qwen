@@ -66,6 +66,9 @@ def _strict_integer(value: Any) -> int:
 
 FiniteFloat = Annotated[float, BeforeValidator(_finite_number)]
 Probability = Annotated[FiniteFloat, Field(ge=0, le=1)]
+UnitFloat = Annotated[FiniteFloat, Field(ge=0, le=1)]
+MechanismOffset = Annotated[FiniteFloat, Field(ge=-0.25, le=0.25)]
+MechanismCurvature = Annotated[FiniteFloat, Field(ge=-0.5, le=0.5)]
 NonNegativeFloat = Annotated[FiniteFloat, Field(ge=0)]
 StrictInteger = Annotated[int, BeforeValidator(_strict_integer)]
 NonNegativeInt = Annotated[StrictInteger, Field(ge=0)]
@@ -514,11 +517,18 @@ class SpatialChoroplethData(StrictModel):
 class MechanismNode(StrictModel):
     node_id: NonEmptyStr
     label: NonEmptyStr
+    x: UnitFloat | None = None
+    y: UnitFloat | None = None
+    width: Annotated[FiniteFloat, Field(gt=0, le=0.5)] | None = None
+    height: Annotated[FiniteFloat, Field(gt=0, le=0.5)] | None = None
+    fill: Annotated[StrictStr, StringConstraints(pattern=r"^#[0-9A-Fa-f]{6}$")] | None = None
 
     @model_validator(mode="after")
     def validate_neutral_label(self) -> "MechanismNode":
         if _UNAUTHORIZED_MECHANISM_LABEL.search(self.label):
             raise ValueError("mechanism node label contains conclusion language")
+        if (self.x is None) != (self.y is None):
+            raise ValueError("mechanism node x and y must be supplied together")
         return self
 
 
@@ -527,13 +537,17 @@ class MechanismEdge(StrictModel):
     source: NonEmptyStr
     target: NonEmptyStr
     edge_kind: Literal["hypothesized"]
-    label: NonEmptyStr
+    label: NonEmptyStr | None = None
+    style: Literal["solid", "dashed"] = "dashed"
+    curvature: MechanismCurvature = 0.0
+    label_dx: MechanismOffset = 0.0
+    label_dy: MechanismOffset = 0.035
 
     @model_validator(mode="after")
     def validate_hypothesis_edge(self) -> "MechanismEdge":
         if self.source == self.target:
             raise ValueError("mechanism graph edges cannot be self-loops")
-        if _UNAUTHORIZED_MECHANISM_LABEL.search(self.label):
+        if self.label and _UNAUTHORIZED_MECHANISM_LABEL.search(self.label):
             raise ValueError("mechanism edge label contains conclusion language")
         return self
 

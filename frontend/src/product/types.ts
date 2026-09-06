@@ -81,6 +81,67 @@ export interface IdeaCard {
   }
 }
 
+export type ScientificTenItemStatus = 'evidence_bound' | 'conditional' | 'pending'
+
+export interface ScientificTenDraftItem {
+  itemNo: number
+  title: string
+  content: string
+  status: ScientificTenItemStatus
+  evidenceRefs: string[]
+  unresolvedActions: string[]
+  confirmed: boolean
+}
+
+export type ResearchFigureLanguage = 'zh' | 'en'
+
+export type ScientificFigureKind = 'mechanism' | 'event_study' | 'coefficient' | 'trend'
+
+export interface ScientificFigureCopy {
+  title: string
+  subtitle: string
+  xLabel: string
+  yLabel: string
+  legend: string[]
+}
+
+export interface ScientificFigureNode {
+  id: string
+  role: 'predictor' | 'mechanism' | 'outcome' | 'boundary'
+  labelZh: string
+  labelEn: string
+}
+
+export interface ScientificFigureDraft {
+  id: string
+  kind: ScientificFigureKind
+  role: 'research_design' | 'planned_result'
+  dataStatus: 'project_bound' | 'awaiting_estimates'
+  copy: Record<ResearchFigureLanguage, ScientificFigureCopy>
+  sourceRefs: string[]
+  nodes?: ScientificFigureNode[]
+}
+
+export interface ScientificTenDraft {
+  generatedAt: string
+  sourceIdeaId: string
+  status: 'draft' | 'confirmed'
+  confirmedAt?: string
+  items: ScientificTenDraftItem[]
+  figureLanguage: ResearchFigureLanguage
+  figures: ScientificFigureDraft[]
+}
+
+export type ScientificTenItemPatch = Partial<Pick<
+  ScientificTenDraftItem,
+  'content' | 'unresolvedActions' | 'confirmed'
+>>
+
+export type ScientificFigureCopyPatch = Partial<Pick<
+  ScientificFigureCopy,
+  'title' | 'subtitle' | 'xLabel' | 'yLabel' | 'legend'
+>>
+
 export interface DiscoveryDraft {
   currentStep: DiscoveryStep
   completedSteps: DiscoveryStep[]
@@ -88,6 +149,7 @@ export interface DiscoveryDraft {
   gapCards: GapCard[]
   ideaCards: IdeaCard[]
   selectedIdeaId?: string
+  scientificTen?: ScientificTenDraft
 }
 
 export interface ProjectResourceLink {
@@ -169,11 +231,23 @@ export interface FrontendDataSource {
   getProject(id: string): Project | null
   createProject(input: CreateProjectInput): Project
   updateProject(id: string, patch: UpdateProjectInput): Project | null
+  deleteProjects(ids: string[]): number
   getSelectedProjectId(): string | null
   setSelectedProjectId(id: string | null): void
   updateDiscoveryDraft(id: string, patch: Partial<DiscoveryDraft>): Project | null
   updateDiscoveryStep(id: string, step: DiscoveryStep, patch?: Partial<DiscoveryDraft>): Project | null
   selectDiscoveryIdea(id: string, ideaId: string | null): Project | null
+  generateScientificTen(id: string): Project | null
+  generateScientificFigures(id: string): Project | null
+  setScientificFigureLanguage(id: string, language: ResearchFigureLanguage): Project | null
+  updateScientificFigureCopy(
+    id: string,
+    figureId: string,
+    language: ResearchFigureLanguage,
+    patch: ScientificFigureCopyPatch,
+  ): Project | null
+  updateScientificTenItem(id: string, itemNo: number, patch: ScientificTenItemPatch): Project | null
+  confirmScientificTen(id: string): Project | null
   queryResources(query: ResourceQuery): ResourcePage
   getResource(kind: ResourceKind, id: string): ResourceDetail | null
   addProjectResource(projectId: string, kind: ResourceKind, resourceId: string): ProjectResourceLink | null

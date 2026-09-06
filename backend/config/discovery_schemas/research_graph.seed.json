@@ -1,0 +1,1164 @@
+{
+    "schema_version":  "0.2.0",
+    "graph_id":  "greenfin-taxonomy-seed-v0.2",
+    "snapshot_id":  "greenfin-taxonomy-seed-v0.2@2026-07-15",
+    "as_of":  "2026-07-15T00:00:00+08:00",
+    "domain":  "green_finance",
+    "scope":  {
+                  "themes":  [
+                                 "ESG绿洗与融资成本"
+                             ],
+                  "languages":  [
+                                    "zh",
+                                    "en"
+                                ],
+                  "document_types":  [
+                                         "project_spec"
+                                     ],
+                  "year_start":  null,
+                  "year_end":  null
+              },
+    "build":  {
+                  "created_at":  "2026-07-15T00:00:00+08:00",
+                  "generator":  "D schema bootstrap",
+                  "graph_schema_version":  "0.2.0",
+                  "input_contract_versions":  [
+                                                  "project-taxonomy/0.2.0"
+                                              ],
+                  "pipeline_run_id":  "run:taxonomy_seed_20260715",
+                  "source_watermarks":  {
+                                            "project_spec":  "2026-07-03"
+                                        },
+                  "base_graph_id":  null,
+                  "parent_snapshot_id":  null,
+                  "code_version":  null,
+                  "config_hash":  null,
+                  "notes":  "Engineering taxonomy only. This seed is not a literature-derived empirical result."
+              },
+    "nodes":  [
+                  {
+                      "id":  "topic:green_finance",
+                      "type":  "topic",
+                      "layer":  "knowledge",
+                      "label":  "绿色金融",
+                      "normalized_label":  "绿色金融",
+                      "aliases":  [
+                                      "green finance"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "topic",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "topic:esg",
+                      "type":  "topic",
+                      "layer":  "knowledge",
+                      "label":  "ESG",
+                      "normalized_label":  "esg",
+                      "aliases":  [
+                                      "环境、社会与治理"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "topic",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "topic:greenwashing",
+                      "type":  "topic",
+                      "layer":  "knowledge",
+                      "label":  "绿洗",
+                      "normalized_label":  "绿洗",
+                      "aliases":  [
+                                      "greenwashing",
+                                      "漂绿"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "topic",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "topic:green_credit",
+                      "type":  "topic",
+                      "layer":  "knowledge",
+                      "label":  "绿色信贷",
+                      "normalized_label":  "绿色信贷",
+                      "aliases":  [
+                                      "green credit"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "topic",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "topic:green_bond",
+                      "type":  "topic",
+                      "layer":  "knowledge",
+                      "label":  "绿色债券",
+                      "normalized_label":  "绿色债券",
+                      "aliases":  [
+                                      "green bond"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "topic",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "mechanism:information_asymmetry",
+                      "type":  "mechanism",
+                      "layer":  "knowledge",
+                      "label":  "信息不对称",
+                      "normalized_label":  "信息不对称",
+                      "aliases":  [
+                                      "information asymmetry"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "mechanism",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "mechanism:financing_constraints",
+                      "type":  "mechanism",
+                      "layer":  "knowledge",
+                      "label":  "融资约束",
+                      "normalized_label":  "融资约束",
+                      "aliases":  [
+                                      "financing constraints"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "mechanism",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "mechanism:reputation",
+                      "type":  "mechanism",
+                      "layer":  "knowledge",
+                      "label":  "声誉机制",
+                      "normalized_label":  "声誉机制",
+                      "aliases":  [
+                                      "reputation mechanism"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "mechanism",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "variable:green_narrative_intensity",
+                      "type":  "variable",
+                      "layer":  "knowledge",
+                      "label":  "绿色叙事强度",
+                      "normalized_label":  "绿色叙事强度",
+                      "aliases":  [
+                                      "green narrative intensity"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "variable",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "variable:real_green_behavior",
+                      "type":  "variable",
+                      "layer":  "knowledge",
+                      "label":  "真实绿色行为",
+                      "normalized_label":  "真实绿色行为",
+                      "aliases":  [
+                                      "real green behavior"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "variable",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "variable:greenwashing_risk",
+                      "type":  "variable",
+                      "layer":  "knowledge",
+                      "label":  "绿洗风险",
+                      "normalized_label":  "绿洗风险",
+                      "aliases":  [
+                                      "greenwashing risk"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "variable",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "variable:financing_cost",
+                      "type":  "variable",
+                      "layer":  "knowledge",
+                      "label":  "融资成本",
+                      "normalized_label":  "融资成本",
+                      "aliases":  [
+                                      "cost of capital",
+                                      "financing cost"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "variable",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "variable:green_innovation",
+                      "type":  "variable",
+                      "layer":  "knowledge",
+                      "label":  "绿色创新",
+                      "normalized_label":  "绿色创新",
+                      "aliases":  [
+                                      "green innovation"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "variable",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "method:did",
+                      "type":  "method",
+                      "layer":  "knowledge",
+                      "label":  "双重差分法",
+                      "normalized_label":  "双重差分法",
+                      "aliases":  [
+                                      "DID",
+                                      "difference-in-differences"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "method",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "method:fixed_effects",
+                      "type":  "method",
+                      "layer":  "knowledge",
+                      "label":  "固定效应回归",
+                      "normalized_label":  "固定效应回归",
+                      "aliases":  [
+                                      "fixed effects regression"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "method",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "method:text_analysis",
+                      "type":  "method",
+                      "layer":  "knowledge",
+                      "label":  "文本分析",
+                      "normalized_label":  "文本分析",
+                      "aliases":  [
+                                      "text analysis"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "method",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "dataset:annual_reports",
+                      "type":  "dataset",
+                      "layer":  "source",
+                      "label":  "上市公司年报",
+                      "normalized_label":  "上市公司年报",
+                      "aliases":  [
+                                      "annual reports"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "dataset",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "dataset:esg_reports",
+                      "type":  "dataset",
+                      "layer":  "source",
+                      "label":  "ESG报告",
+                      "normalized_label":  "esg报告",
+                      "aliases":  [
+                                      "ESG reports"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "dataset",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "dataset:green_patents",
+                      "type":  "dataset",
+                      "layer":  "source",
+                      "label":  "绿色专利",
+                      "normalized_label":  "绿色专利",
+                      "aliases":  [
+                                      "green patents"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "dataset",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "dataset:environmental_penalties",
+                      "type":  "dataset",
+                      "layer":  "source",
+                      "label":  "环境处罚记录",
+                      "normalized_label":  "环境处罚记录",
+                      "aliases":  [
+                                      "environmental penalties"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "dataset",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "policy:green_finance_reform_pilot",
+                      "type":  "policy_document",
+                      "layer":  "source",
+                      "label":  "绿色金融改革创新试验区政策",
+                      "normalized_label":  "绿色金融改革创新试验区政策",
+                      "aliases":  [
+                                      "绿色金融改革试验区"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "policy",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "measure:annual_report_green_narrative",
+                      "type":  "measure",
+                      "layer":  "knowledge",
+                      "label":  "年报绿色叙事指标",
+                      "normalized_label":  "年报绿色叙事指标",
+                      "aliases":  [
+                                      "annual-report green narrative measure"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "measure",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  },
+                  {
+                      "id":  "measure:esg_report_green_narrative",
+                      "type":  "measure",
+                      "layer":  "knowledge",
+                      "label":  "ESG报告绿色叙事指标",
+                      "normalized_label":  "esg报告绿色叙事指标",
+                      "aliases":  [
+                                      "ESG-report green narrative measure"
+                                  ],
+                      "description":  null,
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "source_profile_ids":  [
+
+                                             ],
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "properties":  {
+                                         "seed_group":  "measure",
+                                         "scientific_status":  "taxonomy_only"
+                                     }
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "edge:green_credit_subtopic",
+                      "source":  "topic:green_credit",
+                      "target":  "topic:green_finance",
+                      "type":  "SUBTOPIC_OF",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "taxonomy"
+                                     }
+                  },
+                  {
+                      "id":  "edge:green_bond_subtopic",
+                      "source":  "topic:green_bond",
+                      "target":  "topic:green_finance",
+                      "type":  "SUBTOPIC_OF",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "taxonomy"
+                                     }
+                  },
+                  {
+                      "id":  "edge:esg_green_finance_related",
+                      "source":  "topic:esg",
+                      "target":  "topic:green_finance",
+                      "type":  "RELATED_TO",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "taxonomy"
+                                     }
+                  },
+                  {
+                      "id":  "edge:greenwashing_esg_related",
+                      "source":  "topic:greenwashing",
+                      "target":  "topic:esg",
+                      "type":  "RELATED_TO",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  1,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "taxonomy"
+                                     }
+                  },
+                  {
+                      "id":  "edge:narrative_annual_reports",
+                      "source":  "variable:green_narrative_intensity",
+                      "target":  "measure:annual_report_green_narrative",
+                      "type":  "MEASURED_BY",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_measurement"
+                                     }
+                  },
+                  {
+                      "id":  "edge:narrative_esg_reports",
+                      "source":  "variable:green_narrative_intensity",
+                      "target":  "measure:esg_report_green_narrative",
+                      "type":  "MEASURED_BY",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_measurement"
+                                     }
+                  },
+                  {
+                      "id":  "edge:behavior_green_patents",
+                      "source":  "variable:real_green_behavior",
+                      "target":  "dataset:green_patents",
+                      "type":  "PROXIED_BY",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.8,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_proxy"
+                                     }
+                  },
+                  {
+                      "id":  "edge:behavior_penalties",
+                      "source":  "variable:real_green_behavior",
+                      "target":  "dataset:environmental_penalties",
+                      "type":  "PROXIED_BY",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.8,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_proxy",
+                                         "polarity":  "inverse"
+                                     }
+                  },
+                  {
+                      "id":  "edge:greenwashing_narrative_related",
+                      "source":  "variable:greenwashing_risk",
+                      "target":  "variable:green_narrative_intensity",
+                      "type":  "RELATED_TO",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.8,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_construct"
+                                     }
+                  },
+                  {
+                      "id":  "edge:greenwashing_behavior_related",
+                      "source":  "variable:greenwashing_risk",
+                      "target":  "variable:real_green_behavior",
+                      "type":  "RELATED_TO",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.8,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_construct"
+                                     }
+                  },
+                  {
+                      "id":  "edge:did_pilot_suitable",
+                      "source":  "method:did",
+                      "target":  "policy:green_finance_reform_pilot",
+                      "type":  "SUITABLE_FOR",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.8,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_method"
+                                     }
+                  },
+                  {
+                      "id":  "edge:text_analysis_greenwashing",
+                      "source":  "method:text_analysis",
+                      "target":  "topic:greenwashing",
+                      "type":  "SUITABLE_FOR",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_method"
+                                     }
+                  },
+                  {
+                      "id":  "edge:annual_measure_from_reports",
+                      "source":  "measure:annual_report_green_narrative",
+                      "target":  "dataset:annual_reports",
+                      "type":  "DERIVED_FROM",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_measurement"
+                                     }
+                  },
+                  {
+                      "id":  "edge:esg_measure_from_reports",
+                      "source":  "measure:esg_report_green_narrative",
+                      "target":  "dataset:esg_reports",
+                      "type":  "DERIVED_FROM",
+                      "layer":  "knowledge",
+                      "origin":  "curated",
+                      "review_status":  "human_verified",
+                      "confidence":  0.9,
+                      "version":  1,
+                      "validity":  {
+                                       "observed_at":  "2026-07-15T00:00:00+08:00",
+                                       "valid_from":  null,
+                                       "valid_to":  null
+                                   },
+                      "evidence_ids":  [
+                                           "ev:project_spec_graph_module"
+                                       ],
+                      "derivation":  null,
+                      "context":  {
+
+                                  },
+                      "properties":  {
+                                         "assertion_kind":  "candidate_measurement"
+                                     }
+                  }
+              ],
+    "evidence":  [
+                     {
+                         "id":  "ev:project_spec_graph_module",
+                         "source_type":  "project_spec",
+                         "evidence_type":  "design_decision",
+                         "evidence_level":  "design",
+                         "source_document_id":  "green-finance-ai-scientist-architecture",
+                         "document_version":  "spec-2026-07-03",
+                         "profile_id":  null,
+                         "chunk_id":  null,
+                         "content":  "把文献、政策、变量、数据和方法连接成研究图谱",
+                         "content_hash":  "0067d75171d6a59d20b347c665507dfbde95cd4792e7b761d784d67992110f51",
+                         "source_ref":  "docs/superpowers/specs/2026-07-03-green-finance-ai-scientist-architecture.md",
+                         "published_at":  "2026-07-03",
+                         "retrieved_at":  "2026-07-15T00:00:00+08:00",
+                         "verification_status":  "not_applicable",
+                         "access_level":  "open",
+                         "license":  null,
+                         "locator":  {
+                                         "page":  null,
+                                         "section":  "10. 模块六：研究图谱构建 Agent",
+                                         "start_char":  null,
+                                         "end_char":  null,
+                                         "table_id":  null,
+                                         "row":  null,
+                                         "column":  null
+                                     }
+                     }
+                 ],
+    "quality_summary":  {
+                            "source_document_count":  0,
+                            "fact_edge_traceability_rate":  1,
+                            "verified_evidence_rate":  0,
+                            "unresolved_entity_count":  0,
+                            "rejected_item_count":  0
+                        },
+    "statistics":  {
+                       "node_count":  23,
+                       "edge_count":  14,
+                       "evidence_count":  1
+                   }
+}

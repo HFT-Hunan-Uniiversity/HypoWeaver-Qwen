@@ -9,6 +9,10 @@ import type {
   GateDecisionInput,
   LocalCaseImportResult,
   DesignArenaView,
+  DiscoveryLaunchResult,
+  DiscoveryPlanGeneration,
+  DiscoveryPlanWire,
+  DiscoveryReleasePreviewWire,
   FigureBundleView,
   Group1VerifiedBundleStatus,
   ManuscriptPackageView,
@@ -23,12 +27,18 @@ import type {
   RunSummary,
   RuntimeConfigStatus,
   RuntimeConfigUpdate,
+  OriginalLiteratureAnswer,
+  OriginalLiteratureDocument,
+  OriginalLiteraturePage,
   StepAttempt,
   StepStatus,
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
   WorkflowStage,
+  KnowledgeCatalogPage,
+  KnowledgeDocumentTextSlice,
+  KnowledgeEvidenceBundle,
 } from './types'
 
 type UnknownRecord = Record<string, unknown>
@@ -82,6 +92,41 @@ function first(record: UnknownRecord, ...keys: string[]): unknown {
     if (record[key] !== undefined && record[key] !== null) return record[key]
   }
   return undefined
+}
+
+function normalizeDiscoveryGeneration(payload: unknown): DiscoveryPlanGeneration {
+  const value = asRecord(payload)
+  const evidenceBundle = asRecord(value.evidence_bundle)
+  const plan = asRecord(value.plan)
+  const consistencyReviews = asArray(value.consistency_reviews).map(asRecord) as unknown as DiscoveryPlanGeneration['consistencyReviews']
+  const retrievalRounds = asArray(value.retrieval_rounds).map(asRecord) as unknown as DiscoveryPlanGeneration['retrievalRounds']
+  const executionReadiness = asRecord(value.execution_readiness)
+  if (!asString(evidenceBundle.bundle_id) || !asString(plan.schema_version)) {
+    throw new Error('发现服务返回了不完整的 EvidenceBundle 或 DiscoveryPlan。')
+  }
+  return {
+    originalQuestion: asString(value.original_question, asString(evidenceBundle.question)),
+    evidenceBundle: evidenceBundle as unknown as KnowledgeEvidenceBundle,
+    plan: plan as unknown as DiscoveryPlanWire,
+    modelUsage: asRecord(value.model_usage),
+    consistencyReview: consistencyReviews.at(-1) ?? null,
+    consistencyReviews,
+    retrievalRounds,
+    repairCount: Number(value.repair_count ?? 0),
+    finalConsistencyPassed: Boolean(value.final_consistency_passed),
+    executionReadiness: Object.keys(executionReadiness).length
+      ? executionReadiness as unknown as NonNullable<DiscoveryPlanGeneration['executionReadiness']>
+      : null,
+    warnings: asArray(value.warnings).map((item) => asString(item)).filter(Boolean),
+  }
+}
+
+function normalizeDiscoveryRelease(payload: unknown): DiscoveryReleasePreviewWire {
+  const value = asRecord(payload)
+  if (!asString(value.schema_version) || !Array.isArray(value.hypothesis_cards)) {
+    throw new Error('发现引擎返回了不完整的发布预览。')
+  }
+  return value as unknown as DiscoveryReleasePreviewWire
 }
 
 function asNodeKind(value: unknown): NodeKind {
@@ -610,6 +655,7 @@ export function normalizeRun(payload: unknown): RunSnapshot {
     planOnly: Boolean(first(run, 'plan_only', 'planOnly')) || manuscriptPayload.mode === 'research_plan_only',
     createdAt: asString(first(run, 'created_at', 'createdAt'), firstTimestamp),
     updatedAt: asString(first(run, 'updated_at', 'updatedAt'), lastTimestamp),
+    caseSubmission: Object.keys(caseSubmission).length ? normalizeCaseSubmission(caseSubmission) : undefined,
     steps: attempts,
     events: normalizedEvents,
     claims: asArray(first(run, 'claims', 'claim_ledger') ?? claimPayload.claims).map(normalizeClaim),
@@ -636,6 +682,7 @@ export function normalizeRun(payload: unknown): RunSnapshot {
       status: asString(upstreamProvenance.status),
       manifestSha256: asString(first(upstreamProvenance, 'manifest_sha256', 'manifestSha256')),
       verifiedArtifactCount: Number(first(upstreamProvenance, 'verified_artifact_count', 'verifiedArtifactCount') ?? 0),
+      evidenceRefCount: asArray(first(upstreamProvenance, 'evidence_refs', 'evidenceRefs')).length,
       hypothesisId: asString(first(upstreamProvenance, 'hypothesis_id', 'hypothesisId'), '') || undefined,
       gapId: asString(first(upstreamProvenance, 'gap_id', 'gapId'), '') || undefined,
       corpusBoundary: asString(first(upstreamProvenance, 'corpus_boundary', 'corpusBoundary'), '') || undefined,
@@ -1020,6 +1067,47 @@ export function normalizeBaselineRun(payload: unknown): BaselineRun {
   }
 }
 
+function normalizeLiteraturePage(payload: unknown): OriginalLiteraturePage {
+  const value = asRecord(payload)
+  return {
+    pageNumber: Number(first(value, 'page_number', 'pageNumber') ?? 0),
+    characterCount: Number(first(value, 'character_count', 'characterCount') ?? 0),
+    textSha256: asString(first(value, 'text_sha256', 'textSha256')),
+    text: asString(value.text),
+  }
+}
+
+function normalizeLiteratureDocument(payload: unknown): OriginalLiteratureDocument {
+  const value = asRecord(payload)
+  return {
+    documentId: asString(first(value, 'document_id', 'documentId')),
+    filename: asString(value.filename),
+    title: asString(value.title),
+    author: asString(value.author, '') || undefined,
+    sha256: asString(value.sha256),
+    sizeBytes: Number(first(value, 'size_bytes', 'sizeBytes') ?? 0),
+    pageCount: Number(first(value, 'page_count', 'pageCount') ?? 0),
+    extractedPageCount: Number(first(value, 'extracted_page_count', 'extractedPageCount') ?? 0),
+    extractedCharacterCount: Number(first(value, 'extracted_character_count', 'extractedCharacterCount') ?? 0),
+    uploadedAt: asString(first(value, 'uploaded_at', 'uploadedAt')),
+    isShowcase: Boolean(first(value, 'is_showcase', 'isShowcase')),
+    publicationYear: Number(first(value, 'publication_year', 'publicationYear')) || undefined,
+    journal: asString(value.journal, '') || undefined,
+    doi: asString(value.doi, '') || undefined,
+    sourceUrl: asString(first(value, 'source_url', 'sourceUrl'), '') || undefined,
+    license: asString(value.license, '') || undefined,
+    showcaseOrder: Number(first(value, 'showcase_order', 'showcaseOrder')) || undefined,
+    pages: asArray(value.pages).map((page) => {
+      const normalized = normalizeLiteraturePage(page)
+      return {
+        pageNumber: normalized.pageNumber,
+        characterCount: normalized.characterCount,
+        textSha256: normalized.textSha256,
+      }
+    }),
+  }
+}
+
 export const workflowApi = {
   hasAccessToken(): boolean {
     return Boolean(accessToken())
@@ -1099,6 +1187,80 @@ export const workflowApi = {
       body: JSON.stringify({}),
     }))
     return normalizeRun(payload.run)
+  },
+
+  async generateDiscoveryPlan(input: {
+    question: string
+    goal: string
+    unitOfAnalysis: string
+    samplePeriod: string
+    constraints: string[]
+  }): Promise<DiscoveryPlanGeneration> {
+    if (input.question.trim().length < 2) throw new Error('请先填写至少 2 个字符的研究问题。')
+    return normalizeDiscoveryGeneration(await request('/discovery/plans/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        search: {
+          question: input.question.trim(),
+          top_k: 20,
+          max_graph_edges: 30,
+          diversity_mode: 'per_document_cap',
+          max_hits_per_document: 2,
+          min_unique_documents: 3,
+        },
+        context: {
+          goal: input.goal.trim(),
+          unit_of_analysis: input.unitOfAnalysis.trim(),
+          sample_period: input.samplePeriod.trim(),
+          constraints: input.constraints,
+        },
+      }),
+    }))
+  },
+
+  async reviewDiscoveryPlan(
+    generation: DiscoveryPlanGeneration,
+    reviewNote: string,
+  ): Promise<DiscoveryReleasePreviewWire> {
+    if (reviewNote.trim().length < 10) throw new Error('H0 审阅说明至少需要 10 个字符。')
+    return normalizeDiscoveryRelease(await request('/discovery/plans/review', {
+      method: 'POST',
+      body: JSON.stringify({
+        evidence_bundle: generation.evidenceBundle,
+        plan: generation.plan,
+        consistency_review: generation.consistencyReview,
+        execution_readiness: generation.executionReadiness,
+        review_note: reviewNote.trim(),
+      }),
+    }))
+  },
+
+  async launchDiscoveryPlan(
+    generation: DiscoveryPlanGeneration,
+    reviewNote: string,
+    approvalReason: string,
+  ): Promise<DiscoveryLaunchResult> {
+    if (reviewNote.trim().length < 10 || approvalReason.trim().length < 10) {
+      throw new Error('H0 审阅说明和批准理由都至少需要 10 个字符。')
+    }
+    const payload = asRecord(await request('/discovery/plans/launch', {
+      method: 'POST',
+      body: JSON.stringify({
+        evidence_bundle: generation.evidenceBundle,
+        plan: generation.plan,
+        consistency_review: generation.consistencyReview,
+        execution_readiness: generation.executionReadiness,
+        review_note: reviewNote.trim(),
+        approve_h0: true,
+        approval_reason: approvalReason.trim(),
+        mode: 'research',
+        research_model_provider: 'qwen',
+      }),
+    }))
+    return {
+      discoveryRelease: normalizeDiscoveryRelease(payload.discovery_release),
+      run: normalizeRun(payload.run),
+    }
   },
 
   async uploadCaseFile(file: File): Promise<LocalCaseImportResult> {
@@ -1190,6 +1352,164 @@ export const workflowApi = {
       success: Boolean(payload.success),
       message: asString(payload.message),
       statusCode: payload.status_code === null || payload.status_code === undefined ? undefined : Number(payload.status_code),
+    }
+  },
+
+  async getKnowledgeCatalog(input: {
+    query?: string
+    fulltextOnly?: boolean
+    readableOnly?: boolean
+    offset?: number
+    limit?: number
+  } = {}): Promise<KnowledgeCatalogPage> {
+    const params = new URLSearchParams({
+      query: input.query?.trim() ?? '',
+      fulltext_only: String(Boolean(input.fulltextOnly)),
+      readable_only: String(Boolean(input.readableOnly)),
+      offset: String(input.offset ?? 0),
+      limit: String(input.limit ?? 20),
+    })
+    const payload = asRecord(await request(
+      `/knowledge/catalog?${params.toString()}`,
+      { cache: 'no-store' },
+    ))
+    if (!asString(payload.corpus_snapshot_id) || !Array.isArray(payload.items)) {
+      throw new Error('知识服务返回了不完整的论文库目录。')
+    }
+    return payload as unknown as KnowledgeCatalogPage
+  },
+
+  async searchKnowledge(
+    question: string,
+    options: { fulltextOnly?: boolean; topK?: number } = {},
+  ): Promise<KnowledgeEvidenceBundle> {
+    const normalized = question.trim()
+    if (normalized.length < 2) throw new Error('请输入至少 2 个字符后再检索系统论文库。')
+    const payload = asRecord(await request('/knowledge/search', {
+      method: 'POST',
+      body: JSON.stringify({
+        question: normalized,
+        filters: { fulltext_only: options.fulltextOnly ?? true },
+        top_k: options.topK ?? 12,
+        max_graph_edges: 12,
+      }),
+    }))
+    if (!asString(payload.bundle_id) || !Array.isArray(payload.evidence_hits)) {
+      throw new Error('知识服务返回了不完整的检索证据。')
+    }
+    return payload as unknown as KnowledgeEvidenceBundle
+  },
+
+  async getKnowledgeDocumentText(
+    documentId: string,
+    input: { offset?: number; limit?: number } = {},
+  ): Promise<KnowledgeDocumentTextSlice> {
+    const params = new URLSearchParams({
+      offset: String(input.offset ?? 0),
+      limit: String(input.limit ?? 30_000),
+    })
+    const payload = asRecord(await request(
+      `/knowledge/catalog/${encodeURIComponent(documentId)}/text?${params.toString()}`,
+      { cache: 'no-store' },
+    ))
+    if (!asString(payload.document_id) || !asString(payload.content_sha256) || !asString(payload.text)) {
+      throw new Error('论文正文返回不完整，请稍后重试。')
+    }
+    return payload as unknown as KnowledgeDocumentTextSlice
+  },
+
+  async listLiteratureDocuments(): Promise<OriginalLiteratureDocument[]> {
+    return asArray(await request('/literature/documents')).map(normalizeLiteratureDocument)
+  },
+
+  async getLiteratureDocument(documentId: string): Promise<OriginalLiteratureDocument> {
+    return normalizeLiteratureDocument(
+      await request(`/literature/documents/${encodeURIComponent(documentId)}`),
+    )
+  },
+
+  async uploadLiteratureDocument(file: File): Promise<OriginalLiteratureDocument> {
+    if (!file.name.toLowerCase().endsWith('.pdf')) throw new Error('请选择原始 PDF 文件。')
+    const token = accessToken()
+    const response = await fetch(
+      `${API_BASE}/literature/documents?filename=${encodeURIComponent(file.name)}`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/pdf',
+          ...(token ? { 'X-Hypoweaver-Token': token } : {}),
+        },
+        body: file,
+      },
+    )
+    const payload = await response.json().catch(() => null)
+    if (!response.ok) {
+      const message = asString(first(asRecord(payload), 'detail', 'message'), `HTTP ${response.status}`)
+      throw new Error(message)
+    }
+    return normalizeLiteratureDocument(payload)
+  },
+
+  async deleteLiteratureDocument(documentId: string): Promise<void> {
+    await request(`/literature/documents/${encodeURIComponent(documentId)}`, { method: 'DELETE' })
+  },
+
+  async getLiteraturePdf(documentId: string): Promise<Blob> {
+    const token = accessToken()
+    const response = await fetch(
+      `${API_BASE}/literature/documents/${encodeURIComponent(documentId)}/file`,
+      { headers: { Accept: 'application/pdf', ...(token ? { 'X-Hypoweaver-Token': token } : {}) } },
+    )
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      const message = asString(first(asRecord(payload), 'detail', 'message'), `HTTP ${response.status}`)
+      throw new Error(message)
+    }
+    return response.blob()
+  },
+
+  async getLiteraturePage(documentId: string, pageNumber: number): Promise<OriginalLiteraturePage> {
+    return normalizeLiteraturePage(
+      await request(`/literature/documents/${encodeURIComponent(documentId)}/pages/${pageNumber}`),
+    )
+  },
+
+  async getLiteraturePageImage(documentId: string, pageNumber: number): Promise<Blob> {
+    const token = accessToken()
+    const response = await fetch(
+      `${API_BASE}/literature/documents/${encodeURIComponent(documentId)}/pages/${pageNumber}/image`,
+      { headers: { Accept: 'image/png', ...(token ? { 'X-Hypoweaver-Token': token } : {}) } },
+    )
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      const message = asString(first(asRecord(payload), 'detail', 'message'), `HTTP ${response.status}`)
+      throw new Error(message)
+    }
+    return response.blob()
+  },
+
+  async askLiterature(
+    documentId: string,
+    input: { question: string; pageNumbers?: number[] },
+  ): Promise<OriginalLiteratureAnswer> {
+    const payload = asRecord(await request(
+      `/literature/documents/${encodeURIComponent(documentId)}/ask`, {
+        method: 'POST',
+        body: JSON.stringify({
+          question: input.question,
+          ...(input.pageNumbers?.length ? { page_numbers: input.pageNumbers } : {}),
+        }),
+      },
+    ))
+    return {
+      documentId: asString(first(payload, 'document_id', 'documentId')),
+      documentSha256: asString(first(payload, 'document_sha256', 'documentSha256')),
+      answer: asString(payload.answer),
+      citedPages: asArray(first(payload, 'cited_pages', 'citedPages')).map(Number),
+      model: asString(payload.model),
+      usedPages: asArray(first(payload, 'used_pages', 'usedPages')).map(Number),
+      usedCharacters: Number(first(payload, 'used_characters', 'usedCharacters') ?? 0),
     }
   },
 

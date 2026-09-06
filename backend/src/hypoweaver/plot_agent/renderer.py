@@ -103,6 +103,7 @@ def render_request(
                 "figure_id": figure_id,
                 "recipe_id": recipe_id,
                 "recipe_version": request["recipe_version"],
+                "provenance": request["provenance"],
                 "title": title,
                 "caption": caption,
                 "alt_text": alt_text,
@@ -989,19 +990,20 @@ def _render_mechanism_evidence_graph(
                     "shrinkB": 25,
                 },
             )
-            label = edge["label"]
-            midpoint = (
-                (source[0] + target[0]) / 2,
-                (source[1] + target[1]) / 2 + 0.035,
-            )
-            axis.text(
-                *midpoint,
-                label,
-                ha="center",
-                va="center",
-                fontproperties=font("label"),
-                bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
-            )
+            label = edge.get("label")
+            if label:
+                midpoint = (
+                    (source[0] + target[0]) / 2,
+                    (source[1] + target[1]) / 2 + 0.035,
+                )
+                axis.text(
+                    *midpoint,
+                    label,
+                    ha="center",
+                    va="center",
+                    fontproperties=font("label"),
+                    bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
+                )
         for node_id, position in positions.items():
             axis.text(
                 *position,

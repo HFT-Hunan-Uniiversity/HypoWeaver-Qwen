@@ -847,6 +847,8 @@ class QwenGatewayReceiptTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         gateway = _mock_qwen_gateway(create_completion)
+        gateway.seed = 20260901
+        gateway.temperature = 0.2
 
         output = await gateway.generate(
             "intake",
@@ -870,6 +872,8 @@ class QwenGatewayReceiptTests(unittest.IsolatedAsyncioTestCase):
         request = create_completion.await_args.kwargs
         self.assertTrue(request["stream"])
         self.assertEqual(request["stream_options"], {"include_usage": True})
+        self.assertEqual(request["seed"], 20260901)
+        self.assertEqual(request["temperature"], 0.2)
 
     async def test_midstream_connection_error_discards_partial_text_and_retries(self) -> None:
         raw_secret = "PARTIAL-CONTENT-MUST-NOT-PERSIST"
@@ -1432,6 +1436,27 @@ class QwenGatewayReceiptTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(first_call["stream"])
         self.assertEqual(first_call["stream_options"], {"include_usage": True})
         retry_sleep.assert_not_awaited()
+
+    async def test_schema_repair_can_be_disabled_without_changing_default(self) -> None:
+        invalid = _stream_response(
+            "{}",
+            response_id="response-invalid-no-repair",
+            prompt_tokens=5,
+            completion_tokens=2,
+        )
+        valid = _stream_response('{"value":7}')
+        create_completion = AsyncMock(side_effect=[invalid, valid])
+        gateway = _mock_qwen_gateway(create_completion)
+        gateway.schema_repair_enabled = False
+
+        with self.assertRaisesRegex(ValueError, "failed schema validation"):
+            await gateway.generate("intake", {"safe": "input"}, _TinyOutput)
+
+        self.assertEqual(create_completion.await_count, 1)
+        receipts = gateway.budget.snapshot()["call_receipts"]
+        self.assertEqual(len(receipts), 1)
+        self.assertEqual(receipts[0]["attempt_type"], "primary")
+        self.assertEqual(receipts[0]["outcome"], "schema_failure")
 
     async def test_malformed_choices_still_emit_one_receipt_per_attempt(self) -> None:
         empty_choices = _stream_response(

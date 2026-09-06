@@ -2,11 +2,14 @@
 # The front-end transitive dependency graph is frozen separately by package-lock.json.
 fastapi==0.109.0
 httpx==0.28.1
+jsonschema==4.25.1
 linearmodels==7.0
 matplotlib==3.11.1
 numpy==2.4.4
 openai==2.30.0
 pandas==2.3.3
 pydantic==2.12.5
+pymupdf==1.26.4
+pypdf==5.9.0
 scipy==1.17.1
 uvicorn==0.27.0

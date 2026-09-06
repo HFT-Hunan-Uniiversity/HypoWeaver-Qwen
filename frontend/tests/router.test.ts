@@ -24,6 +24,11 @@ describe('frontend hash router', () => {
     expect(viewFromHash('#library/unknown')).toEqual({ kind: 'library', resourceKind: 'literature' })
   })
 
+  it('round-trips an encoded literature reader route', () => {
+    const reader = { kind: 'reader', id: '论文 01/全文' } as const
+    expect(viewFromHash(hashOf(reader))).toEqual(reader)
+  })
+
   it('round-trips encoded project and task identifiers', () => {
     const project = { kind: 'project', id: '研究 01', section: 'overview' } as const
     const task = { kind: 'task', id: 'mock/01' } as const

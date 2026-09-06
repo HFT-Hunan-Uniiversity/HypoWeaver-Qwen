@@ -1,0 +1,4280 @@
+{
+  "format_version": "hypoweaver-submission/1.0",
+  "created_at": "2026-09-05T13:36:30.313428+00:00",
+  "file_count": 854,
+  "bytes": 367670777,
+  "scope": "Source, deployment, public data, public experimental derivatives and validation; restricted fulltext corpus omitted.",
+  "excludes_manifest_itself": true,
+  "files": [
+    {
+      "path": ".dockerignore",
+      "bytes": 309,
+      "sha256": "b177a1a0448387128ee145fff19d19027dfcef22b2100f0cf232e1e10fdff193"
+    },
+    {
+      "path": ".env.example",
+      "bytes": 2493,
+      "sha256": "38487fffac084fe4ee80ff7980ccedec75d7a6cc4929acdfd854b54a9adcbc76"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 930,
+      "sha256": "35ef6959764ad8f585937a2471ef90f318d3ebab8fda05ee34593352eee69c7b"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 632,
+      "sha256": "fa3322233805f26cb699d67639c331147b082a225ae8cab62d63392a8ef655b6"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 931,
+      "sha256": "1b070b2673e3f807155219fd5137643bb17637fbba15d2ff7a7cf913c056f629"
+    },
+    {
+      "path": "backend/config/discovery_schemas/discovery_config.schema.json",
+      "bytes": 17450,
+      "sha256": "627a2d6d12c67e23228f23381de28c259f7c54c8fc86d8f19d8257b983e63b9b"
+    },
+    {
+      "path": "backend/config/discovery_schemas/discovery_release_manifest.schema.json",
+      "bytes": 3224,
+      "sha256": "c01e6a75f3eae11a0d130cb1e72cbed057cb7e6f006fad1c2160b24dce962d94"
+    },
+    {
+      "path": "backend/config/discovery_schemas/gap_card.schema.json",
+      "bytes": 7072,
+      "sha256": "7563f4c90781719355cf5ccc61a4d93785a7b25db73a235582c069c76f95cd84"
+    },
+    {
+      "path": "backend/config/discovery_schemas/graph_build_manifest.schema.json",
+      "bytes": 2183,
+      "sha256": "78883f1bdde28c8a77153fb1fd5201df76c6fecbb4f2f32fed5c93be72e61dd6"
+    },
+    {
+      "path": "backend/config/discovery_schemas/hypothesis_card.schema.json",
+      "bytes": 9320,
+      "sha256": "bbd3ae462edc5c57f24cf80317237b33dfcd6ab0522328eb290941c31670c2d2"
+    },
+    {
+      "path": "backend/config/discovery_schemas/novelty_search.schema.json",
+      "bytes": 6958,
+      "sha256": "a9f210991f3dad6f401df23d51acd449d76c0001c8c2af42d7bf13a2d4217ea4"
+    },
+    {
+      "path": "backend/config/discovery_schemas/paper_profile.graph_input.schema.json",
+      "bytes": 17022,
+      "sha256": "fe1220a1fc074f8ebaa9ff2a350a26574f772f3f9930a6382569df38307037e4"
+    },
+    {
+      "path": "backend/config/discovery_schemas/research_graph.schema.json",
+      "bytes": 14759,
+      "sha256": "51bfcd8b25f2172387ca680fc14c883d0ec668a92a992bbf827c1f4c4ce361c2"
+    },
+    {
+      "path": "backend/config/discovery_schemas/research_graph.seed.json",
+      "bytes": 54320,
+      "sha256": "18ecea256fa8639fca224baebdbdfafc34a4a56dfeb479e8273f4e419e165585"
+    },
+    {
+      "path": "backend/config/discovery_schemas/research_landscape.schema.json",
+      "bytes": 8336,
+      "sha256": "512a6d2135a89c4659754ccfb0b9c5ba5c0c7b3dbb6eb3f50bfc9a348fd09d26"
+    },
+    {
+      "path": "backend/config/group1_execution_sources.json",
+      "bytes": 5177,
+      "sha256": "85f79909f63ffb664d0d4a220c0b01cc19c95a64cbd408d728c2775da58ec211"
+    },
+    {
+      "path": "backend/pyproject.toml",
+      "bytes": 583,
+      "sha256": "148f7b50735f3a238b8720be974de08ae6c8520ef56456d8d66fd73c63acdb92"
+    },
+    {
+      "path": "backend/requirements-knowledge.txt",
+      "bytes": 205,
+      "sha256": "f1ba252bdc66e7b833ed10691e94a2503fd5004f7b1a7a28ab2d2f478a7da01c"
+    },
+    {
+      "path": "backend/requirements-lock.txt",
+      "bytes": 374,
+      "sha256": "95aab721b8dc1964ae52875a6614dc8e17f60ed82315d624cc4d1c6be0afe3e9"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "bytes": 168,
+      "sha256": "ecce43000b0366deb1b4cb03816dcb4c7378fb2b063ed476c008539aff938fee"
+    },
+    {
+      "path": "backend/run_tests.py",
+      "bytes": 1769,
+      "sha256": "80575065717cef484fefe686dc2534330a66f576f8059f8e34feadf0fc0a2cc2"
+    },
+    {
+      "path": "backend/scripts/audit_legacy_knowledge_delivery.py",
+      "bytes": 13284,
+      "sha256": "0350c4f30f200c904d21d0f29ff44c7050a66399be7ea6ff8c748b8751bc648e"
+    },
+    {
+      "path": "backend/scripts/build_group1_execution_panel.py",
+      "bytes": 18377,
+      "sha256": "3946dfcc71a5f732e6ec5e65481353413b6c6f4365016a6349d3a95f2fb57f49"
+    },
+    {
+      "path": "backend/scripts/render_carbon_showcase_figures.py",
+      "bytes": 11586,
+      "sha256": "13ad29fb51556f037c73e679326f6b2649f32f764560b9144140afc69cb8f39b"
+    },
+    {
+      "path": "backend/scripts/run_group1_group2_acceptance.py",
+      "bytes": 14160,
+      "sha256": "550d897b166fcc76a95180c8d50a392209779193764bf4061426d772e37e2610"
+    },
+    {
+      "path": "backend/scripts/run_legacy_knowledge_e2e.py",
+      "bytes": 15307,
+      "sha256": "e979e9a1817ff0e5376cca03c87e6a5c081021ad7a6fc3f2f72a5266d17c1971"
+    },
+    {
+      "path": "backend/scripts/run_qwen_knowledge_e2e.py",
+      "bytes": 12831,
+      "sha256": "180b628fb18589bd13220498b9679fca5455007843c6db2577881fd856ab0755"
+    },
+    {
+      "path": "backend/src/hypoweaver/__init__.py",
+      "bytes": 74,
+      "sha256": "2a8d02e8fd1acbb3eb3734028042c1ba029c0f7f0a6cf4d7d48abb9b3f3780ce"
+    },
+    {
+      "path": "backend/src/hypoweaver/adapters.py",
+      "bytes": 79737,
+      "sha256": "d1740b2880f5ae4b7daa004c4dfdd2a33e004b063099d3f629589261d934b8aa"
+    },
+    {
+      "path": "backend/src/hypoweaver/api.py",
+      "bytes": 29636,
+      "sha256": "681390b01f545f9a8bbfc668d0b440082c058e01e7344f2da0588631f5fdc469"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_evaluator.py",
+      "bytes": 25915,
+      "sha256": "a52ccec0a5ffba0a3dd90760dd6339288dc646e61cfc5b8250f5849256cb916f"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_faults.py",
+      "bytes": 26152,
+      "sha256": "04079661644756f3f609545b11ae93e49d58b865f4777404bef06bf9176433f8"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_models.py",
+      "bytes": 27095,
+      "sha256": "828b72a3bdacf91dcbbe5b531d883a9c5db4ac619fefa96cecf8a20a915b0d2f"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_packets.py",
+      "bytes": 21886,
+      "sha256": "d5a683bb5d0cbb94f0db434857acba5ecbab5005613e93fe60831ba6d812201a"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_protocol.py",
+      "bytes": 48744,
+      "sha256": "e2f70ea2f4ee5dbacfbc26e37ac1b81379d34b05bf46d6045730a5f8531ce808"
+    },
+    {
+      "path": "backend/src/hypoweaver/benchmark_runner.py",
+      "bytes": 31906,
+      "sha256": "e07dc168534597b2fcd71070f12e3074f993dab22f39f030e60e05ec021a7dd2"
+    },
+    {
+      "path": "backend/src/hypoweaver/blind_api.py",
+      "bytes": 4656,
+      "sha256": "dca7b3c34b9c7a5156249efe32bed5902e1b9f5cac1df1028ca877d2827124f8"
+    },
+    {
+      "path": "backend/src/hypoweaver/blind_engine.py",
+      "bytes": 9130,
+      "sha256": "498668aeb7f769e057b7d1383fb71887bf70057f8534e38c744e6542c9f88cbd"
+    },
+    {
+      "path": "backend/src/hypoweaver/blind_models.py",
+      "bytes": 4814,
+      "sha256": "60cc83f3b151eb8abfa9c4b11bb4c8d1d7ee87042d2a3f71b3181c1dbfdaed00"
+    },
+    {
+      "path": "backend/src/hypoweaver/blind_prompts.py",
+      "bytes": 2789,
+      "sha256": "bc539c173ac74f80208a8e85aa870265df4f56c9fc644247844d1ad3600c8142"
+    },
+    {
+      "path": "backend/src/hypoweaver/blind_repository.py",
+      "bytes": 3563,
+      "sha256": "3f006f55f396a80c92bb543c6a9acb5f9edc4c3d607cf936c8b1f524687a93d9"
+    },
+    {
+      "path": "backend/src/hypoweaver/case002_v2_dev_runner.py",
+      "bytes": 48414,
+      "sha256": "ade5914dea153b4da905989d2032c3b219418e8c4a56feb5b0c7ba654361d885"
+    },
+    {
+      "path": "backend/src/hypoweaver/case_benchmark_cli.py",
+      "bytes": 33556,
+      "sha256": "aa0ec242f2b734ec8619fae4e55e6700a6afd26f2cfbe6a010f10bed38f85af1"
+    },
+    {
+      "path": "backend/src/hypoweaver/case_import.py",
+      "bytes": 25200,
+      "sha256": "ae5eb076994d2955ee15afe7475d6f9377f9cee1d227ce090e9a63f74ef90531"
+    },
+    {
+      "path": "backend/src/hypoweaver/claim_gate.py",
+      "bytes": 32576,
+      "sha256": "beaeeaef3b37122ced2c2dd0feb8943a221495453fc70ec6cb70a8467ac05217"
+    },
+    {
+      "path": "backend/src/hypoweaver/common_executor_adapter.py",
+      "bytes": 38269,
+      "sha256": "1b39d7db4eb8e26d98dc6db61215468ba20fc745bdbb7cf7baf6734ac3cee164"
+    },
+    {
+      "path": "backend/src/hypoweaver/definition.py",
+      "bytes": 19769,
+      "sha256": "04fa99a64e3ac7e22489dd255c21cc2f1654175d4ed8f5f4c110a1bd2ace012f"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_bridge.py",
+      "bytes": 10232,
+      "sha256": "c12d66d231d0bce39ecef0bfa70b12ccce00325c360d40b3aa8481baa4dfa069"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_engine/__init__.py",
+      "bytes": 463,
+      "sha256": "cb2ded000af4b213caec331d10acb1108af115e0c38b346301c30e83e7e70a60"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_engine/builder.py",
+      "bytes": 65877,
+      "sha256": "0deb3f9df85e547f12da0dbdb0bd0caaec39ae9459c1128afc0bbb7ac4f59667"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_engine/research_graph.py",
+      "bytes": 43513,
+      "sha256": "4734b35f3c95d1479c2d5322513c29eba7590fc101bab218aa2fbb86341f2034"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_engine/schema_gate.py",
+      "bytes": 2532,
+      "sha256": "d2b4afac1141726a0313ccb0916691c9a7e784736667b12c9dc7dd1efd63df71"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_engine/validate.py",
+      "bytes": 33816,
+      "sha256": "7cc2313ebbf6b8ca0c43006b459ebf7c09b09845d4c9dce38a61411fcf257e3c"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_handoff.py",
+      "bytes": 12860,
+      "sha256": "30ddc223af9a7edf28d3b31e191f7c63fa73c5bbb67486696e4febab56f63858"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_pipeline.py",
+      "bytes": 7556,
+      "sha256": "b0adfed02c38019baa374cfcf92429a6dfd5258402acc6540135e329f2606b3e"
+    },
+    {
+      "path": "backend/src/hypoweaver/discovery_planner.py",
+      "bytes": 51360,
+      "sha256": "e44a9c0cb17036e1bd6d3c070a97ea686582484e64f977e32f054113376b1196"
+    },
+    {
+      "path": "backend/src/hypoweaver/engine.py",
+      "bytes": 391838,
+      "sha256": "009151a5f5587e06360eb94191d26db31974922f4d60cdec3c11c5cf6c9f8f0a"
+    },
+    {
+      "path": "backend/src/hypoweaver/engineering_replay.py",
+      "bytes": 52688,
+      "sha256": "66a2a1bf109a8b0c8eed80719ff4927b649771bb38ea72cc7a336671f9984e3a"
+    },
+    {
+      "path": "backend/src/hypoweaver/figure_data.py",
+      "bytes": 14126,
+      "sha256": "248d593ca8a8d2ce6dd4e4297df7ffa244d580c419c82fe421d96423bd104c49"
+    },
+    {
+      "path": "backend/src/hypoweaver/group1_handoff.py",
+      "bytes": 51586,
+      "sha256": "ff42a301678545cd09719a53e7e7aeb5a74b8241e1e17c56c54dad5accdede2d"
+    },
+    {
+      "path": "backend/src/hypoweaver/group1_staggered_ddd.py",
+      "bytes": 39302,
+      "sha256": "43fc21f12f9207a5a9ac99972ccd994f62dd6f1d6b528d2d75922766f177415b"
+    },
+    {
+      "path": "backend/src/hypoweaver/knowledge_api.py",
+      "bytes": 3814,
+      "sha256": "6b1fa56865eb2ac19fb3d886000a2fb00e266e68433a43712823742c38142fb4"
+    },
+    {
+      "path": "backend/src/hypoweaver/knowledge_client.py",
+      "bytes": 6476,
+      "sha256": "7f515bd263f1e69cc3cf3df237ba9b1fc6914b58204cca91d5daa2e5e5b641d1"
+    },
+    {
+      "path": "backend/src/hypoweaver/knowledge_models.py",
+      "bytes": 13646,
+      "sha256": "f55813423c810343bb754d36b6bd4a6313cf2b1e020e56800da52bab4c542a62"
+    },
+    {
+      "path": "backend/src/hypoweaver/knowledge_service.py",
+      "bytes": 55485,
+      "sha256": "67cb82f054929a90a1a94d2aefa604fb590d312e66a373ab46b085d83e662538"
+    },
+    {
+      "path": "backend/src/hypoweaver/legacy_rag.py",
+      "bytes": 14210,
+      "sha256": "3948baab4ea20e9b4839bdb97c67a4605899b7a5893adce6faf98f38046f93fa"
+    },
+    {
+      "path": "backend/src/hypoweaver/literature_reader.py",
+      "bytes": 25954,
+      "sha256": "1734b2a03c7163af8ef57170ffa3552ec6c5144e3a7bafcc56161da12a75e60d"
+    },
+    {
+      "path": "backend/src/hypoweaver/local_recovery_runner.py",
+      "bytes": 33510,
+      "sha256": "adaa4d59b140544ef4dea1e0ca31dee7230434c5a967c9831608044bb1b3f128"
+    },
+    {
+      "path": "backend/src/hypoweaver/manuscript_ir.py",
+      "bytes": 57546,
+      "sha256": "a27c86da5cb2de60598f8522678892ca6f8c1c71b1ba0d53705ce54119ce5c84"
+    },
+    {
+      "path": "backend/src/hypoweaver/models.py",
+      "bytes": 61944,
+      "sha256": "7aa8f9c668f3f7a0350a850a6b2d8e77b7ce48480fa315f526bf48387d5bae22"
+    },
+    {
+      "path": "backend/src/hypoweaver/official_benchmark_runner.py",
+      "bytes": 37684,
+      "sha256": "b6f7000af396bf01560593780248211fa403f9611ce4f68866efe6d445b46399"
+    },
+    {
+      "path": "backend/src/hypoweaver/paired_blind.py",
+      "bytes": 30605,
+      "sha256": "aa73e3db2820e8cf83628cd3dd7ef67a239c6201b97a55945edceb650e8dbc65"
+    },
+    {
+      "path": "backend/src/hypoweaver/paired_blind_repository.py",
+      "bytes": 3723,
+      "sha256": "bee3ee403e9eb0a63e0c822b3b8cb4135eeb8b7bc754f4ce94639d2ca451ceea"
+    },
+    {
+      "path": "backend/src/hypoweaver/plot_agent/__init__.py",
+      "bytes": 279,
+      "sha256": "496f30683c14388515451f50a89a60b3ec913199a28283350228c8dd2f87281f"
+    },
+    {
+      "path": "backend/src/hypoweaver/plot_agent/recipe_contracts.py",
+      "bytes": 24702,
+      "sha256": "c8e8265c95f9b418d1e80026148727a35fbf751f492b252ef591da2f04c5c278"
+    },
+    {
+      "path": "backend/src/hypoweaver/plot_agent/renderer.py",
+      "bytes": 49489,
+      "sha256": "aacb62ab63dbf3f3d735d9175077b0c2fddb0b3e1f6c2fc2232a80494888aa01"
+    },
+    {
+      "path": "backend/src/hypoweaver/plot_agent/skill_renderer.py",
+      "bytes": 15170,
+      "sha256": "1a648e2f79488ebe874b5b787c717a9cfc3dd0eb38ebfdf8b58b9a617d1eead1"
+    },
+    {
+      "path": "backend/src/hypoweaver/plot_agent/UPSTREAM.md",
+      "bytes": 1203,
+      "sha256": "7474bb3d3b432b201f055d4210e6f8a6b6b509b9f9d5e62aa309e029cea1bf29"
+    },
+    {
+      "path": "backend/src/hypoweaver/policy_causal.py",
+      "bytes": 73221,
+      "sha256": "b465fbf1af070c715aa76f9f48e86601881603d12a585f5e8e9452bd204aa0bb"
+    },
+    {
+      "path": "backend/src/hypoweaver/production_recovery_backend.py",
+      "bytes": 73834,
+      "sha256": "eaa6ba1c185141f7bde384bc8dfa40248a8081042ebdd9f776e7edde46103582"
+    },
+    {
+      "path": "backend/src/hypoweaver/prompts.py",
+      "bytes": 37693,
+      "sha256": "a11e2f3422f7ffcff9b326d024020047db3e92ee54c31b1a206198b4dda84c49"
+    },
+    {
+      "path": "backend/src/hypoweaver/qwen_single_pass_runner.py",
+      "bytes": 11123,
+      "sha256": "0264956b770880b4f0ae6a7d5b28d740f7f987dfd61fa645298a78c67e7ce8d5"
+    },
+    {
+      "path": "backend/src/hypoweaver/recovery_campaign.py",
+      "bytes": 112250,
+      "sha256": "f4c62e368c76a40662c439bd9bf2203e659dd7e032fa600101e1ccb6b3d81f65"
+    },
+    {
+      "path": "backend/src/hypoweaver/recovery_identity.py",
+      "bytes": 2688,
+      "sha256": "aa819705a6c6beec43a76b1c54c9be11340e47bf9eec321cade061c0d870dc5c"
+    },
+    {
+      "path": "backend/src/hypoweaver/recovery_models.py",
+      "bytes": 33530,
+      "sha256": "9445284944a4373fc9f84fdfea280225e758fc757d1fbcb046db15813a86ec00"
+    },
+    {
+      "path": "backend/src/hypoweaver/recovery_run_cli.py",
+      "bytes": 66330,
+      "sha256": "bcc5729a04438c9650beec3f293c2e4b79cb3a7e7d09b78db5bacfbbddc9d9db"
+    },
+    {
+      "path": "backend/src/hypoweaver/repository.py",
+      "bytes": 6860,
+      "sha256": "9b0555dae79bd772b7e9faab3c6dd182d9a55938724d2911a37538d1f723c031"
+    },
+    {
+      "path": "backend/src/hypoweaver/reproducer.py",
+      "bytes": 85222,
+      "sha256": "e1ed094e8563a487b7e2cbfceff61cb5cef961bb0a9c2c10fdd30a4f57a68c51"
+    },
+    {
+      "path": "backend/src/hypoweaver/research_api.py",
+      "bytes": 5441,
+      "sha256": "0a356e5fee545ed790174ffa7dc25affeba1ead97dc1ddf78dfd1be0e5e3697d"
+    },
+    {
+      "path": "backend/src/hypoweaver/research_engine.py",
+      "bytes": 106768,
+      "sha256": "55ea45216a495d30ec9d122f89aaf313f7046e64f34eccfbe339046c113332b9"
+    },
+    {
+      "path": "backend/src/hypoweaver/runtime_config.py",
+      "bytes": 16501,
+      "sha256": "bd76bedfa6cfd39d5f70debfddc9c322b81e385e06771827464af964a252beaa"
+    },
+    {
+      "path": "backend/src/hypoweaver/seal.py",
+      "bytes": 1927,
+      "sha256": "912b5796fc1ad59fb52665c9661067a4eec5f0aef2a77a574480acb7a4c0d0e9"
+    },
+    {
+      "path": "backend/src/hypoweaver/spatial.py",
+      "bytes": 2750,
+      "sha256": "1e5f946fadd9c8060d95df00fe20be6baa35282650f7e15f9a034512749b2f74"
+    },
+    {
+      "path": "backend/src/hypoweaver/sqlite_support.py",
+      "bytes": 700,
+      "sha256": "b0067e5d8ea543ff0b9862116dbedf53e20f24aa6117accb7f06e2fd601e651f"
+    },
+    {
+      "path": "backend/src/hypoweaver/storage_limits.py",
+      "bytes": 1717,
+      "sha256": "f684e86f71547f0eabfea9f194f40bc3b49e6b9d3103f76253db0fa780f7729e"
+    },
+    {
+      "path": "backend/src/hypoweaver/system_comparison_v2.py",
+      "bytes": 26719,
+      "sha256": "f7baaef2516807339fe780b9ed3d7eb984e8710b0ce157af02e55769cd1f1ebe"
+    },
+    {
+      "path": "backend/src/hypoweaver/test_dag.py",
+      "bytes": 60783,
+      "sha256": "9ed34600685ac087e3e0356573ef32255d4a8d25a0e345d407db7c9b17fa8d2a"
+    },
+    {
+      "path": "backend/src/hypoweaver/visualization.py",
+      "bytes": 44490,
+      "sha256": "779c88f14f463ed59abf84a957ac1910dd022095c9a2c31bfd0525b1f4b15eca"
+    },
+    {
+      "path": "backend/tests/test_benchmark_evaluator.py",
+      "bytes": 42192,
+      "sha256": "0f0962f43018c645a3e738c514a1fa5a23fb625e3f53d4b2b80ecae6e7617e57"
+    },
+    {
+      "path": "backend/tests/test_benchmark_faults.py",
+      "bytes": 16251,
+      "sha256": "18fbf9a5fb190ef7f402180843736adedbbeee8d18ad11e602b4e00476ea5799"
+    },
+    {
+      "path": "backend/tests/test_benchmark_protocol.py",
+      "bytes": 31737,
+      "sha256": "1cf56945010bf41a761576eac2a3e291b7028b27396fb9be8076525db5477178"
+    },
+    {
+      "path": "backend/tests/test_benchmark_runner.py",
+      "bytes": 21753,
+      "sha256": "18d190809dfbffb6e0f3dfe512ac028e9acc0f56a7b8139dbb9f64d8ee4a3f8f"
+    },
+    {
+      "path": "backend/tests/test_blind_engine.py",
+      "bytes": 7507,
+      "sha256": "b6d0437a4d949b14196a1de4c9be274fb4f4c35c623b27d5a37c505d0f779b95"
+    },
+    {
+      "path": "backend/tests/test_case002_v2_dev_runner.py",
+      "bytes": 39079,
+      "sha256": "61598f0eff7a79ad8998d7a956d0809ad655727daf0b92eb7e6a709b557b4e6d"
+    },
+    {
+      "path": "backend/tests/test_case_benchmark_cli.py",
+      "bytes": 14613,
+      "sha256": "3c48fd7bd2ecdc3b47df95e966190fa2d2798e2c118822eeea413764d1772f62"
+    },
+    {
+      "path": "backend/tests/test_case_import.py",
+      "bytes": 13210,
+      "sha256": "1e091bfa8ef535d9f688806777ef132c126f4c1219d5701b2e7333d75bb38f8f"
+    },
+    {
+      "path": "backend/tests/test_claim_gate.py",
+      "bytes": 38276,
+      "sha256": "e6c57556b32732daec0b1acfed096d6f481e3788cb68e9d86078d1bf7d4435bb"
+    },
+    {
+      "path": "backend/tests/test_claim_gate_engine.py",
+      "bytes": 6742,
+      "sha256": "25d52ae3b1202ef12556eba04fda5289fa1b7b8dded8da74d29fe1bd26ce45bf"
+    },
+    {
+      "path": "backend/tests/test_common_executor_adapter.py",
+      "bytes": 27441,
+      "sha256": "b9c14fa589b69435d6809410eb9f003db1b60de2e9481c8d2760809e58b13fa9"
+    },
+    {
+      "path": "backend/tests/test_discovery_bridge.py",
+      "bytes": 4589,
+      "sha256": "84473bc93fd528c3c12402e3971c7382bfd8baf29c7e67cf9d818191ded00ad6"
+    },
+    {
+      "path": "backend/tests/test_discovery_engine.py",
+      "bytes": 34248,
+      "sha256": "9d3fc87357ac7369352bbe88a4cf689dc80d8daa700bda0358b95b1aa923b999"
+    },
+    {
+      "path": "backend/tests/test_discovery_handoff.py",
+      "bytes": 4006,
+      "sha256": "606319d821abc12d41a9020833a3a5bb375db706d49918f97915f3448442e95b"
+    },
+    {
+      "path": "backend/tests/test_discovery_pipeline.py",
+      "bytes": 6039,
+      "sha256": "9af71cd088ca66b8f03493d2e7d952b21ce98a1da618f248fe98f71454ba5c30"
+    },
+    {
+      "path": "backend/tests/test_discovery_planner.py",
+      "bytes": 27324,
+      "sha256": "add7aea181cc8daf7ca69a369637540acbc50bf48341e0d099d9aa4f8b04508d"
+    },
+    {
+      "path": "backend/tests/test_engine.py",
+      "bytes": 216417,
+      "sha256": "b261d58b66467590766367ee5258c194eaa0f1575f4323b1fec8666d2e1ef07b"
+    },
+    {
+      "path": "backend/tests/test_engineering_replay.py",
+      "bytes": 35264,
+      "sha256": "54bf4b4d566a07c72c7c1ca2dfcd6bf1801790d4c6436bff6f6700994b127e78"
+    },
+    {
+      "path": "backend/tests/test_figure_data.py",
+      "bytes": 11627,
+      "sha256": "9fba7beba3584bb7cb9854ccf8a202d06072a9cb2b3c202afb739b105eebe37d"
+    },
+    {
+      "path": "backend/tests/test_group1_handoff.py",
+      "bytes": 21997,
+      "sha256": "46679505f27bdf4c04fa05925892ef432fc394b7c7a0c82fb25e950c5378cfea"
+    },
+    {
+      "path": "backend/tests/test_group1_staggered_ddd.py",
+      "bytes": 10895,
+      "sha256": "88d4a241f32f9763bfee2d83244b6c7238a1e1c3529aaba7688b13a391490b1e"
+    },
+    {
+      "path": "backend/tests/test_knowledge_service.py",
+      "bytes": 24433,
+      "sha256": "ae2d7dbfaa98154956b3b55acedc580d125f012c37805f7bc90a68d3c868f3dd"
+    },
+    {
+      "path": "backend/tests/test_legacy_run_compatibility.py",
+      "bytes": 8916,
+      "sha256": "360ac4445d0ae10c5069788278b0ea404abe039bde64ae1078f0dfb01a9d1568"
+    },
+    {
+      "path": "backend/tests/test_literature_reader.py",
+      "bytes": 6891,
+      "sha256": "c0560e00bd8c6b9c79aad798a95d1b28525595f17b08de61742f1eed1ff94cbb"
+    },
+    {
+      "path": "backend/tests/test_local_recovery_runner.py",
+      "bytes": 33001,
+      "sha256": "fb3bad8a0ab67dd6f7bac45f9593bee708dd74fb639b885247bcce71e08d7703"
+    },
+    {
+      "path": "backend/tests/test_manuscript_ir.py",
+      "bytes": 43999,
+      "sha256": "5cfee0a4e3957ee26108f05f72208cd2b5e45a047af549b7b9a6bdabf4ea26e0"
+    },
+    {
+      "path": "backend/tests/test_model_call_batching.py",
+      "bytes": 57637,
+      "sha256": "7b1c54b3cbd496461dd0e9b3ca2a77e6d8e2e5336d5007932e0bcba3972d974f"
+    },
+    {
+      "path": "backend/tests/test_official_benchmark_runner.py",
+      "bytes": 20827,
+      "sha256": "b48c7f5d4efcfc1c9208088d68f77bc7904bade53bcdc9623cf3b2f1a18c78b2"
+    },
+    {
+      "path": "backend/tests/test_paired_blind.py",
+      "bytes": 33627,
+      "sha256": "e9c512fbdcf4d8f85dafceb3c96aa5db2d4adbcba9d5b1c33de443f4c69d319e"
+    },
+    {
+      "path": "backend/tests/test_policy_causal.py",
+      "bytes": 16927,
+      "sha256": "4678ad9e5b415fa2bc8a0928bd85bea664f4ecaf37348502ba325cd2f8754e0f"
+    },
+    {
+      "path": "backend/tests/test_production_recovery_backend.py",
+      "bytes": 96031,
+      "sha256": "9b6a671765d9acf7efe79988ea3d531708c789e735225541d42d452ded82526f"
+    },
+    {
+      "path": "backend/tests/test_qwen_single_pass_runner.py",
+      "bytes": 9930,
+      "sha256": "592f60d622f0fdb913daacf184aa7471e989bad604a7f4017f61bbd3844d5a58"
+    },
+    {
+      "path": "backend/tests/test_recovery_campaign.py",
+      "bytes": 51708,
+      "sha256": "6e574f2545b2b4f16f006784c8250819cc7c58ebabc7e510adeca92ed05a2d9b"
+    },
+    {
+      "path": "backend/tests/test_reproducer.py",
+      "bytes": 32403,
+      "sha256": "3d849bd5aeb5a99cb6ab8f0c4328e644867140412a4e48321267830429019d48"
+    },
+    {
+      "path": "backend/tests/test_research_engine.py",
+      "bytes": 37126,
+      "sha256": "c544d0e7ca77f89a596d6ffe4a5681831fe675ed5a66df17a1c4501b3b7cc90e"
+    },
+    {
+      "path": "backend/tests/test_runtime_config.py",
+      "bytes": 23260,
+      "sha256": "254b7315915d1190ddc31a06d618dd5555fcf576b650eff57167862177a67a12"
+    },
+    {
+      "path": "backend/tests/test_storage_limits.py",
+      "bytes": 4654,
+      "sha256": "7b8566c9bbb7812c714a4f0192c7ede036cecf5010060ca248f4471a968ec36a"
+    },
+    {
+      "path": "backend/tests/test_system_comparison_v2.py",
+      "bytes": 13931,
+      "sha256": "48437f6a6b70e09c14e9d43ea0249729a4584aef0880f1737e09136bb1d3e275"
+    },
+    {
+      "path": "backend/tests/test_test_dag.py",
+      "bytes": 30096,
+      "sha256": "4e06a3aed6cef47947b5ca7ae8e0b49802a71e50fa31affea45bdaa7b193f41f"
+    },
+    {
+      "path": "backend/tests/test_visualization.py",
+      "bytes": 42544,
+      "sha256": "4d294bc659362f8e84138a30fccdab0f7218c7030f3fb25d0c65ad23db772c95"
+    },
+    {
+      "path": "CODE_MAP.md",
+      "bytes": 1617,
+      "sha256": "db912a5ed6b16c5f2d745ae8b949bf4f513b37b7f81a4badebaec1b80d304bd3"
+    },
+    {
+      "path": "DATA_AND_LICENSES.md",
+      "bytes": 2410,
+      "sha256": "c96e93dbee3acf725709d0bd74182aefcb0825cfc918ba4d6dfe22e704476fe0"
+    },
+    {
+      "path": "docker-compose.yml",
+      "bytes": 4570,
+      "sha256": "73bd75ef4b45c96e9030bf5383f13969549375bf4d418049151c905ad101839b"
+    },
+    {
+      "path": "Dockerfile",
+      "bytes": 1155,
+      "sha256": "b24b7ebf659d04d151ed78b07959bd47b25ac072a3f9c023197755078a31cd5d"
+    },
+    {
+      "path": "Dockerfile.knowledge",
+      "bytes": 757,
+      "sha256": "50658b77de53fed7870fbcf071dc05b502689d14ba1d7d79139005b3517cd7dd"
+    },
+    {
+      "path": "docs/CASE_001_ESG_SDLA_SAFE_INPUT.json",
+      "bytes": 320,
+      "sha256": "076ffd217e59fef60ac2022e2cee670dbaaf4ae26dcc15c78a666eaec06040ef"
+    },
+    {
+      "path": "docs/contracts/coverage-and-claim-policy.md",
+      "bytes": 10765,
+      "sha256": "c9cf0d8321e88a0f01e62cad029db4f486a8e69cdf040abeda9e44b194d6a709"
+    },
+    {
+      "path": "docs/contracts/ID与版本规则.md",
+      "bytes": 7182,
+      "sha256": "5cb22f691264e7a7550bacfa15ff6b3a4db345b0f877c949610f4c1c987daf8d"
+    },
+    {
+      "path": "docs/contracts/SQLite字段字典.md",
+      "bytes": 12457,
+      "sha256": "eaf3069e7dbbd01ecdcd731fb0b8a9fc48e7ab4a49520bf7c6e247f9ca577d82"
+    },
+    {
+      "path": "docs/experiment_reports/AI_Scientist系统能力实验_v3_误差审计.md",
+      "bytes": 4887,
+      "sha256": "11f7acd4103fcd4f7e5cbf06de7b5c97863faf088cc030fa3395407e1572cf40"
+    },
+    {
+      "path": "docs/experiment_reports/实验_AI_Scientist系统能力_v2.md",
+      "bytes": 12522,
+      "sha256": "fed20fae04d0615e350f6a7ee7923d066ab1cc78bdaeda530a3ebe4adc8f83de"
+    },
+    {
+      "path": "docs/experiment_reports/实验_QwenVL科研表格抽取_v1.md",
+      "bytes": 10085,
+      "sha256": "156e213311673089ecd384939d341861da6d9ea71b94b8f775309264d4334f0d"
+    },
+    {
+      "path": "docs/experiment_reports/真实案例_碳市场与高质量绿色创新_十项中文结果_v1.md",
+      "bytes": 18881,
+      "sha256": "9e0517029d48aedcde77cea6fa57b402578de31f62ddb29acfb0ce7e87ab0b4c"
+    },
+    {
+      "path": "docs/experiment_reports/真实案例_问题集Case009_十项中文结果_v1.md",
+      "bytes": 11812,
+      "sha256": "6861452a48161736eeacbcbe0f413b9aaaadbc917a344672213de7ce3b4bc451"
+    },
+    {
+      "path": "docs/PACKAGING_CHANGES.json",
+      "bytes": 2732,
+      "sha256": "15670ffaf3156abede65d512b877e1dcbc970343bdd2586f53414f97445cc290"
+    },
+    {
+      "path": "docs/PUBLIC_REDACTIONS.json",
+      "bytes": 61260,
+      "sha256": "7e46bd4312127c0c22287f8137256b20fa65d2b3d617df59b6ed1c7071d7774d"
+    },
+    {
+      "path": "docs/reason/paper-profile-to-graph.md",
+      "bytes": 6334,
+      "sha256": "fcaac0cb5290c018ecbf272c5834088ffd5e85f28a594fd8d38e1e81bb9cd471"
+    },
+    {
+      "path": "docs/reason/research-graph-v0.2-design.md",
+      "bytes": 7988,
+      "sha256": "0ebb5adf7f01c3b6db8e02958b7fffc470daaec2a29975383c38693d96227776"
+    },
+    {
+      "path": "docs/reference/API.md",
+      "bytes": 13529,
+      "sha256": "5d8804f09e80a603708d25643a30c26837ce9537ad89e939ce8af4249767b578"
+    },
+    {
+      "path": "docs/reference/ENGINE_ORIGINAL_DEPLOYMENT.md",
+      "bytes": 9343,
+      "sha256": "43927fb68eef576263fca874e44e7f4ea88e2137c55a26e37758eb23f8fb3a5c"
+    },
+    {
+      "path": "docs/reference/ENGINE_ORIGINAL_README.md",
+      "bytes": 9090,
+      "sha256": "440c0fb12fa4362ef066904f70a1223faf644a47f0ec407a93c2307ada976552"
+    },
+    {
+      "path": "docs/reference/KNOWLEDGE_DISCOVERY_INTEGRATION.md",
+      "bytes": 12091,
+      "sha256": "65ea62f773850b64737469fe84a840e20ff923dab090cb6fa9110cc7e9fa2d5d"
+    },
+    {
+      "path": "docs/reference/PRODUCT_USER_JOURNEY.md",
+      "bytes": 7024,
+      "sha256": "dc084e645b5d6e612b28ad9f6d358c7c72c0b2fec1949b71705a219acea25d64"
+    },
+    {
+      "path": "docs/retrieve/vector-search.md",
+      "bytes": 5268,
+      "sha256": "400c26ae9b2d1badcbc9504a8ad1bbd594bdc2ee52c399e05db4b58a2b236deb"
+    },
+    {
+      "path": "docs/SOURCE_SNAPSHOT.json",
+      "bytes": 132750,
+      "sha256": "4161507c14bc85bd2e1684860e0511083da41e9ec91784e9eb4a1579046bede9"
+    },
+    {
+      "path": "docs/validation/backend-tests-final.txt",
+      "bytes": 41946,
+      "sha256": "7b05937ddbd07f01be4ab1c54df863ec1ad0024b75660eca17e8babe0e378460"
+    },
+    {
+      "path": "docs/validation/delivery_audit.json",
+      "bytes": 6217,
+      "sha256": "839d2c90371803150a2602529b5e589020e907402d70d3a5456d74b5e1dfc174"
+    },
+    {
+      "path": "docs/validation/frontend-build.txt",
+      "bytes": 860,
+      "sha256": "1c4eb0d91c24b7191c077ad798f23277cddb2f83e2a4833628cf7656574ce741"
+    },
+    {
+      "path": "docs/validation/frontend-tests.txt",
+      "bytes": 266,
+      "sha256": "15e9ebacba960c38e823cf223189f064ec9696bbc257622501633d55d57bb72a"
+    },
+    {
+      "path": "docs/validation/independent_statistics.json",
+      "bytes": 14331,
+      "sha256": "02209ced961a5d56f81b1d65a45b38246f14bdb198d8087556a96d2eb7eb2bcf"
+    },
+    {
+      "path": "docs/validation/public_metrics_summary.json",
+      "bytes": 8258,
+      "sha256": "ce58913d736ee5344334a27870a8560e6571096e32e2c6d7c3a7df5abe571d69"
+    },
+    {
+      "path": "docs/validation/qwen_vl_recheck.json",
+      "bytes": 2798,
+      "sha256": "17ece2b2253bd2bf2560f3f2da60e8e589af788ca70f15c69cbec51ed9318c0a"
+    },
+    {
+      "path": "docs/validation/readiness_recheck.json",
+      "bytes": 10939,
+      "sha256": "f91ecaf38d18d0fe209e1926867af3512cd092bdff7765a5c546ad3c4cf0b620"
+    },
+    {
+      "path": "docs/第6节部署部分精简替换稿.md",
+      "bytes": 386,
+      "sha256": "5c141f71e4ec0f81fb0598cd4c56f623ce45d38178913bcb94409cf39933273b"
+    },
+    {
+      "path": "examples/python_client.py",
+      "bytes": 3171,
+      "sha256": "1e2ba9df0fa5c6ec90a6d9cf46fcc2a5b15fef13e26de7dc67720e92895e6a17"
+    },
+    {
+      "path": "experiments/ai_scientist_component_ablation_20260905_protocol.json",
+      "bytes": 4805,
+      "sha256": "64f8cf986f7df30b46c7ea0183982e6e55222929f5850ec5202cb340d200a4ba"
+    },
+    {
+      "path": "experiments/ai_scientist_system_capability_v2_protocol.json",
+      "bytes": 7947,
+      "sha256": "68b256b83671a95ac8011709b6c244b9f98dad892ef05efd69501c02165c0e90"
+    },
+    {
+      "path": "experiments/ai_scientist_system_capability_v3_protocol.json",
+      "bytes": 9159,
+      "sha256": "d1f79f9d479cdde7ef41e95a0447547b52098756069a8553c216cb39dab55128"
+    },
+    {
+      "path": "experiments/case010_carbon_market_round1_protocol.json",
+      "bytes": 6015,
+      "sha256": "33af88736561b80dd9e87cbc33e4808121a5b8679c38ce26e57893f039554b60"
+    },
+    {
+      "path": "experiments/case010_carbon_market_round2_protocol.json",
+      "bytes": 10037,
+      "sha256": "cfdb6aa13e097cf20fe899bdb5198bf27fcc2494ad8eaae56336911bd4d7edfd"
+    },
+    {
+      "path": "experiments/fixtures/case009_harvard_dataverse_data_v1.xlsx",
+      "bytes": 2037657,
+      "sha256": "e1d8ed21af33e7be474198366c802209f41a67617659eb50177a8106188acc0a"
+    },
+    {
+      "path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1/S1_File/S1A_Table Explanatory variables.xlsx",
+      "bytes": 215573,
+      "sha256": "9b114de7336e2051ebf8cf9c21ae975bfb74770e07574e56b8136c7ab74e96e2"
+    },
+    {
+      "path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1/S1_File/S1B_Table Control variables.xlsx",
+      "bytes": 141521,
+      "sha256": "f300bc3c9d34e3d6c452ab0f6501d9649ccdbe4ccedeeb342b5c4e4c4efeaa65"
+    },
+    {
+      "path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1/S1_File/S1C_Table Mediating variable.xlsx",
+      "bytes": 347989,
+      "sha256": "ba0eafbe958935d1cfe89e0ad17e5c36701b8ddfc65e860ee0c6450d685419fc"
+    },
+    {
+      "path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1/S1_File/S1D_Table Explained variable.xlsx",
+      "bytes": 3400495,
+      "sha256": "6e0a6553cee6fd007dd0fb3b5126a69c00f5727224236f10ed20d045b3c5bcf7"
+    },
+    {
+      "path": "experiments/fixtures/case010_figshare_green_innovation_financing_v1.zip",
+      "bytes": 3503124,
+      "sha256": "88cea8df65ef9fa8e8bc6d56bf19e1b409d8f56cb8a09eb370188c65ec981c0b"
+    },
+    {
+      "path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.csv",
+      "bytes": 2292129,
+      "sha256": "5470c52e8e6712984a78b6959bf56ca016aa9fc0c9577b3e9765ed832975e967"
+    },
+    {
+      "path": "experiments/fixtures/case010_mendeley_analysis_extract_v1.manifest.json",
+      "bytes": 2945,
+      "sha256": "324dbc14b5d9c099f938536ed7e3f7eaa5e1bb94f5bc183c969d0a04d20d172b"
+    },
+    {
+      "path": "experiments/fixtures/case010_mendeley_carbon_green_innovation_candidate_v1.dta",
+      "bytes": 332614843,
+      "sha256": "15bbce1ca0b7f3ab2adf8381c0fa57c335c6fcd42fd99285b0a3f59a5b7d819e"
+    },
+    {
+      "path": "experiments/fixtures/readiness_contract_panel_v1.csv",
+      "bytes": 261,
+      "sha256": "95d1ffac391acf68450e4f54ec2114795c9b882a910f4fd1f9791889911470dc"
+    },
+    {
+      "path": "experiments/fixtures/readiness_contract_panel_v1_LICENSE.md",
+      "bytes": 280,
+      "sha256": "4f45fcd7a1e1b46db718b2653de4fd6c2a8a626ebe65fc76136906c7286d2153"
+    },
+    {
+      "path": "experiments/track1b_case009_pm25_round1_protocol.json",
+      "bytes": 4797,
+      "sha256": "2c789ba1707fe0229ecaf042eba3afdd092832300dd4b11cea780c5e2d9496c7"
+    },
+    {
+      "path": "experiments/track1b_case009_pm25_round2_protocol.json",
+      "bytes": 4456,
+      "sha256": "f57acdac1d73cbce7cc8c6a6d98fcb21711a1c08171ef0539ff74c6e4b2a1a8f"
+    },
+    {
+      "path": "frontend/.vercelignore",
+      "bytes": 64,
+      "sha256": "d383badcc3a22fa29d4fcef0d3bcad57fd390bd5bbdf78da36b54212727f6ac9"
+    },
+    {
+      "path": "frontend/index.html",
+      "bytes": 749,
+      "sha256": "5130ab19ef7c22be05dc5df4c2bcedbc358e0ed267370d660f62a4b157c86ccf"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "bytes": 50379,
+      "sha256": "dc861d7085a06c94f2d542e9122fd3d169da7d430015973c0246e101ddacb7c0"
+    },
+    {
+      "path": "frontend/package.json",
+      "bytes": 711,
+      "sha256": "50c4662439d7d67b4d2850023c139d5697641e61c70e6989619e7894bcb6cde5"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_1_mechanism.png",
+      "bytes": 168223,
+      "sha256": "250203e555f673a18c205d029b788e768cc3bb68a21ad292bd06710e7f044296"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_1_mechanism.svg",
+      "bytes": 97200,
+      "sha256": "88c8313ec0d19670f77c946aeb4c96486b7fac8e9a81a14a05fbb4fa0de66dcd"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_2_event_study.png",
+      "bytes": 88779,
+      "sha256": "b6d3a5cce90888813eb475a3dbe8434e1d531762413624be539431d5e4842feb"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_2_event_study.svg",
+      "bytes": 48424,
+      "sha256": "41332831cf1cbaac51e59f40b33915782e7bf16442bee4e7c94fdf2ecd6af44f"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_3_robustness.png",
+      "bytes": 112967,
+      "sha256": "f56f8be9b5dceb41e73a77b90a14d5b529e199133cbf5cd4faafb9a830ecc25b"
+    },
+    {
+      "path": "frontend/public/showcase-paper/backend_skill_figure_3_robustness.svg",
+      "bytes": 85087,
+      "sha256": "989f69fffb8b59a62928ebba1324850ef4ea7241b645317f43e36be5dbe4ac0d"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_1_mechanism.metadata.json",
+      "bytes": 551,
+      "sha256": "ecf4826107f905ddb47313dd12ea412261911bee3537b8ad554a13f11a429309"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_1_mechanism.pdf",
+      "bytes": 50065,
+      "sha256": "aa7cfef6f703392fd6ab437410b665fdb46beecffd2c9f4bbb1e8592e9b30193"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_1_mechanism.png",
+      "bytes": 168223,
+      "sha256": "250203e555f673a18c205d029b788e768cc3bb68a21ad292bd06710e7f044296"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_1_mechanism.svg",
+      "bytes": 97200,
+      "sha256": "88c8313ec0d19670f77c946aeb4c96486b7fac8e9a81a14a05fbb4fa0de66dcd"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_2_event_study.metadata.json",
+      "bytes": 512,
+      "sha256": "9e7234ca23329ab8c11d89f0bae277bdd4d267eb03c11555f26da1405d2ac328"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_2_event_study.pdf",
+      "bytes": 23324,
+      "sha256": "bf95fe1535b5799cd5794cea3745850a79b14416bc4c53f2f02e05118ee5813c"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_2_event_study.png",
+      "bytes": 88779,
+      "sha256": "b6d3a5cce90888813eb475a3dbe8434e1d531762413624be539431d5e4842feb"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_2_event_study.svg",
+      "bytes": 48424,
+      "sha256": "41332831cf1cbaac51e59f40b33915782e7bf16442bee4e7c94fdf2ecd6af44f"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_3_robustness.metadata.json",
+      "bytes": 537,
+      "sha256": "540e01633cf12c2fe4072491e74e97b5865e65ea993493941e2c2c7782703e20"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_3_robustness.pdf",
+      "bytes": 41964,
+      "sha256": "24509703651a63ed63c2741f85205bfa2ffb080b0b5a7ec559d2fc20ab89ec06"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_3_robustness.png",
+      "bytes": 112967,
+      "sha256": "f56f8be9b5dceb41e73a77b90a14d5b529e199133cbf5cd4faafb9a830ecc25b"
+    },
+    {
+      "path": "frontend/public/showcase-paper/figure_3_robustness.svg",
+      "bytes": 85087,
+      "sha256": "989f69fffb8b59a62928ebba1324850ef4ea7241b645317f43e36be5dbe4ac0d"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "bytes": 37469,
+      "sha256": "c663e25c3f9b6fe3a64641b5586482e0c05639cf2426f0e4d558bda53eb992e8"
+    },
+    {
+      "path": "frontend/src/components/AppSidebar.tsx",
+      "bytes": 17035,
+      "sha256": "e8ebc9829678793a1348ea0134097bc69072225035073b188a4681b4173d679a"
+    },
+    {
+      "path": "frontend/src/components/DiscoveryPage.tsx",
+      "bytes": 68870,
+      "sha256": "f1edd694a005c9375eb811b5abb1a02514598be4072c3cb65597457b47c3c717"
+    },
+    {
+      "path": "frontend/src/components/DotGrid.tsx",
+      "bytes": 6923,
+      "sha256": "797240a0a2d55f8f521fcea21bbd8d2ca5be545c85a6c404e65851f5a5d642f0"
+    },
+    {
+      "path": "frontend/src/components/ElectricBorder.tsx",
+      "bytes": 2859,
+      "sha256": "f9d7f7c5dc84807e08ba1c9f47f79265a165478e66ab6319873f19d97c158ae4"
+    },
+    {
+      "path": "frontend/src/components/GateDecisionCard.tsx",
+      "bytes": 18515,
+      "sha256": "49f9cdd3788aacdd18e53b8c43408f0e950c60384b91c0288ab5edc716e57dad"
+    },
+    {
+      "path": "frontend/src/components/LiteratureReaderPage.tsx",
+      "bytes": 19576,
+      "sha256": "b43debfadaad5e68d302c9f9bcf82186d1a1a9d829863707f373330886364adc"
+    },
+    {
+      "path": "frontend/src/components/MagicRings.tsx",
+      "bytes": 4923,
+      "sha256": "871d6f902b5416603a2af6696759934b5e23046f5fbb0064ced5f5cb40376ce3"
+    },
+    {
+      "path": "frontend/src/components/MainToolbar.tsx",
+      "bytes": 997,
+      "sha256": "4876947df9ae44717ddde752bf2a19affdd49a038b4ed2e15d3d333e98969668"
+    },
+    {
+      "path": "frontend/src/components/PreflightPanel.tsx",
+      "bytes": 4902,
+      "sha256": "49078ea626c510e65c4686241bab013066281019016c814dd12da586a8335ea9"
+    },
+    {
+      "path": "frontend/src/components/ProjectOverviewPage.tsx",
+      "bytes": 38372,
+      "sha256": "893720f6ff1c94b2e7140fc51e0a4f90eafcc77e3cff423674950dd1029bcf8a"
+    },
+    {
+      "path": "frontend/src/components/ProjectsPage.tsx",
+      "bytes": 12891,
+      "sha256": "61f380b9f2a68f5d1b885947b248f0602280566690391d4c09ee7de419ef9bd0"
+    },
+    {
+      "path": "frontend/src/components/ResearchCaseStudio.tsx",
+      "bytes": 54315,
+      "sha256": "7cfad5e5e0420c58a48c3d0abd11d70a1f9ef380a33daa96b65859fe4190f79e"
+    },
+    {
+      "path": "frontend/src/components/ResearchInputForm.tsx",
+      "bytes": 16911,
+      "sha256": "1a2f35ff812e0320e66cc49684a547e9cccceca5d63af0ad5acbcd33dd1e4e7e"
+    },
+    {
+      "path": "frontend/src/components/ResourceLibraryPage.tsx",
+      "bytes": 72202,
+      "sha256": "d76452eacece9e3e2bd0ec592ddb4420cf971bae381937cb8f36d06d7bc0bac6"
+    },
+    {
+      "path": "frontend/src/components/ScientificFigureStudio.tsx",
+      "bytes": 18487,
+      "sha256": "93e5ea01fe83f8c89456f93f398b022032ad62930cb22ad3627c0d9396b8f488"
+    },
+    {
+      "path": "frontend/src/components/ScientificTenPanel.tsx",
+      "bytes": 7670,
+      "sha256": "713239130744c859eea2512074cea3684e8d26d1327ff3b82fdbd38f6f96a1cc"
+    },
+    {
+      "path": "frontend/src/components/SystemConfigPanel.tsx",
+      "bytes": 9426,
+      "sha256": "a1a4b154c1922164415053bb83b7df1ea78e2360df9d89d5ee3da25c99ae2a95"
+    },
+    {
+      "path": "frontend/src/components/TaskComposer.tsx",
+      "bytes": 20892,
+      "sha256": "8548ce8a423fe58beb0fd2a365a6ef3425b35239d021d8a3597cc58f995bd7e5"
+    },
+    {
+      "path": "frontend/src/components/TaskResearchRail.tsx",
+      "bytes": 8075,
+      "sha256": "79eaa250c2d65ff697cd9e70d50b4adf2dbd386303c10a8b5bf92fb8817a0429"
+    },
+    {
+      "path": "frontend/src/components/TaskStream.tsx",
+      "bytes": 27073,
+      "sha256": "7cd0a5a0e65472dc2c563c916f6babbfb687a0241ca81939c2384a87a7743efc"
+    },
+    {
+      "path": "frontend/src/components/WorkspaceDrawer.tsx",
+      "bytes": 19970,
+      "sha256": "4e6671aeaea4bfc851eb9cedd7d90b3d74841497e92bff3c3d8901937cb1034f"
+    },
+    {
+      "path": "frontend/src/composer.css",
+      "bytes": 19626,
+      "sha256": "2fc4d3f443f6682d31fcfdc00b978fd3741220f43faef40f8e244e4e3d550c00"
+    },
+    {
+      "path": "frontend/src/data/mockPipeline.ts",
+      "bytes": 19049,
+      "sha256": "61fdd64caa22b6bdb3d527155a21668982aaa3ddc7d24f6b94628f5895174117"
+    },
+    {
+      "path": "frontend/src/data/policyDocuments.ts",
+      "bytes": 60700,
+      "sha256": "ebc139484f2f619f08f775d72bdc0cf858fb8b3dd02cb17f6d32db3a1bb02eb0"
+    },
+    {
+      "path": "frontend/src/data/researchDraft.ts",
+      "bytes": 6823,
+      "sha256": "fbdb505930b5c299d0bad24264bfe1d474d1461f90828279ca80554a5226793a"
+    },
+    {
+      "path": "frontend/src/data/showcaseFigureSpecs/figure_1_mechanism.json",
+      "bytes": 1771,
+      "sha256": "6c6178ebfeab4e3c920839054f67599f3e035bf93fb081c56ff5d9ed55cc19eb"
+    },
+    {
+      "path": "frontend/src/data/showcaseFigureSpecs/figure_2_event_study.json",
+      "bytes": 957,
+      "sha256": "9281ee184ae45aed90d7c5fcadc8339de9d49431b1c87a83715d51c26253aad0"
+    },
+    {
+      "path": "frontend/src/data/showcaseFigureSpecs/figure_3_robustness.json",
+      "bytes": 1351,
+      "sha256": "e389d1412421c715c0beb13101ac088ef5beb55459f143b80cba30b2b86db1b2"
+    },
+    {
+      "path": "frontend/src/data/showcaseResearch.ts",
+      "bytes": 23383,
+      "sha256": "0050ae0a9a199ea105f511fca58c93e90ffe22a4892479f4030e9b4c98d02fd6"
+    },
+    {
+      "path": "frontend/src/execution.css",
+      "bytes": 11353,
+      "sha256": "d3081ddfe626a03793707c10512940ac54c67ef5ee8f70f98911955365800eeb"
+    },
+    {
+      "path": "frontend/src/library.css",
+      "bytes": 46452,
+      "sha256": "7e02a493951fbb2600d7e5e06b9f4a32557615d89226ead2452c4621cc75a7a2"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "bytes": 444,
+      "sha256": "753417eba7ea4b408d52fd331a1e69048d1da8b19e9cb374a1961491d52391ce"
+    },
+    {
+      "path": "frontend/src/product/catalog.ts",
+      "bytes": 3926,
+      "sha256": "206d68cbc4dae756d382b278243aa3e1deee1d7780e60acb04c06556a5a3aa08"
+    },
+    {
+      "path": "frontend/src/product/dataSource.ts",
+      "bytes": 1815,
+      "sha256": "ba3a1da7f982c81f04fd10083682c17e69b148800941a9914630c16bfae3d689"
+    },
+    {
+      "path": "frontend/src/product/fixtures.ts",
+      "bytes": 20014,
+      "sha256": "032299aef3b821c6140f08c22ca20999e27d14644aed90d79613c50c181df68e"
+    },
+    {
+      "path": "frontend/src/product/index.ts",
+      "bytes": 130,
+      "sha256": "993bc7afe770cd35eac79fd81256f158ff493e5563b4effbfd824bb47d492c43"
+    },
+    {
+      "path": "frontend/src/product/store.ts",
+      "bytes": 50959,
+      "sha256": "134fc1e336c59c96d39992de66713c9c072f3b7b951224f5e1afc95c96f86d15"
+    },
+    {
+      "path": "frontend/src/product/types.ts",
+      "bytes": 7295,
+      "sha256": "ac5ce7e15f37bb282646885f23cd87b750b0c2532b3b2f620a6241b108f39c64"
+    },
+    {
+      "path": "frontend/src/projects.css",
+      "bytes": 90930,
+      "sha256": "94509d075ab3bb26d459848d21e922ea452c87461f704790e78da7afcf413e3b"
+    },
+    {
+      "path": "frontend/src/reader.css",
+      "bytes": 15679,
+      "sha256": "629380d45f2c167553883bb75cda7e5451533d51387b997a04b865f8413b466a"
+    },
+    {
+      "path": "frontend/src/runtime/api.ts",
+      "bytes": 74882,
+      "sha256": "19b2c93cb2e47d2cc532ec9bf9b9337cfa782a1dfcdebb598fd5d7bf9bcd5940"
+    },
+    {
+      "path": "frontend/src/runtime/caseFolder.ts",
+      "bytes": 2497,
+      "sha256": "a8576db65157dd0ab4824cd3e63c7cf996aa903b87d6214d5f5d188feb95f827"
+    },
+    {
+      "path": "frontend/src/runtime/router.ts",
+      "bytes": 2853,
+      "sha256": "5ec0e29e267d0153896afdab0116b09dbe410ad61d76104f1658d08ee8fb78f6"
+    },
+    {
+      "path": "frontend/src/runtime/theme.ts",
+      "bytes": 1250,
+      "sha256": "07982bb150c4d9ff19bf94f0319056b52e267ef8843428a24cfd558fd3fcb1cd"
+    },
+    {
+      "path": "frontend/src/runtime/types.ts",
+      "bytes": 20080,
+      "sha256": "45be1563af63ee8554ce4833edabde5d976c96fce6452ba02ee7a771d134374e"
+    },
+    {
+      "path": "frontend/src/shell.css",
+      "bytes": 13736,
+      "sha256": "a199da966b510e3ade8f0b1006bc274251fb84a1129c8695be6d66c86a87e1e5"
+    },
+    {
+      "path": "frontend/src/stream.css",
+      "bytes": 21854,
+      "sha256": "213e10f50687cb7e4fb38844012a10c73b5d7750c25cb38f8178ac4b82c8bc1b"
+    },
+    {
+      "path": "frontend/src/studio.css",
+      "bytes": 64889,
+      "sha256": "a0a1ef062fea56f68359f43e2d92effb1750137ea6031681dee8b32a6bb2ac8d"
+    },
+    {
+      "path": "frontend/src/styles.css",
+      "bytes": 52770,
+      "sha256": "4c25bd94025c7189f636d75282139a27b9edc744fe7df7253aadf5334e362772"
+    },
+    {
+      "path": "frontend/src/theme.css",
+      "bytes": 3066,
+      "sha256": "3efa095861c165788fe1434ce959e462f39afb5131d7675dd4f75f0c107fb3d6"
+    },
+    {
+      "path": "frontend/src/views.css",
+      "bytes": 16705,
+      "sha256": "087d7303ab2c2932adac824b9fcec5fa36eb904159e72a027acbb04b4f624400"
+    },
+    {
+      "path": "frontend/src/vite-env.d.ts",
+      "bytes": 38,
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "path": "frontend/tests/caseFolder.test.ts",
+      "bytes": 2674,
+      "sha256": "838dc0a942110dc9b649e53e03268f9755efef988a65bee814e5f3d7504b8275"
+    },
+    {
+      "path": "frontend/tests/executionRevision.test.ts",
+      "bytes": 6578,
+      "sha256": "60cffd8ad513a9cdf43ed62b2a6b4e6d509a9b00561311cb8f9cd4fe1aae26a6"
+    },
+    {
+      "path": "frontend/tests/productData.test.ts",
+      "bytes": 19337,
+      "sha256": "0eb3afd51f5778ae2bca72628677886bd586fed612f461bfa3c2b6b676d308f1"
+    },
+    {
+      "path": "frontend/tests/researchDraft.test.ts",
+      "bytes": 2770,
+      "sha256": "e3314c866f5c711912921a0baf603188d6ed4f8a656eef78a64b71f7b87f1d9f"
+    },
+    {
+      "path": "frontend/tests/router.test.ts",
+      "bytes": 1433,
+      "sha256": "2f5ed232c1d9490eb571a426f2cc996f98411639427562c97a3df536462786f3"
+    },
+    {
+      "path": "frontend/tests/runtimeApi.test.ts",
+      "bytes": 35865,
+      "sha256": "80fcc2c781194b63855eeacf3013bd4aa5e409ac8ca3e1c4a715f767d1b959da"
+    },
+    {
+      "path": "frontend/tsconfig.app.json",
+      "bytes": 507,
+      "sha256": "a7266d1c85fa6947c70073256d9a73e4c459e97b0b4ef24b5c48dcab498ef4c5"
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "bytes": 119,
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+    },
+    {
+      "path": "frontend/tsconfig.node.json",
+      "bytes": 148,
+      "sha256": "955083d3603a5016edcdb697b73ccde3d68d8f8c35af45ef896b67bcb8faeea2"
+    },
+    {
+      "path": "frontend/vercel.json",
+      "bytes": 253,
+      "sha256": "14b94035125ac9f94ae739e715d57281e6bca02637082784259b637e2512c3ff"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "bytes": 429,
+      "sha256": "27ab09fe2fc061529395d9851e3886b9a46a084784ef03bd4b17af843cb4e3ba"
+    },
+    {
+      "path": "knowledge-data/cleaned/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "knowledge-data/cleaned_meta/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "knowledge-data/evidence.jsonl",
+      "bytes": 2563,
+      "sha256": "c1c5323cfb4b1f51a2b913977549f1376923c8b139cf3c69d3d28d607250749c"
+    },
+    {
+      "path": "knowledge-data/kg/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "knowledge-data/manifest.json",
+      "bytes": 170,
+      "sha256": "ed4178c59ffc33bca8c9ab492598c87d362c0d4910ca29e561f8d4da15792eea"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/campaign_binding.json",
+      "bytes": 1138,
+      "sha256": "07093291655f548318fc5199d4a4bd96911fa2ccca75b414e06529b4e8a1b914"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/campaign_run_manifest.json",
+      "bytes": 1114,
+      "sha256": "8af5436011dd51b6b9334a008f582399894816821061533cc0a148d7f12eb55a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 43008,
+      "sha256": "0399b5f00b272c01525d11d407336b33c0ad1ece35f7bd45d94c5918e66f9b90"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 16234,
+      "sha256": "dea31446b8ee388b0f346a5910bcf75535d1ee1729712f32cdd91e7b39db7a8b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 43150,
+      "sha256": "b68b2d0ad1b36020149c814bcd19051315412d512d3188f8319f8b893cbe657e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 16228,
+      "sha256": "0dbe015c53bb6856c156ff19b3b7b87c41a29b8848e1ec0fca065b070047191c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 42249,
+      "sha256": "969e9333714b43b201f0c2982bf68a9cf1d5d8d5d4b4204c5c3b6e7f7bc40b38"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 16146,
+      "sha256": "086ac084dd957c79b04bf615fadffcca8f587bdb27af677a912b112878308dfe"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 43315,
+      "sha256": "26260fd431263b007288a07c78f1278279d44f41acac202eef533a509e4d27fd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 16292,
+      "sha256": "4e8750839b3e495756d14b39294349c60e6425ec1910813f56268513950875ce"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+      "bytes": 49861,
+      "sha256": "7d2874cb08357cbed274182f317b4132c6f7fe4c3c766d25dd1ad404121880fd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 21796,
+      "sha256": "cef0febeda06fbf379b854cdf44b17b68743e1f5e7bf54da6ce88db285c0723c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 52858,
+      "sha256": "66904be5d737c4f90cded0a0e1539fbbdc243dabdaa12b00deadc1a3376e70c1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 22968,
+      "sha256": "a0691561b53177588bd078988c473f13bd10b7c1a48402fcd97225848ecdce5d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+      "bytes": 38837,
+      "sha256": "27269fc30b55b658b39779b7a7404f92d38b51385306081bc6fe2b94c41094bb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 14281,
+      "sha256": "18375ec9e27710d8b0167c8bbf9d7b81bffc056ab75e62c9e000ea931e43d5da"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 44491,
+      "sha256": "d55ff63b600063c107ff62d23eead0601c01fc0d674586c43f2ff41a0130fe8a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 17299,
+      "sha256": "8333ce91e3ddd5a1e6af35eba995929660e43a2b5efa4ca9a7f59a62aa6231d2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+      "bytes": 40578,
+      "sha256": "e7e4e4914bbfa2e7fe50146fb5df99daf7a7c012c1afcb0c15f68dc34a1c66aa"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 14782,
+      "sha256": "e7d97cce54b91217a329de4898a4bdf11487bb753acb014192d59d7348524ffd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 42834,
+      "sha256": "d1c8d5fa6bbf81533844be019f42c67727ae6204917fb56e92e02f7e00b25624"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 16683,
+      "sha256": "1c002fe045585eadf52c119076dbc0d1544797bb30b1fca4c4ed0f089dd6416b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 40732,
+      "sha256": "b5050f17bf37596116d2d738ef29c3e1e1cd80495d38b42c1fd579267b9b7416"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 15186,
+      "sha256": "b1d7cb39b31a3569d35ac7267f24f345c5760d06a60a65de675ef8758b5aded7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+      "bytes": 43067,
+      "sha256": "4ccc882c6750ff3820569887a06c5f8d3e352a55e3675759b2e3e55b7a341f6e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 16741,
+      "sha256": "10d956d67635569e734065b5b59a814c6321f76112f48b2cf1d03e6ecf982829"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 45259,
+      "sha256": "861a083ab0de576be2a9ed95a0f59332ba4086447368211ef7f39d1393a47e5b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 16650,
+      "sha256": "5d6fe684ea94848dde28f2d83ed5a44828422b6fbc9ac7e819eccfdbd98c26c0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+      "bytes": 44775,
+      "sha256": "673f75ebbd65afb2da47a1c269a74516bc5658c2f35d3b2a3327caf6a96508f4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 16872,
+      "sha256": "5945397a5385779b4fcffc349dd4dc73aa7476e45927f58bcbe2ba97967c86bb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+      "bytes": 49146,
+      "sha256": "9d5d4917b12712ce1d42584a725fc7d035903264d2f140dc9494e541e52c1e3b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 21956,
+      "sha256": "dd4764c0a07596b692acffe1b0ba7b58109c3cccc00dbfcce918d7b42a80ee34"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 43562,
+      "sha256": "48a77f1cbd47863e72f462fad32f5b320587386bec97f18555972c6dcc740eed"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 16871,
+      "sha256": "e9191c7ca1948d83e7c09639eb00f5b89da71e8fb893c5affe5f1b94ff8055e4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 43738,
+      "sha256": "4a4b5004b5526473e4f5c9320c4797edf1e842d8bced20cd085b4363a5c99b65"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 16711,
+      "sha256": "1b3783a8b0e5402fb04e80c1f7913dda7f52e53e69618437a9461a7015535ef2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 44811,
+      "sha256": "6d54aaec0e7f5a78ded8552123648fca09ed332bae43e057985cb03cc2196e34"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 16839,
+      "sha256": "9f12d2bed890d7411631b97888d18fb86557c84a709543843adaa78e200d090a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 40478,
+      "sha256": "951d0774fd059324eff2c362edbbcf5c2d23df63ffa6fe5c2216e810464e9d34"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 15946,
+      "sha256": "00073c931ead9165a0d47ba06876a0bda8224fb82568c7668c03c1c4af91d8b3"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+      "bytes": 41516,
+      "sha256": "d9b470d622189bd714a1f3557e067791c2cc16e09ce6746e3fd286fc8872fded"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 16583,
+      "sha256": "053c969eb537e44d68382835ede75ef256313d80b8410449b9a8c5ee83c27ac6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+      "bytes": 43641,
+      "sha256": "3788b7c8c66e4a45fd8fa915711cac1f2572ee839ba3aa9f487e82eb3f46768b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 16583,
+      "sha256": "c80a27f357b14cbaad61b3ed6bb013294a1099c442658b8a643d880813bf403b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 44747,
+      "sha256": "71dbd368ba7416f99a7e2c99bb568014c58ab2ec99be2065c76c32f33846fb08"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 16473,
+      "sha256": "640d5021c4105ced7bbc5b4173d2d34d5f6f017dbde548212c2d650a384072ca"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 44159,
+      "sha256": "ba6e6597a94e50185077fc098308cba67d1293f285613305e02466b27e0d7415"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 16860,
+      "sha256": "42edd1f3c77de1ef669c6288395d8406955279e8b194cd3472aec00ef0c5dfb0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 43556,
+      "sha256": "3782cf2e2c2251180b063025852cb64d9a2dd1c4bfcf573e77ad3592e872c85c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 16405,
+      "sha256": "5497f6be09bc3fba871afd5a72f48b37e06c200e55a1ebe5eb2525f923141fc5"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 42085,
+      "sha256": "d8ec5f40844aaf42b733802c26fc5517edf2edd3ef416c67fdc8f474acecb493"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 16922,
+      "sha256": "7e651100c0135f614abf244e45d0f398ed44b64479387b5ea7f375f5b3541e1c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 41881,
+      "sha256": "1ed29ea626bd4e7423892d3f608ff880fa2922c4c0ec6de5d87f75f3aaf3f129"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 16092,
+      "sha256": "131b0fc48ce9222d5b6bfa6eada1315c9f9ad278adae45ec6c51f5c66f418e76"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 41335,
+      "sha256": "c0dbb95f77aa5afbf9dfb0e56b5f910cec35796ea2a18377b755b6af8b3b79b8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 15954,
+      "sha256": "08165a72c5b10bd804f607bcc4f8784a77dcd239a5ed99c10feea46bc08c751d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+      "bytes": 39191,
+      "sha256": "aff2dbb1263acfc7148f2a292398e018f58017bbb1f7fc392c2ba87ee9f344a7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 15040,
+      "sha256": "49e5aa3be22f256f638b924b84cc22a2a2e5fccbd968a9d790628554fd60e1fb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+      "bytes": 42418,
+      "sha256": "f94bf57765a14b9b941f717547355f0dc61d7e271aab382250841492962b27f4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 17307,
+      "sha256": "a2a4d3349855b25cda70f64cb4421aaf93f09ce008ac8bf7f25d4762db9d7ed2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+      "bytes": 42940,
+      "sha256": "6f4ab842ab8a984da5c8aa81b13f06c66cdf2213b881020dc99f4878779cc633"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 15961,
+      "sha256": "b6e04d3a530cbe92765e644f70ebca3577d1b4d40a96d695ce2f650e9ff1691f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/evaluation.json",
+      "bytes": 126334,
+      "sha256": "3fd6c4c8b9c00bb0df6c9f4a153e0abe1b94249e4caf076e68f459af6e77aaae"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/evaluation_internal.md",
+      "bytes": 3376,
+      "sha256": "8a41010de012dbf706dfe96ea312fbdfa2248f943a4e1eee08bb9e63a1244d9e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/evaluation_progress.json",
+      "bytes": 64527,
+      "sha256": "71c5e9d1196148ac3fa5cbdc08b43cf9749763fe013171dd2033accb11fd462b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/evaluation_progress_internal.md",
+      "bytes": 2888,
+      "sha256": "54d3374cd23073fc1de77efc4a156705d9f0e740eac27376185d4d47438de099"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/frozen_protocol.json",
+      "bytes": 13239,
+      "sha256": "588a590af79b4a8b4d451da4c92ac5114aeeba5429e5a2032caaa3826cb05692"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/protocol_binding.json",
+      "bytes": 542,
+      "sha256": "58213870df935a4053961acff6cc3766626be25f744141789d2fd5e7c6beac03"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "9babe8a423251854f83a36de2f3514c8021c1dc7b3c1b3711dbbad1de97d3ce6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/run_manifest.json",
+      "bytes": 10946,
+      "sha256": "63f4b9f0a4c4497162315e97bc52e2e9910428a49db6fdd7f551fafa3a29582d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/component_ablation_public.md",
+      "bytes": 5321,
+      "sha256": "e37a7a73e6e93aa1bf45944d3390e894d52e295c1cfb9ea5abba8c83986b1370"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/component_ablation_summary.json",
+      "bytes": 637529,
+      "sha256": "d2d982219ea56e74a222a811b5f1d77147e5b7f03786418d479f9e13dde08d21"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/implementation_verification.json",
+      "bytes": 2207,
+      "sha256": "626bd9d465d688871ab013a6fbdbf8d7d13d7d65524ae09c499e8ee674210ca9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 41887,
+      "sha256": "876bd4b61b7ad76a30bd13cbcb5676a30fd4471c89467707d332180402bc2afd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 15974,
+      "sha256": "c8ebceb43bb6f53a976b599e4fce239b3bf17b3fdad28a4dc44f3ffae8fb21d0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 45149,
+      "sha256": "89fe2dbb17287857873408be3937cf08af46505ce873369ae62e0fd87926ff4b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 17859,
+      "sha256": "8f9d4550ee352d1dbcc219cf8eb06106c0917c3195ce3e83bf2a2d20d58c5d68"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 42523,
+      "sha256": "8b36d4efcc4109cd6a4b073928b1d3e2be159a00ac93f7ff8a3bf30b61cb6fbe"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 17127,
+      "sha256": "42639e099340ce8abeeb8ff4f4dd2fbd3e1660eb7442c202ce72a7207ccf143c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 41323,
+      "sha256": "339a32775fadd7e25923e90f34016d487e3d336966ed34bd3001df24d9024059"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 14930,
+      "sha256": "67b988b62dfb09d3e7c295c4394943632e4c41b80930d9b0f446318a8bc8a7ba"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+      "bytes": 38407,
+      "sha256": "56c800bf31033adacf6f3d0775518628870ad9ed43820b2aee5fa027918e5f20"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 14175,
+      "sha256": "28aefe0e47a137aa9bf6ae4137581d4a761b1147e2254e58ea77a81f182cf25b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 40070,
+      "sha256": "91989c6369f362059f5043f3b708b1d2e5eefdbc04f515b59d22521fe60397bb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 14500,
+      "sha256": "6320f19317a92aa7ce1879301f49033f721b8ac54910fee22beadb5724a23186"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+      "bytes": 50036,
+      "sha256": "f37984fcc25a2221898a25bbec0eceef9752cbee8a37046c5228513ce623143f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 22682,
+      "sha256": "6b668c642c10b35090112bb5161d937fd37963c248832ffb63e131002f69bd2d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 40734,
+      "sha256": "84f55cc8982a0870b917caeda13481a0c40915effb029c7cee0f4e0bbffae376"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 15488,
+      "sha256": "70ef5eba0c466e5b47aeb9e373c1b6a4204a5fd4a93bfbd7b735e2135bc09257"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+      "bytes": 49937,
+      "sha256": "07de129438bb0ab2c92a691c008a86f7ad1aa015b9f63c173282347509b54665"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 23281,
+      "sha256": "d75e474e35188e5986f5d689e4973186206a29c0b10bce44d8f49d72a9b06fca"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 41548,
+      "sha256": "764ab678a8f9ef3b032dd8d092c93031bf31c976c8e9ccadde4dddeaf32c6bce"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 15912,
+      "sha256": "58df7d8914ddee4d1a63fb8bd9ac07afa8c90d59d8c01e45bbf66e8179aa4db0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 42269,
+      "sha256": "643cb4836796840ec2527ecb407a219ed5e0ea27435c42d01c3ab066dfa3a9a7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 16413,
+      "sha256": "61ae69bbc92cc0c71d3549388dc2636b97ba2356ab5a0b2a1da3f16500adb7ee"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+      "bytes": 42308,
+      "sha256": "7e261e7d9a849e68d6ee2e33280b352566f17e5bbdd1b0ae8c5859de2aeb339d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 15743,
+      "sha256": "4b1404b33c524e46a3ea9c67c538f71b6d0efa0133e3b038bd9ef9c214870c70"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 49918,
+      "sha256": "3d7967d6f118eaf422cdd8a863f8f1faba4e35507bfe0413aa8d0ee7967415fc"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 19486,
+      "sha256": "a6a9ddff83e559a165da5f1114750bce247c96307f1d79fa9aadbd09f94b55d4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+      "bytes": 48636,
+      "sha256": "9e16368a849243a62619674454d471311a949bc08c24369d261edcd8aab345ce"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 21299,
+      "sha256": "3d8f0f94d080f2154aa4055963b83c85b907b1c746ebef75e0d9a9deb5752418"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+      "bytes": 43365,
+      "sha256": "ffbc2355cdb8a9bd8c223c8148ef7a4287d6b4e88dcb4cce7f91c74112cbb17b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 16169,
+      "sha256": "1a24bb8591fc1f51d6936b037304ba7f2387b2b60ebc15671e71b6ce19f26606"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 44835,
+      "sha256": "187ddac1481923eca2865ae5a9f6559e69b536fb7a08a31823a7af3d06b9dc4f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 18055,
+      "sha256": "573744fd7df589229183a10c24c33925b8f662722fdea735e3bf7e48a1adfd2f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 44961,
+      "sha256": "3a4fe25e8d945a7aa77671167b9e38617413ae15796c5a48c6e19d7c70bdf6e8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 18209,
+      "sha256": "b768a548b4ba53d86a2da7174ccc8ad89c59f9a15e29333f4913247efdd6993e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 40660,
+      "sha256": "149dd540b8c7055c433c736a8c909c5a531bfdbf3d3f1142d602bc1e830e1f03"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 16393,
+      "sha256": "c11f75ae2e0191ddfd2b642c73623329762d3e32a3c82d2dbca070f7473ab148"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 41945,
+      "sha256": "2fcf785bb00ff0d28ed9b2fb6c4a79c9c49b4d30a8f7a1b7a2f8746beee00103"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 16619,
+      "sha256": "d56c833ca3a6ef1da8ab8fd948a9677e80db91f4b8f9b219e29c66a92fab0528"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+      "bytes": 41338,
+      "sha256": "70db869daf1e771ac963bb74055118b4a96a4029d009b64aa960fa81906676ba"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 16095,
+      "sha256": "e60da9e62f3b575a57787fdf05636c62968a0f968df3041780f4711b0e69bdfd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+      "bytes": 40223,
+      "sha256": "bca887b8d1aa723a98e4458bde1b27f4718d990a566f718bca54abfb96718644"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 15382,
+      "sha256": "4d72980b81e768dde1269242348544462a25730477c77c3101ba0e60cb797f74"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 45940,
+      "sha256": "be4ce1c90d63d0afc6566d229c563ae03419aa44fffb44813ba56b426df7d159"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 17151,
+      "sha256": "e8bf59407b14bc49b55864018911afee5b15faf5dabe0a8c22f69b7f196f6c76"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 45869,
+      "sha256": "c180c395ca645efc85df7552e1a92833c8322fdbf7d629ae7d5e05ccb85674dd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 16532,
+      "sha256": "c58c13d2e447832fc0890c13c36ad3a4753f5d7badf7ace607e4169265632e61"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 44022,
+      "sha256": "558ee35612eab67c6a882f02d2803b2a62b6e2dccdaaf885e04e128285f01e48"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 17047,
+      "sha256": "430298091e801624a67448cd345d69cd00b8537a40fa522c62c01a6ec4b998ec"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 41945,
+      "sha256": "e34dc8b983a22ad7e494c42bb7bdfefa24e9f73cc0e815c927a3625e2527aba4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 15803,
+      "sha256": "322dda5c64192e67ce0dd60ee209208d920bfa3a268adf906904798e383dc01c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 41839,
+      "sha256": "a38174dd65c0f425dfd9abf5e314f5e1792cbb399b1305bb3b88337fb526943d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 15696,
+      "sha256": "2f68370b454ed33af602b279d05a52fc4984bc4360204903541f5d15cb5294de"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 40798,
+      "sha256": "068927ba55732bf1a7d02c876b83b243827091805ca9b3330a4d9a9395c9fed2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 15301,
+      "sha256": "a894500eee2379ad90181d48b573f90ee234397af6a6f2aebe61fefd61c3a5ce"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+      "bytes": 42543,
+      "sha256": "297d13b9e534da7b0ee948756d5378498550658bea58b3f4898491f22ab4720d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 16800,
+      "sha256": "291411c58b6fba70564d7eed78a6dc4c4a86f6e7f563c15499ef7c1551f2134e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+      "bytes": 53918,
+      "sha256": "9403a812b521be3beed12d5a4cf68a46b54d8adea413ec828673f23c9f14f282"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 24882,
+      "sha256": "b0b25b620d1789698d10915d4d7e8559c8899bebe3c822b44b993dec84027381"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+      "bytes": 50126,
+      "sha256": "5023eaee1dd58e2f4c812970cb26cb21798035426430d3b419c0c168b6d1fb77"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 22869,
+      "sha256": "d9c6387b2bcde331603bc72920745be2fdaf2567aa1f671e096908a4b9db2352"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/evaluation.json",
+      "bytes": 125992,
+      "sha256": "66e85f566f1ae3e1b6782fa83bc5ad8f751f177617845b4c8c2eb3b5f46a7e12"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/evaluation_internal.md",
+      "bytes": 3535,
+      "sha256": "473b94229e90ddd7cd22052905d2657db538777fbb8305254bd1655be2cb3e19"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/frozen_protocol.json",
+      "bytes": 13229,
+      "sha256": "76dec7834a911466a902ce6dfcce827cddfd98386ae198cdbe3b32bead8ffeda"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/protocol_binding.json",
+      "bytes": 556,
+      "sha256": "41838d7c27a3c76e947aae17d49f0a9b5132057d4873dce2b78d6a270572b2f8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "9babe8a423251854f83a36de2f3514c8021c1dc7b3c1b3711dbbad1de97d3ce6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/run_manifest.json",
+      "bytes": 11786,
+      "sha256": "0c7ab2acc58a65be75dc8595039dba2d714a8060238ad5745b3108ec532f79b1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 43471,
+      "sha256": "7ca97965cb464ff8ebecd349c69c31542457ac640af1d582097d30bfb888bf5e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 16519,
+      "sha256": "f4b795635331f5f0a6b93da647829b6572794feff9e8b82cfd25f4844595acf4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 42994,
+      "sha256": "a57ceff487007ce0e00942e914fa0878f07018fc2a31dc15c92a0b806148e80d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 16391,
+      "sha256": "2be05989f844853998e55c785dedccaa7065f0ae2b2d46b3dd50adf2dbda1aab"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 45260,
+      "sha256": "84d312a931f4f5a10eab9cde13a77b2c8775eaee9d8cf7a98f20d548ddea0388"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 17356,
+      "sha256": "365e27caa090dbca23ab60319409cc58d1834b2ac94f1393fb262f60de15f047"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 42540,
+      "sha256": "407e2e7b469ca5bfac37f71fdd537082dc973e1f8f2146fd236df20a02d9fffd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 16596,
+      "sha256": "f591f22c9fd01125f8e939ee73584d5a67f2a228277f62d67f934de0fd5dc931"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+      "bytes": 41279,
+      "sha256": "16f0c6818af7fbf3a08a50d3c8054cb8bf688aa0a93ff8d1d31106791d24e79a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 15209,
+      "sha256": "3e133e8e75adb7d2cce97b2dfc139e60abee7a7e0b6638671a5f9151afdd1009"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 41480,
+      "sha256": "c9d6a6e26b5263e7866323b17a4d9d791952000a6fb873fce25ce11d983bfef2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 15118,
+      "sha256": "a36b936abfd4a55473a576a0ad7bee3a012482694b8e7e400007da6901c744f9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+      "bytes": 40302,
+      "sha256": "411db07248ea8a2e8a5651b93c26ad459e1efc43224e4ad2de1ee406d9866d08"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 14509,
+      "sha256": "bc88820ddd05586e26fff4d5e37fbfddefd57e5b0acdb440fef200707cba83ca"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 43658,
+      "sha256": "53fa8fd7c7d70af63badebc37b58631e4068d5092a6520efa9b82f1e35f823a7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 17360,
+      "sha256": "708cb3db180191e2f37461aa27930e5b55ba55c3aaf520a8e12a45614936dd4f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+      "bytes": 40864,
+      "sha256": "e7737455c6827e78f38f13895bd779e72ae5817c1a419b8a639f6661c19ff795"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 15077,
+      "sha256": "0db34c5880471e2af8d1e6d9936aacac45555f535c03d0232be861740f5c74b2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 43376,
+      "sha256": "10ae3b90ce722798197599e7712655fed562eb5431b099a2102d7f6f6aeb8755"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 14577,
+      "sha256": "4b0def9fc9b61672cbdea4be987541cf052919d0c5c077bb5565b8f0ee4e4a12"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 40307,
+      "sha256": "3f3b89c4134ae246d6fddd003571a5f7d7269670014cb0ef8624ce4a74ef0bd4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 15277,
+      "sha256": "ce9f0d0e382f0916d5764cbab86402e522773efb56fe9efd0e94a2b31f93d3af"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+      "bytes": 43572,
+      "sha256": "a065de585920fa9216e4c81609666cce3d9414ea452f6256ac0c79c45337b2a1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 16727,
+      "sha256": "72fd081ec82d548423dfa94a35de758c15c31cfebef07103f8f55543fc12d625"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 40435,
+      "sha256": "c77b8d219f29ad46b601b1faaf8b38d5685d32c01bbc0d5a1e2dd7341ffd5383"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 15433,
+      "sha256": "4851c41003af057e8f3ae7cefa3c1126d4806f64d77896c14a229d60dc955454"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+      "bytes": 42128,
+      "sha256": "15ef56ba613d51411f4ab34297716c97cce9c13eb5b011e609e63137287bfc9c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 16041,
+      "sha256": "eb4eb6312a1958041082b625c67e15fd589f291a1af2c12d14071ab3f273be09"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+      "bytes": 44287,
+      "sha256": "cb8487309721dfe7a0e3451b08d32ba1945ea77044d457c663eec4a527937c86"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 16954,
+      "sha256": "14f31fca09aab22380dd07ace2df4a2547cf15ac530b37b336de7112d4e56497"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 46402,
+      "sha256": "40a37b636556ac020e1027e0d775ef1f9372bbf6d0d8b5e0d751b17a00b36a20"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 17691,
+      "sha256": "5bb95c4d148157479ea375e580cc7a2e1e6e7547fdf4ed205d13af86bb45017d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 43491,
+      "sha256": "1d6797152e4eedf22de013861feea7150974673e11529c2283c3f9986f6b3267"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 16521,
+      "sha256": "008b9c83a19584ed7faaad5fe898fcb5a3100586b6cb4c102becd2755899153a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 44147,
+      "sha256": "5df4276580818bac79730b299106c3da11db48cff73c5a3b11a1c71221968915"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 17168,
+      "sha256": "4551d3ba3e5bad1d887ac2dfc79d26b5f014c85e5a592454de1818f80b7f8953"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 40946,
+      "sha256": "d0a8efea342bb1bb32526291bfd43aa0e6ab8a4daaa5a2ca455a93857ad2c496"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 15452,
+      "sha256": "3313a0787e663b642e220634da1fa05fee5ed1fe278d05ce1b51fdc0a93518d0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+      "bytes": 41389,
+      "sha256": "56319a67b968e3edbc152c63037e05019bf24cc511263225e21bbc5612c3ade3"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 15483,
+      "sha256": "1cb6e55be9d1a4a42af2736f6f510bb64272e38716cd58a4fcab690ab1d743ef"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+      "bytes": 42127,
+      "sha256": "7b0be0ba45e3e29085f40eb5dc172ab4821b73b18dbf71d210503f3f8e5f18fe"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 14968,
+      "sha256": "3cb7eeb510d76deb9e07c91750d475763b7f49e3a14b26d94a3557cbcfdae5e6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 46099,
+      "sha256": "5f9e9c70a083cfae5b61647dae1e296bdd464bb99be3e89d0506bd7398ae3f56"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 17079,
+      "sha256": "b4485afe5e96a34854b12f477f7bba35d93ed7664e41d1cf899086890f95f67e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 43955,
+      "sha256": "48b0766960f6364865c3555c77023b4b5d7fcfeed61513a633b4e0f86bb87959"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 16479,
+      "sha256": "3fa285a4868b5b54d7d4ad1c89c1790a4c00ab0bcf28b69c98123ef11038d8ac"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 45975,
+      "sha256": "30bb2c2ddf7f5a9d522a58a34a3f6163a07318f562d79e76675981b872a14e5b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 18249,
+      "sha256": "b83c426cea890f9adc3fdaf43ac3fcb872e4b624a8c7cbcde135e86b45d9cdf3"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 40651,
+      "sha256": "388e7e5c7ee602b918005fde79af1b0796f23297f3c4e851b8c69d06719bc7e7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 15559,
+      "sha256": "47618178f8ccfeeb9009c523ab3b769c7030f719d42f03e58e9a3f65585713ec"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 40928,
+      "sha256": "b885d401721d1848ae0af1dc2a274b4d5fd109fe0dd8266ea97d247b9b9c07ca"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 15671,
+      "sha256": "4f094647ccebeeec6fdb53d98e5ace3b7fe796b673a7c03db1a943b87bde7906"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 39181,
+      "sha256": "da6af05961f805f1048eb7e7779b2d7d13c9af6e18a94f6526013b84160b31a7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 14802,
+      "sha256": "3cf15ba3f23d698f1486da93601e32fd8e29852d220fa108d2255b34e7d6ca75"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+      "bytes": 43144,
+      "sha256": "8104cd38488a4582ddec814a531f8903c17353392e1929ebc530ff0554b52567"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 16963,
+      "sha256": "5be6c5950e536e424ac1d54c99e63896286e84d31b3811809a2f64460d7cebd5"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+      "bytes": 41405,
+      "sha256": "324438c7572750ca9f5ecd4ef85a719210cc2e2de5962856a43e8f1d8c7d795e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 16416,
+      "sha256": "fb619a9f8ac8b951b8a319eb5c19d93f971d8b6aef0199e451851eeef6beec74"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+      "bytes": 39231,
+      "sha256": "2843711a55ba19c616c9c8b4b7697179a9796652e447674de1d7743277f2ee1a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 15112,
+      "sha256": "af1e42c90ded5aa99920030bfed1244e8a6d373062d23a3b3262ca50293ca41f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/evaluation.json",
+      "bytes": 126458,
+      "sha256": "a09b4e0a4960baf4161bfb97a51a83f2dd76a65fc08f59d2188a82a536ff3d41"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/evaluation_internal.md",
+      "bytes": 3372,
+      "sha256": "13e78f8733465ece737af4ac275f72a4e1825b7a32cac6fcc74b03a36c9655f0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/frozen_protocol.json",
+      "bytes": 13270,
+      "sha256": "de2c51a11052e0a59c5c5561f102ca4273e582a8c6ab8db120d8d85feec707d4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/protocol_binding.json",
+      "bytes": 555,
+      "sha256": "e4a40a7876d957a9d3b35a8d3b3ac58ccf25e488a0e8e8f2e97b6ed1466595cb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "9babe8a423251854f83a36de2f3514c8021c1dc7b3c1b3711dbbad1de97d3ce6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/run_manifest.json",
+      "bytes": 11372,
+      "sha256": "f8f81dc3c4d465896ec3cfbc9f0b9a2a04ce61334b33016f592cf1aa5e824081"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 43998,
+      "sha256": "39f41929ede519853be42c63d3aad261bd470f5b62d928ba43f41f6ba4f79f07"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 16313,
+      "sha256": "5c2e63808c7180e5832c763bbc462f776170317aa85dbfe80dcdab8b61d34e49"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 43158,
+      "sha256": "621f8cc3fdeef01931f1716fe25e83254dd0830facb1cf7c2a9f5ea32a85ed36"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 16357,
+      "sha256": "503ded08ca5ceb26ca7f56298293210da8112338ab06e288a6749b58c254b08b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 44469,
+      "sha256": "61c1d5afc9e303ec03e6930a058df6818aa5072fe319647ebcfefdbbd4c06945"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 17059,
+      "sha256": "bff5d6603fa596815701de2668e61447cda0f88436fe693a793e938fa34fd361"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 47401,
+      "sha256": "7cca2d0447e9832a5ea743c7789247163cbbb5ad04abfc0cbbb2f2a7a9004701"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 17381,
+      "sha256": "91047f67bd9cefcbf99c5e828037b840b62b557022ad8764d1898547e907f43f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 4769,
+      "sha256": "db62990cc18b812750c9b855afef396436335fc4260ad83f825bab0a8dfb9b6a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 49998,
+      "sha256": "78590db1223fcf3212cf8964eeeb167d58daf201c64b5326f7ac57786550f8d7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 21519,
+      "sha256": "7fed50bec77be4353b3dedcc1691fc855abca579b569bd38660fda455a64c627"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+      "bytes": 40175,
+      "sha256": "8e3b625305b499ca31db2a120dc1998e485b820df967814ab04518082551b3b2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 14225,
+      "sha256": "b9d582894c2c366b45108020dc47d2ae26f6864d6b231b18c7d399323c1a8024"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 44010,
+      "sha256": "99646c525f390b4fac2211fc0f01fee00450a4c71e27087cc58dacc05eeebb04"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 16288,
+      "sha256": "6df0b6c6c183fc9c26038ba1f846a296b2b562b4576536d35691ea694899cd61"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+      "bytes": 42839,
+      "sha256": "2e7659c9915b776f855bf03b8c43c9e2c49e11333474d0dac0f7d3fd027eef17"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 15796,
+      "sha256": "f5e1e9a0ac5a62f8a9dab67c14be4657e1c99cfbae572f46b064bf42423149b0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 44790,
+      "sha256": "db2164026bcd6fc720e0372439c8438815757595799890c7fe49f4d09f36f50d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 16690,
+      "sha256": "5c5ef1b1c9d50be2f41c1b79fe7d897aa42222244327ef6fa81f93c2293ad277"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 43599,
+      "sha256": "f1986e034771489ba12003709d962680c947c42cb99085ba034d6c40e8fb82bd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 16553,
+      "sha256": "17fb869c35414568bcca86797eeb802c86cbfc2b4de79c2268010b392606621b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+      "bytes": 42414,
+      "sha256": "0de7a1df8354e1d2e4c8f53ef8268d75866aaf9c12973657f37c442868c7ca37"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 15741,
+      "sha256": "7e1b9e512ba6785bd772263bb155bd30e856d769873d9f9a553ae1ffea5c70f7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 39941,
+      "sha256": "09ffa90f56c92b084d47ff472a0b3cebdff0c026be5d1e386825def898982b0b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 14929,
+      "sha256": "05d0ce103ed4a356bec2d8d9640d5975b7cfda79fb09a19e226d1c0f6d4907a9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+      "bytes": 51320,
+      "sha256": "9b3a62cf6b4ef1e3bdb45937100dbba69e5e59da0acb8a279b70776ba74cdc53"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 22243,
+      "sha256": "2c0b4b872f6c44fdec0f2bf81c8388c98effc64a9d77b3d80533d1bc50629c78"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+      "bytes": 43894,
+      "sha256": "64dfdfa6a0faba3ca8565abde5dfa97910f73ce45dba17073fe0f6f537542b9f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 16756,
+      "sha256": "2c0d2987fabbc63b6591387cdd81d1b4d74909be94234c0aae000f3b9fdbec86"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 44112,
+      "sha256": "f3666248db2ac55c6ef6b807d2ff1dcb745d31c9c4fc9df4c8d71c9e5ac6de44"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 17021,
+      "sha256": "ec3b6283b2e77f591edcc6fb1759e1ac198fdac21c211701aecc8f4f67dbc669"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 44022,
+      "sha256": "0af120aa1afbd27f40b3d198202ae5472f540bda0357b9ba910d00a7e5d2742a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 16963,
+      "sha256": "e4ad06bab9fa932e0ee0e36fd5771027d1f79b8e19c16a7c857270a0199de24d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 44481,
+      "sha256": "bd9f243b43ea119e369689e7f6adc76af60487a362a602246a91e60d7dc5201e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 16718,
+      "sha256": "c97a24861e7a24608be60882d5c87592d92902c93f70e894223a32a5d4819c1a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 41175,
+      "sha256": "10bcd3218e7697a5cee967d1e462111418d54d8e8e410d5294db4393d17318b3"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 15500,
+      "sha256": "d462311528d191b909e8a84f202e5d5a73117ae3bd2eb26a32d260bc573e6bc2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 4518,
+      "sha256": "1c9c30193bbf127699fda72ab476ea1afd9058cf7b5c9d64fb357bfc1a6da360"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 4518,
+      "sha256": "95b17c6f11e6c435d670413a4f7ac529cee6e9a5d8399e88968f4052a0513370"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 45432,
+      "sha256": "25a5dfcf6fd425c3706681723074ce4262958eb2676a7a38f4f71aff598c27b6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 17097,
+      "sha256": "bfd4acab2bff2eafdab3e7e7c897cd854f62aabacf46da3322a188c818ce21a8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 44162,
+      "sha256": "8f6e3a292c5f7bf2639ad05c6218b1380ae5f493d470832213303f0e451f5dc7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 16588,
+      "sha256": "3f78af5ae731718ec79cb4e8a2d91af61dd1c90bc4286277afb70c3ef638dbb2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 46621,
+      "sha256": "f8f5b485bde81d2e99c5dcb3c5fad5cbe81aa38a5ca14ecab0342dc125727e68"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 17829,
+      "sha256": "6d687926b78964830cfdc140a5b721811ca0bea12273db999ce46fad014e3cd6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 43982,
+      "sha256": "6f7aaa91117919bbc6f664472d5aebe904ff479886933f6e1b509c4ef8a6c2e9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 17089,
+      "sha256": "e0e47996c6addb7e136b3debb9e7874a374fefa30faaa3798a0192db71851a33"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 41035,
+      "sha256": "ea3d7002ac1ede1e7345135c3abeaeb9c491493c5c22f49614aeaf080a954a56"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 16362,
+      "sha256": "5376fbd0b726c801b3d23c8060ff9dcfe81aab92f301a06ede1f586e8c8b171b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 41459,
+      "sha256": "7c17e113b33c63f7ecd762d38c71c1c6dbc9532c0fe478dd22f51d5bac6fe63d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 15808,
+      "sha256": "1a56a89245fc3b7bfed0837bd64c21d9e364ddf56382c537939580d65e70fa8d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+      "bytes": 43248,
+      "sha256": "974d25a977ce8c2b898c7d17e23c10091bff788b5e25a32b7ae45f3badc8a286"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 16248,
+      "sha256": "c89a9e91c2547baead428ed0ab7109d0fe857c1a5e1b2a155144d3440afd6a4e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+      "bytes": 39161,
+      "sha256": "acaa4a90cc942494b7a14cd6afdf326551fc4deeb6a6763356aa4a27d2c162db"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 14938,
+      "sha256": "58b10ee0fb0ef74cd268b83eacb4035155099b801d7415b165371818458b65b1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 4525,
+      "sha256": "30d2e6734daf88a291a2c69f13fe55c208220d65f1d95ef6c6f148494c85626a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/evaluation.json",
+      "bytes": 117739,
+      "sha256": "55426eddb0eda679ca03c494bf93b1d1512abaf8cfaae97f0ab6fb1779a42382"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/evaluation_internal.md",
+      "bytes": 3452,
+      "sha256": "11d1b7243d5d34a8227569f0a9028d08672328a3123acfd230e7460f1a3ad3d8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/frozen_protocol.json",
+      "bytes": 13262,
+      "sha256": "a29906cad5f591ce177bb542a699ea8432014b56b0a8e51f4b323e646594dbf1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/protocol_binding.json",
+      "bytes": 545,
+      "sha256": "41c2f2ed98e9a5264ef056b4fb0c03d9d2474461edf701e0a1933ed28af9498e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "9babe8a423251854f83a36de2f3514c8021c1dc7b3c1b3711dbbad1de97d3ce6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/run_manifest.json",
+      "bytes": 11114,
+      "sha256": "abd3059ae90bb45c8214789024efd3e77afd840f3141d2e23e757888b5c87275"
+    },
+    {
+      "path": "output/experiments/ai_scientist_component_ablation_20260905/same_condition_audit.json",
+      "bytes": 3444,
+      "sha256": "c9ecdcbbb3bb71204844faaea3b171f1a258f41b7591479e58fb987d2f97aa1d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 46018,
+      "sha256": "e26eb515710b2e0634523eabf237dd0f42835b0c58f06ca0ea1718f829975f95"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 17027,
+      "sha256": "62e6f92002d962a77fe6eb89a4879ab2b758760a107a87a1e8612d0e7618dd62"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 44134,
+      "sha256": "f05084f6a5251ba97ebc021e8991a33f7af629e00291c1e5843e43723ba92c12"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 16636,
+      "sha256": "76c52f3a837b643b63fb64d135de510e284894c6e1174cbbb7b3a8df0b2e3030"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 43531,
+      "sha256": "c5299ffc3225f534041881d6feadf1365f0c58e8049dfcfcc82640a139521036"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 16525,
+      "sha256": "8a9651ab0914380c223ecd3e78f9c26bdb947f1350fa1aee3ecbf4e66294d7e8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 51114,
+      "sha256": "ee49344078fbc3fe524eedb273a55674b656da076597d85bda904ab158f211ce"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 19937,
+      "sha256": "63ac6d302e5c1110b5cf839250a5f29cc34cddebce28fbf504d0de10974dc6df"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+      "bytes": 49137,
+      "sha256": "9a79f1d83f423aa24fddb7e44ed673cb8d631335c335123b701fa70bdd00eab0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 19945,
+      "sha256": "2f6e2c11e823fd19b3cf9878446570e8c9817a07631266377800e14252867c73"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 53578,
+      "sha256": "d3f753948e0b576bd87c12cb3063b6446763a16a463ae9fc66271d6d3c4a67a7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 22752,
+      "sha256": "50b2391346b11da8703ac0fe4be4b11e2f60e8a66ad550ab2f5c010bf48d0bd8"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 9696,
+      "sha256": "fbeee1b01b5e2689a2936371fd8d285ba20d1a20c720dcd92be5aa4cd97fd008"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 46900,
+      "sha256": "4929be2450a393ca8894801b584fe6cfd018f9dffd3cf9f3f56164ea29030653"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 18321,
+      "sha256": "e6b50a3834d2df971db4dcb86d23b62c5b50bb54d13df82420946ff91e5ca1fb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 7133,
+      "sha256": "77cd85f2a3c571bfb9a9a763ef50f51b5ef6ba9e9c6f9476b49aa780c4fbd45c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 42904,
+      "sha256": "69e8c4cd466a319759c66537cba67a3b1869bc2753f6b07e09d1639365333f79"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 15605,
+      "sha256": "7475c6d264badfceb9cdbab9512e57277ad25fa6362cfecf9eabd938218040bd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 52974,
+      "sha256": "684d76a12efbe7fa70b1741e61a646b77ab476e83888af5e28937112ad468577"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 22076,
+      "sha256": "eec397f39d8e3ed76850e5457352aabb454c45c23e19787eeb57207739b7d9b2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 9581,
+      "sha256": "11a82aac19e8a2d3797c815a65f7f121a9a007c89a32c958b10df94602c8b94f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 53789,
+      "sha256": "33144e7bcbde119ed6edbe27629679994da1a80bf57ad348e38fa0af4bb11548"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 21632,
+      "sha256": "ed7bd7b96aff58a1d310db81b16fc24826e34ff1b5daf712338761abc2b89b13"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 9713,
+      "sha256": "f70813ba3082ee2ca7f89e535ee746220108866da30b4a6408ce0703474967da"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 9713,
+      "sha256": "ab7ba6c13037a2f1124db7e25dbb05dace7a36ae2c3633ed5e9168d6ec6efef5"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 44758,
+      "sha256": "bdfd12ce0ae16906a9d7682a8ce958796a0395aca1b86db5c7af4a74c6dc380c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 17443,
+      "sha256": "d977627f581e73ee1bd3c9bd0060bb309f065f5e3d1e13c008364c06d98be2f7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 42419,
+      "sha256": "b1c909c3df512892a881ce91eec1ad23420d2c967354993e367c0016acd7b42f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 15840,
+      "sha256": "d6c2ca6abdf222e035da26ddef538d84d2fb4b422471a0d6645a08054d5be7eb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 43845,
+      "sha256": "49048264b524ce411e6aeb2832e8ee34dbee643970c41aa6bdd10061a15821a4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 16141,
+      "sha256": "513a18b230ff5d2318ffd26cafbea73649b9eb37c26d35a338e92524dc069108"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 43045,
+      "sha256": "e85403cb35a477055ad02721a526edce01822702f402866d9adddaa648fac4d0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 16416,
+      "sha256": "14bfced495939b69b2843f92cbe284be3a9a2b64f5c868dd4f9a69751aa85245"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 7231,
+      "sha256": "fcdfa9db421950434e58e982c93d6bfbc8e511145372fdaf814481ce7a3382b5"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 7229,
+      "sha256": "d9dff7a39ccdaddd0748da2f508f7b9979a53839b2a8a0aebaa90cc929995a5b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 46373,
+      "sha256": "1fa96da10893cbae3eea6355b4fd6b37e9aa989165fd8ccb9ec788591be3f4f7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 17208,
+      "sha256": "c168937245415ad49329d9f7c3b97420551dd45b917ada6b1c7df90bfe24ea47"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 46045,
+      "sha256": "015abb0df3e77cfd12b7b0744b52205d3977e881ed3879652b70f456ec48c4fe"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 17202,
+      "sha256": "6d3369ed9737b98f410cb1aa9ab88bd0b7ce7fa0fb85419ab93b4bd96f2edcb7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 44898,
+      "sha256": "e8731c95f4ff4ba02fbbb49d1736bcab3ff376fd82a2ae20725925d711d0ef6e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 16769,
+      "sha256": "403f4fc754a2e7be4bbccca873c3b2f161e054fd21e182cdeea5cb8333e9d39a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 47196,
+      "sha256": "b66aae54ea4fc46dcb5707b37d47b2dea30027e8b93a68cdb9ad2495c60421c2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 19445,
+      "sha256": "ffe3a62add242b9e43c5e6e0c204e70196726a0192448af1a75ac5f093cb3cb7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 41329,
+      "sha256": "1c4e81f2fe4dcd0f43b26356356d4c56a25094e0f8efa199ade4c7dbcebe5664"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 15668,
+      "sha256": "e913fcddf8e96de9a33a92350bf6b19cc0b89ff685eb11f77c203fc087efcc1e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 39197,
+      "sha256": "87b9a60e71f89c921a8a2147c3c1767875b6c647e82474cec4d0de156b534df2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 14600,
+      "sha256": "90af33e84eb1e1c5339d7e2bb69be4d86272c9c934c674110e399ab882f402cf"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 7144,
+      "sha256": "af497abe2e27efff46b5de52191f8fcea6285a7e2742dca9047bb646f2003e55"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 7143,
+      "sha256": "cb803c609f93521b111b55ccbd94154f1ebca28f89dc725d52552d160bd9f3f6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 6948,
+      "sha256": "faa3960ff552401f6fe31e2bf6fdefa39930e0b9ec8c4efe11a5837ed8851ce7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/evaluation.json",
+      "bytes": 102928,
+      "sha256": "ec49807f3cb0b72d4f7d1055dda4ab19c440bc4771f30296f4f30de38e7b7fde"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/evaluation_recheck.json",
+      "bytes": 102928,
+      "sha256": "4012ea11dd3984922b3329abc401d26357b63b551d60fc6c4ac892773d3d3e26"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/evaluation_recheck.md",
+      "bytes": 3423,
+      "sha256": "7f7b97c8eaf997fdde9dc9bf4d229ea3abfcf6bc9f05a31e442e211dffbbc85f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/evaluation_v3evaluator_check.json",
+      "bytes": 105467,
+      "sha256": "349c09599d0654269f8d24a96c4847055d27eb5fd427bd2c61bf3c4d144dff59"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/evaluation_v3evaluator_check.md",
+      "bytes": 3555,
+      "sha256": "a77f7040c61188ef05dfd5b3f36739be2666e56255c165fc41ddb13804f1f177"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/protocol_binding.json",
+      "bytes": 248,
+      "sha256": "cb20ff7b019f0dfec53b543dce66ec0d7ec527af12650a31c653855afe9b747b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "7299d6acdca75607cdc55b307db03e6f7a1ff3303f57325ee25cceb7a30e84e9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v2/run_manifest.json",
+      "bytes": 8375,
+      "sha256": "347af41ada90239a86460ae81e70f6a5e79772086a74e94cfff2675e57f30e56"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+      "bytes": 44112,
+      "sha256": "402e00f7e8b736349e569148625a82b8f011d828147e23dfe9346af316296f8e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260901/result.json",
+      "bytes": 16761,
+      "sha256": "cc050e112d8f0614e4b38ba1e94761a1120844845e3430c8a33add4041071f1f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+      "bytes": 46355,
+      "sha256": "bc688167dde8a364835c51c42c1819ef851c99916f718a558b3579166f611f1c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260902/result.json",
+      "bytes": 17612,
+      "sha256": "b67a0c49663ca2cdfda2217d2053fb59bbd3493203f1d1384365a76925c261c4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+      "bytes": 44043,
+      "sha256": "b805e9196ed2695f0132377270f95019e9773cc4509c0b6f7dbafffbac413bca"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260903/result.json",
+      "bytes": 15936,
+      "sha256": "2bf64fa08032af2a7199564c6f40203f7679a19a463a86116167c3b44b06a3f4"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+      "bytes": 44398,
+      "sha256": "da52d8a56b33b04af0afdae526fdacd3ccfa7ac256106c92a5a9f53519f75d33"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260901/result.json",
+      "bytes": 16560,
+      "sha256": "b794e98f92d045eb1b1e41cc8aa47695f0a57feb3ba436c426630640ee63f0d6"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+      "bytes": 43312,
+      "sha256": "2b6a692a999b87137790c2fbadc08169ab760b24db7f5522f23f5ff722dd67b9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260902/result.json",
+      "bytes": 15838,
+      "sha256": "3df7b6f542592e4bea0ff1304d737b9bea7646d8a6ca81d6521fbbdd00cbdc33"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+      "bytes": 51172,
+      "sha256": "fd40b6ce0d746749e5541412148d08cc57d627a7f19f49ddf0ae97d7d03e885a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260903/result.json",
+      "bytes": 22729,
+      "sha256": "d7a3fb3794fadaa9de5b8654f30bde73c641291c6a58626c6be2c7f90c2a6d7c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+      "bytes": 54884,
+      "sha256": "2f55495197ebe3a8e3c2b7bc210d2bad23a58cba1dcd7304c18950a69e81279a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260901/result.json",
+      "bytes": 21776,
+      "sha256": "5bcfd4dfe35697e51baef0d9916504fa69a889fe1e400012fc43de8d6bb2fd74"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+      "bytes": 47221,
+      "sha256": "8d72715f3d0b4eb66eab819337f0208d2f06c99d3bcf433dc0121e2131ba6f52"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260902/result.json",
+      "bytes": 17358,
+      "sha256": "36afe9b85334502670382cdb46349436bcb1f88217aeea4519fcbbf0b63182fc"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+      "bytes": 44875,
+      "sha256": "f6f9332a7aadf4330a830feec0405ff1b21ffa721364ea52d8f590b4f4fa259f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260903/result.json",
+      "bytes": 15701,
+      "sha256": "f36f58ba4daa426cbbd50207a6b3e25c254d599d6fd91a46bfe967f310107a11"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+      "bytes": 44281,
+      "sha256": "6b6080a35528f40035c612400383f30fd5adc8c8c7833e7015f43e6e9768217c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260901/result.json",
+      "bytes": 16671,
+      "sha256": "3f7b7f5656e84051c6c7737e1abf595ac6e71a9481894cb877903e43ee114ddf"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+      "bytes": 45304,
+      "sha256": "a35dd58dfba91e0ada6c010d7b59e0549f1d0ff8f063728639e51b87ecb7b8a2"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260902/result.json",
+      "bytes": 16707,
+      "sha256": "bf1aae5537ae2645e3cfdec30350a1b0d6465ff69e693c7a52db0e9ea381e817"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+      "bytes": 42619,
+      "sha256": "5a1f0a809542db8ce20ed5601fe428c67ec7c85ea81a16cf45c9522d5dc95b18"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260903/result.json",
+      "bytes": 15924,
+      "sha256": "36a34f66a0522ab2b2709ec727afb2b2ac1e806f968dc5dda0749ce4a7e81a09"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+      "bytes": 45123,
+      "sha256": "d3cbe0240932ef01b29f4bd8cd3891fdaaf6e8f9e88bd894f66164488003358f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/result.json",
+      "bytes": 16118,
+      "sha256": "e127ba1a26783d0ba8e82072ac8235f541583765448e9f09e36a3a4590706730"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+      "bytes": 45383,
+      "sha256": "d702ccc2376e159767eb167bd01b102477ff8b1ef9a0ae85f55ddc02287fc274"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/result.json",
+      "bytes": 16654,
+      "sha256": "f12950ee6a20ae5c15e0f84f9dfebc14983c91de2440e529806676c6cb2db155"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+      "bytes": 45472,
+      "sha256": "36d5df9ed99c87f278cb8c580f6bfd474e59ac4de70654411a0e850715ced681"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/result.json",
+      "bytes": 16218,
+      "sha256": "d584091ebe6fd2e9bc3592c4fe6f25434a3ab0b932fdd54aa4b5a9a53a2df91f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+      "bytes": 44123,
+      "sha256": "a1e84e78f9e4093009ec6bfbc8b2a8f72f3fe67a88c151747c8905a1910ead85"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260901/result.json",
+      "bytes": 16422,
+      "sha256": "247712b80da7ad9c145b7f16bddbf0aebb8fd116547a39f71046f0ad1ba22684"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+      "bytes": 43268,
+      "sha256": "e883115148e7f39ae385420db96d39abe392f6bf3f88cc5b3de1b33d89512b03"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260902/result.json",
+      "bytes": 16298,
+      "sha256": "ffc6df172db6976222c1f9c85ea13aadbfdfd9fbe92d67ee47bdf9a2a0cf179f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+      "bytes": 43999,
+      "sha256": "7ce0a795c5100a65577c7ccd6929a87be9af39db524e57c1b2456161f34e6170"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260903/result.json",
+      "bytes": 16201,
+      "sha256": "9c810288649ba0f1a27adbe1d54984078e5030e5ef186918853c527b797649cf"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+      "bytes": 44093,
+      "sha256": "beb2e110a2aadd535f014531e8bd56f629c0f531528b8ee2bfc07086e63b5665"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260901/result.json",
+      "bytes": 17167,
+      "sha256": "2b5892bfb18cefd4a2224ca50ded8f7996ebf80b1afdf68c81d7cffc5cf674ea"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260902/result.json",
+      "bytes": 7336,
+      "sha256": "c615c86c8a03ada42ea92f28ee7ab45e64906286718904f010c264b6f5d2b92c"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+      "bytes": 48166,
+      "sha256": "e1792615415c0ae5da79f7f208cefbfbd948cfdc8f6953e7c1355cd20668d64a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260903/result.json",
+      "bytes": 20518,
+      "sha256": "77c045acd374fe708fb4c3d939948c6cf019b816ba172927f89e4fb15877828b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+      "bytes": 45946,
+      "sha256": "75c4830fe84b3474e4b4e095d329bc825272a2e9bff0a4aa56fcea5041288080"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260901/result.json",
+      "bytes": 16703,
+      "sha256": "997f4ee363505883f980f162438d56acec69d0639911d9f299554a01ea97cec7"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+      "bytes": 46267,
+      "sha256": "d7c248bebcab0ea4d3b411d18a77905293e3943affac498f6e14468fccc5f5d1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260902/result.json",
+      "bytes": 16877,
+      "sha256": "b045a107e928f9cb7b178eea4e555565fdc8ec1b5d3dbb5f36f2d50072755d34"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+      "bytes": 48005,
+      "sha256": "09cb1c5e0fb6548c69d85fb2d171ad626eb0db2161e9c125318d3f337e09b426"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260903/result.json",
+      "bytes": 17714,
+      "sha256": "0956072cdfed8e9f6fd350904a8ae1b36d71e0fe021eedd2c5d512f672692558"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+      "bytes": 41830,
+      "sha256": "109961a19ae20d7dd4a3e835b3d300fa84964d7fb4f30d81e6339f8902287711"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260901/result.json",
+      "bytes": 15883,
+      "sha256": "bab769e102cad60d341b0b358911bf5ea49f640b9e8aabe3466aac0139562373"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+      "bytes": 42907,
+      "sha256": "7c72d41f0a6c22acd2c302a2be3ef8f3420e5d54f05555408c369d38786c60d1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260902/result.json",
+      "bytes": 16898,
+      "sha256": "9a3357cf3782aad1d80166047157ba81b688e4595fad8d1cd524588d9f8f8958"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+      "bytes": 43085,
+      "sha256": "e0c2e73b415a481f524900d797b811008f33a68c831af7471ee9d978422826e0"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260903/result.json",
+      "bytes": 16784,
+      "sha256": "37e3393f37998222d0f24ecc17c13f0d0c9d7450719832717fab22b2d9382d7a"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+      "bytes": 44903,
+      "sha256": "e598a14d0140b17f5af35a87ee45cfab88b0728673f4fa9f11af713671425c23"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/result.json",
+      "bytes": 18009,
+      "sha256": "1e42984bfa16548f19132aabff9c9ca20a5700586406f76916f2e2ea3f232a6f"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+      "bytes": 41966,
+      "sha256": "71b0eeb43546d3a843ac34677c0b9d1db4f458f3ed6e0ee98ae53fff0d1b6139"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/result.json",
+      "bytes": 15952,
+      "sha256": "70aaafae1e1bd1e467b0726c041758c2b20f1237610762715d2809d8179a37e1"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+      "bytes": 45570,
+      "sha256": "23974d92f9df2d03d2923f1c3fab1787495fdc63a36dfb06a85019c1b0f16372"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/result.json",
+      "bytes": 17907,
+      "sha256": "dadbfbe0c17f422ea87b928172ac21f4f28b50ca362326544c13a5693621e3d5"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/comparison_v2_v3.json",
+      "bytes": 8246,
+      "sha256": "a8c5e52676a69ab1729d6fa805037566d07abc2f92cf1d96bdfca1962c71a1cb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/comparison_v2_v3.md",
+      "bytes": 3135,
+      "sha256": "fa25e95a84dced0edfca170866c7deb233e129dc13b0424fdb8280a421f12d8e"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evaluation.json",
+      "bytes": 125994,
+      "sha256": "a76fe3b0328d8509e8e8262bdac5095d8a548878852918c32cdcbfb78f51ef36"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evaluation.md",
+      "bytes": 3429,
+      "sha256": "6d69195280253834ff94e82008c320c0f9682f2abfa7b85a52df0642926b018b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evaluation_recheck.json",
+      "bytes": 125994,
+      "sha256": "8e5f0b850a603ccda39ad5957e27935b283a85ac8629ebd40bda7d274d690fdc"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evaluation_recheck.md",
+      "bytes": 3429,
+      "sha256": "6d69195280253834ff94e82008c320c0f9682f2abfa7b85a52df0642926b018b"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evidence_manifest.json",
+      "bytes": 6825,
+      "sha256": "1cfccbc1bcbb377a7e2738cbb7d093f4e3f59aa2d36af46c8f8ff977fa9aff9d"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/evidence_manifest.sha256",
+      "bytes": 90,
+      "sha256": "940382d55016ca21c82b65ea105873c0083f995c837c5aa816c636d51e18fe69"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3.pdf",
+      "bytes": 63909,
+      "sha256": "b17ad05eaad9f47bca917eec22d1bf0360d6681f3bcda75e168d69291c225959"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3.png",
+      "bytes": 216805,
+      "sha256": "1d0c838305b7c5fdca2fb8dabf6fff393ec8946795e0102ea09c8b6ba0e80dbd"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3.svg",
+      "bytes": 26031,
+      "sha256": "9ad80fae95556a62a82ec163a9273297a86e7f0aedbe398580334209143ec679"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3_metadata.json",
+      "bytes": 1715,
+      "sha256": "63bfd5c86dca117d033d24e74ce7268640f633f2907ab5becbcd23c00bb48ecb"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/knowledge_status.json",
+      "bytes": 425,
+      "sha256": "4d3700f8a3e37e28d1567a4edbde8ab45b645d24fc34b49fc00bc3d5931cdf84"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/protocol_binding.json",
+      "bytes": 248,
+      "sha256": "1ae77b9ef393fad1c8d3a77afa20823625385a3cb70fa0681e78bc1a936f5e60"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/retrieval_ablation.json",
+      "bytes": 23106,
+      "sha256": "7299d6acdca75607cdc55b307db03e6f7a1ff3303f57325ee25cceb7a30e84e9"
+    },
+    {
+      "path": "output/experiments/ai_scientist_system_capability_v3/run_manifest.json",
+      "bytes": 7863,
+      "sha256": "f90a8191b4c09f679230aedaf4d4e3ccffea4a64ca4e5e9cdb3ca11fcbeee4c4"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/case_bundle_manifest.json",
+      "bytes": 11213,
+      "sha256": "532117d2f61f8c34f65a70eaf00700ac70870a24560cfccb92d547f16d2f1265"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/case_bundle_manifest.sha256",
+      "bytes": 93,
+      "sha256": "0879c0bddad6c419dd5773b2bf903fb5cf3391904498311df8c425cebf94ed4c"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/event_study.csv",
+      "bytes": 1251,
+      "sha256": "eb5d156fa12264464035eca824e521999534e432afe5c1153487553ed03b6b3b"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figure_manifest.json",
+      "bytes": 7944,
+      "sha256": "7d5971300797715ab16dc3ada2522ebd7643816b7701c2ea6e2d32b7a18ecc89"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_event_study.json",
+      "bytes": 957,
+      "sha256": "9281ee184ae45aed90d7c5fcadc8339de9d49431b1c87a83715d51c26253aad0"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_mechanism_framework.json",
+      "bytes": 1771,
+      "sha256": "6c6178ebfeab4e3c920839054f67599f3e035bf93fb081c56ff5d9ed55cc19eb"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figure_specs/carbon_market_model_comparison.json",
+      "bytes": 1351,
+      "sha256": "e389d1412421c715c0beb13101ac088ef5beb55459f143b80cba30b2b86db1b2"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_event_study.metadata.json",
+      "bytes": 534,
+      "sha256": "49a305a4f2776dc5ba0a768d648de5937c96dd7fd416cbd651f7aa698bf52ee4"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_event_study.pdf",
+      "bytes": 23324,
+      "sha256": "bf95fe1535b5799cd5794cea3745850a79b14416bc4c53f2f02e05118ee5813c"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_event_study.png",
+      "bytes": 88779,
+      "sha256": "b6d3a5cce90888813eb475a3dbe8434e1d531762413624be539431d5e4842feb"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_event_study.svg",
+      "bytes": 48424,
+      "sha256": "41332831cf1cbaac51e59f40b33915782e7bf16442bee4e7c94fdf2ecd6af44f"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_mechanism_framework.metadata.json",
+      "bytes": 573,
+      "sha256": "c2ead7f94f93a46f5aea834d33764e69ce6c4e68b313b55fcb087140076d5fd4"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_mechanism_framework.pdf",
+      "bytes": 50065,
+      "sha256": "aa7cfef6f703392fd6ab437410b665fdb46beecffd2c9f4bbb1e8592e9b30193"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_mechanism_framework.png",
+      "bytes": 168223,
+      "sha256": "250203e555f673a18c205d029b788e768cc3bb68a21ad292bd06710e7f044296"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_mechanism_framework.svg",
+      "bytes": 97200,
+      "sha256": "88c8313ec0d19670f77c946aeb4c96486b7fac8e9a81a14a05fbb4fa0de66dcd"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_model_comparison.metadata.json",
+      "bytes": 559,
+      "sha256": "1ed8dc2be9a2510b5fa15a63386cef372f7842d80948bdb4e17ab9020cb994cd"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_model_comparison.pdf",
+      "bytes": 41964,
+      "sha256": "24509703651a63ed63c2741f85205bfa2ffb080b0b5a7ec559d2fc20ab89ec06"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_model_comparison.png",
+      "bytes": 112967,
+      "sha256": "f56f8be9b5dceb41e73a77b90a14d5b529e199133cbf5cd4faafb9a830ecc25b"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/figures/carbon_market_model_comparison.svg",
+      "bytes": 85087,
+      "sha256": "989f69fffb8b59a62928ebba1324850ef4ea7241b645317f43e36be5dbe4ac0d"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/independent_recompute.json",
+      "bytes": 10521,
+      "sha256": "23250ac127aa781097ad7b8fd3776917e7658582c693da944fa352fbea2a2ba3"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/independent_recompute.sha256",
+      "bytes": 94,
+      "sha256": "f3b9d8cddfb2f88a9369e056b8ca60182d4cfb6a5817e8de15dc1a353f8239c5"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/mechanism_and_heterogeneity.csv",
+      "bytes": 530,
+      "sha256": "de28bba711078c7d3b5158a000e3a83681dd68f42bcad51196409cb680acdf78"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/model_comparison.csv",
+      "bytes": 1551,
+      "sha256": "4690809864588d9bbf82763187cc234afec4a268da160c963a4c48e2c914e2f4"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/placebo_distribution.csv",
+      "bytes": 13066,
+      "sha256": "b00a77db7e84954c879d9a6dcf704229513442e9a53ad971d0c7f230d2950bf5"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/round1_result.json",
+      "bytes": 4901,
+      "sha256": "b3d3f7a018bb42d851dfafda6ed99b534b72ea02adc57d008a251bd5d584554c"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/round1_result.sha256",
+      "bytes": 86,
+      "sha256": "bc610bf485e0a1726591afc7fc9f19a29c0fec13248f1c6a5a8093abcdc6e7db"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/round2_result.json",
+      "bytes": 29858,
+      "sha256": "46ff732b05a1da0159f2e06bdb51cc87140adcf4e3a6ca39729a173ea76e83d9"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/round2_result.sha256",
+      "bytes": 86,
+      "sha256": "92ae193a2f82e6daebea41c343feda6091b068013ff05a0959f1f53caccd3d8c"
+    },
+    {
+      "path": "output/experiments/case010_carbon_market_adaptive_v1/source_audit.json",
+      "bytes": 10219,
+      "sha256": "c49571b27d121753e5c47e16fa79d3c11ad77306d2243bf5f76fbc14e59ec573"
+    },
+    {
+      "path": "output/experiments/execution_readiness_contract_control_v1/result.json",
+      "bytes": 10946,
+      "sha256": "6f26de468ba0c8d3b71edc4441e7e4c5c75441436059d64745765293153d988a"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/experiment_manifest.json",
+      "bytes": 3264,
+      "sha256": "80908ec448b1a6c4e662ce9003becdfd19839922a737aa7a21da3afc4494af37"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/fixtures/mutated_extraction.json",
+      "bytes": 1853,
+      "sha256": "501980b5aadda23b9c39f14311995764e464d659cc2f49333464d373185218e6"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/fixtures/reference_extraction.json",
+      "bytes": 1767,
+      "sha256": "5c7584ee799416ebce2e2ac98f9849c191c114dab5790ead94e19b098d155b43"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/ground_truth.json",
+      "bytes": 1768,
+      "sha256": "0388aeb811b8fce4fbec6deeb9aa8a868dbbf236d6b357a7a3e8bd982f03b58f"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_call_status.json",
+      "bytes": 1540,
+      "sha256": "826c6329a1a33f542e7493352262862967754e99fd6421641cd362cd058e4b2b"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/batch_summary.json",
+      "bytes": 5915,
+      "sha256": "33c4f6a49ef11ed8309ba99aead6ac09d77d106aa5095e9ae160951ffca0cf7d"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_cropped_target_table_r1.json",
+      "bytes": 8065,
+      "sha256": "7fe1e905b367cdfd7233a81208117639f2e33024b19833577da064eeec663b2b"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_cropped_target_table_r2.json",
+      "bytes": 8065,
+      "sha256": "7fe1e905b367cdfd7233a81208117639f2e33024b19833577da064eeec663b2b"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_cropped_target_table_r3.json",
+      "bytes": 8065,
+      "sha256": "7fe1e905b367cdfd7233a81208117639f2e33024b19833577da064eeec663b2b"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_full_page_with_distractor_table_r1.json",
+      "bytes": 8244,
+      "sha256": "6da3d930dc00efd0b3e176654123ac71213f5c25e852e8062e2403e33c09dac1"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_full_page_with_distractor_table_r2.json",
+      "bytes": 8244,
+      "sha256": "6da3d930dc00efd0b3e176654123ac71213f5c25e852e8062e2403e33c09dac1"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/evaluation_full_page_with_distractor_table_r3.json",
+      "bytes": 8244,
+      "sha256": "6da3d930dc00efd0b3e176654123ac71213f5c25e852e8062e2403e33c09dac1"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_cropped_target_table_r1.json",
+      "bytes": 1846,
+      "sha256": "6cc53ee2b614f2456533432896e182b8550ce0333df5858f8777ddc187f64e1f"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_cropped_target_table_r2.json",
+      "bytes": 1846,
+      "sha256": "6cc53ee2b614f2456533432896e182b8550ce0333df5858f8777ddc187f64e1f"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_cropped_target_table_r3.json",
+      "bytes": 1846,
+      "sha256": "6cc53ee2b614f2456533432896e182b8550ce0333df5858f8777ddc187f64e1f"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_full_page_with_distractor_table_r1.json",
+      "bytes": 1845,
+      "sha256": "5cbc9b61dd1bdc835c1cce668de92db8db6f36feb3b6ae408271e14da33cc681"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_full_page_with_distractor_table_r2.json",
+      "bytes": 1845,
+      "sha256": "5cbc9b61dd1bdc835c1cce668de92db8db6f36feb3b6ae408271e14da33cc681"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/extraction_full_page_with_distractor_table_r3.json",
+      "bytes": 1845,
+      "sha256": "5cbc9b61dd1bdc835c1cce668de92db8db6f36feb3b6ae408271e14da33cc681"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_cropped_target_table_r1.json",
+      "bytes": 3334,
+      "sha256": "6948181a6e5715e4f2b3005a4806dfa040b49ed5befefabce1a0ffe60c607300"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_cropped_target_table_r2.json",
+      "bytes": 3338,
+      "sha256": "16a65d134138e63d575a4a9190acf58bf7e2eb6a15ef08390f09dd24edb44de7"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_cropped_target_table_r3.json",
+      "bytes": 3338,
+      "sha256": "519910f8eab8ddc4f9486a6252bdde94410ae15baf7375c91aafb82c89c33f7c"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_full_page_with_distractor_table_r1.json",
+      "bytes": 3338,
+      "sha256": "c7dda6fb66ac8f912f53566582bda90973af76335591f669ee543af8d705e137"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_full_page_with_distractor_table_r2.json",
+      "bytes": 3344,
+      "sha256": "4efbed96d4b0bd8a1b70d76f7b68c0dfb32271708bba1b7779f6194e7a33431f"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/qwen_runs/response_full_page_with_distractor_table_r3.json",
+      "bytes": 3338,
+      "sha256": "b3769f5cd097485c906526e5ef1c9e7fc81ac11493fc807830136dc63eb41441"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/selfcheck_mutated.json",
+      "bytes": 8839,
+      "sha256": "dba1af214ad7adb94ae48c4b26d695239a003488d342f9946bd4b06c5b12ffb6"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/selfcheck_reference.json",
+      "bytes": 8065,
+      "sha256": "7fe1e905b367cdfd7233a81208117639f2e33024b19833577da064eeec663b2b"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/source_article.pdf",
+      "bytes": 391363,
+      "sha256": "fef1d29e71086fff69f6aeaf3dfac9b3a3b152613bfd35ed0bf95b753cbdfea8"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/source_page-5.png",
+      "bytes": 551170,
+      "sha256": "8dd2c58e5e330a82addaf7a4426d6b4396f0c486d1b20dc5736787f197569af9"
+    },
+    {
+      "path": "output/experiments/qwen_vl_scientific_table/table5_crop-5.png",
+      "bytes": 76570,
+      "sha256": "1680014316ee894920f59407a34267c18e6c970d193e1a0542b2ee02a3b2f6c3"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/independent_recompute.json",
+      "bytes": 3139,
+      "sha256": "9f2a819756370e8753af709cf4b53b3a46ebc514d4fea753b430d4366ada934f"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/independent_recompute.sha256",
+      "bytes": 94,
+      "sha256": "f2063e5bef528d343ea792b4edf7e9f4945c434ec4593d2927dcb5368afabda5"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round1_event_study.csv",
+      "bytes": 2218,
+      "sha256": "f57461d48c88386da5a3e5c49f6c8a5c9655f1d4f52304abf50d3b68b147c159"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round1_event_study.png",
+      "bytes": 73876,
+      "sha256": "16dd3322c4d42c1eeb4d6c47822ebd316bafbbedd42b407f10906e35e1007b53"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round1_result.json",
+      "bytes": 12534,
+      "sha256": "e730e2b68c72e1c73afea94bd28233a929a93860f156bdba34e31ba5b08e9bd6"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round1_result.sha256",
+      "bytes": 86,
+      "sha256": "b26a199b6af11aeb279de09fce070a0b3b14050799493542684274f196642588"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round2_model_comparison.csv",
+      "bytes": 723,
+      "sha256": "0b765eed61233f937f7207edf524f443a8781c86617827aba8f82f3e54af0584"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round2_model_comparison.png",
+      "bytes": 72714,
+      "sha256": "6e24094b2442c17336dd70f7caa2f2698e8bb6b3fac79e69f70b6016575a2a6c"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round2_result.json",
+      "bytes": 5994,
+      "sha256": "5a89804e296850c22ab912416fdf3f6db70244385c9010c63f794af25e7eb5be"
+    },
+    {
+      "path": "output/experiments/track1b_case009_two_round_v1/round2_result.sha256",
+      "bytes": 86,
+      "sha256": "dcddc59e5f3bd0389b4d1b7cf4515ae93a2b8fb8cb336e0e2fd568eedd45d425"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3191,
+      "sha256": "224e302e9edb1f0831b08ed30934f74e3ad2b25e176b54b354c85392e079e74c"
+    },
+    {
+      "path": "README_DEPLOYMENT.md",
+      "bytes": 4802,
+      "sha256": "e4902a15b6ec9a2b17a8d38f2a9b457738005745c7905cc6ba0102b3577aaa8a"
+    },
+    {
+      "path": "README_REPRODUCE.md",
+      "bytes": 5276,
+      "sha256": "c74c5f742795f846d56910a67c52c7c9c1f460540653242d0d3cf3d0cee7aa53"
+    },
+    {
+      "path": "requirements-reproduce.txt",
+      "bytes": 145,
+      "sha256": "7e43c9af5e4f6052e6f25656395f50e47b4bc23e287a6a60ceb2b27d59f045d7"
+    },
+    {
+      "path": "samples/coverage_certificate.seed.json",
+      "bytes": 24103,
+      "sha256": "667976c02de3bfe9c9f441fb7025ae6f127d66da95e8388c65fbde6758b87d7c"
+    },
+    {
+      "path": "samples/graph_build_manifest.seed.json",
+      "bytes": 925,
+      "sha256": "0465a579665c701161e8879141193bb5ffaa9a9d0aecef88a042042f300b059a"
+    },
+    {
+      "path": "samples/research_graph.seed.json",
+      "bytes": 55482,
+      "sha256": "ad2bcf812dd1395f4aea4615c8d55ffaf4fd5b404d8c632593b38ed1f841aa57"
+    },
+    {
+      "path": "samples/retrieval_result.seed.json",
+      "bytes": 1221,
+      "sha256": "f9e4f33727f1b67eb713decbadb7d7fcc741c1e0534e2ad50f6e46eca8e1a957"
+    },
+    {
+      "path": "schemas/chunk.schema.json",
+      "bytes": 5370,
+      "sha256": "37a3ca46fae85a56a06118aef93dca42d46cb7079dff568e7f57c9d491d995de"
+    },
+    {
+      "path": "schemas/coverage_certificate.schema.json",
+      "bytes": 28049,
+      "sha256": "c1e8f61c7a471145c9e95f151904e1584375a30fe1b67ad3025db792a2dafcf5"
+    },
+    {
+      "path": "schemas/data_source_profile.schema.json",
+      "bytes": 5659,
+      "sha256": "8d808fa6cb0d7f34198688eaebcb89bb7ab326078e1238d59d32e20d6ea3b0f9"
+    },
+    {
+      "path": "schemas/discovery_config.schema.json",
+      "bytes": 17450,
+      "sha256": "627a2d6d12c67e23228f23381de28c259f7c54c8fc86d8f19d8257b983e63b9b"
+    },
+    {
+      "path": "schemas/discovery_release_manifest.schema.json",
+      "bytes": 3224,
+      "sha256": "c01e6a75f3eae11a0d130cb1e72cbed057cb7e6f006fad1c2160b24dce962d94"
+    },
+    {
+      "path": "schemas/gap_card.schema.json",
+      "bytes": 7073,
+      "sha256": "0d842a74f54ebe12980128db13a047707584831793d9cfbd7294b0a70440844b"
+    },
+    {
+      "path": "schemas/graph_build_manifest.schema.json",
+      "bytes": 2183,
+      "sha256": "78883f1bdde28c8a77153fb1fd5201df76c6fecbb4f2f32fed5c93be72e61dd6"
+    },
+    {
+      "path": "schemas/graph_query.schema.json",
+      "bytes": 5822,
+      "sha256": "0409f3b063761f6d0496f839b354d161b7944e758c43cd0e7265c37614ee941a"
+    },
+    {
+      "path": "schemas/group1_handoff.schema.json",
+      "bytes": 4641,
+      "sha256": "a0e38fc4b6a925630544bfd535e20d58139a31a8c59d5fa815bba34a72064185"
+    },
+    {
+      "path": "schemas/group1_literature_review.schema.json",
+      "bytes": 6569,
+      "sha256": "02bd66419fc1240e3440853029fe0a466393a2c8e200bf0b18218d569508cf9a"
+    },
+    {
+      "path": "schemas/hypothesis_card.schema.json",
+      "bytes": 9320,
+      "sha256": "bbd3ae462edc5c57f24cf80317237b33dfcd6ab0522328eb290941c31670c2d2"
+    },
+    {
+      "path": "schemas/novelty_search.schema.json",
+      "bytes": 6958,
+      "sha256": "a9f210991f3dad6f401df23d51acd449d76c0001c8c2af42d7bf13a2d4217ea4"
+    },
+    {
+      "path": "schemas/paper_profile.graph_input.schema.json",
+      "bytes": 17022,
+      "sha256": "fe1220a1fc074f8ebaa9ff2a350a26574f772f3f9930a6382569df38307037e4"
+    },
+    {
+      "path": "schemas/policy_profile.graph_input.schema.json",
+      "bytes": 7789,
+      "sha256": "3778c1510e2c094732d02aa78f74e8085d284cee64172cc24029b93b42206d6a"
+    },
+    {
+      "path": "schemas/research_graph.schema.json",
+      "bytes": 14759,
+      "sha256": "51bfcd8b25f2172387ca680fc14c883d0ec668a92a992bbf827c1f4c4ce361c2"
+    },
+    {
+      "path": "schemas/research_landscape.schema.json",
+      "bytes": 8337,
+      "sha256": "7476fc2ca514d19a63e17688a97068575e0513ea342d6e016e22506102e0fe28"
+    },
+    {
+      "path": "schemas/retrieval_result.schema.json",
+      "bytes": 3327,
+      "sha256": "36fd152586e25ddee890771f0145af373962ab039f5338cf26a6f07b1d52745b"
+    },
+    {
+      "path": "schemas/source_registry.schema.json",
+      "bytes": 5620,
+      "sha256": "bc90cf0337df09c4af77e6372ee33a36c90e7736d5c11c0d465548a46502e9f3"
+    },
+    {
+      "path": "scripts/experiments/audit_case010_carbon_candidate.py",
+      "bytes": 9269,
+      "sha256": "e98aa0621d7f44a71f56718cd114b26e0688fb0f004858e980fa92f0d530b2bc"
+    },
+    {
+      "path": "scripts/experiments/build_case010_carbon_bundle.py",
+      "bytes": 10324,
+      "sha256": "67f9e31c5e20f2c4d4be1a005ce0a865f762d40f98c13c77cc10311bdbf52b33"
+    },
+    {
+      "path": "scripts/experiments/build_p18_p19_evidence_pack.py",
+      "bytes": 53234,
+      "sha256": "b6222a88923d940a1f2e43f58ad3af0b7708954ec0dadde6c9f8fc3c3bd36952"
+    },
+    {
+      "path": "scripts/experiments/build_track1b_submission_bundle.py",
+      "bytes": 35695,
+      "sha256": "f165c0b50987cbe0787ed6f4b4816382f6ecf06cba6927434348a7229d63b351"
+    },
+    {
+      "path": "scripts/experiments/compare_ai_scientist_system_capability_v2_v3.py",
+      "bytes": 17529,
+      "sha256": "fce08d6ca290117d4e9f9a8da878cfd142d73dc27c120c2cd8e531a1b31845c3"
+    },
+    {
+      "path": "scripts/experiments/evaluate_ai_scientist_component_ablation.py",
+      "bytes": 22410,
+      "sha256": "6d3a2cbc0a4c0445a7ad6ad3a7cc0475ca9756ce296e2292c60d42a3c829764f"
+    },
+    {
+      "path": "scripts/experiments/evaluate_ai_scientist_system_capability.py",
+      "bytes": 26402,
+      "sha256": "2a504f39307e74ecfbfa6ce60fefb6bf69351a23b29746c4dc072b396ce7d2f7"
+    },
+    {
+      "path": "scripts/experiments/evaluate_ai_scientist_system_capability_v2.py",
+      "bytes": 33921,
+      "sha256": "dc333524acaea2c32519afbfb70d4df012e564fdcd235ae3e80180391c13e917"
+    },
+    {
+      "path": "scripts/experiments/evaluate_qwen_vl_table_experiment.py",
+      "bytes": 4476,
+      "sha256": "d5933f11ad4c521482b92bd5c3ae8897c2f1d6ad021c75d5955cc95e3a6fa98c"
+    },
+    {
+      "path": "scripts/experiments/figurekit.py",
+      "bytes": 16000,
+      "sha256": "02539ddd9ec93a878d1570b02ef880e1097bcdb2a25ae1617c653465cff14a2c"
+    },
+    {
+      "path": "scripts/experiments/plot_ai_scientist_system_capability_v2_v3.py",
+      "bytes": 10339,
+      "sha256": "f647e64e2d867dfb00734118e71252347108c04248c1bb8e34cb7613891044a1"
+    },
+    {
+      "path": "scripts/experiments/prepare_case010_carbon_analysis_data.py",
+      "bytes": 5502,
+      "sha256": "287f236ab8bc6ee095435bf4dab13c3f66a1850352117aeb8c698d5721c815f1"
+    },
+    {
+      "path": "scripts/experiments/run_ai_scientist_component_ablation.py",
+      "bytes": 12369,
+      "sha256": "60d36cff611684c9a8cd9a451642b8cf2c9c31fbb05840b5c78da2b237413834"
+    },
+    {
+      "path": "scripts/experiments/run_ai_scientist_system_capability_v2.py",
+      "bytes": 18616,
+      "sha256": "cd09d6b7e0f08ec84fec3d6432a76ad5ee61688421ef65a80d75d5e841c030d2"
+    },
+    {
+      "path": "scripts/experiments/run_case010_carbon_market_adaptive.py",
+      "bytes": 52732,
+      "sha256": "834a4ea9fc38ef338b6373812252ee0be2257b73938be3b323ccbcc84aee2423"
+    },
+    {
+      "path": "scripts/experiments/run_execution_readiness_contract_control_v1.py",
+      "bytes": 7821,
+      "sha256": "b10186d252d9e504c283d03c311565295230d6faf9bd61afc89297fcdbffa4a1"
+    },
+    {
+      "path": "scripts/experiments/run_qwen_vl_table_batch.py",
+      "bytes": 5194,
+      "sha256": "e72cac687a4a36fef9b67b6bd36162f8c480c502117810461a39061bb9c12a8a"
+    },
+    {
+      "path": "scripts/experiments/run_qwen_vl_table_experiment.py",
+      "bytes": 7054,
+      "sha256": "03fce8eac44978a12470f5a6e2a1d765d06180f5ba406da4553793ffcb09eccf"
+    },
+    {
+      "path": "scripts/experiments/run_track1b_case009_two_round.py",
+      "bytes": 29584,
+      "sha256": "9620d0720a00c5df47e298e58666a81fdfe815748a2685799c2e576c875d2f8b"
+    },
+    {
+      "path": "scripts/experiments/seal_ai_scientist_system_capability_v3.py",
+      "bytes": 9927,
+      "sha256": "15e8d4cdf940a16c9e30bd95032c62b3b283c459a63f5d0e54d047cab75d771c"
+    },
+    {
+      "path": "scripts/experiments/verify_case010_carbon_market_adaptive.py",
+      "bytes": 21516,
+      "sha256": "dd5689e898f3c0ea4406fa24d11e9734960e8ec661064dc1c649e0cd490be506"
+    },
+    {
+      "path": "scripts/experiments/verify_component_ablation_implementation.py",
+      "bytes": 2946,
+      "sha256": "f75629d6812fed133c9ed64e4e1bcbdf2a84a759a94879c715af55c9fa6971b5"
+    },
+    {
+      "path": "scripts/experiments/verify_track1b_case009_two_round.py",
+      "bytes": 10058,
+      "sha256": "e8b6b74d21501ecbbeb32d9c2bfeef4404894ed0c5eeb93851f60b96cfd04601"
+    },
+    {
+      "path": "scripts/mini_loop/run_green_finance_loop.py",
+      "bytes": 46828,
+      "sha256": "165b7ea5997594a71abf6d4f3b54c9bb968d6ec60333159d5e8c358c968db349"
+    },
+    {
+      "path": "scripts/research/align_profile_evidence.py",
+      "bytes": 11218,
+      "sha256": "f1b506e25ccadcebf1d879bd43e2f0d9ad8e45524bd0e0caa5a41485e0fd40e7"
+    },
+    {
+      "path": "scripts/research/analyze_metadata_signals.py",
+      "bytes": 5730,
+      "sha256": "57dc14aac74e643343cc8244508dcbd158379f50d66d34970d373cf669fd797c"
+    },
+    {
+      "path": "scripts/research/build_coverage_certificate.py",
+      "bytes": 27625,
+      "sha256": "f2bf8dbd23693f6cefa0dff42acc1897dc6fe7d957cc2551fa1a08d2ca66363d"
+    },
+    {
+      "path": "scripts/research/build_eligible_fulltext_manifest.py",
+      "bytes": 8114,
+      "sha256": "3bc7672697da20a5c652a3b96981df940e6f7b061ed737bf99f4aea18ca1162c"
+    },
+    {
+      "path": "scripts/research/build_group1_handoff.py",
+      "bytes": 19423,
+      "sha256": "462f3eff3e4d2256e9a1336edee32f76b354ab505ef6898024c1eb902058420d"
+    },
+    {
+      "path": "scripts/research/build_real_discovery_config.py",
+      "bytes": 72638,
+      "sha256": "f89a8c3f625fae1769c72a618c5909c031c7598679da6e9385abaccaa3783404"
+    },
+    {
+      "path": "scripts/research/build_retrieval_bundle.py",
+      "bytes": 3889,
+      "sha256": "6f3754f23fd0d2688ccccf491a2fd2beb710c9557905192ec9bf6b37aa174352"
+    },
+    {
+      "path": "scripts/research/build_source_graph_release.py",
+      "bytes": 8100,
+      "sha256": "ae20a082b03d75d07569882dceb8f51246d70c5e54c2e22f23c6e17faacdd49d"
+    },
+    {
+      "path": "scripts/research/collect_europe_pmc_fulltexts.py",
+      "bytes": 8023,
+      "sha256": "77e1fd842589a06aff22b1be086cde5a5818c45fa433373e14f6b04abb410fe2"
+    },
+    {
+      "path": "scripts/research/fetch_public_feed.py",
+      "bytes": 5244,
+      "sha256": "461065b8811241ae07087eea4b735f0163da20badf40397fa12e8b73522f3c8a"
+    },
+    {
+      "path": "scripts/research/run_novelty_search.py",
+      "bytes": 11945,
+      "sha256": "4d604cb1163d06fa6f5679309d69563f43ca861ef4035659c6c567497137d5c4"
+    },
+    {
+      "path": "skills/chinese-econ-journal-figures/agents/openai.yaml",
+      "bytes": 366,
+      "sha256": "c860cb952a3b9f1b5443c296742ec484f7028e5efa18aa40112b68636a183a67"
+    },
+    {
+      "path": "skills/chinese-econ-journal-figures/references/venue-style.md",
+      "bytes": 3424,
+      "sha256": "35f434aaa69f2f787b5dc2ecb566532e27cc2975d745ca359c82197a38b1884b"
+    },
+    {
+      "path": "skills/chinese-econ-journal-figures/scripts/render_econ_figure.py",
+      "bytes": 9633,
+      "sha256": "96c0b512cae8adf6c6ad1d527411f179d8a9ecae366b42e064f86d26344e8ab7"
+    },
+    {
+      "path": "skills/chinese-econ-journal-figures/SKILL.md",
+      "bytes": 3895,
+      "sha256": "daaba44f9a64b1ef969fa46d66e0a1d6a5372b25a4f5313a22411a6dec4f7b8e"
+    },
+    {
+      "path": "src/coverage/__init__.py",
+      "bytes": 250,
+      "sha256": "fbf10ad0c464771704898c06221ea7294390f367c805e354e6921330c8e6969e"
+    },
+    {
+      "path": "src/coverage/validate_coverage_certificate.py",
+      "bytes": 2301,
+      "sha256": "92b05f41a0938969db8bc495ea2166c92c3bc0ecc18ccdf4c63970a299375dfd"
+    },
+    {
+      "path": "src/coverage/validator.py",
+      "bytes": 24963,
+      "sha256": "5d4598323ab02c3a414131cefd63f4e36981f14ac5f03b95ba6f27f4e1c8351d"
+    },
+    {
+      "path": "src/discovery/__init__.py",
+      "bytes": 545,
+      "sha256": "2bc59b3c3fd9ab9c0248956b76a26506d7e03ea137090fe50a3d18d4242206c0"
+    },
+    {
+      "path": "src/discovery/__main__.py",
+      "bytes": 1267,
+      "sha256": "34f460cbc10c6db284ddb8561e033d032fce32b2d7329dcc79516ea3a8bc7b24"
+    },
+    {
+      "path": "src/discovery/builder.py",
+      "bytes": 65869,
+      "sha256": "4b35cdd001f0a6aa74a2a45165267408dda26394903c2a5885e82603c6499660"
+    },
+    {
+      "path": "src/discovery/README.md",
+      "bytes": 3469,
+      "sha256": "169cc95a31f675597138067e5e49fca89243a8cd3dc6461ebd0891af0840c471"
+    },
+    {
+      "path": "src/discovery/validate.py",
+      "bytes": 33836,
+      "sha256": "5216f920fa7d20edf46b56459c1610171702014ffdcb9a436d04f95f52bc6dc1"
+    },
+    {
+      "path": "src/parse/__init__.py",
+      "bytes": 409,
+      "sha256": "7fc2ca101f16e6ddf9e1c1f7549f04d10128c6f74075b1005ca176fe6dafcae7"
+    },
+    {
+      "path": "src/parse/__main__.py",
+      "bytes": 142,
+      "sha256": "bbccf13ad3a791ea051c0fdde806000709361e0976872975a6847644394f2400"
+    },
+    {
+      "path": "src/parse/jats.py",
+      "bytes": 42734,
+      "sha256": "f4d91bbeef3c53094156bb898d39f284a9cdb6ad740ff6f4bf08bcb14f6faa0c"
+    },
+    {
+      "path": "src/reason/__init__.py",
+      "bytes": 215,
+      "sha256": "8e1e13d21ea32df067a3c4a5b982fb5a6bb23f38450cbf8d8f9c39e6371c2f8f"
+    },
+    {
+      "path": "src/reason/build_research_graph.py",
+      "bytes": 61493,
+      "sha256": "69028f6f12849b0a38c23bb1c0725a7e3e27454b6d3e523975ebadaead891179"
+    },
+    {
+      "path": "src/reason/schema_gate.py",
+      "bytes": 2523,
+      "sha256": "31bdcc1b0156911e2d2db5952c5169c16650a98620024bbd9790401ac65d06e6"
+    },
+    {
+      "path": "src/reason/validate_research_graph.py",
+      "bytes": 43513,
+      "sha256": "4734b35f3c95d1479c2d5322513c29eba7590fc101bab218aa2fbb86341f2034"
+    },
+    {
+      "path": "src/retrieve/__init__.py",
+      "bytes": 464,
+      "sha256": "23e806349ffc1014d3a54439533f58716a4cf0ff48bd20dd0634cec7c658aa7d"
+    },
+    {
+      "path": "src/retrieve/__main__.py",
+      "bytes": 144,
+      "sha256": "2ae9ec587e71d9e1af98fc17df82019f6aaf51090f5a6325421a107923118275"
+    },
+    {
+      "path": "src/retrieve/vector_index.py",
+      "bytes": 27129,
+      "sha256": "fefa0a62cb11f0781adf1ef9218967a5158ce09392f2cb221de45f3327cb1d3d"
+    },
+    {
+      "path": "tests/contracts/fixtures/coverage_certificate.invalid-field-count.json",
+      "bytes": 341,
+      "sha256": "e26eb1ee821bf24c1c35d68136c535f306249027caf09d99303d4dd8f6ece34e"
+    },
+    {
+      "path": "tests/contracts/test_coverage_certificate.py",
+      "bytes": 5163,
+      "sha256": "9f231ee408a9b5b2268d6322bb6a783c2a710a9725663d421105202c858156fd"
+    },
+    {
+      "path": "tests/discovery/test_discovery_builder.py",
+      "bytes": 35557,
+      "sha256": "7ab67627c2b7aef74f7f3b519cea6134f31cdc4c762451e5ce259eda6a875fe7"
+    },
+    {
+      "path": "tests/discovery/test_group1_handoff.py",
+      "bytes": 4831,
+      "sha256": "c9673960646bd6ec54b1b80fa99ba0d6acad88f5792a2bd87f3ebe60586a4342"
+    },
+    {
+      "path": "tests/parse/test_jats_parser.py",
+      "bytes": 8862,
+      "sha256": "d03748689c5e5fda68e4010b93db9ed9fca3981cad6c1c1d4493733d1ec273b7"
+    },
+    {
+      "path": "tests/reason/test_graph_pipeline.py",
+      "bytes": 41421,
+      "sha256": "ac813bbd9632be1409f1f5b728a36e9c218199cf9dfd8a0c8dfc7bd95f3509c3"
+    },
+    {
+      "path": "tests/research/test_eligibility_gate.py",
+      "bytes": 4801,
+      "sha256": "4ecdb69153a4d45bc890a7dc6e8d33508bab9f2ebebd8be5223b3bf887deae99"
+    },
+    {
+      "path": "tests/retrieve/test_vector_index.py",
+      "bytes": 13140,
+      "sha256": "e6dba15eaecbe0d13ff404436995d5dde3d7a22de12642381ad24919decf4d31"
+    },
+    {
+      "path": "tools/evaluate_public_results.py",
+      "bytes": 4842,
+      "sha256": "31a68bf674b462e698f3ff47f96bb7885d99d5bbb5b038e06cbc0a84f51e7c25"
+    },
+    {
+      "path": "tools/init_env.py",
+      "bytes": 889,
+      "sha256": "5787e145174ef11c3b543448cc711d518cc44b3647c6499531f5b1cd26ef60bf"
+    },
+    {
+      "path": "tools/reproduce.py",
+      "bytes": 3133,
+      "sha256": "53cac348595a9ad7062442e22b2716e0044ee7a1c15f5c8ce1366349f539145f"
+    },
+    {
+      "path": "tools/verify_package.py",
+      "bytes": 1097,
+      "sha256": "6f9f5979f2cc7d20ad316b6bdd681986991510657f8940309eb7debfb5feb185"
+    },
+    {
+      "path": "VALIDATION.md",
+      "bytes": 2761,
+      "sha256": "97f29c0280515b0909422065ec7ea27fd1e1659bc392a20e35254e5ceab18b4f"
+    }
+  ]
+}

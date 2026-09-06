@@ -1,0 +1,191 @@
+{
+  "syntax_and_json_counts": {
+    "python": 182,
+    "json": 493,
+    "jsonl": 1
+  },
+  "errors": [],
+  "local_secret_values_found_in": [],
+  "key_pattern_review_files": [
+    "backend/tests/test_runtime_config.py"
+  ],
+  "compose_config_passed": true,
+  "compose_diagnostic": "",
+  "api_smoke": {
+    "workflow": {
+      "status_code": 200,
+      "body": {
+        "status": "ok",
+        "runtime": "code-native",
+        "definition": "app-a@1.8.0"
+      }
+    },
+    "research_engine": {
+      "status_code": 200,
+      "body": {
+        "status": "ok",
+        "service": "hypoweaver-research-engine",
+        "api_version": "0.1.0",
+        "source_sha256": "bb24e4933f4e4a217f1bb4fdfa22c86ad7de3bd2bf3aa4cddf7520b45daac174",
+        "environment_sha256": "06821baaee7e4a64e3e07d9bbd610a7f90d556c9cc1ce9775c37cd84ac8a3d0c",
+        "primary_implementation_ids": [
+          "hypoweaver-spatial-primary-v1",
+          "linearmodels-absorbingls-policy-did-v2",
+          "linearmodels-panelols-v1",
+          "linearmodels-stacked-cohort-ddd-v1"
+        ],
+        "reproduction_implementation_id": "numpy-two-way-within-v1",
+        "reproduction_implementation_ids": [
+          "numpy-multiway-within-policy-did-v2",
+          "numpy-stacked-cohort-ddd-v1",
+          "numpy-two-way-within-v1"
+        ],
+        "supported_methods": [
+          "mechanism_boundary",
+          "panel_association",
+          "policy_causal",
+          "spatial"
+        ],
+        "independent_reproduction_methods": [
+          "mechanism_boundary",
+          "panel_association",
+          "policy_causal"
+        ],
+        "reproduction_scope_by_method": {
+          "mechanism_boundary": "data_preparation_and_estimator",
+          "panel_association": "data_preparation_and_estimator",
+          "policy_causal": "estimator_only"
+        },
+        "dataset_registry_path_sha256": "315e5fc8f8344d3dff098ba04cd13e0d1b269fee060876c7677953f91b4344c5"
+      }
+    },
+    "knowledge": {
+      "status_code": 200,
+      "body": {
+        "status": "empty",
+        "corpus_snapshot_id": "local-unverified:4f53cda18c2baa0c0354bb5f",
+        "vector_backend": "none",
+        "vector_count": 0,
+        "graph_document_count": 0,
+        "graph_edge_count": 0,
+        "warnings": [
+          "corpus snapshot is derived from local file metadata; configure a hash-bound manifest for release use",
+          "no knowledge vector catalog is configured"
+        ]
+      }
+    }
+  },
+  "sample_catalog": {
+    "corpus_snapshot_id": "manifest-sha256:ed4178c59ffc33bca8c9ab492598c87d362c0d4910ca29e561f8d4da15792eea",
+    "total_documents": 3,
+    "fulltext_documents": 0,
+    "readable_documents": 0,
+    "metadata_only_documents": 3,
+    "declared_source_asset_documents": 0,
+    "available_source_asset_documents": 0,
+    "original_pdf_documents": 0,
+    "vector_count": 3,
+    "graph_document_count": 0,
+    "graph_edge_count": 0,
+    "matched_documents": 3,
+    "offset": 0,
+    "limit": 10,
+    "next_offset": null,
+    "data_updated_at": null,
+    "access_level": "public_project_authored_descriptions",
+    "source_format_counts": {
+      "paper": 1,
+      "dataset": 2
+    },
+    "collection_status": "snapshot_only",
+    "collection_message": "当前展示已交付的离线索引快照；在线学术采集器尚未接入主线。",
+    "items": [
+      {
+        "document_id": "method-boundary",
+        "title": "研究执行与结论边界说明",
+        "title_source": "metadata",
+        "authors": [],
+        "abstract": null,
+        "journal": null,
+        "doi": null,
+        "publication_year": 2026,
+        "has_fulltext": false,
+        "content_kind": "metadata_only",
+        "source_format": "paper",
+        "access_level": null,
+        "original_pdf_available": false,
+        "reading_available": false
+      },
+      {
+        "document_id": "case010-data",
+        "title": "绿色创新与企业面板公开数据说明",
+        "title_source": "metadata",
+        "authors": [],
+        "abstract": null,
+        "journal": null,
+        "doi": null,
+        "publication_year": 2026,
+        "has_fulltext": false,
+        "content_kind": "metadata_only",
+        "source_format": "dataset",
+        "access_level": null,
+        "original_pdf_available": false,
+        "reading_available": false
+      },
+      {
+        "document_id": "case009-data",
+        "title": "绿色金融与城市空气质量公开数据说明",
+        "title_source": "metadata",
+        "authors": [],
+        "abstract": null,
+        "journal": null,
+        "doi": null,
+        "publication_year": 2026,
+        "has_fulltext": false,
+        "content_kind": "metadata_only",
+        "source_format": "dataset",
+        "access_level": null,
+        "original_pdf_available": false,
+        "reading_available": false
+      }
+    ],
+    "warnings": [
+      "document registry is not configured; catalog inventory is derived from evidence records"
+    ]
+  },
+  "sample_search_hits": 0,
+  "sample_health": {
+    "status": "ok",
+    "corpus_snapshot_id": "manifest-sha256:ed4178c59ffc33bca8c9ab492598c87d362c0d4910ca29e561f8d4da15792eea",
+    "vector_backend": "jsonl-vector",
+    "vector_count": 3,
+    "graph_document_count": 0,
+    "graph_edge_count": 0,
+    "warnings": []
+  },
+  "validation_environment": {
+    "python": "3.12.4",
+    "packages": {
+      "fastapi": "0.117.1",
+      "httpx": "0.27.2",
+      "jsonschema": "4.25.1",
+      "linearmodels": "6.1",
+      "matplotlib": "3.10.0",
+      "numpy": "2.2.6",
+      "openai": "2.28.0",
+      "pandas": "2.2.3",
+      "pydantic": "2.11.9",
+      "pymupdf": "1.26.4",
+      "pypdf": "5.9.0",
+      "scipy": "1.17.1",
+      "uvicorn": "0.37.0",
+      "h5py": "3.16.0",
+      "sentence-transformers": "5.2.2",
+      "openpyxl": "3.1.5"
+    }
+  },
+  "docker_images_built_and_started": false,
+  "key_pattern_review": {
+    "backend/tests/test_runtime_config.py": "Reviewed as an intentionally invalid synthetic unit-test value; no developer credential."
+  }
+}

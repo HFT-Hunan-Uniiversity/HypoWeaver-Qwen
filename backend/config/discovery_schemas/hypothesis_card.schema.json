@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/hypothesis_card.schema.json",
+  "title": "Evidence-grounded hypothesis card for Group1 v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "hypothesis_id", "graph_snapshot_id", "gap_card_ids", "as_of", "title", "hypothesis_statement", "falsifiable_form", "rationale", "mechanism_chain", "variables", "boundary_conditions", "predictions", "evidence_balance", "novelty_check_ref", "feasibility", "recommended_design", "scores", "handoff", "status", "review"],
+  "properties": {
+    "schema_version": { "const": "0.2.0" },
+    "hypothesis_id": { "type": "string", "minLength": 1 },
+    "graph_snapshot_id": { "type": "string", "minLength": 1 },
+    "gap_card_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "as_of": { "type": "string", "format": "date-time" },
+    "title": { "type": "string", "minLength": 1 },
+    "hypothesis_statement": { "type": "string", "minLength": 1 },
+    "falsifiable_form": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "mechanism_chain": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/mechanismStep" } },
+    "variables": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["independent", "dependent", "mediators", "moderators", "controls"],
+      "properties": {
+        "independent": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/variable" } },
+        "dependent": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/variable" } },
+        "mediators": { "type": "array", "items": { "$ref": "#/$defs/variable" } },
+        "moderators": { "type": "array", "items": { "$ref": "#/$defs/variable" } },
+        "controls": { "type": "array", "items": { "$ref": "#/$defs/variable" } }
+      }
+    },
+    "boundary_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "predictions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/prediction" } },
+    "evidence_balance": { "$ref": "#/$defs/evidenceBalance" },
+    "novelty_check_ref": { "type": "string", "minLength": 1 },
+    "feasibility": { "$ref": "#/$defs/feasibility" },
+    "recommended_design": { "$ref": "#/$defs/design" },
+    "scores": { "$ref": "#/$defs/scores" },
+    "handoff": { "$ref": "#/$defs/handoff" },
+    "status": { "enum": ["draft", "needs_scientific_review", "needs_feasibility_review", "approved_for_output", "rejected"] },
+    "review": { "$ref": "#/$defs/review" }
+  },
+  "$defs": {
+    "mechanismStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "source_node_id", "relation", "target_node_id", "statement", "evidence_ids"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "source_node_id": { "type": "string", "minLength": 1 },
+        "relation": { "type": "string", "minLength": 1 },
+        "target_node_id": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "evidence_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph_node_id", "name", "definition", "role", "expected_direction", "measurement_candidates"],
+      "properties": {
+        "graph_node_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "definition": { "type": "string", "minLength": 1 },
+        "role": { "enum": ["independent", "dependent", "mediator", "moderator", "control"] },
+        "expected_direction": { "enum": ["positive", "negative", "nonlinear", "heterogeneous", "not_applicable", "unknown"] },
+        "measurement_candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["measure_node_id", "data_source_id", "availability", "evidence_ids"],
+            "properties": {
+              "measure_node_id": { "type": "string", "minLength": 1 },
+              "data_source_id": { "type": "string", "minLength": 1 },
+              "availability": { "enum": ["open", "restricted", "commercial", "unknown"] },
+              "evidence_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+            }
+          }
+        }
+      }
+    },
+    "prediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prediction_id", "statement", "observable_pattern", "would_falsify"],
+      "properties": {
+        "prediction_id": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "observable_pattern": { "type": "string", "minLength": 1 },
+        "would_falsify": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidenceBalance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supporting_finding_ids", "challenging_finding_ids", "policy_document_ids", "unresolved_conflicts"],
+      "properties": {
+        "supporting_finding_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "challenging_finding_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "policy_document_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "unresolved_conflicts": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "feasibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_status", "method_status", "citation_status", "blocking_items", "assessed_at"],
+      "properties": {
+        "data_status": { "enum": ["feasible", "conditional", "infeasible", "unknown"] },
+        "method_status": { "enum": ["feasible", "conditional", "infeasible", "unknown"] },
+        "citation_status": { "enum": ["verified", "partially_verified", "rejected"] },
+        "blocking_items": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "assessed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "design": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_dataset_ids", "candidate_method_ids", "candidate_model_ids", "candidate_identification_strategy_ids", "unit_of_analysis", "baseline_specification", "major_threats"],
+      "properties": {
+        "candidate_dataset_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "candidate_method_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "candidate_model_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "candidate_identification_strategy_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "unit_of_analysis": { "type": "string", "minLength": 1 },
+        "baseline_specification": { "type": "string", "minLength": 1 },
+        "major_threats": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["novelty", "theory", "evidence", "data", "method", "policy_value", "overall"],
+      "properties": {
+        "novelty": { "type": "number", "minimum": 0, "maximum": 5 },
+        "theory": { "type": "number", "minimum": 0, "maximum": 5 },
+        "evidence": { "type": "number", "minimum": 0, "maximum": 5 },
+        "data": { "type": "number", "minimum": 0, "maximum": 5 },
+        "method": { "type": "number", "minimum": 0, "maximum": 5 },
+        "policy_value": { "type": "number", "minimum": 0, "maximum": 5 },
+        "overall": { "type": "number", "minimum": 0, "maximum": 5 }
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_inputs", "blocking_questions", "validation_acceptance_criteria", "evidence_bundle_refs", "reproduction_seed"],
+      "properties": {
+        "required_inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "blocking_questions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "validation_acceptance_criteria": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "evidence_bundle_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "reproduction_seed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["green_finance_review", "data_review", "method_review", "citation_review", "final_decision"],
+      "properties": {
+        "green_finance_review": { "type": "string", "minLength": 1 },
+        "data_review": { "type": "string", "minLength": 1 },
+        "method_review": { "type": "string", "minLength": 1 },
+        "citation_review": { "type": "string", "minLength": 1 },
+        "final_decision": { "enum": ["accept", "revise", "reject"] }
+      }
+    }
+  }
+}

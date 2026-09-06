@@ -1,0 +1,867 @@
+[
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "a3fe8c17278def4327b19001db93ab5c0de3b20a09e6f7022051d0f6f779257c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "f09b1629588c5633721a6920d975adb1d51ef7ff595ae20dfa3a212e3e2790bb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "330c0e68964d02654e2eee57c5f4d061f129585d52f206f9a8591c9c92c6a61e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "25489d21b426c2bb33bb3ae5f869e5579a496b10f5aa4c19489ba85b46ce661e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+    "original_sha256": "9856e0ed0aeb663217601dd24c6e3a9f5728bf719586212056f0d269c23a3f75",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "ede4a4d2ff810eb9715b9c919ccb067b4da499a453675008295a801d94aa22c8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "f81bf376c0a9576dd47b9a43dddc2e2efa7866d15bbb676d11dfff8e51d2c414",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "390ebe47510b9b1051bebedc6235dce7b4fb27ab9f8985de67259291762de499",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "c2118a3f68b0f4d5486458e7d361a4f300ec7c8796aa070568e33abd76c1cb2e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "87e791ba99fa86960f8da196631cd081858bba3b932e27845fcd8e22efdb22ee",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "2204b5f086a6a48880b30fb039f0fef482b3e209c8e5e63610aee8e358d99889",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "c796d9fb9bc281b100931ddb29b24e72f754a61a42967377fd9bfe2f9b310696",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "b15840a107d2336b3f37fc9e9569d9075698a220cdaf907d8f5954ec2edaf092",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "9124d2d420808d1ba52d47f38188e7f450fa55dcb864d03efd80d55051f22397",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "284d6d1ca5084dc2f8ca6bfc3efcd4093178bc75c1fe083058f87b496d06a818",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "298710e43f90d6175620b7c76e19101b0c9402e7385b583702979dab306df138",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "c4774ffd8c498cfb3fb990b114668ff321ba224e0ba8637eb69ef61be1821795",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "df310f4c543e7132ffa7e4436b93c75844d6f58b43cca45977ff27802721675c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "dcb1c5587ceab8f7c0724a6b7e0f4fca97954db838a56e4d2b680caa5f50335e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v2/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "f6cc1ff2486e0f24a6f9b92300ef8ada1179225cf1e41320330f3af76e56d967",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "c880f3aa8bb35031ffd20f6abd1a967e24c1bcbf1d184f6adccf4c7e6d47b914",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "a645b94b52c0d80c23a45a502aef361decef455860dfcac3afdbd09a31b6d174",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "1198af6a1fb04f198e84caf074ee3e06e655f7c2e3d487167fce22f40f3126ba",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "12d4b389f09e23a3bceef9919656239bf3a8c294d4de3404069ee0a8f9a2c541",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+    "original_sha256": "ea955ae66906888470e274773d050aa5ed4672d8d740fa59084fb5db2e796244",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "f26e4511c1f3ab577dc1a414b7b5f861a8bfa104512aafdfa7be8546f970e573",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+    "original_sha256": "52f029622e410cb84f8557813adbb9a26cbb4ed928a6b0986e8d5e946d03e41b",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "7ba6f3c8092d6d2491b10e8093b29f270d897a64d1b0415e6aa47b34f52e6a66",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+    "original_sha256": "c98027e07731c11c2f23ce8a5a57e50c5c08ea2202804add9a97a2e7099df90f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "2812567cbd32e5a766cb876bd6bd3bfdc80e4d0e2b7d06914845fb8eeef362a0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "4d067c0d0f0925f645c88363cd7a212713f6ce66bff4ddac8ac81391639fae6f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+    "original_sha256": "99a89bd17cc7ac32a19f81413fbcbb4ff80e492bc3b958230a918aab0c9388ce",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "2f16dbc3f370674f3ac4266bdea85ccc5271a30edcb010d46a921d215706533b",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+    "original_sha256": "32421399bc59c9c3e41b2b1cb37a9952739942b9cd215c818236bde519f1337f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+    "original_sha256": "aea3e266442e1cc532f72af6d67cffcf49d6cfb3e1c86eb8936aac134863c017",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "669ce2f0ff95420edc0f2e51b4e796822ec75d00f7c0d67e1d7f6b16f63f4cf6",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "80df8a818717e557a5ca45050d0aa275a8f20862282daa6ca78a83e8f354c3b7",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "50c394d9a83f9a57657755ff6541f38500c8d9f2b0e7d6aa8342ea31dde1ee04",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "afb54321107f881afe7e4e9496254ea12122ab7e88b198028b196d5572a443c5",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+    "original_sha256": "70f03fd8ab6e205b77d4922c1f8aa6b5c1c3936cd15f6fe0bc2db364ad883861",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "c97fbbe94ac3e494cd152f3c1aca5cbdf813fe7df496f06f7d557f0810125a2b",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "67e90b360cf022b59cbd8e2f25b1af0cd4a815a2241e129b9d7961754cfcf8b0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "bda66f5196cc5eb306ed159e4cdce8674502f3d821859845297438cc2838029d",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "c78d796cd706539b84ebceebc0d6906c19f3da52b283c7504babcf3c3a46bdd0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "8e320ebcfc8a1e0b286c11c396c4e731f02efe9fb8e79c067cc68cc16963019a",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "0c88d8fdc57a0bf1824892abc131f69df1931b7fe7330b7a54367955a8b250d7",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+    "original_sha256": "f9e6ba2aa800c4e327e61c07e05fe3c28aa1c0b880107fa71362eb83a67c3243",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+    "original_sha256": "ae42e9c7d79a904dd9f58a85111f09470db5a40fc2baec183cc1c7ad55259edb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+    "original_sha256": "e410fb9c0f10cc8db231869e6fb0f56e93a57378e6a560647264520966e229c6",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "074e9b8fd8f920aac685342e6e46e70e72d3341e7c2a7d5012175ae554a2df0c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "0aab2b6c5a5befbc22234f35cfba68eaa3e5a36957a596d94f37d6230678d382",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "e2ad606c0d229effd7c9956de6e17303e0e837b6a1a9919ce7e326aa379d5cf5",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "88f3e8544c337bbc06621c4a2236fd5835ba6b41fb271a0c98e6bd3f0ce4ba5f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+    "original_sha256": "db9e9147c92a313be774972c6df1bc3b80bae648475bf7ddfe94ed6b0110143c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "e3c48167f9e73f0a5141a306558e44e474d5a425171dfeae7e2e3c90da9e5ce0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+    "original_sha256": "722f798aa41713e52835abe67b0876a08cbe4a136f14bb6019139573301b2f00",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "8288ab3c14e96501b93568630bd12032cb458466e5415b7f43cbf58a976582b9",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+    "original_sha256": "e6761ecab65085dce8ce2ca655134725bf96c016e87855ee70d0ba1b8466c34f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "1e7cc78213007833c84d0997c3c7887ae971823384c55a13e54f2a20d25ff271",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "332d3c41ef68824268789fc20f2ab450458d045f4cb32bfe51db9143c062cccb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+    "original_sha256": "383ab95d58336506902781a4f67b86ff7ebf934d09db40c304121c520e4b451a",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "3f95280394e8cd071daa16f5bf424886ffe841561c20c3706bffe8ee92c0683d",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+    "original_sha256": "72ba090a7efc7db4355138fe9738ff4185864efbb0b8c22890d123a5dd992cb8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+    "original_sha256": "15e54ab5b95dfaa9f5c29d32307db79ba8306bd53b380b3ae938564a443b5185",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "0a8458bdd080168f514c19c5789a8e91aa736019c8624d933b887d62c24927ea",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "b5586edca2058919b2c7bcbbe66f6be4f19926cd802110f3bb73af4fbe7f3a5e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "8efd0ab95055907efc41f97bc9d642aa4f662a224ba03756880b025b96192dfe",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "4a70cfb025ee5c6c6c100f84f9cb947593d3ed53e032fd6e640196f42de37cb0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+    "original_sha256": "d615415e94036d7da1b25c5ac05f5dc2a6562f20cbcdd3d36831ec517c16a7c8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+    "original_sha256": "01827ebcf66d98e93ba112188982d6c25401c975f163931c5f75c8898386e6c3",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "4c465d6c4a4e56c840b1746cc58be42f96de36b215a94634c00193257f9a2286",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "b1dad39c47f3512844e6ef2a2626d4001fd7327ba9d4bb519d42f1957fed22c3",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "d0362e51fe56d122d45f69b6bc0d862de96b572691196b42cf8d13d7b2f5bbc0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "e605649c5719eb763cf3e9fcc1a23cfa0fb64c3fa50c3bbe9af51e1bf431f291",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "ab46f7d8afe69e9c75bb88dbad5211ac01d6294980835363e20aa367f8642ceb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "34e3dea008fa1a35c40a7720b0a1b934587116d713fbf6f8806220941d33f85a",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+    "original_sha256": "db267a598514259d1569dad38841b6c43045b80f6d8dac60e4bac53e57501af3",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+    "original_sha256": "d10004546f287d0ee9e19f8a1b3de425e36a41a8786648f689162aacadaefadc",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/complete_loop/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+    "original_sha256": "51af996fb0669cb63cda495191ecebfe4546088524e6ab235b4d1819e84ecdbb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "99fe50942888d89b9c65effad189f744a73613d5b5fbc2fd3aa33331b7578c8d",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "4212d5838911af344569224f84889451d69950b0c3d814a316c3d5ee7b4b56f8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "2f3d23d40767a2cc01d74719772257290f1c45a2588411b43276b167d366ef47",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "56999b47c0f2eb09c4047c3c2aebad25f0168ec917130ebfa6b4dfb057592e69",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+    "original_sha256": "1ca979ee0365456bad6127af01fc3a414ec04a024a3dc472176f045c5acd4969",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "20e44a7ba32b0185e06091a6a958d27f14ae358883d3e3c8b71f35831703e40a",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+    "original_sha256": "56c9b1090122ec92c86c8dc05d725156dd819942751e3df5163273a60c255c8d",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "0da0e1a9ee8311dc487bb90b3e9c01cd11ec14d45574d3a7ff9a825c12a0d537",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+    "original_sha256": "2204b470917d8f599bfd4d0291fbf361f1e2887ec216b8d0a338bc20692df25e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "3bcfd47a1767e83f0e514660210d7e4e9caef107cb3431c668b398990420cd86",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "c15c579bbef37066f9993777d1e8889974fbfc9abee5265802f56f48f923ed5a",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+    "original_sha256": "6734a0b8fe9021d4843c8ad034036ea7bbd0bc95a3af8f7c8ffdc8fc76744872",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "254de4d6b8755b08fe14fffde69ce128a9faff21502c100d746f77f80c863784",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+    "original_sha256": "e287e68e2c89889c8094d3761ce546ae6616771a9ccb0840c2ec9d4b4e260979",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+    "original_sha256": "3353d4b419ee0d93a411b54449b3e2619b951e301f9f9da529bd586e79615f29",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "52a7c4c03abbe800e6b9243426491c91cc424f90fef21642c37b080808b710ce",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "0545c262cbafde954cb847fde64d3cb396440ae851d9fd1693357e97598ff409",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "06b0afed9b53c1250a2b08b17c623f4f1ee746da6492e608265e3ab01c0942a2",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "ba63d9a490e3162a371b8d7046223b0e0c2a855f763cf326e9152949d1eaaa57",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+    "original_sha256": "f15e6090316204d9122de03a546cdc0a7a0d3f865c2f26ba66093c632b488ce9",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+    "original_sha256": "bafbe6376f53a1a82592a9ce73f2ab04f33e422c1e215030b32598e51b9b3c24",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "8370746e8c55d951652359e3437da84c2791acf1d7d9f4a888258aa801a1b400",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "f11cec8386ff8ffab22f513271292dcf6fc9e177a738e3ada8a0b6682cd60950",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "eeb76dff5c3079c2ef2d99a829624f6e55cf4fb23e57e87d6f0351ecc6425652",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "822b46108b0d8cf6235f892606f988ce7819ce2e11eca417d1a99cc6e7b3ba0f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "0949b5d25aaee2693925350cb02fcf4ebe329c14ea6fd44731b0c56e64d6b86f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "c611ffe6f375b85f0038f9d6194ec4450f641b50c3a82c9dc0769f55bb254ae8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+    "original_sha256": "de9308e6a5661ed316427b0a582870d179025089052007916640f4a8c4809314",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+    "original_sha256": "782f4a1919e39596ff4b3084d20dfc490feb3368fdf427911c76f13f86672764",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_document_diversification/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+    "original_sha256": "e5ad83444953f6226a9b3b4a83877505a60da9dc762fb8624f4eb673aca696ad",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "2a70c3154907e5e1d9848bd99d683fedb3f9c4bc996999be7ffb6758e7473387",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "83937e5c6e90492d6e90d82bfb989e5b749953080fb98f640f3d0c2fdf118be8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "c6add008cee38a42ff1bb3a7f3e6e6b53974569a3c9efd4ef53b5a8a47c740ac",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "f7dc424a0a7c2d57f0d99eb33bf11aa952317a7c8ac542de95c6851228656462",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260902/generation_public.json",
+    "original_sha256": "d7aa5142b2c3a5b1b8acec02e6ce48486f27bdc38da942d59ab8b3e42893eff7",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "db90e6c1af1b7735332a10817ffc0b787d290f9e06fd568d27ed33bce0d89532",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+    "original_sha256": "ac37907d55e08fe13f8d385ee4414553e5dc143774e008ccffc67056f8ae5869",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "9ccd0e76ae738d6cef836906621bee5c79cdf8154648c0b3a36f6aeabaf2094b",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+    "original_sha256": "ad1398ffef96795adeb8fb651736ecbfc2c61eb5205008e8a976e9dcc26bda92",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "c62e367a03dd7cee03b7e6bd8401889a633a9b08384bc1dafde28122457453d5",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "0d692dfea5a8c91135a15e6bd83f5d0e5c015b5abbf7487ce2359f4c414931f0",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+    "original_sha256": "5c48a3bfac41a920b0ae59498a9ead15399efeca7836700647c0ff8c12249281",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "fee49c4169e828989420ec4d48f75bfdef85e0d4dbb3ba9b9a301fdab6e15841",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+    "original_sha256": "d1eb467deab46c038a824a279e0e9ca38c3f41f827f759128d10b33833e6963e",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+    "original_sha256": "4cb83f893f9e16f8d373f152e39ee1bed124b18257d4ad87e2c4445c868346f6",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "2015a2fd21f5d13de1d05f5522050e270c8d73d4fe6dedb9b848faf2813e0efc",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "254eab2cbaf9f075fb99ae56c233fcc4c216ad537c3b03131bbed1328222acf3",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "46dbda778a5ab73cefba8e22479690c10b65e954a2dca6c6b2dbd72fe9799ec4",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "0011595054a6647895465789f17c0417b0e0231de04693371ea3ea6f108e8fc1",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260902/generation_public.json",
+    "original_sha256": "85610cad84f9a3fb26ad75710302c5502bf50d63e5283386325a7952d191de73",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q07_institutional_attention_greenwashing__seed_20260903/generation_public.json",
+    "original_sha256": "26acd220074c9b3fa9db53e2764d729c0045baabf35813fd6dee79cd7e60b208",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "feaf2a0e95788d73fd34e51cbe7352ef09cc39bfc2440222f7088da50a3a274f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "2590e76bc21c51a2fd5ff7b481743d063dbc36e8a4305dad80e22c2ccf991c27",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "012da0e91e98c266a74cd3e13eb8f82de20a924eae7370079fe8bfbdf505283d",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "a98776ea584247d96f91a791e1f0360dace54550e603df1a5aa7e32e331ffdeb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "79d34cd68e2e697b05766ccd3b4a796e0b715c5363d5c73f98b6006aa65353fc",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "f70b2a0503ecdd6411ab22e22ac20046638b4ae84fbad431ed41cd1e773ea6c4",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+    "original_sha256": "993e86db3373825928ef35b0a7324685757957b08de5d11c2da29447c7cc28ce",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+    "original_sha256": "462d36c316f0a4221f9b1d75ef38390b4c647a55bd02a83fb8b0d2877130c40f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_reviewer_feedback/cells/Q10_efficiency_vs_absolute_emissions__seed_20260903/generation_public.json",
+    "original_sha256": "dad3b8809dbb26473c528274b22a8415a100de3273e67466c00f9edd9ddb84bd",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260901/generation_public.json",
+    "original_sha256": "8f757e0e62bf10c8827a972795c43133a13c0cbddb0c461f327cb9d07183ce1c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260902/generation_public.json",
+    "original_sha256": "bba61378f394d403b9cc945e57879614aeba2cda9c3e6a207c33be15b78ae9ff",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q01_green_patent_quality__seed_20260903/generation_public.json",
+    "original_sha256": "10ea647877ef090bf608eb4f3f16aec6281ecdf20b48294da9adbb8777faba34",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260901/generation_public.json",
+    "original_sha256": "7ea351a3e02fb4e99ddd425141feb5fa3cd944e9b69d5b01fca3e4f90e543265",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q02_esg_real_reduction__seed_20260903/generation_public.json",
+    "original_sha256": "a2f0b0e1e7b89d7411b041f109fa1de7c691f3d1847ced1047ede84aa860997f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260901/generation_public.json",
+    "original_sha256": "256afb815373538a3f2562a289d83fbe6eb06438351046b987de15622f044c96",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260902/generation_public.json",
+    "original_sha256": "f8bf5ac05f4df8c2714024ac57e07a0adc4b2852c3b8f3f55158fd59d8586056",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q03_investment_scale_efficiency__seed_20260903/generation_public.json",
+    "original_sha256": "eb95b01e0d20bb14529ae3b51a1009ab01e92d1928ef2afeeb05491b7abb2439",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260901/generation_public.json",
+    "original_sha256": "02232176eda6f36998b45a55ca695404ca91e4c22445080daad06a990fa464c9",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260902/generation_public.json",
+    "original_sha256": "9050a9b844fa48e452b9850e0248546736d4ff85a2e7e78b035fd531e9cea5fc",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q04_digital_green_synergy__seed_20260903/generation_public.json",
+    "original_sha256": "7f7d8efb685ca75edfaa039f43e0df422036aae5f838e66216a04ff9be520229",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260901/generation_public.json",
+    "original_sha256": "892f008e33f2ce42d62340cc477aa6c7787172b9f6a7f8c2c938cd6b1dd01c14",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260902/generation_public.json",
+    "original_sha256": "c3bc92017cd00a0ad474aa8b257589199bd317958be0c43dd39d5e28e006de6f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q05_green_credit_regional_heterogeneity__seed_20260903/generation_public.json",
+    "original_sha256": "fc06335708507ac4124bca802988d820e37d48d5e381503af5d207f68ab74e04",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260901/generation_public.json",
+    "original_sha256": "f10fd96370c7a87fb994588d05d677e7b325034d4854900e0ce4743810a605f8",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260902/generation_public.json",
+    "original_sha256": "b367c2322132dcbf9c6da5aff9baf5a3f556eb6018b9238de5d2aac223358e37",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q06_financing_constraint_mechanism__seed_20260903/generation_public.json",
+    "original_sha256": "b64becd34c94e05f6e114131c5cb221d6a6535ee36dd96d3eb882f86518599cc",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q07_institutional_attention_greenwashing__seed_20260901/generation_public.json",
+    "original_sha256": "67f8c641746904763e917109a022d5ed83d9812eea0e270483391ec505c9d849",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260901/generation_public.json",
+    "original_sha256": "7b1cf2acac70032b92ba801466e0a7b2830dc3b5724ab1c2fca1fa3bbb10c19f",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260902/generation_public.json",
+    "original_sha256": "804ab9eaed21fe0fb193608dca7357e7e5c88fc102e16bf2792c62a922041563",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q08_carbon_productivity_channels__seed_20260903/generation_public.json",
+    "original_sha256": "6677478b0466faae9f500933c4d7fb94716552e8d8700f9319633e521b717965",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260901/generation_public.json",
+    "original_sha256": "99d2656c901ff23d944042d268582a9aa3b96807ddb7ac793967eaa85b1d55eb",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260902/generation_public.json",
+    "original_sha256": "17981bdbf630e7ec473347ed433524ce54b6fd718ef8dfdcce01d6647f7a09cd",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q09_pilot_did_pretrend__seed_20260903/generation_public.json",
+    "original_sha256": "bcd0b656a301b5b91b83b5a24d0b47443d8a307239034679cb20091926cb115c",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260901/generation_public.json",
+    "original_sha256": "0c0c0555bbac9ba47d2a3d22d35012f36a87c276b9a4f390660282cc54651797",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "output/experiments/ai_scientist_component_ablation_20260905/no_schema_repair/cells/Q10_efficiency_vs_absolute_emissions__seed_20260902/generation_public.json",
+    "original_sha256": "e9563a2f18b7ac731a7bef3cd42c2ce1380b782fbb22a53a274c0e1c2b022813",
+    "reason": "Restricted evidence passages omitted; public projection named separately"
+  },
+  {
+    "path": "docs/experiment_reports/实验_QwenVL科研表格抽取_v1.md",
+    "original_sha256": "b7b38fcb91f9ed218ee16dd127c9372acb33445b5de677714634cd843318ccdf",
+    "reason": "Host-only path redaction; historical manifests are reference records, package manifest is authoritative for distributed bytes"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3.svg",
+    "original_sha256": "37f3ee4ae863df78f63e91737df7e35f40de50a36ad691967f8c4c7c9e121b7d",
+    "reason": "Host-only path redaction; historical manifests are reference records, package manifest is authoritative for distributed bytes"
+  },
+  {
+    "path": "output/experiments/ai_scientist_system_capability_v3/figures/system_capability_v2_v3_metadata.json",
+    "original_sha256": "8e0da64478bce28554415bf0fb99b3d9ce6f6f202d8778b84ba45ef35f6d774f",
+    "reason": "Host-only path redaction; historical manifests are reference records, package manifest is authoritative for distributed bytes"
+  },
+  {
+    "path": "scripts/experiments/plot_ai_scientist_system_capability_v2_v3.py",
+    "original_sha256": "fc5197847036ca69cc8b8a61da52a0819a779c6e1de2814c0577e8ee8f9eb89b",
+    "reason": "Host-only path redaction; historical manifests are reference records, package manifest is authoritative for distributed bytes"
+  },
+  {
+    "path": "scripts/mini_loop/run_green_finance_loop.py",
+    "original_sha256": "3f646143558d9da1db28064b6344f403606fd3166fa40b75721f41cb6e35be58",
+    "reason": "Host-only path redaction; historical manifests are reference records, package manifest is authoritative for distributed bytes"
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_1_mechanism.metadata.json",
+    "original_sha256": "c2ead7f94f93a46f5aea834d33764e69ce6c4e68b313b55fcb087140076d5fd4",
+    "reason": "Host-only path redaction; package manifest records the portable distributed bytes"
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_2_event_study.metadata.json",
+    "original_sha256": "49a305a4f2776dc5ba0a768d648de5937c96dd7fd416cbd651f7aa698bf52ee4",
+    "reason": "Host-only path redaction; package manifest records the portable distributed bytes"
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_3_robustness.metadata.json",
+    "original_sha256": "1ed8dc2be9a2510b5fa15a63386cef372f7842d80948bdb4e17ab9020cb994cd",
+    "reason": "Host-only path redaction; package manifest records the portable distributed bytes"
+  }
+]

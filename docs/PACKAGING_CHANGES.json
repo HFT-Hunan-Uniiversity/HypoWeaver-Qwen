@@ -1,0 +1,70 @@
+[
+  {
+    "path": "scripts/experiments/run_ai_scientist_system_capability_v2.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "scripts/experiments/run_execution_readiness_contract_control_v1.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "scripts/experiments/verify_component_ablation_implementation.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "scripts/experiments/run_ai_scientist_system_capability_v2.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "scripts/experiments/run_ai_scientist_system_capability_v2.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "scripts/experiments/run_ai_scientist_system_capability_v2.py",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "docker-compose.yml",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": ".env.example",
+    "reason": "portable submission paths/configuration"
+  },
+  {
+    "path": "tools/",
+    "reason": "Add portable config initializer, integrity checker and public/statistical reproduction entry points."
+  },
+  {
+    "path": "backend/requirements-knowledge.txt",
+    "reason": "Pin h5py and sentence-transformers additions to available validated versions; original workflow lock retained."
+  },
+  {
+    "path": "scripts/experiments/figurekit.py",
+    "reason": "Include local plotting helper so plotting does not depend on the author profile directory."
+  },
+  {
+    "path": "scripts/experiments/plot_ai_scientist_system_capability_v2_v3.py",
+    "reason": "Resolve figurekit next to the plotting script."
+  },
+  {
+    "path": "docker-compose.yml",
+    "reason": "Persist original literature under the shared private volume and bind workflow to loopback by default."
+  },
+  {
+    "path": "docs/CASE_001_ESG_SDLA_SAFE_INPUT.json",
+    "reason": "Include hash-only public fixture declaration required for the private-data test to skip cleanly."
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_1_mechanism.metadata.json",
+    "reason": "Replace a host-only figure specification path with a repository-relative path before public Git publication."
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_2_event_study.metadata.json",
+    "reason": "Replace a host-only figure specification path with a repository-relative path before public Git publication."
+  },
+  {
+    "path": "frontend/public/showcase-paper/figure_3_robustness.metadata.json",
+    "reason": "Replace a host-only figure specification path with a repository-relative path before public Git publication."
+  }
+]

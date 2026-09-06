@@ -1,0 +1,870 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/coverage_certificate.schema.json",
+  "title": "Coverage certificate for corpus-bounded research-gap claims",
+  "description": "A standalone, auditable certificate proving corpus coverage before absence, research-gap, or trend claims are emitted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "certificate_id",
+    "generated_at",
+    "as_of",
+    "subject",
+    "scope",
+    "pipeline_versions",
+    "coverage_status",
+    "thresholds",
+    "coverage",
+    "gates",
+    "claim_gate",
+    "evidence_refs",
+    "blockers",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "certificate_id": {
+      "type": "string",
+      "pattern": "^coverage-[a-z0-9][a-z0-9._-]{2,127}$"
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "as_of": { "type": "string", "format": "date-time" },
+    "supersedes_certificate_id": { "type": ["string", "null"], "minLength": 1 },
+    "subject": { "$ref": "#/$defs/subject" },
+    "scope": { "$ref": "#/$defs/scope" },
+    "pipeline_versions": { "$ref": "#/$defs/pipelineVersions" },
+    "coverage_status": {
+      "enum": [
+        "draft",
+        "coverage_ready",
+        "coverage_conditional",
+        "coverage_blocked",
+        "invalidated"
+      ]
+    },
+    "thresholds": { "$ref": "#/$defs/thresholds" },
+    "coverage": { "$ref": "#/$defs/coverage" },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/gate" }
+    },
+    "claim_gate": { "$ref": "#/$defs/claimGate" },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blocker" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "coverage_status": { "const": "coverage_ready" } },
+        "required": ["coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "blockers": { "maxItems": 0 },
+          "claim_gate": {
+            "properties": {
+              "status": { "const": "claim_ready" },
+              "claim_ceiling": {
+                "enum": ["corpus_bounded_absence", "corpus_bounded_gap"]
+              },
+              "allowed_gap_types": { "minItems": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "coverage_status": { "const": "coverage_conditional" } },
+        "required": ["coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "blockers": { "maxItems": 0 },
+          "claim_gate": {
+            "properties": {
+              "status": { "const": "claim_limited" },
+              "allowed_gap_types": { "minItems": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "coverage_status": { "const": "coverage_blocked" } },
+        "required": ["coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "blockers": { "minItems": 1 },
+          "claim_gate": {
+            "properties": {
+              "status": { "const": "coverage_blocked" },
+              "claim_ceiling": {
+                "enum": ["no_claims", "descriptive_coverage_only"]
+              },
+              "allowed_gap_types": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "coverage_status": { "enum": ["draft", "invalidated"] } },
+        "required": ["coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "claim_gate": {
+            "properties": {
+              "status": { "enum": ["not_evaluated", "claim_rejected"] },
+              "claim_ceiling": { "const": "no_claims" },
+              "allowed_gap_types": { "maxItems": 0 },
+              "conditional_gap_types": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "observationStatus": {
+      "enum": [
+        "observed_present",
+        "observed_absent",
+        "not_extracted",
+        "source_missing",
+        "not_applicable"
+      ]
+    },
+    "gapType": {
+      "enum": [
+        "mechanism",
+        "data",
+        "population",
+        "context",
+        "method",
+        "model",
+        "policy",
+        "controversy",
+        "temporal",
+        "cross_stream"
+      ]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "corpus_id",
+        "release_id",
+        "manifest_sha256",
+        "graph_snapshot_id",
+        "index_snapshot_id"
+      ],
+      "properties": {
+        "corpus_id": { "type": "string", "minLength": 1 },
+        "release_id": { "type": "string", "minLength": 1 },
+        "manifest_sha256": { "$ref": "#/$defs/sha256" },
+        "graph_snapshot_id": { "type": ["string", "null"], "minLength": 1 },
+        "index_snapshot_id": { "type": ["string", "null"], "minLength": 1 }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "inclusion_criteria",
+        "exclusion_criteria",
+        "source_ids",
+        "languages",
+        "year_start",
+        "year_end",
+        "document_types",
+        "target_document_count"
+      ],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "inclusion_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "exclusion_criteria": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "languages": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 2 }
+        },
+        "year_start": { "type": "integer", "minimum": 1800, "maximum": 2100 },
+        "year_end": { "type": "integer", "minimum": 1800, "maximum": 2100 },
+        "document_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "target_document_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "pipelineVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_registry",
+        "ingestion",
+        "deduplication",
+        "fulltext_resolver",
+        "parser",
+        "field_extractor",
+        "indexer",
+        "retrieval_protocol",
+        "coverage_evaluator"
+      ],
+      "properties": {
+        "source_registry": { "type": "string", "minLength": 1 },
+        "ingestion": { "type": "string", "minLength": 1 },
+        "deduplication": { "type": "string", "minLength": 1 },
+        "fulltext_resolver": { "type": "string", "minLength": 1 },
+        "parser": { "type": "string", "minLength": 1 },
+        "field_extractor": { "type": "string", "minLength": 1 },
+        "indexer": { "type": "string", "minLength": 1 },
+        "retrieval_protocol": { "type": "string", "minLength": 1 },
+        "coverage_evaluator": { "type": "string", "minLength": 1 }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_source_coverage_rate",
+        "language_coverage_rate",
+        "year_coverage_rate",
+        "fulltext_coverage_rate",
+        "parsing_success_rate",
+        "indexing_success_rate",
+        "critical_field_observability_rate",
+        "dedup_resolution_rate",
+        "retrieval_marginal_gain_max",
+        "retrieval_consecutive_low_gain_rounds"
+      ],
+      "properties": {
+        "required_source_coverage_rate": { "$ref": "#/$defs/ratio" },
+        "language_coverage_rate": { "$ref": "#/$defs/ratio" },
+        "year_coverage_rate": { "$ref": "#/$defs/ratio" },
+        "fulltext_coverage_rate": { "$ref": "#/$defs/ratio" },
+        "parsing_success_rate": { "$ref": "#/$defs/ratio" },
+        "indexing_success_rate": { "$ref": "#/$defs/ratio" },
+        "critical_field_observability_rate": { "$ref": "#/$defs/ratio" },
+        "dedup_resolution_rate": { "$ref": "#/$defs/ratio" },
+        "retrieval_marginal_gain_max": { "$ref": "#/$defs/ratio" },
+        "retrieval_consecutive_low_gain_rounds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "sourceCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "registered_source_count",
+        "required_source_count",
+        "covered_required_source_count",
+        "missing_required_source_count",
+        "required_coverage_rate",
+        "items"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "registered_source_count": { "type": "integer", "minimum": 0 },
+        "required_source_count": { "type": "integer", "minimum": 0 },
+        "covered_required_source_count": { "type": "integer", "minimum": 0 },
+        "missing_required_source_count": { "type": "integer", "minimum": 0 },
+        "required_coverage_rate": { "$ref": "#/$defs/ratio" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceItem" }
+        }
+      }
+    },
+    "sourceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "required",
+        "status",
+        "query_executed",
+        "observed_record_count",
+        "checked_at",
+        "evidence_refs",
+        "note"
+      ],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "query_executed": { "type": "boolean" },
+        "observed_record_count": { "type": "integer", "minimum": 0 },
+        "checked_at": { "type": "string", "format": "date-time" },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "note": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "observed_present" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "query_executed": { "const": true },
+              "observed_record_count": { "minimum": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "observed_absent" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "query_executed": { "const": true },
+              "observed_record_count": { "const": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "languageCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "target_document_count",
+        "covered_document_count",
+        "unknown_language_count",
+        "coverage_rate",
+        "items"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "covered_document_count": { "type": "integer", "minimum": 0 },
+        "unknown_language_count": { "type": "integer", "minimum": 0 },
+        "coverage_rate": { "$ref": "#/$defs/ratio" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["language", "document_count", "status"],
+            "properties": {
+              "language": { "type": "string", "minLength": 2 },
+              "document_count": { "type": "integer", "minimum": 0 },
+              "status": { "$ref": "#/$defs/observationStatus" }
+            }
+          }
+        }
+      }
+    },
+    "yearCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "target_document_count",
+        "known_year_count",
+        "missing_year_count",
+        "coverage_rate",
+        "bins"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "known_year_count": { "type": "integer", "minimum": 0 },
+        "missing_year_count": { "type": "integer", "minimum": 0 },
+        "coverage_rate": { "$ref": "#/$defs/ratio" },
+        "bins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["year", "document_count", "status"],
+            "properties": {
+              "year": { "type": "integer", "minimum": 1800, "maximum": 2100 },
+              "document_count": { "type": "integer", "minimum": 0 },
+              "status": { "$ref": "#/$defs/observationStatus" }
+            }
+          }
+        }
+      }
+    },
+    "fulltextCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "target_document_count",
+        "fulltext_available_count",
+        "metadata_only_count",
+        "rights_blocked_count",
+        "source_missing_count",
+        "not_applicable_count",
+        "coverage_rate"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "fulltext_available_count": { "type": "integer", "minimum": 0 },
+        "metadata_only_count": { "type": "integer", "minimum": 0 },
+        "rights_blocked_count": { "type": "integer", "minimum": 0 },
+        "source_missing_count": { "type": "integer", "minimum": 0 },
+        "not_applicable_count": { "type": "integer", "minimum": 0 },
+        "coverage_rate": { "$ref": "#/$defs/ratio" }
+      }
+    },
+    "parsingCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "target_document_count",
+        "input_document_count",
+        "success_count",
+        "failed_count",
+        "not_applicable_count",
+        "success_rate",
+        "parser_versions"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "input_document_count": { "type": "integer", "minimum": 0 },
+        "success_count": { "type": "integer", "minimum": 0 },
+        "failed_count": { "type": "integer", "minimum": 0 },
+        "not_applicable_count": { "type": "integer", "minimum": 0 },
+        "success_rate": { "$ref": "#/$defs/ratio" },
+        "parser_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "indexingCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "target_document_count",
+        "input_document_count",
+        "indexed_document_count",
+        "failed_count",
+        "not_applicable_count",
+        "success_rate",
+        "index_snapshot_id"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "input_document_count": { "type": "integer", "minimum": 0 },
+        "indexed_document_count": { "type": "integer", "minimum": 0 },
+        "failed_count": { "type": "integer", "minimum": 0 },
+        "not_applicable_count": { "type": "integer", "minimum": 0 },
+        "success_rate": { "$ref": "#/$defs/ratio" },
+        "index_snapshot_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "statusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed_present",
+        "observed_absent",
+        "not_extracted",
+        "source_missing",
+        "not_applicable"
+      ],
+      "properties": {
+        "observed_present": { "type": "integer", "minimum": 0 },
+        "observed_absent": { "type": "integer", "minimum": 0 },
+        "not_extracted": { "type": "integer", "minimum": 0 },
+        "source_missing": { "type": "integer", "minimum": 0 },
+        "not_applicable": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "fieldCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_path",
+        "description",
+        "critical",
+        "target_document_count",
+        "applicable_document_count",
+        "observable_document_count",
+        "status_counts",
+        "observability_rate",
+        "presence_rate",
+        "extraction_version",
+        "evidence_refs"
+      ],
+      "properties": {
+        "field_path": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "critical": { "type": "boolean" },
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "applicable_document_count": { "type": "integer", "minimum": 0 },
+        "observable_document_count": { "type": "integer", "minimum": 0 },
+        "status_counts": { "$ref": "#/$defs/statusCounts" },
+        "observability_rate": {
+          "oneOf": [{ "$ref": "#/$defs/ratio" }, { "type": "null" }]
+        },
+        "presence_rate": {
+          "oneOf": [{ "$ref": "#/$defs/ratio" }, { "type": "null" }]
+        },
+        "extraction_version": { "type": ["string", "null"], "minLength": 1 },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "fieldObservability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_document_count", "critical_field_min_observability", "fields"],
+      "properties": {
+        "target_document_count": { "type": "integer", "minimum": 0 },
+        "critical_field_min_observability": {
+          "oneOf": [{ "$ref": "#/$defs/ratio" }, { "type": "null" }]
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/fieldCoverage" }
+        }
+      }
+    },
+    "dedupCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "input_record_count",
+        "canonical_document_count",
+        "exact_duplicate_record_count",
+        "near_duplicate_record_count",
+        "duplicate_candidate_pair_count",
+        "resolved_pair_count",
+        "unresolved_pair_count",
+        "manual_review_pending_count",
+        "resolution_rate",
+        "deduplication_version"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/observationStatus" },
+        "input_record_count": { "type": "integer", "minimum": 0 },
+        "canonical_document_count": { "type": "integer", "minimum": 0 },
+        "exact_duplicate_record_count": { "type": "integer", "minimum": 0 },
+        "near_duplicate_record_count": { "type": "integer", "minimum": 0 },
+        "duplicate_candidate_pair_count": { "type": "integer", "minimum": 0 },
+        "resolved_pair_count": { "type": "integer", "minimum": 0 },
+        "unresolved_pair_count": { "type": "integer", "minimum": 0 },
+        "manual_review_pending_count": { "type": "integer", "minimum": 0 },
+        "resolution_rate": { "$ref": "#/$defs/ratio" },
+        "deduplication_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "retrievalRound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round",
+        "query_family",
+        "candidate_count",
+        "new_unique_document_count",
+        "cumulative_unique_document_count",
+        "marginal_gain"
+      ],
+      "properties": {
+        "round": { "type": "integer", "minimum": 1 },
+        "query_family": { "type": "string", "minLength": 1 },
+        "candidate_count": { "type": "integer", "minimum": 0 },
+        "new_unique_document_count": { "type": "integer", "minimum": 0 },
+        "cumulative_unique_document_count": { "type": "integer", "minimum": 0 },
+        "marginal_gain": { "$ref": "#/$defs/ratio" }
+      }
+    },
+    "retrievalSaturation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_status",
+        "saturation_status",
+        "query_set_sha256",
+        "search_space_description",
+        "minimum_rounds",
+        "executed_rounds",
+        "required_consecutive_low_gain_rounds",
+        "marginal_gain_threshold",
+        "last_round_marginal_gain",
+        "unique_retrieved_document_count",
+        "stopping_rule",
+        "rounds",
+        "evidence_refs"
+      ],
+      "properties": {
+        "observation_status": { "$ref": "#/$defs/observationStatus" },
+        "saturation_status": {
+          "enum": ["not_assessed", "not_saturated", "saturated", "blocked", "not_applicable"]
+        },
+        "query_set_sha256": { "$ref": "#/$defs/sha256" },
+        "search_space_description": { "type": "string", "minLength": 1 },
+        "minimum_rounds": { "type": "integer", "minimum": 1 },
+        "executed_rounds": { "type": "integer", "minimum": 0 },
+        "required_consecutive_low_gain_rounds": { "type": "integer", "minimum": 1 },
+        "marginal_gain_threshold": { "$ref": "#/$defs/ratio" },
+        "last_round_marginal_gain": {
+          "oneOf": [{ "$ref": "#/$defs/ratio" }, { "type": "null" }]
+        },
+        "unique_retrieved_document_count": { "type": "integer", "minimum": 0 },
+        "stopping_rule": { "type": "string", "minLength": 1 },
+        "rounds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/retrievalRound" }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sources",
+        "languages",
+        "years",
+        "fulltext",
+        "parsing",
+        "indexing",
+        "field_observability",
+        "deduplication",
+        "retrieval_saturation"
+      ],
+      "properties": {
+        "sources": { "$ref": "#/$defs/sourceCoverage" },
+        "languages": { "$ref": "#/$defs/languageCoverage" },
+        "years": { "$ref": "#/$defs/yearCoverage" },
+        "fulltext": { "$ref": "#/$defs/fulltextCoverage" },
+        "parsing": { "$ref": "#/$defs/parsingCoverage" },
+        "indexing": { "$ref": "#/$defs/indexingCoverage" },
+        "field_observability": { "$ref": "#/$defs/fieldObservability" },
+        "deduplication": { "$ref": "#/$defs/dedupCoverage" },
+        "retrieval_saturation": { "$ref": "#/$defs/retrievalSaturation" }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "dimension",
+        "metric",
+        "comparator",
+        "threshold",
+        "observed",
+        "status",
+        "blocking",
+        "evidence_refs",
+        "notes"
+      ],
+      "properties": {
+        "gate_id": { "type": "string", "minLength": 1 },
+        "dimension": {
+          "enum": [
+            "sources",
+            "languages",
+            "years",
+            "fulltext",
+            "parsing",
+            "indexing",
+            "field_observability",
+            "deduplication",
+            "retrieval_saturation"
+          ]
+        },
+        "metric": { "type": "string", "minLength": 1 },
+        "comparator": { "enum": [">=", "<=", "==", "in"] },
+        "threshold": { "type": ["number", "string", "boolean", "null"] },
+        "observed": { "type": ["number", "string", "boolean", "null"] },
+        "status": { "enum": ["passed", "failed", "not_assessed", "not_applicable"] },
+        "blocking": { "type": "boolean" },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "gapDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gap_type",
+        "decision",
+        "required_dimensions",
+        "required_field_paths",
+        "blocked_by",
+        "rationale"
+      ],
+      "properties": {
+        "gap_type": { "$ref": "#/$defs/gapType" },
+        "decision": { "enum": ["allowed", "conditional", "blocked"] },
+        "required_dimensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_field_paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "blocked_by": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "rationale": { "type": "string", "minLength": 1 }
+      }
+    },
+    "claimGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "claim_ceiling",
+        "required_scope_qualifier",
+        "allowed_gap_types",
+        "conditional_gap_types",
+        "blocked_gap_types",
+        "gap_type_decisions",
+        "prohibited_claim_forms"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_evaluated",
+            "claim_ready",
+            "claim_limited",
+            "coverage_blocked",
+            "claim_rejected"
+          ]
+        },
+        "claim_ceiling": {
+          "enum": [
+            "no_claims",
+            "descriptive_coverage_only",
+            "corpus_bounded_presence",
+            "corpus_bounded_absence",
+            "corpus_bounded_gap"
+          ]
+        },
+        "required_scope_qualifier": { "type": "string", "minLength": 1 },
+        "allowed_gap_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/gapType" }
+        },
+        "conditional_gap_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/gapType" }
+        },
+        "blocked_gap_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/gapType" }
+        },
+        "gap_type_decisions": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/gapDecision" }
+        },
+        "prohibited_claim_forms": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blocker_id", "dimension", "message", "remediation", "evidence_refs"],
+      "properties": {
+        "blocker_id": { "type": "string", "minLength": 1 },
+        "dimension": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "remediation": { "type": "string", "minLength": 1 },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

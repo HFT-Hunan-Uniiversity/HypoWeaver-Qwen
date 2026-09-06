@@ -1,0 +1,57 @@
+{
+  "id": "carbon_market_model_comparison",
+  "kind": "coefficient",
+  "provenance": "estimated",
+  "reference": 0,
+  "rows": [
+    {
+      "estimate": 0.071718653,
+      "label": "基准模型",
+      "lower": 0.0317842842,
+      "upper": 0.1116530219
+    },
+    {
+      "estimate": 0.0729340554,
+      "label": "不含控制变量",
+      "lower": 0.0329617826,
+      "upper": 0.1129063282
+    },
+    {
+      "estimate": 0.0736978074,
+      "label": "剔除2021年",
+      "lower": 0.0352535605,
+      "upper": 0.1121420544
+    },
+    {
+      "estimate": 0.0804667604,
+      "label": "仅单调暴露路径",
+      "lower": 0.0367534709,
+      "upper": 0.1241800498
+    },
+    {
+      "estimate": 0.062657681,
+      "label": "仅独立绿色发明",
+      "lower": 0.0328416846,
+      "upper": 0.0924736775
+    },
+    {
+      "estimate": 0.0601684717,
+      "label": "全部绿色专利",
+      "lower": 0.013054503,
+      "upper": 0.1072824404
+    },
+    {
+      "estimate": 0.0228783282,
+      "label": "实用新型对照",
+      "lower": -0.0127598446,
+      "upper": 0.0585165009
+    },
+    {
+      "estimate": 0.0722110407,
+      "label": "加入行业集中度",
+      "lower": 0.0320649471,
+      "upper": 0.1123571342
+    }
+  ],
+  "x_label": "政策暴露系数及95%置信区间"
+}

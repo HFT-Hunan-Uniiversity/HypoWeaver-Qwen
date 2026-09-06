@@ -1,0 +1,98 @@
+[
+  {
+    "file": "extraction_cropped_target_table_r1.json",
+    "summary": {
+      "correct_fields": 47,
+      "total_fields": 47,
+      "field_accuracy": 1.0,
+      "field_precision": 1.0,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 1.0,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": true,
+      "numeric_tolerance": 0.0005
+    }
+  },
+  {
+    "file": "extraction_cropped_target_table_r2.json",
+    "summary": {
+      "correct_fields": 47,
+      "total_fields": 47,
+      "field_accuracy": 1.0,
+      "field_precision": 1.0,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 1.0,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": true,
+      "numeric_tolerance": 0.0005
+    }
+  },
+  {
+    "file": "extraction_cropped_target_table_r3.json",
+    "summary": {
+      "correct_fields": 47,
+      "total_fields": 47,
+      "field_accuracy": 1.0,
+      "field_precision": 1.0,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 1.0,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": true,
+      "numeric_tolerance": 0.0005
+    }
+  },
+  {
+    "file": "extraction_full_page_with_distractor_table_r1.json",
+    "summary": {
+      "correct_fields": 46,
+      "total_fields": 47,
+      "field_accuracy": 0.9787,
+      "field_precision": 0.9787,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 0.9091,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": false,
+      "numeric_tolerance": 0.0005
+    }
+  },
+  {
+    "file": "extraction_full_page_with_distractor_table_r2.json",
+    "summary": {
+      "correct_fields": 46,
+      "total_fields": 47,
+      "field_accuracy": 0.9787,
+      "field_precision": 0.9787,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 0.9091,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": false,
+      "numeric_tolerance": 0.0005
+    }
+  },
+  {
+    "file": "extraction_full_page_with_distractor_table_r3.json",
+    "summary": {
+      "correct_fields": 46,
+      "total_fields": 47,
+      "field_accuracy": 0.9787,
+      "field_precision": 0.9787,
+      "numeric_accuracy": 1.0,
+      "significance_accuracy": 0.9091,
+      "null_handling_accuracy": 1.0,
+      "missing_field_count": 0,
+      "unexpected_field_count": 0,
+      "strict_exact_match": false,
+      "numeric_tolerance": 0.0005
+    }
+  }
+]

@@ -1,5 +1,6 @@
 fastapi>=0.109,<1
 httpx>=0.26,<1
+jsonschema>=4.23,<5
 linearmodels>=7,<8
 matplotlib>=3.9,<4
 numpy>=2,<3

@@ -1,9 +1,10 @@
 /**
  * TaskComposer：ClawsGO /chat 形态的「新研究」页。
- * 问候语（逐字 blur 入场）→ 分类 chips → 模板卡片 2 列 → 底部居中输入框。
+ * 问候语（逐字 blur 入场）→ 研究旅程 → 分类 chips → 模板卡片 → 底部居中输入框。
  * 提交文本 → 创建前端演示项目；导入案例文件夹 → 走真实链路（App 处理）。
  */
-import { ArrowUp, CheckCircle2, ChevronDown, CircleAlert, Database, FolderUp, Link2, Settings2, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { ArrowRight, ArrowUp, BookOpenText, ChartNoAxesCombined, ChevronDown, ClipboardList, Database, FileText, FlaskConical, FolderUp, Lightbulb, Link2, Network, Paperclip, Settings2, SlidersHorizontal, Sparkles } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import type { CaseImportReport, Group1VerifiedBundleStatus, RuntimeConfigStatus } from '../runtime/types'
 import type { MockMode } from '../data/mockPipeline'
@@ -16,6 +17,7 @@ interface TemplateCard {
   description: string
   prompt: string
   mode: MockMode
+  icon: LucideIcon
 }
 
 interface TemplateCategory {
@@ -24,50 +26,72 @@ interface TemplateCategory {
   cards: TemplateCard[]
 }
 
-/** 模板任务：取材于 benchmark 案例，静态数据即可。 */
+interface JourneyStage {
+  title: string
+  description: string
+  owner: string
+  tone: 'auto' | 'confirm' | 'collaborate'
+  icon: LucideIcon
+}
+
+/** 入口页只展示用户能理解的完整研究旅程，不把后台 Agent 名称暴露给用户。 */
+const RESEARCH_JOURNEY: JourneyStage[] = [
+  { title: '多源检索', description: '文献 · 政策 · 数据', owner: '系统自动', tone: 'auto', icon: Database },
+  { title: '趋势与图谱', description: '主题演进 · 证据关系', owner: '系统自动', tone: 'auto', icon: Network },
+  { title: '研究空白 H0', description: '证据边界 · 空白确认', owner: '你来确认', tone: 'confirm', icon: Lightbulb },
+  { title: '候选假设', description: '机制 · 变量 · 证伪', owner: '共同选择', tone: 'collaborate', icon: Sparkles },
+  { title: '科学十项', description: '方案草案 · 逐项审查', owner: '你来确认', tone: 'confirm', icon: ClipboardList },
+  { title: '正式研究', description: 'H1–H4 · 结果交付', owner: '共同推进', tone: 'collaborate', icon: FlaskConical },
+]
+
+/** 首页任务建议：按科研意图组织，而不是让用户先理解系统流水线。 */
 const TEMPLATE_CATEGORIES: TemplateCategory[] = [
   {
-    id: 'policy', label: '政策评估',
+    id: 'literature', label: '文献与空白',
     cards: [
-      { id: 'case_002', title: '绿色信贷与高污染企业', description: '绿色信贷政策约束下，高污染企业的授信、投资与转型行为如何变化。', prompt: '研究绿色信贷政策对高污染企业新增授信与转型行为的因果效应，企业-年份面板，2012–2022。', mode: 'discovery_blind' },
-      { id: 'case_009', title: '绿改试验区与空气质量', description: '绿色金融改革创新试验区设立对城市空气质量的处理效应。', prompt: '评估绿色金融改革创新试验区设立对城市空气质量指数的因果影响，城市面板，试点作为准自然实验。', mode: 'reproduction_aligned' },
+      { id: 'lit_progress', title: '看清一个领域的研究进展', description: '围绕主题梳理关键文献、方法演进和主要结论，形成可追溯的研究地图。', prompt: '梳理绿色金融政策与企业绿色技术创新领域的研究进展，识别主要理论、方法演进和关键证据。', mode: 'discovery_blind', icon: BookOpenText },
+      { id: 'lit_gap', title: '从现有证据中定位研究空白', description: '对比已知结论与尚未回答的问题，给出有证据边界的空白清单。', prompt: '基于近五年文献与政策证据，识别绿色金融政策影响企业创新的研究空白，并说明每个空白的证据依据。', mode: 'discovery_blind', icon: Lightbulb },
+      { id: 'lit_dispute', title: '比较一组相互矛盾的结论', description: '核对样本、口径和识别策略，解释为什么不同研究会得到不同结果。', prompt: '比较绿色金融政策促进与抑制企业创新的相互矛盾证据，重点核对样本、变量口径和识别策略。', mode: 'reproduction_aligned', icon: ChartNoAxesCombined },
+      { id: 'lit_graph', title: '建立主题证据图谱', description: '把文献、政策、变量、方法与结论连接起来，便于后续提出假设。', prompt: '建立绿色金融政策、融资约束、研发投入与绿色专利质量之间的证据图谱。', mode: 'discovery_blind', icon: Sparkles },
     ],
   },
   {
-    id: 'firm', label: '企业行为',
+    id: 'hypothesis', label: '研究假设',
     cards: [
-      { id: 'case_006', title: '绿色金融与企业环境投资', description: '绿色金融发展水平如何影响企业环境治理投资的规模与结构。', prompt: '研究地区绿色金融发展水平对企业环境治理投资的影响与作用机制。', mode: 'discovery_blind' },
-      { id: 'case_005', title: '农业绿色金融', description: '农业绿色金融支持与农业企业绿色生产率的关系与机制。', prompt: '检验农业绿色金融支持对农业企业绿色全要素生产率的影响，识别融资约束缓解机制。', mode: 'reproduction_aligned' },
+      { id: 'hyp_generate', title: '从理论与证据提出可检验假设', description: '把研究空白转成变量明确、方向清楚且能够被证伪的假设。', prompt: '结合融资约束与创新补偿理论，为绿色金融政策对企业绿色创新的影响提出可检验假设。', mode: 'discovery_blind', icon: Lightbulb },
+      { id: 'hyp_mechanism', title: '拆解一条作用机制', description: '明确中介变量、竞争机制和可观测证据，避免只写叙事链条。', prompt: '拆解绿色金融政策通过融资约束与研发投入影响绿色专利质量的作用机制。', mode: 'discovery_blind', icon: Sparkles },
+      { id: 'hyp_boundary', title: '找出假设成立的边界条件', description: '比较行业、所有制与地区差异，形成异质性和调节效应假设。', prompt: '分析绿色金融政策创新效应在高碳行业、新兴绿色产业和不同所有制企业中的边界条件。', mode: 'reproduction_aligned', icon: ChartNoAxesCombined },
+      { id: 'hyp_falsify', title: '为假设设计证伪路径', description: '列出会推翻假设的观察结果、替代解释和必要稳健性检验。', prompt: '为“绿色金融政策提升企业绿色专利质量”设计可证伪标准与替代解释排除方案。', mode: 'reproduction_aligned', icon: FlaskConical },
     ],
   },
   {
-    id: 'region', label: '区域发展',
+    id: 'design', label: '研究设计',
     cards: [
-      { id: 'case_004', title: '绿色金融地方竞争与产业转型', description: '地方政府绿色金融竞争对区域产业结构转型的推动作用。', prompt: '研究地方绿色金融竞争强度与区域产业结构高级化之间的因果关系。', mode: 'discovery_blind' },
-      { id: 'case_008', title: '绿色金融与可持续发展', description: '绿色金融发展对区域可持续发展指数的贡献及空间溢出。', prompt: '评估绿色金融发展水平对区域可持续发展的影响，考虑空间溢出效应。', mode: 'reproduction_aligned' },
+      { id: 'design_full', title: '把研究问题变成可执行方案', description: '定义样本、变量、估计量、识别策略和诊断，输出可冻结的研究合同。', prompt: '为绿色金融改革创新试验区政策与企业绿色创新设计一套可执行的实证研究方案。', mode: 'reproduction_aligned', icon: FlaskConical },
+      { id: 'design_variable', title: '完善变量与测量方案', description: '比较代理变量、数据来源和测量误差，给出变量字典与替代口径。', prompt: '完善绿色金融政策、绿色研发强度和绿色专利质量的变量定义、数据来源与替代测量。', mode: 'reproduction_aligned', icon: ChartNoAxesCombined },
+      { id: 'design_sample', title: '确定样本边界与数据结构', description: '明确分析单位、时间窗口、纳入排除标准以及可能的选择偏差。', prompt: '为企业—地区—年份面板确定样本边界、时间窗口、纳入排除规则和缺失值策略。', mode: 'reproduction_aligned', icon: BookOpenText },
+      { id: 'design_diagnostics', title: '列出必须通过的诊断检验', description: '提前约定平行趋势、安慰剂、稳健性和敏感性分析，防止事后选择。', prompt: '为绿色金融政策的双重差分研究设计必须通过的诊断、安慰剂与敏感性检验。', mode: 'reproduction_aligned', icon: Sparkles },
     ],
   },
   {
-    id: 'market', label: '市场反应',
+    id: 'causal', label: '数据与因果',
     cards: [
-      { id: 'case_010', title: '央行绿色沟通与金融市场', description: '央行绿色政策沟通事件对债券与股票市场的短期反应。', prompt: '用事件研究法检验央行绿色沟通对绿色债券利差与相关股票收益的短期影响。', mode: 'reproduction_aligned' },
-      { id: 'case_007', title: '数字绿色金融与经济韧性', description: '数字化绿色金融发展对城市经济韧性的提升效应。', prompt: '研究数字绿色金融发展指数对城市经济韧性的影响与异质性来源。', mode: 'discovery_blind' },
+      { id: 'causal_strategy', title: '比较可行的因果识别策略', description: '针对同一问题比较 DID、事件研究、工具变量等方案的假设与风险。', prompt: '比较识别绿色金融政策因果效应的 DID、事件研究与工具变量方案，并给出推荐条件。', mode: 'reproduction_aligned', icon: ChartNoAxesCombined },
+      { id: 'causal_audit', title: '审计现有数据能否支撑结论', description: '检查处理组、时间、变量变异和缺失，明确能做什么、不能做什么。', prompt: '审计现有企业—地区—年份面板是否足以识别绿色金融政策对绿色创新的因果效应。', mode: 'reproduction_aligned', icon: FlaskConical },
+      { id: 'causal_robust', title: '规划稳健性与敏感性分析', description: '把关键识别威胁转成可执行检查，并约定失败后的结论降级规则。', prompt: '为绿色金融政策研究规划稳健性、敏感性与结论降级规则。', mode: 'reproduction_aligned', icon: Sparkles },
+      { id: 'causal_result', title: '解释模型结果而不过度推断', description: '区分统计事实、识别假设和可授权结论，生成证据支持的表述。', prompt: '审核一组绿色金融政策回归结果，区分统计相关、因果证据和不能发布的主张。', mode: 'reproduction_aligned', icon: FileText },
+    ],
+  },
+  {
+    id: 'writing', label: '论文写作',
+    cards: [
+      { id: 'write_outline', title: '从研究方案生成论文结构', description: '按问题、理论、设计、结果与限制组织章节，并绑定每节所需证据。', prompt: '根据绿色金融政策与企业创新的研究方案生成论文结构和各章节证据需求。', mode: 'reproduction_aligned', icon: FileText },
+      { id: 'write_methods', title: '写清楚可复现的方法部分', description: '把样本、变量、模型、诊断和版本信息写成可复现的方法说明。', prompt: '为企业—地区—年份面板研究撰写可复现的方法与识别策略部分。', mode: 'reproduction_aligned', icon: FlaskConical },
+      { id: 'write_results', title: '把证据转成审慎结论', description: '仅使用已通过审核的主张，主动说明边界、失败检验和替代解释。', prompt: '把已审核的绿色金融政策实证结果整理成审慎的结果与讨论部分。', mode: 'reproduction_aligned', icon: ChartNoAxesCombined },
+      { id: 'write_review', title: '检查全文证据与引文一致性', description: '逐句核对结论来源、引用和图表，标出夸大或无法复现的内容。', prompt: '审查论文中每条结论的证据、引用与图表来源，并列出需要降级或重写的句子。', mode: 'reproduction_aligned', icon: BookOpenText },
     ],
   },
 ]
-
-const MODE_TEXT: Record<MockMode, string> = {
-  discovery_blind: '盲态发现',
-  reproduction_aligned: '对齐复现',
-}
-
-function greetingByHour(): string {
-  const hour = new Date().getHours()
-  if (hour < 5) return '夜深了'
-  if (hour < 12) return '上午好'
-  if (hour < 18) return '下午好'
-  return '晚上好'
-}
 
 const directoryInputAttributes = { webkitdirectory: '', directory: '' }
 
@@ -97,7 +121,7 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
   const [group1Path, setGroup1Path] = useState('')
   const [group1Mode, setGroup1Mode] = useState<'research' | 'fixture'>('research')
   const qwenReady = Boolean(config?.qwenApiKey.configured)
-  const greeting = useMemo(() => `${greetingByHour()}，研究者`, [])
+  const greeting = '你今天想研究什么？'
   const cards = TEMPLATE_CATEGORIES.find((item) => item.id === category)?.cards ?? []
   const group1Ready = group1Bundle?.status === 'ready'
   const group1VerifiedAt = useMemo(() => {
@@ -149,8 +173,34 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
               <span key={`${char}-${index}`} style={{ animationDelay: `${index * 45}ms` }}>{char}</span>
             ))}
           </h1>
-          <p className="composer__demo-badge">Group 1 冻结包 → 可行性包与科学十项 → Group 2 H1/H2 设计审查</p>
-          <p className="composer__lead">描述一个研究目标，先建立项目并完成研究发现，再决定是否交接到正式 H1–H4。</p>
+          <p className="composer__lead">从文献与证据出发，与你一起识别研究空白、提出假设并完成可审查的研究。</p>
+
+          <section className="composer__journey" aria-labelledby="composer-journey-title">
+            <header>
+              <div>
+                <span className="composer__journey-kicker"><ChartNoAxesCombined size={14} aria-hidden="true" />研究流程</span>
+                <strong id="composer-journey-title">提交主题后，系统会沿这条路径推进</strong>
+              </div>
+              <small><i className="is-auto" />系统自动 <i className="is-confirm" />需要确认</small>
+            </header>
+            <ol>
+              {RESEARCH_JOURNEY.map((stage, index) => {
+                const Icon = stage.icon
+                return (
+                  <li key={stage.title}>
+                    <span className={`composer__journey-icon is-${stage.tone}`} aria-hidden="true"><Icon size={16} /></span>
+                    <span className="composer__journey-copy">
+                      <b>{String(index + 1).padStart(2, '0')}</b>
+                      <strong>{stage.title}</strong>
+                      <small>{stage.description}</small>
+                    </span>
+                    <em className={`is-${stage.tone}`}>{stage.owner}</em>
+                    {index < RESEARCH_JOURNEY.length - 1 && <ArrowRight className="composer__journey-arrow" size={13} aria-hidden="true" />}
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
 
           <div className="composer__chips" role="tablist" aria-label="任务模板分类">
             {TEMPLATE_CATEGORIES.map((item) => (
@@ -170,9 +220,9 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
           <div className="composer__cards" key={category}>
             {cards.map((card) => (
               <button type="button" className="composer__card" key={card.id} onClick={() => pickTemplate(card)}>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-                <small>{MODE_TEXT[card.mode]} · {card.id}</small>
+                <span className="composer__card-icon" aria-hidden="true"><card.icon size={18} /></span>
+                <span className="composer__card-copy"><h3>{card.title}</h3><p>{card.description}</p></span>
+                <ArrowRight className="composer__card-arrow" size={17} aria-hidden="true" />
               </button>
             ))}
           </div>
@@ -185,55 +235,19 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
             已导入 {importReport.datasetFilename} · {importReport.rowCount.toLocaleString()} 行 × {importReport.columnCount} 列 · 隔离 {importReport.hiddenFileCount} 份隐藏材料
           </p>
         )}
-        <section className={`composer__group1-bundle is-${group1Bundle?.status ?? 'loading'}`} aria-label="Group 1 到 Group 2 真实链路">
-          <div className="composer__group1-head">
-            <div>
-              <span className="composer__group1-icon"><Link2 size={16} /></span>
-              <span><strong>Group 1 → Group 2</strong><small>{publicDemo ? '界面演示 · 后端未连接' : '已验证真实执行链路'}</small></span>
-            </div>
-            <span className="composer__group1-state">
-              {publicDemo ? <><CircleAlert size={14} />公开演示</> : group1Ready ? <><CheckCircle2 size={14} />工程验收通过</> : group1Bundle?.status === 'invalid' ? <><CircleAlert size={14} />执行包校验失败</> : '等待本机执行包'}
-            </span>
-          </div>
-
-          {group1Ready ? (
-            <>
-              <p className="composer__group1-title">{group1Bundle.label}</p>
-              <div className="composer__group1-metrics">
-                <span><ShieldCheck size={13} />{group1Bundle.verifiedArtifactCount} 个 Artifact 哈希</span>
-                <span><Database size={13} />{group1Bundle.panelRows?.toLocaleString()} 行 × {group1Bundle.panelColumns} 列</span>
-                <span>code_owned</span>
-                <span>复现 {group1Bundle.reproductionStatus === 'matched' ? '一致' : group1Bundle.reproductionStatus}</span>
-              </div>
-              <p className="composer__group1-note">
-                新建独立 run，不覆盖旧阻塞记录；H1/H2 批准后由本机 Research Engine 执行。{group1VerifiedAt ? ` 最近验收 ${group1VerifiedAt}。` : ''}
-              </p>
-              <div className="composer__group1-actions">
-                <button type="button" className="composer__group1-primary" disabled={busy} onClick={() => void onStartVerifiedGroup1Bundle()}>
-                  {busy ? (busyLabel || '正在启动…') : '启动新的真实链路'}
-                </button>
-                <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
-                  手动接入其他包
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="composer__group1-note">{publicDemo ? '公开站点仅演示前端交互，不读取本机执行包、研究数据或模型密钥；完整链路请使用 Docker 或本地部署。' : group1Bundle?.message || '正在读取本机已验证执行包…'}</p>
-              {!publicDemo && (
-                <button type="button" className="composer__group1-secondary" aria-expanded={manualGroup1Open} onClick={() => setManualGroup1Open((current) => !current)}>
-                  手动接入 Group 1 包
-                </button>
-              )}
-            </>
-          )}
-
-          {!publicDemo && manualGroup1Open && (
-            <div className="composer__group1-manual">
-              <p>手动路径只完成交接与 H1/H2 设计；没有执行面板绑定时，统计执行会保持 fail-closed。</p>
+        {!publicDemo && manualGroup1Open && (
+          <section className="composer__handoff-panel" aria-label="接入已有研究包">
+            <header><Link2 size={16} /><div><strong>从已有研究包继续</strong><small>{group1Ready ? `已验证执行包可用${group1VerifiedAt ? ` · ${group1VerifiedAt}` : ''}` : group1Bundle?.message || '尚未发现可直接启动的执行包'}</small></div></header>
+            {group1Ready && (
+              <button type="button" className="composer__handoff-primary" disabled={busy} onClick={() => void onStartVerifiedGroup1Bundle()}>
+                {busy ? (busyLabel || '正在启动…') : '启动已验证链路'}
+              </button>
+            )}
+            <p>也可以粘贴 Group 1 交接包路径；未绑定执行数据时，系统只完成研究设计并在执行前提示补充。</p>
+            <div className="composer__handoff-fields">
               <input
                 value={group1Path}
-                placeholder="粘贴 Group 1 pilot 根目录或 I_group1_handoff 路径"
+                placeholder="Group 1 pilot 或 I_group1_handoff 路径"
                 aria-label="Group 1 冻结交接包路径"
                 onChange={(event) => setGroup1Path(event.target.value)}
                 onKeyDown={(event) => {
@@ -244,15 +258,15 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
                 }}
               />
               <select value={group1Mode} onChange={(event) => setGroup1Mode(event.target.value as 'research' | 'fixture')} aria-label="Group 1 接入运行模式">
-                <option value="research">代码拥有的研究设计</option>
-                <option value="fixture">离线流程演示</option>
+                <option value="research">正式研究</option>
+                <option value="fixture">流程演示</option>
               </select>
               <button type="button" disabled={busy || !group1Path.trim()} onClick={() => void onImportGroup1Handoff(group1Path, group1Mode)}>
-                {busy ? (busyLabel || '正在接入…') : '仅接入并进入 H1'}
+                {busy ? (busyLabel || '正在接入…') : '接入并进入边界确认'}
               </button>
             </div>
-          )}
-        </section>
+          </section>
+        )}
         <form
           className="composer__box"
           onSubmit={(event) => { event.preventDefault(); submit() }}
@@ -278,18 +292,19 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
                 {moreOpen && (
                   <div className="composer__menu" role="menu">
                     <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onOpenAdvanced() }}>手动填写研究输入</button>
+                    {!publicDemo && <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setManualGroup1Open((current) => !current) }}><Link2 size={13} />从已有研究包继续</button>}
                     <button type="button" role="menuitem" disabled={busy || !qwenReady} onClick={() => chooseFile('agent-laboratory')}>{qwenReady ? '导入案例到 Agent Laboratory 基线' : '基线需先配置千问'}</button>
                     <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onOpenSettings() }}><Settings2 size={13} />模型与执行器配置</button>
                   </div>
                 )}
               </div>
               <button type="button" className="composer__tool" disabled={busy} onClick={() => chooseFile('hypoweaver')}>
-                <FolderUp size={14} />{busy ? (busyLabel || '正在处理…') : '导入案例文件夹'}
+                {busy ? <FolderUp size={14} /> : <Paperclip size={14} />}{busy ? (busyLabel || '正在处理…') : '导入资料'}
               </button>
               <label className="composer__mode">
                 <select value={mode} onChange={(event) => setMode(event.target.value as MockMode)} aria-label="研究模式">
-                  <option value="discovery_blind">盲态发现</option>
-                  <option value="reproduction_aligned">对齐复现</option>
+                  <option value="discovery_blind">研究模式 · 严谨</option>
+                  <option value="reproduction_aligned">研究模式 · 复现</option>
                 </select>
                 <ChevronDown size={13} aria-hidden="true" />
               </label>
@@ -299,7 +314,7 @@ export function TaskComposer({ config, group1Bundle, publicDemo, importReport, b
             </button>
           </div>
         </form>
-        <p className="composer__hint">Group 1 冻结包通过 H1 后可继续到 Group 2 设计与 H2；数据和执行器缺口只在统计执行前拦截。</p>
+        <p className="composer__hint">系统会先梳理证据和研究空白；涉及关键边界、研究方案、结论与交付时会请你确认。</p>
       </div>
     </div>
   )

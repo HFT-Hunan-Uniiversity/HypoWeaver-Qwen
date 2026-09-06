@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/paper_profile.graph_input.schema.json",
+  "title": "PaperProfile graph input contract",
+  "description": "D consumes this evidence-grounded projection of C's PaperProfile. C may keep additional fields in its own full schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "document",
+    "research_question",
+    "research_fields",
+    "topics",
+    "theories",
+    "mechanisms",
+    "variables",
+    "measures",
+    "methods",
+    "models",
+    "identification_strategies",
+    "datasets",
+    "policies",
+    "citations",
+    "findings",
+    "limitations",
+    "future_work",
+    "evidence",
+    "quality"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.2.0" },
+    "profile_id": { "type": "string", "minLength": 1 },
+    "document": { "$ref": "#/$defs/document" },
+    "research_question": { "$ref": "#/$defs/evidencedText" },
+    "research_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "topics": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "theories": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "mechanisms": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "variables": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/variable" }
+    },
+    "measures": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/measure" }
+    },
+    "methods": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/method" }
+    },
+    "models": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/model" }
+    },
+    "identification_strategies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "datasets": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/dataset" }
+    },
+    "policies": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/policy" }
+    },
+    "citations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/citation" }
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/limitation" }
+    },
+    "future_work": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/evidencedText" }
+    },
+    "sample": { "$ref": "#/$defs/sample" },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "quality": { "$ref": "#/$defs/quality" }
+  },
+  "$defs": {
+    "referenceList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document_id", "document_version", "title", "authors", "year", "published_date", "journal_or_source", "language", "retrieved_at", "metadata_evidence_refs"],
+      "properties": {
+        "document_id": { "type": "string", "minLength": 1 },
+        "document_version": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+        "published_date": { "type": ["string", "null"], "format": "date" },
+        "updated_at": { "type": ["string", "null"] },
+        "journal_or_source": { "type": "string", "minLength": 1 },
+        "venue_id": { "type": ["string", "null"] },
+        "doi": { "type": ["string", "null"] },
+        "openalex_id": { "type": ["string", "null"] },
+        "semantic_scholar_id": { "type": ["string", "null"] },
+        "language": { "type": "string", "minLength": 2 },
+        "source_uri": { "type": ["string", "null"] },
+        "checksum": { "type": ["string", "null"] },
+        "release_id": { "type": ["string", "null"] },
+        "asset_id": { "type": ["string", "null"] },
+        "content_sha256": { "type": ["string", "null"], "minLength": 8 },
+        "rights_status": { "type": ["string", "null"] },
+        "parsed_doc_version": { "type": ["string", "null"] },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "metadata_evidence_refs": { "$ref": "#/$defs/referenceList" }
+      }
+    },
+    "evidencedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "evidence_refs"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "aliases": {
+          "type": "array",
+          "default": [],
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "description": { "type": ["string", "null"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "roles", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "aliases": {
+          "type": "array",
+          "default": [],
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["independent", "dependent", "mediator", "moderator", "control", "instrument", "treatment", "outcome", "other"]
+          }
+        },
+        "definition": { "type": ["string", "null"] },
+        "operationalization": { "type": ["string", "null"] },
+        "unit": { "type": ["string", "null"] },
+        "measure_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "role", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "role": { "enum": ["primary", "identification", "measurement", "robustness", "heterogeneity", "other"] },
+        "identification_strategy": { "type": ["string", "null"] },
+        "specification": { "type": ["string", "null"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "measure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "construction", "data_source_refs", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "construction": { "type": "string", "minLength": 1 },
+        "unit": { "type": ["string", "null"] },
+        "data_source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "family", "role", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "family": { "enum": ["econometric", "statistical", "machine_learning", "theoretical", "structural", "other"] },
+        "role": { "enum": ["baseline", "mechanism", "heterogeneity", "robustness", "prediction", "theory", "other"] },
+        "specification": { "type": ["string", "null"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "provider": { "type": ["string", "null"] },
+        "access_level": { "enum": ["open", "restricted", "commercial", "unknown"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "name", "evidence_refs"],
+      "properties": {
+        "local_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "canonical_name": { "type": ["string", "null"] },
+        "issuer": { "type": ["string", "null"] },
+        "effective_date": { "type": ["string", "null"], "format": "date" },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_title", "target_year", "relation", "identity_status", "evidence_refs"],
+      "properties": {
+        "target_document_id": { "type": ["string", "null"] },
+        "target_title": { "type": "string", "minLength": 1 },
+        "target_year": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+        "target_doi": { "type": ["string", "null"] },
+        "relation": { "enum": ["cites", "extends", "contrasts", "uses_method_from", "uses_data_from"] },
+        "identity_status": { "enum": ["verified", "unverified", "rejected"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finding_id", "claim", "effect_direction", "significance", "evidence_refs"],
+      "properties": {
+        "finding_id": { "type": "string", "minLength": 1 },
+        "claim": { "type": "string", "minLength": 1 },
+        "predictor_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "outcome_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "mediator_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "moderator_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "mechanism_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "method_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "model_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "identification_strategy_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "effect_direction": { "enum": ["positive", "negative", "null", "mixed", "nonlinear", "heterogeneous", "unknown"] },
+        "significance": { "enum": ["significant", "not_significant", "mixed", "not_reported", "not_applicable"] },
+        "population_or_subsample": { "type": ["string", "null"] },
+        "conditions": { "type": ["string", "null"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "limitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["limitation_id", "text", "category", "evidence_refs"],
+      "properties": {
+        "limitation_id": { "type": "string", "minLength": 1 },
+        "text": { "type": "string", "minLength": 1 },
+        "category": { "enum": ["data", "measurement", "method", "mechanism", "object", "context", "policy", "external_validity", "other"] },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit_of_analysis": { "type": ["string", "null"] },
+        "geographies": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "year_start": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+        "year_end": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+        "sample_size": { "type": ["integer", "null"], "minimum": 0 },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "document_id", "document_version", "quote", "retrieved_at", "verification_status"],
+      "properties": {
+        "evidence_id": { "type": "string", "minLength": 1 },
+        "document_id": { "type": "string", "minLength": 1 },
+        "document_version": { "type": "string", "minLength": 1 },
+        "chunk_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_id": { "type": ["string", "null"] },
+        "release_id": { "type": ["string", "null"] },
+        "content_sha256": { "type": ["string", "null"], "minLength": 8 },
+        "source_type": {
+          "enum": [
+            "paper_fulltext",
+            "paper_abstract",
+            "policy_text",
+            "report_text",
+            "dataset_registry",
+            "metadata_api",
+            "graph_snapshot",
+            "project_spec",
+            "human_curation",
+            null
+          ]
+        },
+        "evidence_type": {
+          "enum": ["direct_quote", "metadata_record", "table_cell", "derived_statistic", "human_annotation", "design_decision", null]
+        },
+        "evidence_level": { "enum": ["primary_source", "metadata", "derived", "design", null] },
+        "quote": { "type": "string", "minLength": 1 },
+        "section": { "type": ["string", "null"], "minLength": 1 },
+        "page": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ]
+        },
+        "start_char": { "type": ["integer", "null"], "minimum": 0 },
+        "end_char": { "type": ["integer", "null"], "minimum": 0 },
+        "source_uri": { "type": ["string", "null"] },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "verification_status": { "enum": ["unverified", "source_located", "cross_checked", "not_applicable", "rejected"] },
+        "access_level": { "enum": ["open", "restricted", "commercial", "unknown", null] },
+        "license": { "type": ["string", "null"] }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["extraction_confidence", "citation_verification_status", "human_review_status"],
+      "properties": {
+        "extraction_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "citation_verification_status": { "enum": ["unverified", "verified", "rejected"] },
+        "human_review_status": { "enum": ["not_reviewed", "sampled", "fully_reviewed"] },
+        "extractor": { "type": ["string", "null"] },
+        "extractor_version": { "type": ["string", "null"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

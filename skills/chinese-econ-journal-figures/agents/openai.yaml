@@ -1,0 +1,5 @@
+interface:
+  display_name: "中文经济学论文图表"
+  short_description: "生成可复现、黑白印刷友好的中文经济学论文图表"
+  default_prompt: "Use $chinese-econ-journal-figures to turn the supplied research claim and data into a reproducible journal-style figure, verify its scientific semantics, and export SVG, PDF, and 300-dpi PNG files."
+

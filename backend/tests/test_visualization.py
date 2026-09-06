@@ -29,6 +29,7 @@ from hypoweaver.plot_agent.recipe_contracts import (
 from hypoweaver.plot_agent.renderer import resolve_artifact_uri
 from hypoweaver.repository import RunRepository
 from hypoweaver.visualization import (
+    ChineseEconJournalFigureRenderer,
     FigureRequest,
     FigureSource,
     LocalFigureRenderer,
@@ -1066,6 +1067,78 @@ class LocalPlotAgentTests(unittest.IsolatedAsyncioTestCase):
                 "immutable figure artifact collision",
             ):
                 await renderer.render(requests[0])
+
+    async def test_journal_figure_skill_renders_supported_recipes_and_falls_back(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            source = FigureSource(
+                artifact_id="workflow-run:research_run",
+                artifact_key="research_run",
+                sha256="c" * 64,
+            )
+            renderer = ChineseEconJournalFigureRenderer(root)
+            supported = {
+                "coefficient_forest",
+                "event_study",
+                "heterogeneity_forest",
+                "specification_curve",
+                "mechanism_evidence_graph",
+            }
+            first_event_hashes: list[str] | None = None
+
+            for recipe_id in supported:
+                request = _request_for_recipe(
+                    recipe_id,
+                    _valid_recipe_data()[recipe_id],
+                    source,
+                )
+                bundle = await renderer.render(request)
+                figure = bundle.figures[0]
+                self.assertEqual(
+                    bundle.renderer["name"],
+                    "chinese-econ-journal-figures",
+                )
+                self.assertEqual(
+                    bundle.renderer["provenance"],
+                    "conceptual"
+                    if recipe_id == "mechanism_evidence_graph"
+                    else "estimated",
+                )
+                self.assertEqual(
+                    {item.format for item in figure.files},
+                    {"svg", "png", "pdf", "csv"},
+                )
+                self.assertEqual(
+                    figure.data_snapshot,
+                    recipe_data_snapshot(recipe_id, request.bindings.data),
+                )
+                figure_root = root / "workflow-run" / "evidence"
+                self.assertTrue(
+                    (figure_root / f"{figure.figure_id}.spec.json").is_file()
+                )
+                metadata = figure_root / f"{figure.figure_id}.metadata.json"
+                self.assertTrue(metadata.is_file())
+                self.assertNotIn("DASHSCOPE", metadata.read_text(encoding="utf-8"))
+                if recipe_id == "event_study":
+                    first_event_hashes = [item.sha256 for item in figure.files]
+                    repeated = await renderer.render(request)
+                    self.assertEqual(
+                        first_event_hashes,
+                        [item.sha256 for item in repeated.figures[0].files],
+                    )
+
+            fallback_request = _request_for_recipe(
+                "sample_flow",
+                _valid_recipe_data()["sample_flow"],
+                source,
+            )
+            fallback = await renderer.render(fallback_request)
+            self.assertEqual(
+                fallback.renderer["name"],
+                "HypoWeaver_Plot_Engine",
+            )
 
     async def test_main_api_streams_hash_verified_figure_file(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

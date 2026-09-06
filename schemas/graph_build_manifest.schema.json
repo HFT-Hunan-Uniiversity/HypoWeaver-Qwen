@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenfin.local/schemas/graph_build_manifest.schema.json",
+  "title": "Graph build run manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "graph_id",
+    "as_of",
+    "build_timestamp",
+    "scope",
+    "source_watermarks",
+    "input_manifest_hash",
+    "profile_set_sha256",
+    "pipeline_run_id",
+    "base_snapshot_id",
+    "base_graph_sha256"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "graph_id": { "type": "string", "minLength": 1 },
+    "as_of": { "type": "string", "format": "date-time" },
+    "build_timestamp": { "type": "string", "format": "date-time" },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["themes", "languages", "document_types"],
+      "properties": {
+        "themes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "languages": { "type": "array", "items": { "type": "string", "minLength": 2 } },
+        "document_types": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "year_start": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 },
+        "year_end": { "type": ["integer", "null"], "minimum": 1900, "maximum": 2100 }
+      }
+    },
+    "source_watermarks": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "null"] }
+    },
+    "input_manifest_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profile_set_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "base_snapshot_id": { "type": ["string", "null"], "minLength": 1 },
+    "base_graph_sha256": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "coverage_certificate_id": { "type": ["string", "null"] },
+    "retrieval_index_snapshot_id": { "type": ["string", "null"] },
+    "pipeline_run_id": { "type": "string", "minLength": 1 },
+    "code_version": { "type": ["string", "null"] },
+    "config_hash": { "type": ["string", "null"] },
+    "notes": { "type": ["string", "null"] }
+  }
+}

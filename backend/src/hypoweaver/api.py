@@ -4,9 +4,9 @@ import hmac
 import os
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from .case_import import (
@@ -34,6 +34,44 @@ from .group1_handoff import (
     inspect_verified_group1_bundle,
     verified_group1_bundle_request,
 )
+from .knowledge_client import KnowledgeClient, KnowledgeServiceError
+from .knowledge_models import (
+    EvidenceBundle,
+    KnowledgeCatalogPage,
+    KnowledgeDocumentTextSlice,
+    KnowledgeSearchRequest,
+    KnowledgeServiceStatus,
+)
+from .literature_reader import (
+    LiteratureAskRequest,
+    LiteratureAskResponse,
+    LiteratureDocument,
+    LiteratureDocumentError,
+    LiteratureDocumentStore,
+    LiteraturePage,
+    ask_literature,
+)
+from .discovery_bridge import EvidenceGraphBridge, evidence_bundle_to_research_graph
+from .discovery_pipeline import (
+    DiscoveryBuildRequest,
+    DiscoveryReleasePreview,
+    build_discovery_release_preview,
+)
+from .discovery_handoff import (
+    DiscoveryLaunchRequest,
+    DiscoveryRunLaunchResponse,
+    create_run_request as create_discovery_run_request,
+    discovery_release_to_case,
+)
+from .discovery_planner import (
+    DiscoveryPlanGeneration,
+    DiscoveryPlanGenerationRequest,
+    DiscoveryPlanLaunchRequest,
+    DiscoveryPlanReviewRequest,
+    compile_discovery_plan,
+    generate_reviewed_discovery_plan,
+    review_discovery_plan,
+)
 from .models import CreateRunRequest, DatasetRef, GateDecisionRequest, RevisionRequest, RunState
 from .repository import (
     RunNotFoundError,
@@ -59,6 +97,7 @@ engine = WorkflowEngine(repository)
 runtime_config_store = RuntimeConfigStore()
 case_importer = LocalCaseImporter()
 case_upload_store = CaseUploadStore()
+literature_store = LiteratureDocumentStore()
 baseline_runner = AgentLaboratoryRunner()
 app = FastAPI(
     title="HypoWeaver-Qwen Workflow API",
@@ -97,6 +136,328 @@ def mutation_actor(
 @app.get("/api/v1/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "runtime": "code-native", "definition": f"app-a@{DEFINITION_VERSION}"}
+
+
+@app.get("/api/v1/knowledge/health", response_model=KnowledgeServiceStatus)
+async def knowledge_health() -> KnowledgeServiceStatus:
+    try:
+        return await KnowledgeClient().status()
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get(
+    "/api/v1/knowledge/catalog/{document_id}/text",
+    response_model=KnowledgeDocumentTextSlice,
+)
+async def knowledge_document_text(
+    document_id: str,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=30_000, ge=1, le=50_000),
+    _actor: str = Depends(mutation_actor),
+) -> KnowledgeDocumentTextSlice:
+    try:
+        return await KnowledgeClient().document_text(
+            document_id,
+            offset=offset,
+            limit=limit,
+        )
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get("/api/v1/knowledge/catalog", response_model=KnowledgeCatalogPage)
+async def knowledge_catalog(
+    query: str = Query(default="", max_length=500),
+    fulltext_only: bool = False,
+    readable_only: bool = False,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    _actor: str = Depends(mutation_actor),
+) -> KnowledgeCatalogPage:
+    try:
+        return await KnowledgeClient().catalog(
+            query=query,
+            fulltext_only=fulltext_only,
+            readable_only=readable_only,
+            offset=offset,
+            limit=limit,
+        )
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.post("/api/v1/knowledge/search", response_model=EvidenceBundle)
+async def knowledge_search(
+    request: KnowledgeSearchRequest,
+    _actor: str = Depends(mutation_actor),
+) -> EvidenceBundle:
+    try:
+        return await KnowledgeClient().search(request)
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get("/api/v1/literature/documents", response_model=list[LiteratureDocument])
+def list_literature_documents(
+    _actor: str = Depends(mutation_actor),
+) -> list[LiteratureDocument]:
+    literature_store.install_showcase_documents()
+    return literature_store.list_documents()
+
+
+@app.post(
+    "/api/v1/literature/documents",
+    response_model=LiteratureDocument,
+    status_code=201,
+)
+async def upload_literature_document(
+    request: Request,
+    filename: str,
+    _actor: str = Depends(mutation_actor),
+) -> LiteratureDocument:
+    try:
+        return await literature_store.save(filename, request.stream())
+    except LocalStorageLimitError as error:
+        raise HTTPException(status_code=409, detail=error.detail()) from error
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.delete("/api/v1/literature/documents/{document_id}")
+async def delete_literature_document(
+    document_id: str,
+    _actor: str = Depends(mutation_actor),
+) -> dict[str, str]:
+    try:
+        deleted = await literature_store.delete(document_id)
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    return {"deleted_document_id": deleted.document_id}
+
+
+@app.get(
+    "/api/v1/literature/documents/{document_id}",
+    response_model=LiteratureDocument,
+)
+def get_literature_document(
+    document_id: str,
+    _actor: str = Depends(mutation_actor),
+) -> LiteratureDocument:
+    try:
+        return literature_store.get_document(document_id)
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@app.get(
+    "/api/v1/literature/documents/{document_id}/pages/{page_number}",
+    response_model=LiteraturePage,
+)
+def get_literature_page(
+    document_id: str,
+    page_number: int,
+    _actor: str = Depends(mutation_actor),
+) -> LiteraturePage:
+    try:
+        return literature_store.get_page(document_id, page_number)
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@app.get("/api/v1/literature/documents/{document_id}/pages/{page_number}/image")
+def get_literature_page_image(
+    document_id: str,
+    page_number: int,
+    _actor: str = Depends(mutation_actor),
+) -> Response:
+    try:
+        return Response(
+            content=literature_store.render_page_png(document_id, page_number),
+            media_type="image/png",
+            headers={"Cache-Control": "private, max-age=3600"},
+        )
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@app.get("/api/v1/literature/documents/{document_id}/file")
+def get_literature_original_pdf(
+    document_id: str,
+    _actor: str = Depends(mutation_actor),
+) -> FileResponse:
+    try:
+        path = literature_store.get_original_pdf(document_id)
+        return FileResponse(path, media_type="application/pdf")
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/literature/documents/{document_id}/ask",
+    response_model=LiteratureAskResponse,
+)
+async def ask_literature_document(
+    document_id: str,
+    request: LiteratureAskRequest,
+    _actor: str = Depends(mutation_actor),
+) -> LiteratureAskResponse:
+    try:
+        return await ask_literature(
+            document_id,
+            request,
+            runtime_config_store.resolve(),
+            literature_store,
+        )
+    except LiteratureDocumentError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/evidence-preview",
+    response_model=EvidenceGraphBridge,
+)
+async def discovery_evidence_preview(
+    request: KnowledgeSearchRequest,
+    _actor: str = Depends(mutation_actor),
+) -> EvidenceGraphBridge:
+    try:
+        bundle = await KnowledgeClient().search(request)
+        return evidence_bundle_to_research_graph(bundle)
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/plans/generate",
+    response_model=DiscoveryPlanGeneration,
+)
+async def generate_online_discovery_plan(
+    request: DiscoveryPlanGenerationRequest,
+    _actor: str = Depends(mutation_actor),
+) -> DiscoveryPlanGeneration:
+    """Retrieve, plan, consistency-review, and at most once repair the draft."""
+
+    try:
+        return await generate_reviewed_discovery_plan(request)
+    except KnowledgeServiceError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/plans/review",
+    response_model=DiscoveryReleasePreview,
+)
+def review_online_discovery_plan(
+    request: DiscoveryPlanReviewRequest,
+    actor: str = Depends(mutation_actor),
+) -> DiscoveryReleasePreview:
+    """Compile an explicitly H0-reviewed Qwen draft through the Group1 engine."""
+
+    try:
+        return review_discovery_plan(request, reviewer=actor)
+    except (KeyError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/plans/launch",
+    response_model=DiscoveryRunLaunchResponse,
+    status_code=201,
+)
+async def launch_online_discovery_plan(
+    request: DiscoveryPlanLaunchRequest,
+    actor: str = Depends(mutation_actor),
+) -> DiscoveryRunLaunchResponse:
+    """Record H0 approval and create a plan-only run at the existing H1 gate."""
+
+    try:
+        build = compile_discovery_plan(
+            request.evidence_bundle,
+            request.plan,
+            reviewer=actor,
+            review_note=request.review_note,
+            consistency_review=request.consistency_review,
+            execution_readiness=request.execution_readiness,
+        )
+        release = build_discovery_release_preview(build, reviewer=actor)
+        hypothesis_id = "hypothesis:online_candidate"
+        case = discovery_release_to_case(
+            release,
+            hypothesis_id=hypothesis_id,
+            approver=actor,
+            approval_reason=request.approval_reason,
+            execution_readiness=request.execution_readiness,
+        )
+        launch = DiscoveryLaunchRequest(
+            build=build,
+            hypothesis_id=hypothesis_id,
+            approve_h0=True,
+            approval_reason=request.approval_reason,
+            mode=request.mode,
+            research_model_provider=request.research_model_provider,
+        )
+        run = await engine.create_run(create_discovery_run_request(case, launch))
+        return DiscoveryRunLaunchResponse(
+            discovery_release=release,
+            case_submission=case,
+            run=run,
+        )
+    except LocalStorageLimitError as error:
+        raise HTTPException(status_code=409, detail=error.detail()) from error
+    except (KeyError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/releases/preview",
+    response_model=DiscoveryReleasePreview,
+)
+def discovery_release_preview(
+    request: DiscoveryBuildRequest,
+    actor: str = Depends(mutation_actor),
+) -> DiscoveryReleasePreview:
+    try:
+        return build_discovery_release_preview(request, reviewer=actor)
+    except (KeyError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.post(
+    "/api/v1/discovery/releases/launch",
+    response_model=DiscoveryRunLaunchResponse,
+    status_code=201,
+)
+async def launch_discovery_release(
+    request: DiscoveryLaunchRequest,
+    actor: str = Depends(mutation_actor),
+) -> DiscoveryRunLaunchResponse:
+    try:
+        release = build_discovery_release_preview(request.build, reviewer=actor)
+        case = discovery_release_to_case(
+            release,
+            hypothesis_id=request.hypothesis_id,
+            approver=actor,
+            approval_reason=request.approval_reason,
+        )
+        run = await engine.create_run(create_discovery_run_request(case, request))
+        return DiscoveryRunLaunchResponse(
+            discovery_release=release,
+            case_submission=case,
+            run=run,
+        )
+    except LocalStorageLimitError as error:
+        raise HTTPException(status_code=409, detail=error.detail()) from error
+    except (KeyError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
 
 
 @app.get("/api/v1/definitions/app-a")

@@ -106,6 +106,27 @@
 }
 .sidebar__tasks--collapsed { border-top: 1px solid var(--hairline); }
 .sidebar__group { font-size: var(--fz-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint); font-weight: 600; padding: 0 10px; }
+.sidebar__group-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-right: 6px; }
+.sidebar__group-row .sidebar__group { flex: 1; }
+.sidebar__task-manage {
+  min-height: 24px; padding: 0 7px; border: 1px solid transparent; border-radius: var(--radius-xs);
+  background: transparent; color: var(--text-faint); cursor: pointer; font: inherit; font-size: 10px; font-weight: 650;
+}
+.sidebar__task-manage:hover,
+.sidebar__task-manage.is-active { border-color: var(--hairline); background: var(--surface-2); color: var(--brand); }
+.sidebar__bulk-actions {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px;
+  padding: 0 6px 4px;
+}
+.sidebar__bulk-actions button {
+  display: inline-flex; min-height: 28px; align-items: center; justify-content: center; gap: 5px;
+  padding: 0 7px; border: 1px solid var(--hairline); border-radius: var(--radius-xs);
+  background: var(--surface); color: var(--text-muted); cursor: pointer; font: inherit; font-size: 9px; font-weight: 650;
+}
+.sidebar__bulk-actions button:hover { border-color: var(--hairline-strong); background: var(--surface-2); color: var(--text); }
+.sidebar__bulk-actions button.is-delete { color: var(--negative); }
+.sidebar__bulk-actions button.is-delete:not(:disabled):hover { border-color: color-mix(in srgb, var(--negative) 38%, var(--hairline)); background: color-mix(in srgb, var(--negative) 7%, var(--surface)); }
+.sidebar__bulk-actions button:disabled { cursor: not-allowed; opacity: 0.42; }
 .sidebar__empty { font-size: var(--fz-xs); line-height: 1.6; color: var(--text-faint); padding: 4px 10px; }
 .sidebar__list { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; scrollbar-width: thin; }
 .sidebar__task {
@@ -116,6 +137,11 @@
 }
 .sidebar__task:hover { background: var(--surface-2); }
 .sidebar__task.is-active { background: var(--brand-soft); }
+.sidebar__task.is-selecting { cursor: pointer; }
+.sidebar__task.is-selecting.is-selected { background: color-mix(in srgb, var(--brand-soft) 74%, var(--surface)); }
+.sidebar__task.is-selecting input {
+  width: 14px; height: 14px; flex: 0 0 auto; margin: 0; accent-color: var(--brand); cursor: pointer;
+}
 .sidebar__dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); }
 .sidebar__dot.is-project { background: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 .sidebar__dot.is-live { background: var(--brand); }
@@ -128,6 +154,19 @@
 .sidebar__task-copy small { font-size: 10px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .sidebar__foot { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--hairline); padding-top: 10px; }
+.sidebar__review { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--attention) 28%, var(--hairline)); border-radius: var(--radius); background: color-mix(in srgb, var(--attention-soft) 52%, var(--surface)); color: var(--attention); text-align: left; cursor: pointer; }
+.sidebar__review:hover { border-color: color-mix(in srgb, var(--attention) 46%, var(--hairline)); background: color-mix(in srgb, var(--attention-soft) 78%, var(--surface)); }
+.sidebar__review > span { min-width: 0; flex: 1; display: grid; gap: 1px; }
+.sidebar__review strong { color: var(--text); font-size: 10px; font-weight: 700; }
+.sidebar__review small { color: var(--text-faint); font-size: 9px; }
+.sidebar__review > svg:last-child { color: var(--text-faint); }
+.sidebar.is-collapsed .sidebar__review { justify-content: center; padding: 9px 0; }
+.sidebar__profile { display: flex; align-items: center; gap: 9px; margin-top: 4px; padding: 9px 8px 1px; border-top: 1px solid var(--hairline); color: var(--text-muted); }
+.sidebar__profile-icon { flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); color: var(--brand); border: 1px solid var(--hairline); }
+.sidebar__profile > span:last-child { min-width: 0; display: grid; gap: 1px; }
+.sidebar__profile strong { color: var(--text); font-size: var(--fz-xs); font-weight: 650; }
+.sidebar__profile small { color: var(--text-faint); font-size: 10px; }
+.sidebar.is-collapsed .sidebar__profile { justify-content: center; padding-inline: 0; }
 
 /* ===================== 主卡工具条 ===================== */
 .main-toolbar {
