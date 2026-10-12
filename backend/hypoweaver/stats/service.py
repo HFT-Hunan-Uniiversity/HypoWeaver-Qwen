@@ -11,6 +11,9 @@ from ..literature.service import serialize
 from ..projects import service as projects
 from .models import AnalysisSpec, AnalysisRun
 from .engine import run_analysis
+from .reproduction import reproduce
+from ..claims.service import assess
+from ..claims.models import ClaimAssessment
 
 STEPS = ['main', 'event_study', 'robustness', 'permutation', 'reproduction', 'assessment']
 LABELS = {'main': '主模型', 'event_study': '事件研究', 'robustness': '稳健性', 'permutation': '置换检验', 'reproduction': '独立复算', 'assessment': '结论评估'}
@@ -85,7 +88,15 @@ def start(app, plan_id):
     def calculate(progress):
         with app.state.sessions() as db:
             frame = datasets.frame(db, dataset_id)
-        return run_analysis(spec, frame, on_step=step, progress=progress)
+        result = run_analysis(spec, frame, on_step=step, progress=progress)
+        step('reproduction','running')
+        progress('正在使用独立实现复算主模型与稳健性')
+        reproduction = reproduce(spec,frame,result)
+        step('reproduction','succeeded' if reproduction['consistent'] else 'failed',None if reproduction['consistent'] else '复算未全部一致，请查看对照')
+        step('assessment','running')
+        claims = assess(plan_snapshot,result,reproduction)
+        step('assessment','succeeded')
+        return result,reproduction,claims
 
     async def work(progress):
         with app.state.sessions() as db:
@@ -93,15 +104,16 @@ def start(app, plan_id):
             db.commit()
         try:
             progress('正在执行主模型与诊断')
-            result = await asyncio.to_thread(calculate, progress)
+            result, reproduction, claims = await asyncio.to_thread(calculate, progress)
             with app.state.sessions() as db:
                 run = get(db, run_id)
                 run.result, run.status, run.finished_at = result, 'succeeded', now()
                 current_plan = plans.get(db, plan_id)
                 current_binding = db.get(VariableBinding, plan_id)
                 run.stale = run.stale or current_plan.stale or current_plan.status != 'confirmed' or serialize(current_binding) != binding_snapshot
-                # These stages are added in the next implementation slice, never reported as passed.
-                run.steps = {**run.steps, 'reproduction': {'status': 'not_started', 'error': None}, 'assessment': {'status': 'not_started', 'error': None}}
+                run.reproduction = reproduction
+                for claim in claims:
+                    db.add(ClaimAssessment(run_id=run_id,**claim))
                 db.commit()
             return {'run_id': run_id}
         except BaseException as exc:
@@ -110,6 +122,8 @@ def start(app, plan_id):
                 run.status, run.finished_at = 'failed', now()
                 run.error = exc.message if isinstance(exc, AppError) else '统计执行中断或失败，请查看输入与步骤状态'
                 run.steps = {k: {'status': 'failed', 'error': run.error} if v['status'] in {'running', 'queued'} else v for k, v in run.steps.items()}
+                for claim in assess(plan_snapshot,None,None):
+                    db.merge(ClaimAssessment(run_id=run_id,**claim))
                 db.commit()
             raise
     job_id = jobs.submit(app, 'analysis', project_id, work)

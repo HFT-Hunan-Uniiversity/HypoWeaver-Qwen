@@ -10,6 +10,7 @@ from .landscape.router import router as landscape_router
 from .literature.router import router as literature_router
 from .literature import service as literature_service
 from .literature.sources import LiteratureClient
+from .claims.router import router as claims_router
 from .stats.router import router as stats_router
 from .stats import service as stats_service
 from .binding.router import router as binding_router
@@ -59,6 +60,7 @@ def create_app(settings=None):
     app.include_router(datasets_router)
     app.include_router(binding_router)
     app.include_router(stats_router)
+    app.include_router(claims_router)
 
     @app.get("/api/health")
     def health():

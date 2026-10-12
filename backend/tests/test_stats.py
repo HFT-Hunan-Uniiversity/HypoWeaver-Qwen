@@ -77,3 +77,19 @@ def test_carbon_small_sample_when_available():
     result=run_analysis(spec,sample)
     assert result['main']['n_units']==120
     assert result['main']['se']>0
+
+
+def test_independent_reproduction_balanced_unbalanced_and_interaction():
+    from hypoweaver.stats.service import reproduce
+    for missing in [False,True]:
+        raw=synthetic(n_units=60)
+        if missing:
+            raw=raw.drop(index=raw.index[::37])
+        spec=specification()
+        result=run_analysis(spec,raw)
+        report=reproduce(spec,raw,result)
+        assert report['consistent'],report
+        assert report['max_relative_diff']<1e-6
+    raw['moderator']=np.random.default_rng(1).normal(size=len(raw))
+    spec=spec.model_copy(update={'method_family':'mechanism_boundary','moderator':'moderator','robustness':[]})
+    assert reproduce(spec,raw,run_analysis(spec,raw))['consistent']
