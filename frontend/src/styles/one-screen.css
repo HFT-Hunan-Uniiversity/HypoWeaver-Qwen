@@ -754,3 +754,56 @@ button,
   margin: 0 0 8px;
   font-size: 15px;
 }
+
+/* 提案：目录 + 正文 */
+.proposal-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+}
+.proposal-toc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.proposal-toc button {
+  justify-content: flex-start;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  text-align: left;
+}
+.proposal-toc button.is-active,
+.proposal-toc button:hover {
+  background: var(--surface);
+  color: var(--brand);
+}
+.proposal-scroll {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.proposal-scroll .proposal-document {
+  margin: 0 auto;
+  border: 0;
+  box-shadow: none;
+}
+.proposal-anchor {
+  scroll-margin-top: 8px;
+}
+@media print {
+  .proposal-layout {
+    display: block;
+  }
+  .proposal-scroll {
+    border: 0;
+  }
+}

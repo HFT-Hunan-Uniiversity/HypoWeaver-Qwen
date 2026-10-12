@@ -1,5 +1,7 @@
+import { ScrollRegion } from '../components/shell/ShellContext'
+import { useUrlParam } from '../lib/urlState'
 import { StageActions } from '../components/shell/ShellContext'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import ReactMarkdown from 'react-markdown'
@@ -122,6 +124,12 @@ export default function Proposal() {
       refresh()
     },
   })
+  const [sec, setSec] = useUrlParam<string>('sec', '')
+  useEffect(() => {
+    if (sec) document.getElementById('sec-' + sec)?.scrollIntoView({ block: 'start' })
+    // 仅在提案载入时定位一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id])
   return (
     <>
       <div className="no-print">
@@ -181,33 +189,52 @@ export default function Proposal() {
           {active.stale && (
             <p className="notice">上游信息已变更，本提案已过期。历史正文保留，请生成新版本。</p>
           )}
-          <article className="proposal-document">
-            {active.snapshot.run && (
-              <Link className="no-print" to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
-                查看本提案的原始检验与复算 →
-              </Link>
-            )}
-            <p className="eyebrow">
-              {active.kind === 'plan_only'
-                ? '计划型提案 · 尚无实证结果'
-                : '研究提案 · 含探索性结果'}
-            </p>
-            <h1>{active.snapshot.project.title}</h1>
-            <p className="muted">已移除无效引用 {active.removed_references} 处</p>
-            {active.sections.map((s) => (
-              <div key={active.id + s.key}>
-                <SectionView section={s} proposalId={active.id} />
-                {s.key === 'results' && active.interpretation?.llm_model && (
-                  <p className="no-print">
-                    结果解读 <GeneratedBy of={active.interpretation} />
-                  </p>
+          <div className="proposal-layout fill">
+            <nav className="proposal-toc no-print" aria-label="提案目录">
+              {active.sections.map((s) => (
+                <button
+                  key={s.key}
+                  className={sec === s.key ? 'is-active' : ''}
+                  aria-current={sec === s.key ? 'true' : undefined}
+                  onClick={() => {
+                    setSec(s.key)
+                    document.getElementById('sec-' + s.key)?.scrollIntoView({ block: 'start' })
+                  }}
+                >
+                  {titles[s.key] || s.key}
+                </button>
+              ))}
+            </nav>
+            <ScrollRegion className="proposal-scroll" label="提案正文">
+              <article className="proposal-document">
+                {active.snapshot.run && (
+                  <Link className="no-print" to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
+                    查看本提案的原始检验与复算 →
+                  </Link>
                 )}
-                {s.key === 'results' && active.snapshot.run?.result && (
-                  <AnalysisCharts result={active.snapshot.run.result} />
-                )}
-              </div>
-            ))}
-          </article>
+                <p className="eyebrow">
+                  {active.kind === 'plan_only'
+                    ? '计划型提案 · 尚无实证结果'
+                    : '研究提案 · 含探索性结果'}
+                </p>
+                <h1>{active.snapshot.project.title}</h1>
+                <p className="muted">已移除无效引用 {active.removed_references} 处</p>
+                {active.sections.map((s) => (
+                  <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
+                    <SectionView section={s} proposalId={active.id} />
+                    {s.key === 'results' && active.interpretation?.llm_model && (
+                      <p className="no-print">
+                        结果解读 <GeneratedBy of={active.interpretation} />
+                      </p>
+                    )}
+                    {s.key === 'results' && active.snapshot.run?.result && (
+                      <AnalysisCharts result={active.snapshot.run.result} />
+                    )}
+                  </div>
+                ))}
+              </article>
+            </ScrollRegion>
+          </div>
         </>
       )}
     </>
