@@ -472,3 +472,51 @@ button,
 .project-list.scroll-region {
   align-content: start;
 }
+
+/* 文献：三区 */
+.lit-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+  gap: 12px;
+  min-height: 0;
+}
+.lit-grid > .scroll-region {
+  gap: 12px;
+  padding-right: 2px;
+}
+.lit-grid .chart-grid {
+  grid-template-columns: 1fr;
+}
+.lit-evidence .evidence-list {
+  flex: 1 1 auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.lit-evidence > .actions {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 1366px) {
+  .lit-grid {
+    grid-template-columns: 260px minmax(0, 1fr) 300px;
+  }
+}
+.lit-grid .heading.compact {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lit-grid .heading.compact h2 {
+  white-space: nowrap;
+  margin-right: auto;
+}
+.lit-evidence .evidence-card {
+  padding: 8px 4px;
+}
+.lit-evidence .evidence-card .tags {
+  margin: 4px 0;
+}
+.lit-grid h3 {
+  margin: 10px 0 4px;
+  font-size: 14px;
+}

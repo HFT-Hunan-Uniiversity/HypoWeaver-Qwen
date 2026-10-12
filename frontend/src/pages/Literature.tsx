@@ -1,3 +1,4 @@
+import { ScrollRegion } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -32,7 +33,7 @@ interface Search {
   job_id: string
   per_source_status: Record<string, { status: string; reason: string; hits: number }>
 }
-const PAGE = 12
+const PAGE = 20
 export default function Literature() {
   const { id } = useParams(),
     cache = useQueryClient()
@@ -84,148 +85,156 @@ export default function Literature() {
   const offset = page * PAGE
   return (
     <>
-      <div className="literature-top">
-        <section className="panel">
-          <div className="heading compact">
-            <h2>检索式</h2>
-            <NeedsModel />
-            <button className="quiet" disabled={suggest.isPending} onClick={() => suggest.mutate()}>
-              {suggest.isPending ? '正在生成…' : '根据方向生成'}
-            </button>
-          </div>
-          <label>
-            中英文检索式（每行一条，最多 6 条）
-            <textarea
-              rows={4}
-              value={queries}
-              onChange={(e) => setQueries(e.target.value)}
-              placeholder="输入关键词，或让模型根据研究方向生成"
-            />
-          </label>
-          <ErrorNote error={suggest.error || search.error} />
-          <button
-            disabled={
-              search.isPending ||
-              searches.data?.some((s) => s.status === 'running') ||
-              !queries.trim()
-            }
-            onClick={() => search.mutate()}
-          >
-            开始联合检索
-          </button>
-        </section>
-        <section className="panel search-log">
-          <h2>检索记录</h2>
-          {!searches.data?.length ? (
-            <p className="muted">尚未执行检索</p>
-          ) : (
-            searches.data.map((s) => (
-              <details key={s.id} open={s.id === searches.data?.[0]?.id}>
-                <summary>
-                  {new Date(s.created_at).toLocaleString('zh-CN')} ·{' '}
-                  {s.status === 'running'
-                    ? '检索中'
-                    : s.status === 'failed'
-                      ? '检索失败'
-                      : `${s.hit_count} 条去重结果`}
-                </summary>
-                <p>{s.queries.map((q) => q.text).join('；')}</p>
-                {Object.entries(s.per_source_status).map(([source, status]) => (
-                  <p key={source} className={status.status === 'failed' ? 'error' : ''}>
-                    {source}：{status.status === 'ok' ? '成功' : '存在失败'} · {status.hits} 条{' '}
-                    {status.reason}
-                  </p>
-                ))}
-              </details>
-            ))
-          )}
-        </section>
-      </div>
       {activeJob && <JobProgress id={activeJob} onComplete={() => refresh()} />}
-      <Landscape projectId={id!} />
-      <details className="panel">
-        <summary>上传 PDF 补充证据</summary>
-        <PdfUpload projectId={id!} />
-      </details>
       <ErrorNote error={cards.error || searches.error || include.error} />
-      <section className="panel">
-        <h2>
-          证据卡{' '}
-          <small>
-            {cards.data?.length || 0} 条 · 纳入 {cards.data?.filter((c) => c.included).length || 0}{' '}
-            条
-          </small>
-        </h2>
-        {cards.isPending ? (
-          <p>正在读取证据…</p>
-        ) : !cards.data?.length ? (
-          <p className="muted">还没有证据卡。输入检索式开始调研。</p>
-        ) : (
-          <>
-            <div className="evidence-list is-compact">
-              {cards.data.slice(offset, offset + PAGE).map((card) => (
-                <article className="evidence-card" key={card.id}>
-                  <div className="evidence-heading">
-                    <label className="check">
-                      <input
-                        type="checkbox"
-                        checked={card.included}
-                        disabled={include.isPending}
-                        onChange={() => include.mutate(card)}
-                      />
-                      纳入
-                    </label>
-                    <div className="evidence-main">
-                      <h3>{card.title}</h3>
-                      <p className="muted">
-                        {card.authors.join('、') || '作者未提供'} · {card.year || '年份未提供'} ·{' '}
-                        {card.venue || '期刊未提供'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="tags">
-                    {card.sources.map((source) => (
-                      <span key={source}>{source}</span>
-                    ))}
-                    {card.cited_by !== null && <span>被引 {card.cited_by}</span>}
-                    {card.doi && (
-                      <a
-                        href={`https://doi.org/${encodeURIComponent(card.doi)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        DOI: {card.doi}
-                      </a>
-                    )}
-                  </div>
-                  <details>
-                    <summary>查看摘要与证据</summary>
-                    <p className="abstract">{card.abstract || '来源未提供摘要'}</p>
-                    {card.fulltext_excerpt && <p className="abstract">{card.fulltext_excerpt}</p>}
-                    <small>证据编号：{card.id}</small>
-                    <EvidenceEdit card={card} projectId={id!} />
-                  </details>
-                </article>
-              ))}
-            </div>
-            <div className="actions">
-              <button className="quiet" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                上一页
-              </button>
-              <span>
-                第 {page + 1} / {Math.ceil(cards.data.length / PAGE)} 页
-              </span>
+      <div className="lit-grid fill">
+        <ScrollRegion className="col-stack" label="检索与记录">
+          <section className="panel">
+            <div className="heading compact">
+              <h2>检索式</h2>
+              <NeedsModel />
               <button
                 className="quiet"
-                disabled={offset + PAGE >= cards.data.length}
-                onClick={() => setPage(page + 1)}
+                disabled={suggest.isPending}
+                onClick={() => suggest.mutate()}
               >
-                下一页
+                {suggest.isPending ? '正在生成…' : '根据方向生成'}
               </button>
             </div>
-          </>
-        )}
-      </section>
+            <label>
+              中英文检索式（每行一条，最多 6 条）
+              <textarea
+                rows={4}
+                value={queries}
+                onChange={(e) => setQueries(e.target.value)}
+                placeholder="输入关键词，或让模型根据研究方向生成"
+              />
+            </label>
+            <ErrorNote error={suggest.error || search.error} />
+            <button
+              disabled={
+                search.isPending ||
+                searches.data?.some((s) => s.status === 'running') ||
+                !queries.trim()
+              }
+              onClick={() => search.mutate()}
+            >
+              开始联合检索
+            </button>
+          </section>
+          <section className="panel search-log">
+            <h2>检索记录</h2>
+            {!searches.data?.length ? (
+              <p className="muted">尚未执行检索</p>
+            ) : (
+              searches.data.map((s) => (
+                <details key={s.id} open={s.id === searches.data?.[0]?.id}>
+                  <summary>
+                    {new Date(s.created_at).toLocaleString('zh-CN')} ·{' '}
+                    {s.status === 'running'
+                      ? '检索中'
+                      : s.status === 'failed'
+                        ? '检索失败'
+                        : `${s.hit_count} 条去重结果`}
+                  </summary>
+                  <p>{s.queries.map((q) => q.text).join('；')}</p>
+                  {Object.entries(s.per_source_status).map(([source, status]) => (
+                    <p key={source} className={status.status === 'failed' ? 'error' : ''}>
+                      {source}：{status.status === 'ok' ? '成功' : '存在失败'} · {status.hits} 条{' '}
+                      {status.reason}
+                    </p>
+                  ))}
+                </details>
+              ))
+            )}
+          </section>
+          <details className="panel">
+            <summary>上传 PDF 补充证据</summary>
+            <PdfUpload projectId={id!} />
+          </details>
+        </ScrollRegion>
+        <section className="panel fill lit-evidence">
+          <h2>
+            证据卡{' '}
+            <small>
+              {cards.data?.length || 0} 条 · 纳入{' '}
+              {cards.data?.filter((c) => c.included).length || 0} 条
+            </small>
+          </h2>
+          {cards.isPending ? (
+            <p>正在读取证据…</p>
+          ) : !cards.data?.length ? (
+            <p className="muted">还没有证据卡。输入检索式开始调研。</p>
+          ) : (
+            <>
+              <ScrollRegion className="evidence-list is-compact" label="证据卡列表">
+                {cards.data.slice(offset, offset + PAGE).map((card) => (
+                  <article className="evidence-card" key={card.id}>
+                    <div className="evidence-heading">
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={card.included}
+                          disabled={include.isPending}
+                          onChange={() => include.mutate(card)}
+                        />
+                        纳入
+                      </label>
+                      <div className="evidence-main">
+                        <h3>{card.title}</h3>
+                        <p className="muted">
+                          {card.authors.join('、') || '作者未提供'} · {card.year || '年份未提供'} ·{' '}
+                          {card.venue || '期刊未提供'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="tags">
+                      {card.sources.map((source) => (
+                        <span key={source}>{source}</span>
+                      ))}
+                      {card.cited_by !== null && <span>被引 {card.cited_by}</span>}
+                      {card.doi && (
+                        <a
+                          href={`https://doi.org/${encodeURIComponent(card.doi)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          DOI: {card.doi}
+                        </a>
+                      )}
+                    </div>
+                    <details>
+                      <summary>查看摘要与证据</summary>
+                      <p className="abstract">{card.abstract || '来源未提供摘要'}</p>
+                      {card.fulltext_excerpt && <p className="abstract">{card.fulltext_excerpt}</p>}
+                      <small>证据编号：{card.id}</small>
+                      <EvidenceEdit card={card} projectId={id!} />
+                    </details>
+                  </article>
+                ))}
+              </ScrollRegion>
+              <div className="actions">
+                <button className="quiet" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                  上一页
+                </button>
+                <span>
+                  第 {page + 1} / {Math.ceil(cards.data.length / PAGE)} 页
+                </span>
+                <button
+                  className="quiet"
+                  disabled={offset + PAGE >= cards.data.length}
+                  onClick={() => setPage(page + 1)}
+                >
+                  下一页
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+        <ScrollRegion className="col-stack" label="文献图景">
+          <Landscape projectId={id!} />
+        </ScrollRegion>
+      </div>
     </>
   )
 }
