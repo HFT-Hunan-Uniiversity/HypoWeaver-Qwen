@@ -22,16 +22,19 @@ from .candidates import service as candidates_service
 from .candidates.router import router as candidates_router
 from .llm.router import router as llm_router
 from .llm.service import LLM
+from .llm.configuration import load as load_llm_config
+from .migrations import migrate
 from .projects.router import router as projects_router
 
 
 def create_app(settings=None):
-    settings = settings or Settings()
+    settings = load_llm_config(settings or Settings())
     engine, sessions = create_database(settings.storage_dir() / "hypoweaver.sqlite")
 
     @asynccontextmanager
     async def lifespan(app):
         Base.metadata.create_all(engine)
+        migrate(engine)
         jobs.recover(sessions)
         literature_service.recover(sessions)
         candidates_service.recover(sessions)

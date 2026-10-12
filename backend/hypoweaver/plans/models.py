@@ -94,6 +94,7 @@ class StudyPlan(Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("plan"))
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     candidate_id: Mapped[str] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"))
+    llm_model: Mapped[str | None]
     version: Mapped[int]
     status: Mapped[str] = mapped_column(default="draft")
     method_family: Mapped[str]

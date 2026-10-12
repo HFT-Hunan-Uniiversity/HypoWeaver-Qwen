@@ -6,7 +6,7 @@
   - 后端：`cd backend && uv sync && uv run uvicorn hypoweaver.app:app --reload`
   - 前端：`cd frontend && npm i && npm run dev`
   - 测试：`cd backend && uv run pytest`；`cd frontend && npm run build`
-- 密钥只放在环境变量或本地 `.env` 中（已 gitignore）：`DASHSCOPE_API_KEY`、`QWEN_BASE_URL`、`QWEN_MODEL`、`CONTACT_EMAIL`。不要提交数据文件、`var/` 或 `.env`。
+- 密钥只放在环境变量或本地 `.env` 中（已 gitignore）：`LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL`、`CONTACT_EMAIL`。不要提交数据文件、`var/` 或 `.env`。
 - 禁止：
   - 演示旁路、硬编码结果、前端 mock 数据源；
   - 写死模型名；

@@ -31,8 +31,11 @@ def get(db, job_id):
 
 def recover(sessions):
     with sessions() as db:
-        db.execute(update(Job).where(Job.status.in_(["queued", "running"])).values(
-            status="failed", error="服务重启中断了执行，请重新发起此步骤", finished_at=now()))
+        db.execute(
+            update(Job)
+            .where(Job.status.in_(["queued", "running"]))
+            .values(status="failed", error="服务重启中断了执行，请重新发起此步骤", finished_at=now())
+        )
         db.commit()
 
 
@@ -62,12 +65,20 @@ def submit(app, kind, project_id, fn):
             raise
         except Exception as exc:
             detail = str(exc)
-            secret = app.state.settings.dashscope_api_key
+            secret = app.state.settings.llm_api_key
             if secret:
                 detail = detail.replace(secret, "[redacted]")
-            logging.getLogger(__name__).error("Task %s (%s): %s: %s\n%s", job_id, kind,
-                                             type(exc).__name__, detail[:500], "".join(traceback.format_tb(exc.__traceback__)))
-            message = exc.message if isinstance(exc, AppError) else f"执行失败（{type(exc).__name__}），请检查输入后重试"
+            logging.getLogger(__name__).error(
+                "Task %s (%s): %s: %s\n%s",
+                job_id,
+                kind,
+                type(exc).__name__,
+                detail[:500],
+                "".join(traceback.format_tb(exc.__traceback__)),
+            )
+            message = (
+                exc.message if isinstance(exc, AppError) else f"执行失败（{type(exc).__name__}），请检查输入后重试"
+            )
             write(status="failed", error=message, finished_at=now())
 
     task = asyncio.create_task(execute())
@@ -84,12 +95,13 @@ def get_job(job_id: str, db: Session = Depends(session)):
     return get(db, job_id)
 
 
-project_router = APIRouter(prefix='/api/projects')
+project_router = APIRouter(prefix="/api/projects")
 
 
-@project_router.get('/{project_id}/jobs')
-def list_jobs(project_id: str, kind: str = '', db: Session = Depends(session)):
+@project_router.get("/{project_id}/jobs")
+def list_jobs(project_id: str, kind: str = "", db: Session = Depends(session)):
     from .projects.service import get as get_project
+
     get_project(db, project_id)
     query = select(Job).where(Job.project_id == project_id)
     if kind:

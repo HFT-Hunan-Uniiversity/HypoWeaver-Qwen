@@ -7,9 +7,9 @@ ROOT = Path(__file__).resolve().parents[2]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
     data_dir: Path = ROOT / "var"
-    dashscope_api_key: str = ""
-    qwen_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    qwen_model: str = ""
+    llm_api_key: str = ""
+    llm_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    llm_model: str = "qwen-plus"
     openalex_url: str = "https://api.openalex.org/works"
     crossref_url: str = "https://api.crossref.org/works"
     contact_email: str = ""

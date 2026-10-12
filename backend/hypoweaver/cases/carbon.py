@@ -92,6 +92,9 @@ def prepare(settings, project_id=None):
     app = create_app(settings)
     sessions = app.state.sessions
     Base.metadata.create_all(sessions.kw["bind"])
+    from ..migrations import migrate
+
+    migrate(sessions.kw["bind"])
     path = settings.storage_dir() / "raw" / "data.dta"
     if not path.exists() or path.stat().st_size != EXPECTED_SIZE:
         raise AppError("source_missing", "请先运行 carbon fetch，核验原始文件大小")

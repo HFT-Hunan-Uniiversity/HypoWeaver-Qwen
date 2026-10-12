@@ -6,13 +6,14 @@ from ..db import Base, now, uid
 
 
 class CandidateSet(Base):
-    __tablename__ = 'candidate_sets'
-    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid('cs'))
-    project_id: Mapped[str] = mapped_column(ForeignKey('projects.id', ondelete='CASCADE'))
+    __tablename__ = "candidate_sets"
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("cs"))
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    model: Mapped[str | None]
     version: Mapped[int]
-    status: Mapped[str] = mapped_column(default='generating')
+    status: Mapped[str] = mapped_column(default="generating")
     review: Mapped[dict] = mapped_column(JSON, default=dict)
-    recommendation_text: Mapped[str] = mapped_column(default='')
+    recommendation_text: Mapped[str] = mapped_column(default="")
     removed_references: Mapped[int] = mapped_column(default=0)
     evidence_ids: Mapped[list] = mapped_column(JSON, default=list)
     stale: Mapped[bool] = mapped_column(default=False)
@@ -22,9 +23,9 @@ class CandidateSet(Base):
 
 
 class Candidate(Base):
-    __tablename__ = 'candidates'
-    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid('cand'))
-    set_id: Mapped[str] = mapped_column(ForeignKey('candidate_sets.id', ondelete='CASCADE'))
+    __tablename__ = "candidates"
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("cand"))
+    set_id: Mapped[str] = mapped_column(ForeignKey("candidate_sets.id", ondelete="CASCADE"))
     title: Mapped[str]
     gap: Mapped[str]
     hypothesis: Mapped[str]
@@ -45,7 +46,7 @@ class CandidateDraft(BaseModel):
     required_data: list[str] = Field(min_length=1)
     identification: str = Field(min_length=1)
     risks: list[str] = Field(min_length=1)
-    positioning: Literal['high_increment_data_gap', 'feasible_limited_increment', 'balanced']
+    positioning: Literal["high_increment_data_gap", "feasible_limited_increment", "balanced"]
     evidence_ids: list[str] = Field(min_length=2)
 
 
@@ -61,5 +62,5 @@ class ReviewIssue(BaseModel):
 
 
 class ReviewOutput(BaseModel):
-    decision: Literal['pass', 'revise']
+    decision: Literal["pass", "revise"]
     issues: list[ReviewIssue] = Field(default_factory=list)

@@ -1,5 +1,6 @@
 from sqlalchemy import select, func
 from .. import jobs
+from ..llm.service import model_name
 from ..db import now
 from ..errors import AppError
 from ..staleness import invalidate
@@ -32,9 +33,11 @@ def list_(db, project_id):
     ]
 
 
-def create(db, project_id, candidate_id, data, stale=False):
+def create(db, project_id, candidate_id, data, stale=False, llm_model=None):
     version = (db.scalar(select(func.max(StudyPlan.version)).where(StudyPlan.project_id == project_id)) or 0) + 1
-    entity = StudyPlan(project_id=project_id, candidate_id=candidate_id, version=version, stale=stale, **data)
+    entity = StudyPlan(
+        llm_model=llm_model, project_id=project_id, candidate_id=candidate_id, version=version, stale=stale, **data
+    )
     db.add(entity)
     projects.get(db, project_id).updated_at = now()
     db.commit()
@@ -81,7 +84,7 @@ def draft(app, project_id, llm):
                 or serialize(current) != snapshot
                 or db.get(CandidateSet, current.set_id).stale
             )
-            entity = create(db, project_id, candidate_id, data, stale)
+            entity = create(db, project_id, candidate_id, data, stale, model_name(llm))
             return {"plan_id": entity.id}
 
     return jobs.submit(app, "plan", project_id, work)
@@ -92,7 +95,7 @@ def edit(db, plan_id, payload):
     data = schema_for(projects.get(db, entity.project_id)).model_validate(payload.model_dump()).model_dump()
     invalidate(db, entity.project_id, "plan")
     if entity.status != "draft":
-        return create(db, entity.project_id, entity.candidate_id, data, entity.stale)
+        return create(db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model)
     for key, value in data.items():
         setattr(entity, key, value)
     projects.get(db, entity.project_id).updated_at = now()
@@ -104,7 +107,7 @@ def new_version(db, plan_id):
     entity = get(db, plan_id)
     data = PlanDraft.model_validate(serialize(entity)).model_dump()
     invalidate(db, entity.project_id, "plan")
-    return create(db, entity.project_id, entity.candidate_id, data, entity.stale)
+    return create(db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model)
 
 
 def confirm(db, plan_id):

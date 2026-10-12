@@ -23,7 +23,7 @@ make build
 cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 ```
 
-模型配置只从本地 `.env` 或环境变量读取。`.env.example` 提供配置示例；密钥、数据库、上传文件和碳市场原始数据均不入 Git。真实模型调用需要 DASHSCOPE_API_KEY 和 QWEN_MODEL，测试使用替代客户端。
+模型配置从本地 `.env`、环境变量及设置接口读取；设置接口保存到忽略的 `DATA_DIR/.env.llm`（权限 0600），重启后仍生效，并优先于环境配置。`.env.example` 提供配置示例；密钥、数据库、上传文件和碳市场原始数据均不入 Git。真实模型调用需要 LLM_API_KEY 和 LLM_MODEL，测试使用替代客户端。
 
 文献页支持最多 6 条手动中英文检索式、OpenAlex/Crossref 联合检索和 PDF 上传。可用 `LOCAL_LIBRARY_DIR` 指向一个已有本地目录：优先读取 `library.jsonl`（每行是一张证据卡，至少有字符串 title；可带 year、doi、authors、abstract、concepts），否则读取目录顶层 PDF。索引最多 10 MB/2000 行，PDF 最多 200 个，每个 30 MB；截断或坏行会在来源状态中提示。上传 PDF 提取前 100 页文字，保留前 12000 字摘录；扫描件需先 OCR。
 
@@ -57,3 +57,13 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 `make test` 运行真实统计计算、数据格式导入、结论规则和从建项目到提案的 API 主流程；模型和文献网络在自动测试中由明确隔离的测试替身提供。产品运行时没有模拟数据入口。`make build` 执行 TypeScript 检查与生产构建。
 
 本轮真实 Qwen 连接和输出质量验收按使用者要求后置。未配置密钥时模型步骤会明确报错；可以先使用真实文献检索、PDF和数据导入。配置后在设置页测试连接，并逐项验收检索式、候选、方案和提案内容。不要把离线测试通过视为真实模型的内容质量已验证。
+
+### 第二轮后端接口约定
+
+- `GET /api/settings/llm` → `{base_url, model, configured}`，不包含密钥，也不会主动调用模型。
+- `PUT /api/settings/llm` 接受可选的 `base_url`、`api_key`、`model`；省略密钥保留现值，传空字符串清除。保存后后续请求使用新配置，进行中的任务保持启动时配置。默认地址和模型集中在后端 Settings / `.env.example`，模型名不限制枚举。
+- 未配置时，生成查询、候选、方案、绑定建议、提案及连接测试均直接返回 HTTP 409 / `llm_not_configured`，不会创建待执行任务。前端可先 GET 配置，再跳转设置页填写。
+- 候选集与提案版本新增 `model`；提案的 `interpretation` 保存 `{model, paragraphs, status}`。方案原有 `model` 是统计设定，为保持兼容，生成模型保存在 `llm_model`。手工新建版本继承该来源；历史记录未知模型为 null，不补猜测值。
+- `PATCH /api/datasets/{id}/fields/{name}` 接受 `semantics`、`level`；方案接口返回 `treatment_semantics`，运行保存当时的语义快照。字段语义变化后，旧运行和提案标为过期。
+
+本轮仅交付后端与接口，前端设置界面由另一项工作接入。真实千问连接与生成验收按用户要求延后；离线接口测试不能替代真实连通性证据。
