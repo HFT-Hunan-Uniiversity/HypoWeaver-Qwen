@@ -11,6 +11,8 @@ from .literature.router import router as literature_router
 from .literature import service as literature_service
 from .literature.sources import LiteratureClient
 from . import jobs
+from .candidates import service as candidates_service
+from .candidates.router import router as candidates_router
 from .llm.router import router as llm_router
 from .llm.service import LLM
 from .projects.router import router as projects_router
@@ -25,6 +27,7 @@ def create_app(settings=None):
         Base.metadata.create_all(engine)
         jobs.recover(sessions)
         literature_service.recover(sessions)
+        candidates_service.recover(sessions)
         yield
         tasks = list(app.state.tasks)
         for task in tasks:
@@ -44,6 +47,7 @@ def create_app(settings=None):
     app.include_router(llm_router)
     app.include_router(literature_router)
     app.include_router(landscape_router)
+    app.include_router(candidates_router)
 
     @app.get("/api/health")
     def health():

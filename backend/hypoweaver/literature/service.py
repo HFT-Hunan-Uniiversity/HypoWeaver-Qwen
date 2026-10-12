@@ -22,7 +22,9 @@ def searches(db, project_id):
 
 
 def save_cards(db, project_id, cards, search_id=None):
+    from ..candidates.service import invalidate
     existing = evidence(db, project_id)
+    before = [serialize(c) for c in existing if c.included]
     by_doi = {doi_normalize(card.doi): card for card in existing if card.doi}
     by_title = {title_key(card.title, card.year): card for card in existing}
     for values in merge_cards(cards):
@@ -42,6 +44,10 @@ def save_cards(db, project_id, cards, search_id=None):
         if doi:
             by_doi[doi] = card
         by_title[title] = card
+    db.flush()
+    after = [serialize(c) for c in evidence(db, project_id) if c.included]
+    if before != after:
+        invalidate(db, project_id)
     projects.get(db, project_id).updated_at = now()
     db.commit()
 
@@ -89,6 +95,9 @@ def patch(db, card_id, payload):
     card = db.get(EvidenceCard, card_id)
     if not card:
         raise AppError("evidence_not_found", "证据卡不存在", 404)
+    from ..candidates.service import invalidate
+    if any(getattr(card, k) != v for k, v in payload.model_dump(exclude_none=True).items()):
+        invalidate(db, card.project_id)
     for key, value in payload.model_dump(exclude_none=True).items():
         setattr(card, key, value)
     projects.get(db, card.project_id).updated_at = now()
