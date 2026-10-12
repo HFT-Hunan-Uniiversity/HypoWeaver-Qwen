@@ -9,7 +9,7 @@ class CandidateSet(Base):
     __tablename__ = "candidate_sets"
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("cs"))
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
-    model: Mapped[str | None]
+    llm_model: Mapped[str | None]
     version: Mapped[int]
     status: Mapped[str] = mapped_column(default="generating")
     review: Mapped[dict] = mapped_column(JSON, default=dict)

@@ -8,7 +8,7 @@ from .service import LLM, configured
 class LLMConfigInput(BaseModel):
     base_url: str | None = Field(default=None, max_length=2000)
     api_key: str | None = Field(default=None, max_length=4096, repr=False)
-    model: str | None = Field(default=None, min_length=1, max_length=200)
+    llm_model: str | None = Field(default=None, min_length=1, max_length=200)
 
     @field_validator("base_url")
     @classmethod
@@ -22,7 +22,7 @@ class LLMConfigInput(BaseModel):
             raise ValueError("模型地址不应包含查询参数或片段")
         return value.rstrip("/")
 
-    @field_validator("model")
+    @field_validator("llm_model")
     @classmethod
     def nonempty_model(cls, value):
         if value is not None and not value.strip():
@@ -46,14 +46,15 @@ def load(settings):
 def public(settings):
     return {
         "base_url": settings.llm_base_url,
-        "model": settings.llm_model,
+        "llm_model": settings.llm_model,
         "configured": configured(settings),
     }
 
 
 def save(app, payload):
     settings = app.state.settings
-    changes = {"llm_" + key: value for key, value in payload.model_dump(exclude_none=True).items()}
+    names = {"base_url": "llm_base_url", "api_key": "llm_api_key", "llm_model": "llm_model"}
+    changes = {names[key]: value for key, value in payload.model_dump(exclude_none=True).items()}
     updated = settings.model_copy(update=changes)
     path = config_path(settings)
     path.parent.mkdir(parents=True, exist_ok=True)

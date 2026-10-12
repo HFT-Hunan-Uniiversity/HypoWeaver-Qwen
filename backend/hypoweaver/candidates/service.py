@@ -54,7 +54,7 @@ def start(app, project_id, llm):
             db.scalar(select(func.max(CandidateSet.version)).where(CandidateSet.project_id == project_id)) or 0
         ) + 1
         entity = CandidateSet(
-            model=model_name(llm), project_id=project_id, version=version, evidence_ids=[c["id"] for c in cards]
+            llm_model=model_name(llm), project_id=project_id, version=version, evidence_ids=[c["id"] for c in cards]
         )
         db.add(entity)
         db.commit()

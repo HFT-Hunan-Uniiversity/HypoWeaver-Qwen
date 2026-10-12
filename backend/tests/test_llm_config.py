@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
@@ -22,22 +23,22 @@ def test_llm_config(tmp_path, monkeypatch):
         original = app.state.llm
         result = client.get("/api/settings/llm")
         assert result.json() == {
-            "model": "config-test-model",
+            "llm_model": "config-test-model",
             "base_url": "https://example.invalid/v1",
             "configured": True,
         }
         assert "offline-test-key" not in result.text
-        result = client.put("/api/settings/llm", json={"model": "changed-model"})
-        assert result.json()["model"] == "changed-model" and result.json()["configured"]
+        result = client.put("/api/settings/llm", json={"llm_model": "changed-model"})
+        assert result.json()["llm_model"] == "changed-model" and result.json()["configured"]
         assert original.model == "config-test-model" and app.state.llm.model == "changed-model"
         assert original.settings.llm_model == "config-test-model"
         assert (tmp_path / ".env.llm").stat().st_mode & 0o777 == 0o600
         assert (
             client.put("/api/settings/llm", json={"base_url": "https://user:secret@example.invalid"}).status_code == 422
         )
-        assert client.put("/api/settings/llm", json={"model": " "}).status_code == 422
+        assert client.put("/api/settings/llm", json={"llm_model": " "}).status_code == 422
     with TestClient(create_app(settings)) as client:
-        assert client.get("/api/settings/llm").json()["model"] == "changed-model"
+        assert client.get("/api/settings/llm").json()["llm_model"] == "changed-model"
         assert client.put("/api/settings/llm", json={"api_key": ""}).json()["configured"] is False
         project = client.post("/api/projects", json={"title": "未配置时应立即拒绝"}).json()["id"]
         for url, payload in [
@@ -57,17 +58,43 @@ def test_llm_config(tmp_path, monkeypatch):
 
 def test_additive_model_migration_preserves_old_rows(tmp_path):
     path = tmp_path / "old.sqlite"
+    legacy_interpretation = {"model": "legacy-model", "paragraphs": {"main": "原解读"}, "status": "generated"}
     with sqlite3.connect(path) as db:
         for table in ["projects", "candidate_sets", "study_plans", "proposals"]:
             db.execute(f"CREATE TABLE {table} (id TEXT PRIMARY KEY, value TEXT)")
             db.execute(f"INSERT INTO {table} VALUES (?, ?)", ("old", "preserved"))
+        for table in ["candidate_sets", "proposals"]:
+            db.execute(f"ALTER TABLE {table} ADD COLUMN model TEXT")
+            db.execute(f"UPDATE {table} SET model = ?", ("legacy-model",))
+            db.execute(f"INSERT INTO {table} (id, value, model) VALUES (?, ?, ?)", ("unknown", "retained", None))
+        db.execute("ALTER TABLE proposals ADD COLUMN interpretation JSON")
+        db.execute("UPDATE proposals SET interpretation = ? WHERE id = ?", (json.dumps(legacy_interpretation), "old"))
+        db.execute("UPDATE proposals SET interpretation = ? WHERE id = ?", (json.dumps({"model": None}), "unknown"))
     engine = create_engine(f"sqlite:///{path}")
     migrate(engine)
     migrate(engine)
     with sqlite3.connect(path) as db:
         assert db.execute('SELECT value, "case" FROM projects').fetchone() == ("preserved", None)
         assert db.execute("SELECT value, llm_model FROM study_plans").fetchone() == ("preserved", None)
-        assert db.execute("SELECT value, model, interpretation FROM proposals").fetchone() == ("preserved", None, None)
+        for table in ["candidate_sets", "proposals"]:
+            assert db.execute(f"SELECT model, llm_model FROM {table} WHERE id = ?", ("old",)).fetchone() == (
+                "legacy-model",
+                "legacy-model",
+            )
+            assert db.execute(f"SELECT model, llm_model FROM {table} WHERE id = ?", ("unknown",)).fetchone() == (
+                None,
+                None,
+            )
+        actual = json.loads(db.execute("SELECT interpretation FROM proposals WHERE id = ?", ("old",)).fetchone()[0])
+        assert actual == {"llm_model": "legacy-model", "paragraphs": {"main": "原解读"}, "status": "generated"}
+        unknown = json.loads(
+            db.execute("SELECT interpretation FROM proposals WHERE id = ?", ("unknown",)).fetchone()[0]
+        )
+        assert unknown == {"llm_model": None}
+        db.execute("UPDATE candidate_sets SET llm_model = ? WHERE id = ?", ("newer-model", "old"))
+    migrate(engine)
+    with sqlite3.connect(path) as db:
+        assert db.execute("SELECT llm_model FROM candidate_sets WHERE id = ?", ("old",)).fetchone()[0] == "newer-model"
     engine.dispose()
 
 

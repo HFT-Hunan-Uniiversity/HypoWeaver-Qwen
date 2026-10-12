@@ -257,7 +257,7 @@ async def build_proposal(snapshot, llm, project_id, progress):
 
     sections.sort(key=lambda s: list(TITLES).index(s["key"]))
     interpretation_record = {
-        "model": model_name(llm),
+        "llm_model": model_name(llm),
         "paragraphs": interpretation,
         "status": "generated" if interpretation else "not_generated",
     }
@@ -277,7 +277,7 @@ def start(app, project_id, llm):
                 stale = True
             version = (db.scalar(select(func.max(Proposal.version)).where(Proposal.project_id == project_id)) or 0) + 1
             entity = Proposal(
-                model=model_name(llm),
+                llm_model=model_name(llm),
                 interpretation=interpretation,
                 project_id=project_id,
                 version=version,

@@ -156,3 +156,11 @@ GPT-6 Luna 独立复核通过，未发现实现缺陷；已按其建议补充旧
 已执行 carbon prepare，复用 14,208 行公开资产。最终后端全量 **39 passed、0 skipped**；GPT-6 Luna 独立重跑结果一致。`ruff format --check backend`、`ruff check --select E501 backend`、diff 空白检查通过。73 个后端 Python 文件均 ≤120 字符/行，最长 309 行（低于 600）；纯格式改动与提交前 AST 对比相同。保留第三方弃用提示和极小合成样本的标准误警告，测试断言均通过。前端本轮未修改，也未调用真实模型。
 
 第二轮真实数据补验：在隔离 QA 库复用历史手工研究设计和公开碳市场资产，另建明确标注“手工设计验收、无模型调用”的项目。通过确认方案 → 新建第 2 版 → 勾选真实分配 → 确认/绑定 → 重新统计的 API 路径，得到 14,207 条有效观测、系数 0.07166669451278744、独立复算一致；运行快照 `treatment_is_real_assignment=true`、`treatment_semantics=peer_exposure`，结论上限仍为 `associational`，指定 blocker 存在。运行 ID：`run_dfefb1b64c934d6bb4b9b4962100cbc4`。最初复用的旧 QA 方案已过期，被确认接口正常拒绝；该失败记录保留，随后新建手工验收项目完成验证。此证据验证真实统计及结论链路，不代表文献、候选或方案通过真实大模型生成。
+
+## 第三轮
+
+### R3-01 · 统一生成模型字段
+
+GET/PUT `/api/settings/llm`、候选集、提案版本及 interpretation 均统一为 `llm_model`；方案的 `llm_model` 保持，`plan.model` 仍为统计设定。旧 candidate_sets/proposals 通过加列并拷贝旧 model 的方式迁移，保留旧列与历史 null，不覆盖已有新字段值；解读 JSON 也迁移键名，保留段落及其他内容。README 接口契约同步。
+
+验证：相关 7 项测试通过，覆盖设置读写/重启、产物来源、plan.model 类型不变、旧模型值和 null 保留、重复迁移与已有新值不覆盖。未调用真实模型，前端未修改。

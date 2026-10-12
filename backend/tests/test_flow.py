@@ -69,12 +69,13 @@ def test_complete_api_flow_and_stale_preservation(tmp_path):
             next(s for s in client.get(path + "/overview").json()["stages"] if s["key"] == "candidates")["status"]
             == "awaiting_selection"
         )
-        assert client.get(path + "/candidate-sets").json()[0]["model"] == fake.model
+        assert client.get(path + "/candidate-sets").json()[0]["llm_model"] == fake.model
         candidate = client.get(path + "/candidate-sets").json()[0]["candidates"][0]
         assert client.post("/api/candidates/" + candidate["id"] + ":select").status_code == 200
         plan_id = complete(client.post(path + "/plans"))["plan_id"]
         plan = client.get("/api/plans/" + plan_id).json()
         assert plan["llm_model"] == fake.model
+        assert isinstance(plan["model"], dict)
         plan["robustness"][-1]["args"] = {"outcome": "y_alt"}
         assert client.patch("/api/plans/" + plan_id, json=plan).status_code == 200
         assert client.post("/api/plans/" + plan_id + ":confirm").status_code == 200
@@ -122,8 +123,8 @@ def test_complete_api_flow_and_stale_preservation(tmp_path):
         )
         proposal_id = complete(client.post(path + "/proposals"))["proposal_id"]
         before = client.get("/api/proposals/" + proposal_id).json()
-        assert before["model"] == fake.model
-        assert before["interpretation"]["model"] == fake.model
+        assert before["llm_model"] == fake.model
+        assert before["interpretation"]["llm_model"] == fake.model
         assert before["interpretation"]["paragraphs"]
         assert before["kind"] == "empirical" and not before["stale"]
         assert all(s["status"] == "completed" for s in client.get(path + "/overview").json()["stages"])
