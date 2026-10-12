@@ -108,5 +108,9 @@ def result_table(result, numbers):
     if result.get("permutation"):
         numbers["permutation.p"] = result["permutation"]["p"]
         numbers["permutation.n"] = result["permutation"]["n"]
-        diagnostic.append("置换 {{num:permutation.n}} 次，双侧 p={{num:permutation.p}}。")
+        numbers["permutation.observed"] = result["permutation"]["observed"]
+        diagnostic.append(
+            "置换检验：无控制变量模型，观测系数 {{num:permutation.observed}}；"
+            "置换 {{num:permutation.n}} 次，双侧 p={{num:permutation.p}}。"
+        )
     return header + "\n" + "\n".join(rows) + "\n\n" + " ".join(diagnostic)
