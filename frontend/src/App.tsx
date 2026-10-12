@@ -1,15 +1,91 @@
-import { lazy,Suspense } from 'react'
-import { BrowserRouter,Link,Route,Routes } from 'react-router-dom'
-const Projects=lazy(()=>import('./pages/Projects'))
-const Settings=lazy(()=>import('./pages/Settings'))
-const Overview=lazy(()=>import('./pages/Overview'))
-const Direction=lazy(()=>import('./pages/Direction'))
-const Literature=lazy(()=>import('./pages/Literature'))
-const Candidates=lazy(()=>import('./pages/Candidates'))
-const Plan=lazy(()=>import('./pages/Plan'))
-const Data=lazy(()=>import('./pages/Data'))
-const Analysis=lazy(()=>import('./pages/Analysis'))
-const Proposal=lazy(()=>import('./pages/Proposal'))
-export default function App(){
- return <BrowserRouter><a className="skip-link" href="#main-content">跳到正文</a><header><Link className="brand" to="/">HypoWeaver <span>研究工作台</span></Link><nav aria-label="工作台导航"><Link to="/">研究项目</Link>　<Link to="/settings">设置</Link></nav></header><main id="main-content"><Suspense fallback={<p role="status" className="panel">正在加载研究页面…</p>}><Routes><Route path="/" element={<Projects/>}/><Route path="/settings" element={<Settings/>}/><Route path="/p/:id" element={<Overview/>}/><Route path="/p/:id/direction" element={<Direction/>}/><Route path="/p/:id/literature" element={<Literature/>}/><Route path="/p/:id/candidates" element={<Candidates/>}/><Route path="/p/:id/plan" element={<Plan/>}/><Route path="/p/:id/data" element={<Data/>}/><Route path="/p/:id/analysis" element={<Analysis/>}/><Route path="/p/:id/proposal" element={<Proposal/>}/><Route path="*" element={<><h1>页面不存在</h1><p>请从项目列表重新进入研究。</p><Link to="/">返回项目列表</Link></>}/></Routes></Suspense></main><footer>HypoWeaver · 文献有出处，数字可复核，结论有边界。</footer></BrowserRouter>
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import AppShell from './components/shell/AppShell'
+import StageLayout from './components/shell/StageLayout'
+const Projects = lazy(() => import('./pages/Projects'))
+const Settings = lazy(() => import('./pages/Settings'))
+const Overview = lazy(() => import('./pages/Overview'))
+const Direction = lazy(() => import('./pages/Direction'))
+const Literature = lazy(() => import('./pages/Literature'))
+const Candidates = lazy(() => import('./pages/Candidates'))
+const Plan = lazy(() => import('./pages/Plan'))
+const Data = lazy(() => import('./pages/Data'))
+const Proposal = lazy(() => import('./pages/Proposal'))
+
+/** 旧链接 /p/:id/analysis → 数据与检验 · 运行结果 */
+function AnalysisRedirect() {
+  const { pathname, search } = useLocation()
+  const params = new URLSearchParams(search)
+  params.set('tab', 'results')
+  return <Navigate replace to={`${pathname.replace(/\/analysis$/, '/data')}?${params}`} />
+}
+
+const loading = (
+  <p role="status" className="loading-line">
+    正在加载研究页面…
+  </p>
+)
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={loading}>
+                <Projects />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Suspense fallback={loading}>
+                <Settings />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/p/:id"
+            element={
+              <Suspense fallback={loading}>
+                <Overview />
+              </Suspense>
+            }
+          />
+          <Route path="/p/:id/analysis" element={<AnalysisRedirect />} />
+          <Route element={<StageLayout />}>
+            {(
+              [
+                ['direction', <Direction />],
+                ['literature', <Literature />],
+                ['candidates', <Candidates />],
+                ['plan', <Plan />],
+                ['data', <Data />],
+                ['proposal', <Proposal />],
+              ] as const
+            ).map(([path, el]) => (
+              <Route
+                key={path}
+                path={`/p/:id/${path}`}
+                element={<Suspense fallback={loading}>{el}</Suspense>}
+              />
+            ))}
+          </Route>
+          <Route
+            path="*"
+            element={
+              <div className="product-page">
+                <h1>页面不存在</h1>
+                <p>请从项目列表重新进入研究。</p>
+                <Link to="/">返回项目列表</Link>
+              </div>
+            }
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
 }

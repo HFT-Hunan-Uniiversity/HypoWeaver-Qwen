@@ -1,0 +1,71 @@
+/* 设计 token：沿用 main 旧版 theme.css 日间模式（雾灰 / 陶土）。text-faint 加深以满足 AA 对比度。 */
+:root {
+  /* —— 字体 —— */
+  --font-sans: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-serif: 'Fraunces', 'Newsreader', 'Songti SC', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* —— 字号阶梯 —— */
+  --fz-display: clamp(34px, 3.4vw, 47px);
+  --fz-h1: 30px;
+  --fz-h2: 24px;
+  --fz-h3: 18px;
+  --fz-body: 14px;
+  --fz-sm: 13px;
+  --fz-xs: 12px;
+  --fz-eyebrow: 11px;
+  --lh-tight: 1.1;
+  --lh-body: 1.6;
+  --tracking-eyebrow: 0.18em;
+
+  /* —— 间距 —— */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 44px;
+  --space-8: 56px;
+
+  /* —— 圆角 —— */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* —— 壳层（ClawsGO 式侧边栏 + 浮起主卡）—— */
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 52px;
+
+  /* —— 过渡 —— */
+  --ease: cubic-bezier(0.4, 0, 0.15, 1);
+  --dur-theme: 0.55s;
+
+  /* —— 日间 · 雾灰 / 陶土（默认） —— */
+  --surface-bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --surface-3: #e7e9ee;
+  --hairline: rgba(27, 29, 34, 0.09);
+  --hairline-strong: rgba(27, 29, 34, 0.16);
+  --text: #1b1d22;
+  --text-muted: #555b66;
+  --text-faint: #6f7681;
+  --brand: #b5533a;
+  --brand-soft: rgba(181, 83, 58, 0.1);
+  --on-accent: #ffffff;
+  --attention: #a06a1f; /* 等待人工/需关注 */
+  --attention-soft: rgba(160, 106, 31, 0.12);
+  --positive: #3f7d54; /* 已通过/已完成语义 */
+  --negative: #b0413f;
+  --glow: rgba(181, 83, 58, 0.05);
+  --shadow-1: 0 1px 2px rgba(20, 30, 50, 0.05);
+  --shadow-2: 0 18px 44px -24px rgba(20, 30, 50, 0.28);
+  color-scheme: light;
+}
+:root {
+  --danger: var(--negative);
+}

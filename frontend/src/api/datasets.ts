@@ -1,3 +1,50 @@
-export interface Source {url:string;doi:string;license:string;citation:string}
-export interface Dataset {id:string;name:string;source:Source;format:string;sheet:string|null;n_rows:number;n_cols:number;selected_columns:string[];size_bytes:number;sha256:string;panel:{detected:boolean;unit:string|null;time:string|null;n_units?:number;n_periods?:number;duplicates?:number;missing_keys?:number;balanced?:boolean;time_min?:string;time_max?:string};profile:{name:string;label:string;type:string;missing_rate:number;unique_count:number;min:number|null;max:number|null}[]}
-export interface Inspection {upload_id:string;name:string;columns:{name:string;label:string}[];sheets:string[];sheet:string|null;format:string}
+export interface Source {
+  url: string
+  doi: string
+  license: string
+  citation: string
+}
+export interface Dataset {
+  id: string
+  name: string
+  source: Source
+  format: string
+  sheet: string | null
+  n_rows: number
+  n_cols: number
+  selected_columns: string[]
+  size_bytes: number
+  sha256: string
+  panel: {
+    detected: boolean
+    unit: string | null
+    time: string | null
+    n_units?: number
+    n_periods?: number
+    duplicates?: number
+    missing_keys?: number
+    balanced?: boolean
+    time_min?: string
+    time_max?: string
+  }
+  profile: {
+    name: string
+    label: string
+    type: string
+    missing_rate: number
+    unique_count: number
+    min: number | null
+    max: number | null
+    /** R2-01：字段语义与层级；后端未落地时缺省 */
+    semantics?: 'real_assignment' | 'peer_exposure' | 'unknown' | null
+    level?: 'firm' | 'industry' | 'region' | 'other' | null
+  }[]
+}
+export interface Inspection {
+  upload_id: string
+  name: string
+  columns: { name: string; label: string }[]
+  sheets: string[]
+  sheet: string | null
+  format: string
+}

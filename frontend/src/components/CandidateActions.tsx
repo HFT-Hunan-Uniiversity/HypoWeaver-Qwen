@@ -6,11 +6,136 @@ import type { Project } from '../api/client'
 import type { Candidate } from '../pages/Candidates'
 import type { Evidence } from './EvidenceChip'
 import { ErrorNote } from './Shared'
-export default function CandidateActions({candidate,projectId,cards,stale}:{candidate:Candidate;projectId:string;cards:Evidence[];stale:boolean}){
- const qc=useQueryClient(),[editing,setEditing]=useState(false),[draft,setDraft]=useState(candidate)
- const project=useQuery({queryKey:['project',projectId],queryFn:()=>api<Project&{selected_candidate_id:string|null}>(`/projects/${projectId}`)})
- const save=useMutation({mutationFn:()=>api(`/candidates/${candidate.id}`,body('PATCH',draft)),onSuccess:()=>{setEditing(false);qc.invalidateQueries({queryKey:['candidate-sets',projectId]});qc.invalidateQueries({queryKey:['plans',projectId]})}})
- const choose=useMutation({mutationFn:()=>api(`/candidates/${candidate.id}:select`,body('POST')),onSuccess:()=>{qc.invalidateQueries({queryKey:['project',projectId]});qc.invalidateQueries({queryKey:['plans',projectId]})}})
- const chosen=project.data?.selected_candidate_id===candidate.id
- return <><ErrorNote error={save.error||choose.error}/><div className="actions"><button className="secondary" disabled={stale} onClick={()=>{setDraft(candidate);setEditing(true)}}>编辑候选</button><button disabled={chosen||stale||choose.isPending} onClick={()=>choose.mutate()}>{chosen?'当前已选':'选择此候选'}</button>{chosen&&<Link to={`/p/${projectId}/plan`}>起草研究方案 →</Link>}</div>{candidate.user_edited&&<p className="muted">已由你编辑；原自审意见对应生成时内容。</p>}{editing&&<div className="modal-backdrop"><form className="modal form" role="dialog" aria-label="编辑候选" onSubmit={e=>{e.preventDefault();save.mutate()}}><h2>编辑研究候选</h2>{(['title','gap','hypothesis','identification'] as const).map((key,i)=><label key={key}>{['标题','研究缺口','假设','识别思路'][i]}<textarea required value={draft[key]} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></label>)}{(['mechanism','required_data','risks'] as const).map((key,i)=><label key={key}>{['机制','数据需求','风险'][i]}（每行一项）<textarea required value={draft[key].join('\n')} onChange={e=>setDraft({...draft,[key]:e.target.value.split('\n')})}/></label>)}<label>定位<select value={draft.positioning} onChange={e=>setDraft({...draft,positioning:e.target.value})}><option value="balanced">增量与可行性平衡</option><option value="high_increment_data_gap">增量较高 · 数据有缺口</option><option value="feasible_limited_increment">可行性较高 · 增量有限</option></select></label><fieldset><legend>引用文献（至少两篇）</legend>{cards.filter(c=>c.included).map(c=><label className="check" key={c.id}><input type="checkbox" checked={draft.evidence_ids.includes(c.id)} onChange={e=>setDraft({...draft,evidence_ids:e.target.checked?[...draft.evidence_ids,c.id]:draft.evidence_ids.filter(x=>x!==c.id)})}/>{c.title}</label>)}</fieldset><ErrorNote error={save.error}/><div className="actions"><button type="button" className="secondary" onClick={()=>setEditing(false)}>取消</button><button disabled={save.isPending}>保存修改</button></div></form></div>}</>
+export default function CandidateActions({
+  candidate,
+  projectId,
+  cards,
+  stale,
+}: {
+  candidate: Candidate
+  projectId: string
+  cards: Evidence[]
+  stale: boolean
+}) {
+  const qc = useQueryClient(),
+    [editing, setEditing] = useState(false),
+    [draft, setDraft] = useState(candidate)
+  const project = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () =>
+      api<Project & { selected_candidate_id: string | null }>(`/projects/${projectId}`),
+  })
+  const save = useMutation({
+    mutationFn: () => api(`/candidates/${candidate.id}`, body('PATCH', draft)),
+    onSuccess: () => {
+      setEditing(false)
+      qc.invalidateQueries({ queryKey: ['candidate-sets', projectId] })
+      qc.invalidateQueries({ queryKey: ['plans', projectId] })
+    },
+  })
+  const choose = useMutation({
+    mutationFn: () => api(`/candidates/${candidate.id}:select`, body('POST')),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project', projectId] })
+      qc.invalidateQueries({ queryKey: ['plans', projectId] })
+    },
+  })
+  const chosen = project.data?.selected_candidate_id === candidate.id
+  return (
+    <>
+      <ErrorNote error={save.error || choose.error} />
+      <div className="actions">
+        <button
+          className="secondary"
+          disabled={stale}
+          onClick={() => {
+            setDraft(candidate)
+            setEditing(true)
+          }}
+        >
+          编辑候选
+        </button>
+        <button disabled={chosen || stale || choose.isPending} onClick={() => choose.mutate()}>
+          {chosen ? '当前已选' : '选择此候选'}
+        </button>
+        {chosen && <Link to={`/p/${projectId}/plan`}>起草研究方案 →</Link>}
+      </div>
+      {candidate.user_edited && <p className="muted">已由你编辑；原自审意见对应生成时内容。</p>}
+      {editing && (
+        <div className="modal-backdrop">
+          <form
+            className="modal form"
+            role="dialog"
+            aria-label="编辑候选"
+            onSubmit={(e) => {
+              e.preventDefault()
+              save.mutate()
+            }}
+          >
+            <h2>编辑研究候选</h2>
+            {(['title', 'gap', 'hypothesis', 'identification'] as const).map((key, i) => (
+              <label key={key}>
+                {['标题', '研究缺口', '假设', '识别思路'][i]}
+                <textarea
+                  required
+                  value={draft[key]}
+                  onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                />
+              </label>
+            ))}
+            {(['mechanism', 'required_data', 'risks'] as const).map((key, i) => (
+              <label key={key}>
+                {['机制', '数据需求', '风险'][i]}（每行一项）
+                <textarea
+                  required
+                  value={draft[key].join('\n')}
+                  onChange={(e) => setDraft({ ...draft, [key]: e.target.value.split('\n') })}
+                />
+              </label>
+            ))}
+            <label>
+              定位
+              <select
+                value={draft.positioning}
+                onChange={(e) => setDraft({ ...draft, positioning: e.target.value })}
+              >
+                <option value="balanced">增量与可行性平衡</option>
+                <option value="high_increment_data_gap">增量较高 · 数据有缺口</option>
+                <option value="feasible_limited_increment">可行性较高 · 增量有限</option>
+              </select>
+            </label>
+            <fieldset>
+              <legend>引用文献（至少两篇）</legend>
+              {cards
+                .filter((c) => c.included)
+                .map((c) => (
+                  <label className="check" key={c.id}>
+                    <input
+                      type="checkbox"
+                      checked={draft.evidence_ids.includes(c.id)}
+                      onChange={(e) =>
+                        setDraft({
+                          ...draft,
+                          evidence_ids: e.target.checked
+                            ? [...draft.evidence_ids, c.id]
+                            : draft.evidence_ids.filter((x) => x !== c.id),
+                        })
+                      }
+                    />
+                    {c.title}
+                  </label>
+                ))}
+            </fieldset>
+            <ErrorNote error={save.error} />
+            <div className="actions">
+              <button type="button" className="secondary" onClick={() => setEditing(false)}>
+                取消
+              </button>
+              <button disabled={save.isPending}>保存修改</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </>
+  )
 }
