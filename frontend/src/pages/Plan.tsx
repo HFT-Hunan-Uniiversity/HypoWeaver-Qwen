@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { type StudyPlan, methods } from '../api/plans'
-import { ErrorNote, ProjectBack } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 import PlanEditor from '../components/PlanEditor'
 import JobProgress from '../components/JobProgress'
 import type { Job } from '../components/JobProgress'
@@ -47,10 +47,8 @@ export default function Plan() {
   })
   return (
     <>
-      <ProjectBack />
       <div className="page-heading">
         <div>
-          <p className="eyebrow">第四阶段 / 把问题写成可检验的方案</p>
           <h1>研究方案</h1>
         </div>
         <button
@@ -118,7 +116,9 @@ export default function Plan() {
                   新建版本
                 </button>
               )}
-              {current.status === 'confirmed' && <Link to={`/p/${id}/data`}>导入与绑定数据 →</Link>}
+              {current.status === 'confirmed' && (
+                <Link to={`/p/${id}/data?tab=binding`}>导入与绑定数据 →</Link>
+              )}
             </div>
           </section>
           {dirty && <p className="notice">有尚未保存的编辑，请先保存草稿再确认。</p>}

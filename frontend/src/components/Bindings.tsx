@@ -282,7 +282,7 @@ function Editor({
                   </ul>
                 </details>
                 {ready.status === 'ready' && (
-                  <Link to={`/p/${plan.project_id}/analysis`}>进入统计检验 →</Link>
+                  <Link to={`/p/${plan.project_id}/data?tab=results`}>进入运行结果 →</Link>
                 )}
               </>
             )}

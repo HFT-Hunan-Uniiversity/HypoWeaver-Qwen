@@ -1,13 +1,19 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, body, type Project } from '../api/client'
 import { ErrorNote } from '../components/Shared'
 export default function Projects() {
   const query = useQuery({ queryKey: ['projects'], queryFn: () => api<Project[]>('/projects') })
-  const [open, setOpen] = useState(false),
+  const [search, setSearch] = useSearchParams()
+  const [open, setOpenState] = useState(search.get('new') === '1'),
     [title, setTitle] = useState(''),
     [deleting, setDeleting] = useState<Project | null>(null)
+  const setOpen = (v: boolean) => {
+    setOpenState(v)
+    if (!v && search.get('new')) setSearch({})
+  }
+  if (search.get('new') === '1' && !open) setOpenState(true)
   const navigate = useNavigate(),
     cache = useQueryClient()
   const create = useMutation({
@@ -25,15 +31,17 @@ export default function Projects() {
     },
   })
   return (
-    <>
-      <div className="heading">
+    <div className="product-page">
+      <header className="product-page__header">
         <div>
-          <p className="eyebrow">研究工作台</p>
+          <span className="product-eyebrow">研究工作台</span>
           <h1>我的研究项目</h1>
           <p className="muted">从一个问题出发，让文献、数据与判断相互印证。</p>
         </div>
-        <button onClick={() => setOpen(true)}>＋ 新建项目</button>
-      </div>
+        <button className="product-button is-primary" onClick={() => setOpen(true)}>
+          ＋ 新建项目
+        </button>
+      </header>
       <ErrorNote error={query.error || remove.error} />
       {query.isPending ? (
         <p>正在读取项目…</p>
@@ -119,6 +127,6 @@ export default function Projects() {
           </section>
         </div>
       )}
-    </>
+    </div>
   )
 }

@@ -45,7 +45,7 @@ export default function Settings() {
     },
   })
   return (
-    <>
+    <div className="product-page">
       <p className="eyebrow">服务设置</p>
       <h1>服务与用量</h1>
       <p className="muted">密钥只在本机环境中配置，此页面不显示或保存密钥。</p>
@@ -117,6 +117,6 @@ export default function Settings() {
           </>
         )
       )}
-    </>
+    </div>
   )
 }

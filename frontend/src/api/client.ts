@@ -1,3 +1,16 @@
+export class ApiError extends Error {
+  status: number
+  code: string
+  constructor(message: string, status: number, code = '') {
+    super(message)
+    this.status = status
+    this.code = code
+  }
+}
+/** 409 或 llm_not_configured：需要模型但未配置 */
+export function isModelMissing(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 409 || error.code === 'llm_not_configured')
+}
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch('/api' + path, {
     ...options,
@@ -8,7 +21,11 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   })
   if (!response.ok) {
     const data = await response.json().catch(() => null)
-    throw new Error(data?.error?.message || `请求失败（${response.status}）`)
+    throw new ApiError(
+      data?.error?.message || data?.detail?.message || `请求失败（${response.status}）`,
+      response.status,
+      data?.error?.code || data?.detail?.code || '',
+    )
   }
   return response.status === 204 ? (undefined as T) : response.json()
 }

@@ -8,7 +8,7 @@ import Claims from '../components/Claims'
 import ResultTable, { num } from '../components/ResultTable'
 import AnalysisCharts from '../components/AnalysisCharts'
 import JobProgress from '../components/JobProgress'
-import { ErrorNote, ProjectBack } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 const stepNames: Record<string, string> = {
   main: '主模型',
   event_study: '事件研究',
@@ -52,17 +52,15 @@ export default function Analysis() {
     mutationFn: () => api<{ job_id: string }>(`/plans/${plan!.id}/runs`, body('POST')),
     onSuccess: (d) => {
       setJob(d.job_id)
-      setParams({})
+      setParams({ tab: 'results' })
       refresh()
     },
   })
   const result = current?.result
   return (
     <>
-      <ProjectBack />
       <div className="page-heading">
         <div>
-          <p className="eyebrow">第五阶段 / 从方案到可复核数字</p>
           <h1>统计检验</h1>
           <p className="muted">按确认后的方案执行。每次运行保留当时的方案和绑定设定。</p>
         </div>
@@ -80,7 +78,7 @@ export default function Analysis() {
       <ErrorNote error={runs.error || plans.error || start.error} />
       {!plan && (
         <p className="notice">
-          请先确认一个未过期的方案，并完成 <Link to={`/p/${id}/data`}>变量绑定</Link>。
+          请先确认一个未过期的方案，并完成 <Link to={`/p/${id}/data?tab=binding`}>变量绑定</Link>。
         </p>
       )}
       {activeJob && (
@@ -88,7 +86,7 @@ export default function Analysis() {
           id={activeJob}
           onComplete={(j) => {
             refresh()
-            if (j.result?.run_id) setParams({ run: String(j.result.run_id) })
+            if (j.result?.run_id) setParams({ tab: 'results', run: String(j.result.run_id) })
           }}
         />
       )}
@@ -98,7 +96,7 @@ export default function Analysis() {
         <section className="panel">
           <h2>尚未运行检验</h2>
           <p>数据就绪后，主回归和诊断会在后台计算并保存；错误会显示具体原因。</p>
-          <Link to={`/p/${id}/data`}>检查数据与绑定 →</Link>
+          <Link to={`/p/${id}/data?tab=binding`}>检查数据与绑定 →</Link>
         </section>
       ) : (
         <>
@@ -108,7 +106,7 @@ export default function Analysis() {
               value={current.id}
               onChange={(e) => {
                 setJob('')
-                setParams({ run: e.target.value })
+                setParams({ tab: 'results', run: e.target.value })
               }}
             >
               {runs.data?.map((r) => (

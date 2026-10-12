@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
-import { ErrorNote, ProjectBack } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 import Landscape from '../components/Landscape'
 import PdfUpload from '../components/PdfUpload'
 import EvidenceEdit from '../components/EvidenceEdit'
@@ -82,8 +82,6 @@ export default function Literature() {
   const offset = page * 20
   return (
     <>
-      <ProjectBack />
-      <p className="eyebrow">第二阶段 / 建立文献依据</p>
       <h1>文献联合调研</h1>
       <p className="muted">检索并筛选证据，后续候选只使用你纳入的文献。</p>
       <section className="panel">

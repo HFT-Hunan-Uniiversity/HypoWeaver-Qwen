@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body, type Direction as DirectionType, type Project } from '../api/client'
-import { ErrorNote, ProjectBack } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 function Editor({ project }: { project: Project }) {
   const [draft, setDraft] = useState<DirectionType>(project.direction),
     [saved, setSaved] = useState(false),
@@ -116,7 +116,6 @@ export default function Direction() {
   const q = useQuery({ queryKey: ['project', id], queryFn: () => api<Project>(`/projects/${id}`) })
   return (
     <>
-      <ProjectBack />
       <h1>研究方向</h1>
       <p className="muted">写下问题与边界，后续研究围绕这些信息展开。</p>
       <ErrorNote error={q.error} />

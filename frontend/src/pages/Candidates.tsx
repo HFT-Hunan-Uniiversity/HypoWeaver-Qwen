@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
-import { ErrorNote, ProjectBack } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 import JobProgress from '../components/JobProgress'
 import EvidenceChip from '../components/EvidenceChip'
 import type { Evidence } from '../components/EvidenceChip'
@@ -69,10 +69,8 @@ export default function Candidates() {
     unused = cards.data?.filter((c) => c.included && !cited.has(c.id)) || []
   return (
     <>
-      <ProjectBack />
       <div className="page-heading">
         <div>
-          <p className="eyebrow">第三阶段 / 从证据到问题</p>
           <h1>缺口与候选</h1>
           <p className="muted">比较研究增量、数据可得性与识别边界，再选择值得推进的问题。</p>
         </div>

@@ -7,7 +7,7 @@ import { api, body } from '../api/client'
 import type { AnalysisResult } from '../api/analysis'
 import AnalysisCharts from '../components/AnalysisCharts'
 import JobProgress from '../components/JobProgress'
-import { ProjectBack, ErrorNote } from '../components/Shared'
+import { ErrorNote } from '../components/Shared'
 const titles: Record<string, string> = {
   overview: '一页概览',
   question: '研究问题与贡献',
@@ -119,10 +119,8 @@ export default function Proposal() {
   return (
     <>
       <div className="no-print">
-        <ProjectBack />
         <div className="page-heading">
           <div>
-            <p className="eyebrow">第六阶段 / 汇总研究成果</p>
             <h1>研究提案</h1>
             <p className="muted">数字来自已保存的检验，叙述须遵守结论强度。</p>
           </div>
