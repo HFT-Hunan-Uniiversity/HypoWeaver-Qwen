@@ -36,15 +36,21 @@ export default function PlanEditor({
       .map(Number)
   return (
     <form
-      className="panel form"
+      className="panel form plan-form"
       onSubmit={(e) => {
         e.preventDefault()
         save.mutate()
       }}
     >
       <h2>{section ? sectionTitles[section] || '完整方案' : '完整方案'}</h2>
-      <fieldset disabled={locked || plan.stale}>
-        <div className="plan-sec" hidden={!!section && section !== 'variables'}>
+      <fieldset
+        className="scroll-region plan-fieldset"
+        data-scroll-region=""
+        tabIndex={0}
+        aria-label="方案编辑"
+        disabled={locked || plan.stale}
+      >
+        <div className="plan-sec plan-sec--variables" hidden={!!section && section !== 'variables'}>
           <label>
             方法类别
             <select
@@ -153,7 +159,7 @@ export default function PlanEditor({
             添加变量
           </button>
         </div>
-        <div className="plan-sec" hidden={!!section && section !== 'model'}>
+        <div className="plan-sec plan-sec--model" hidden={!!section && section !== 'model'}>
           <h3>模型与识别</h3>
           {['unit', 'time'].map((x) => (
             <label className="check" key={x}>
@@ -244,7 +250,10 @@ export default function PlanEditor({
             />
           </label>
         </div>
-        <div className="plan-sec" hidden={!!section && section !== 'robustness'}>
+        <div
+          className="plan-sec plan-sec--robustness"
+          hidden={!!section && section !== 'robustness'}
+        >
           <h3>稳健性检查</h3>
           {draft.robustness.map((r, i) => (
             <div className="editor-row" key={i}>
@@ -346,7 +355,7 @@ export default function PlanEditor({
             添加稳健性检查
           </button>
         </div>
-        <div className="plan-sec" hidden={!!section && section !== 'rules'}>
+        <div className="plan-sec plan-sec--rules" hidden={!!section && section !== 'rules'}>
           <h3>置换与决策规则</h3>
           <div className="two-columns">
             <label>
@@ -412,7 +421,7 @@ export default function PlanEditor({
             ),
           )}
         </div>
-        <div className="plan-sec" hidden={!!section && section !== 'claims'}>
+        <div className="plan-sec plan-sec--claims" hidden={!!section && section !== 'claims'}>
           <h3>计划结论与边界</h3>
           {draft.claims_planned.map((c, i) => (
             <div className="editor-row" key={i}>

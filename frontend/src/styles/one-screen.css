@@ -807,3 +807,130 @@ button,
     border: 0;
   }
 }
+
+/* 研究方案 */
+.plan-layout.fill {
+  align-items: stretch;
+  gap: 12px;
+  min-height: 0;
+}
+.plan-layout .plan-nav {
+  position: static;
+  align-self: start;
+}
+.plan-main {
+  gap: 12px;
+  min-height: 0;
+}
+.plan-main > * {
+  flex: 0 0 auto;
+}
+.plan-main > .fill {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.plan-main > [hidden] {
+  display: none !important;
+}
+.plan-summary-grid > .panel {
+  margin: 0;
+}
+.plan-editor-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.plan-form {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+}
+.plan-form > h2 {
+  flex: 0 0 auto;
+}
+.plan-form > .actions,
+.plan-form > :last-child:not(fieldset) {
+  flex: 0 0 auto;
+}
+.plan-fieldset {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0 4px 0 0;
+  border: 0;
+}
+/* 分节模式下卡片已有 h2，隐藏节内重复的首个 h3 */
+.plan-sec:not([hidden]) > h3:first-child {
+  display: none;
+}
+/* 变量：一行一条 */
+.plan-sec--variables > .editor-row {
+  grid-template-columns: 130px 170px minmax(0, 1fr) auto auto;
+  align-items: end;
+  gap: 10px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+.plan-sec--variables > .editor-row label {
+  margin: 0;
+}
+.plan-sec--variables > .editor-row textarea {
+  min-height: 34px;
+  height: 34px;
+  resize: vertical;
+}
+.plan-sec--variables > .editor-row .check {
+  padding-bottom: 8px;
+  white-space: nowrap;
+}
+/* 稳健性：一行一项 */
+.plan-sec--robustness > .editor-row {
+  grid-template-columns: minmax(0, 1.2fr) 190px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+.plan-sec--robustness > .editor-row label {
+  margin: 0;
+}
+.plan-sec--robustness > .editor-row textarea {
+  min-height: 34px;
+  height: 34px;
+}
+.plan-sec--robustness > .editor-row > button {
+  grid-column: -2;
+}
+/* 决策规则 2×4 */
+.plan-sec--rules:not([hidden]) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 12px;
+  align-items: end;
+}
+.plan-sec--rules > .two-columns {
+  display: contents;
+}
+.plan-sec--rules label {
+  margin: 0;
+}
+@media print {
+  .plan-fieldset {
+    overflow: visible !important;
+  }
+}
+/* 表格式：仅首行显示列名 */
+.plan-sec--variables > .editor-row + .editor-row label:not(.check),
+.plan-sec--robustness > .editor-row + .editor-row label {
+  font-size: 0;
+}
+.plan-sec--variables > .editor-row + .editor-row label:not(.check) > *,
+.plan-sec--robustness > .editor-row + .editor-row label > * {
+  margin-top: 0;
+  font-size: 14px;
+}
+.plan-sec--variables > .editor-row + .editor-row .check {
+  padding-bottom: 8px;
+}
