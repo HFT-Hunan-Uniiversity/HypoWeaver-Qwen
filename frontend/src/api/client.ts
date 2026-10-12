@@ -45,6 +45,8 @@ export interface Project {
   direction: Direction
   updated_at: string
   selected_candidate_id?: string | null
+  /** 案例标记：'carbon' 启用碳市场约束；null 为通用项目 */
+  case?: 'carbon' | null
 }
 export interface Stage {
   key: string

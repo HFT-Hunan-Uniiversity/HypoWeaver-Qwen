@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowRight, Check } from 'lucide-react'
 import { ErrorNote } from '../components/Shared'
+import CaseToggle, { CaseTag } from '../components/CaseToggle'
 import { strengths } from '../components/Claims'
 import { num } from '../components/ResultTable'
 import { useProjectFacts } from '../lib/facts'
@@ -49,6 +50,7 @@ export default function Overview() {
           <div className="project-overview__titleline">
             <h1>{project.title}</h1>
             <span className={`status-badge is-${status[0]}`}>{status[1]}</span>
+            <CaseTag project={project} />
           </div>
           <p>{project.direction.question || project.direction.text || '尚未填写研究方向。'}</p>
         </div>
@@ -64,6 +66,7 @@ export default function Overview() {
           </Link>
         )}
       </header>
+      <CaseToggle project={project} />
       <section className="project-overview__facts is-wide" aria-label="关键信息">
         <div>
           <span>数据资产与样本期</span>

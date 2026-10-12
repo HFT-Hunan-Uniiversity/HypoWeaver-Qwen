@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { FolderKanban, PanelLeftClose, PanelLeftOpen, Plus, Settings2 } from 'lucide-react'
 import { api, type Project } from '../../api/client'
 import { useLlm } from '../../lib/llm'
+import { CaseTag } from '../CaseToggle'
 
 export default function AppSidebar({
   collapsed,
@@ -82,7 +83,10 @@ export default function AppSidebar({
                   <span className="sidebar__dot is-project" aria-hidden="true" />
                   <span className="sidebar__task-copy">
                     <strong>{p.title}</strong>
-                    <small>更新于 {new Date(p.updated_at).toLocaleDateString('zh-CN')}</small>
+                    <small>
+                      <CaseTag project={p} /> 更新于{' '}
+                      {new Date(p.updated_at).toLocaleDateString('zh-CN')}
+                    </small>
                   </span>
                 </Link>
               ))}
