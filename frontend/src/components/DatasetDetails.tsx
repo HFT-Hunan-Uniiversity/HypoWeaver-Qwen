@@ -1,3 +1,4 @@
+import { ScrollRegion } from './shell/ShellContext'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { levelLabels, semanticsLabels } from '../api/plans'
@@ -39,28 +40,45 @@ export default function DatasetDetails({
   const panel = dataset.panel
   return (
     <>
-      <section className="panel">
-        <p className="eyebrow">数据资产</p>
-        <h2>{dataset.name}</h2>
-        <p>
-          <strong>{dataset.n_rows.toLocaleString()}</strong> 行 · <strong>{dataset.n_cols}</strong>{' '}
-          列 · {(dataset.size_bytes / 1024 ** 2).toFixed(2)} MB
-        </p>
+      <section className="info-strip" aria-label="数据资产概况">
+        <div>
+          <span>数据资产</span>
+          <strong>{dataset.name}</strong>
+        </div>
+        <div>
+          <span>规模</span>
+          <strong>
+            {dataset.n_rows.toLocaleString()} 行 · {dataset.n_cols} 列 ·{' '}
+            {(dataset.size_bytes / 1024 ** 2).toFixed(2)} MB
+          </strong>
+        </div>
         {panel.detected ? (
           <>
-            <h3>
-              {panel.unit} × {panel.time} 面板
-            </h3>
-            <p>
-              {panel.n_units?.toLocaleString()} 个个体 · {panel.n_periods} 期 ·{' '}
-              {panel.balanced ? '平衡' : '非平衡'}面板 · 重复个体—时间记录 {panel.duplicates} 行
-            </p>
-            <p>
-              时间范围：{panel.time_min} — {panel.time_max}；缺失面板键 {panel.missing_keys} 行
-            </p>
+            <div>
+              <span>面板结构</span>
+              <strong>
+                {panel.unit} × {panel.time} · {panel.n_units?.toLocaleString()} 个体 ·{' '}
+                {panel.n_periods} 期 · {panel.balanced ? '平衡' : '非平衡'}
+              </strong>
+            </div>
+            <div>
+              <span>时间范围</span>
+              <strong>
+                {panel.time_min} — {panel.time_max}
+              </strong>
+            </div>
+            <div>
+              <span>重复 / 缺失键</span>
+              <strong>
+                {panel.duplicates} / {panel.missing_keys} 行
+              </strong>
+            </div>
           </>
         ) : (
-          <p className="notice">尚未识别完整的个体和时间字段，后续变量绑定中仍可指定。</p>
+          <div>
+            <span>面板结构</span>
+            <strong>尚未识别完整的个体和时间字段，可在变量绑定中指定</strong>
+          </div>
         )}
       </section>
       <details className="panel">
@@ -105,7 +123,7 @@ export default function DatasetDetails({
           </div>
         </form>
       </details>
-      <section className="panel">
+      <section className="panel fill">
         <h2>字段档案</h2>
         <p className="muted">
           {hasSemantics
@@ -113,7 +131,7 @@ export default function DatasetDetails({
             : '字段语义与层级标注需要后端更新后才能编辑（R2-01）。'}
         </p>
         <ErrorNote error={field.error} />
-        <div className="table-scroll">
+        <ScrollRegion label="字段档案">
           <table>
             <thead>
               <tr>
@@ -183,7 +201,7 @@ export default function DatasetDetails({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       </section>
     </>
   )

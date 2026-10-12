@@ -6,9 +6,11 @@ import { ErrorNote } from './Shared'
 export default function DatasetImport({
   projectId,
   onStart,
+  defaultOpen = false,
 }: {
   projectId: string
   onStart: (job: string) => void
+  defaultOpen?: boolean
 }) {
   const qc = useQueryClient(),
     uploads = useQuery({
@@ -77,7 +79,7 @@ export default function DatasetImport({
     },
   })
   return (
-    <details className="panel" open={!info ? undefined : true}>
+    <details className="panel" open={defaultOpen || info ? true : undefined}>
       <summary>导入 CSV、Excel 或 Stata 数据</summary>
       <div className="form">
         <p className="muted">
