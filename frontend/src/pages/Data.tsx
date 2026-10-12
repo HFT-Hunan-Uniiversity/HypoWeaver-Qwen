@@ -1,3 +1,4 @@
+import { ScrollRegion, StageActions } from '../components/shell/ShellContext'
 import Bindings from '../components/Bindings'
 import Analysis from './Analysis'
 import { useState } from 'react'
@@ -21,6 +22,7 @@ export default function Data() {
     queryKey: ['dataset-tasks', id],
     queryFn: () => api<Job[]>(`/projects/${id}/jobs?kind=dataset`),
   })
+  const [importOpen, setImportOpen] = useState(false)
   const tab = (params.get('tab') as 'assets' | 'binding' | 'results') || 'assets'
   const current = datasets.data?.find((d) => d.id === params.get('dataset')) || datasets.data?.[0]
   const activeJob = job || tasks.data?.[0]?.id
@@ -30,7 +32,14 @@ export default function Data() {
   }
   return (
     <>
-      <div className="stage-tabs" role="tablist" aria-label="数据与检验">
+      <StageActions>
+        {tab === 'assets' && (
+          <button className="secondary" onClick={() => setImportOpen((v) => !v)}>
+            导入数据
+          </button>
+        )}
+      </StageActions>
+      <div className="stage-tabs is-compact" role="tablist" aria-label="数据与检验">
         {(
           [
             ['assets', '数据资产', '导入与字段档案'],
@@ -60,20 +69,30 @@ export default function Data() {
         <Analysis />
       ) : (
         <>
-          <h2 className="stage-section-title">{tab === 'assets' ? '数据资产' : '变量绑定'}</h2>
-          <p className="muted">
-            {tab === 'assets'
-              ? '数据资产可在项目之间复用。导入保留原始观测，变量变换在绑定阶段定义。'
-              : '把方案中的变量绑定到数据字段或派生公式，保存后检查有效样本。'}
-          </p>
-          {tab === 'assets' && (
-            <DatasetImport
-              projectId={id!}
-              onStart={(j) => {
-                setJob(j)
-                refresh()
-              }}
-            />
+          {tab === 'assets' && importOpen && (
+            <div className="side-drawer" role="dialog" aria-label="导入数据">
+              <div className="side-drawer__head">
+                <strong>导入数据</strong>
+                <button
+                  className="icon-button"
+                  aria-label="关闭"
+                  onClick={() => setImportOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <ScrollRegion label="导入数据">
+                <DatasetImport
+                  defaultOpen
+                  projectId={id!}
+                  onStart={(j) => {
+                    setJob(j)
+                    setImportOpen(false)
+                    refresh()
+                  }}
+                />
+              </ScrollRegion>
+            </div>
           )}
           {activeJob && (
             <JobProgress
@@ -95,6 +114,7 @@ export default function Data() {
                 上传 CSV、Excel 或 Stata 文件，或按 README
                 运行碳市场数据准备命令。尚无数据时仍可保留方案。
               </p>
+              <button onClick={() => setImportOpen(true)}>导入数据</button>
             </section>
           ) : (
             <>

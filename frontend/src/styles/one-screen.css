@@ -495,7 +495,7 @@ button,
 .lit-evidence > .actions {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--hairline);
 }
 @media (max-width: 1366px) {
   .lit-grid {
@@ -524,7 +524,7 @@ button,
 /* 候选 */
 .reco-line {
   padding: 8px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md, 10px);
   background: var(--surface);
 }
@@ -594,10 +594,10 @@ button,
 .candidate-card > .candidate-actions,
 .candidate-card > :last-child {
   padding-top: 8px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--hairline);
 }
 .compare-scroll {
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md, 10px);
   background: var(--surface);
 }
@@ -616,4 +616,77 @@ button,
 }
 .master-detail .master-list {
   position: static;
+}
+
+/* 数据资产 */
+.stage-tabs.is-compact {
+  margin: 0;
+}
+.stage-tabs.is-compact button {
+  padding: 6px 14px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+.stage-tabs.is-compact small {
+  font-size: 12px;
+}
+.info-strip {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface);
+}
+.info-strip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px;
+  border-right: 1px solid var(--hairline);
+  min-width: 0;
+}
+.info-strip > div:last-child {
+  border-right: 0;
+}
+.info-strip span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.info-strip strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.side-drawer {
+  position: fixed;
+  z-index: 50;
+  top: 64px;
+  right: 16px;
+  bottom: 16px;
+  width: min(520px, 90vw);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+.side-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+.side-drawer > .scroll-region {
+  flex: 1 1 auto;
+  padding: 10px;
+}
+.side-drawer details.panel {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.stage-tabs.is-compact button {
+  min-height: 36px;
 }
