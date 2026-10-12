@@ -26,6 +26,9 @@ def create(db, payload):
 
 def update(db, project_id, payload):
     project = get(db, project_id)
+    if payload.direction is not None and payload.direction.model_dump() != project.direction:
+        from ..staleness import invalidate
+        invalidate(db, project_id, "direction")
     for key, value in payload.model_dump(exclude_none=True).items():
         setattr(project, key, value)
     project.updated_at = now()

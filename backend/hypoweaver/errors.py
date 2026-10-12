@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -14,6 +15,7 @@ def install(app):
     async def application_error(request: Request, exc: AppError):
         return JSONResponse({"error": {"code": exc.code, "message": exc.message}}, status_code=exc.status)
 
+    @app.exception_handler(ValidationError)
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
         message = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())

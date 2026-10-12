@@ -93,3 +93,45 @@ def start(app, project_id, llm):
         db.get(CandidateSet, set_id).job_id = job_id
         db.commit()
     return job_id
+
+
+def get(db, candidate_id):
+    candidate = db.get(Candidate, candidate_id)
+    if not candidate:
+        raise AppError('candidate_not_found', '候选不存在', 404)
+    return candidate
+
+
+def edit(db, candidate_id, payload):
+    from ..staleness import invalidate as downstream
+    candidate = get(db, candidate_id)
+    candidate_set = db.get(CandidateSet, candidate.set_id)
+    project_id = candidate_set.project_id
+    valid = {c.id for c in evidence(db, project_id) if c.included}
+    data = payload.model_dump()
+    refs = list(dict.fromkeys(data['evidence_ids']))
+    if len(refs) < 2 or not set(refs) <= valid:
+        raise AppError('invalid_references', '每个候选须引用至少两张当前已纳入文献，请检查引用')
+    data['evidence_ids'] = refs
+    for k, v in data.items():
+        setattr(candidate, k, v)
+    candidate.user_edited = True
+    downstream(db, project_id, 'candidate')
+    projects.get(db, project_id).updated_at = now()
+    db.commit()
+    return serialize(candidate)
+
+
+def select_(db, candidate_id):
+    from ..staleness import invalidate as downstream
+    candidate = get(db, candidate_id)
+    candidate_set = db.get(CandidateSet, candidate.set_id)
+    if candidate_set.stale:
+        raise AppError('candidate_stale', '该候选版本已过期，请重新生成')
+    project = projects.get(db, candidate_set.project_id)
+    if project.selected_candidate_id != candidate.id:
+        downstream(db, project.id, 'candidate')
+        project.selected_candidate_id = candidate.id
+        project.updated_at = now()
+        db.commit()
+    return serialize(project)
