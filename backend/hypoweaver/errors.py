@@ -23,8 +23,12 @@ def install(app):
 
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
-        return JSONResponse({"error": {"code": str(exc.status_code), "message": str(exc.detail)}}, status_code=exc.status_code)
+        return JSONResponse(
+            {"error": {"code": str(exc.status_code), "message": str(exc.detail)}}, status_code=exc.status_code
+        )
 
     @app.exception_handler(Exception)
     async def unexpected_error(request, exc):
-        return JSONResponse({"error": {"code": "internal_error", "message": "处理失败，请查看服务端运行状态后重试"}}, status_code=500)
+        return JSONResponse(
+            {"error": {"code": "internal_error", "message": "处理失败，请查看服务端运行状态后重试"}}, status_code=500
+        )

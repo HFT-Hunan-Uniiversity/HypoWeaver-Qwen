@@ -18,12 +18,19 @@ def check_wording(text, max_strength):
     if max_strength == "causal_cautious":
         return {"valid": True, "violations": []}
     cleaned = re.sub(
-        r"不能解释为因果|不代表因果关系|不构成因果证据|无法确认因果关系|不能据此推断因果|不能推断因果|不支持因果解释|并非因果证据|does not (?:establish|imply|demonstrate) causality|cannot (?:infer|establish) causality",
+        (
+            "不能解释为因果|不代表因果关系|不构成因果证据|无法确认因果关系|不能据此推断因果|"
+            "不能推断因果|不支持因果解释|并非因果证据|does not (?:establish|imply|demonstrate) "
+            "causality|cannot (?:infer|establish) causality"
+        ),
         "",
         text,
         flags=re.I,
     )
-    pattern = r"促进|导致|造成|驱动|引致|因果|\b(?:caus(?:e[sd]?|ing|al(?:ity)?)|promot(?:e[sd]?|ing)|induc(?:e[sd]?|ing)|driv(?:e[sn]?|ing)|led to|leads? to|effect of)\b"
+    pattern = (
+        "促进|导致|造成|驱动|引致|因果|\\b(?:caus(?:e[sd]?|ing|al(?:ity)?)|promot(?:e[sd]?|"
+        "ing)|induc(?:e[sd]?|ing)|driv(?:e[sn]?|ing)|led to|leads? to|effect of)\\b"
+    )
     violations = list(dict.fromkeys(re.findall(pattern, cleaned, flags=re.I)))
     return {"valid": not violations, "violations": violations}
 

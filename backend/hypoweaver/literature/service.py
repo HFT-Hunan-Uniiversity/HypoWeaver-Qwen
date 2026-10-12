@@ -13,16 +13,23 @@ def serialize(entity):
 
 def evidence(db, project_id):
     projects.get(db, project_id)
-    return db.scalars(select(EvidenceCard).where(EvidenceCard.project_id == project_id).order_by(EvidenceCard.year.desc())).all()
+    return db.scalars(
+        select(EvidenceCard).where(EvidenceCard.project_id == project_id).order_by(EvidenceCard.year.desc())
+    ).all()
 
 
 def searches(db, project_id):
     projects.get(db, project_id)
-    return db.scalars(select(LiteratureSearch).where(LiteratureSearch.project_id == project_id).order_by(LiteratureSearch.created_at.desc())).all()
+    return db.scalars(
+        select(LiteratureSearch)
+        .where(LiteratureSearch.project_id == project_id)
+        .order_by(LiteratureSearch.created_at.desc())
+    ).all()
 
 
 def save_cards(db, project_id, cards, search_id=None):
     from ..candidates.service import invalidate
+
     existing = evidence(db, project_id)
     before = [serialize(c) for c in existing if c.included]
     by_doi = {doi_normalize(card.doi): card for card in existing if card.doi}
@@ -80,7 +87,9 @@ def start_search(app, project_id, queries):
                 search = db.get(LiteratureSearch, search_id)
                 if search and search.status == "running":
                     search.status = "failed"
-                    search.per_source_status = {"system": {"status": "failed", "hits": 0, "reason": "检索中断，请重新发起"}}
+                    search.per_source_status = {
+                        "system": {"status": "failed", "hits": 0, "reason": "检索中断，请重新发起"}
+                    }
                     db.commit()
             raise
 
@@ -96,6 +105,7 @@ def patch(db, card_id, payload):
     if not card:
         raise AppError("evidence_not_found", "证据卡不存在", 404)
     from ..candidates.service import invalidate
+
     if any(getattr(card, k) != v for k, v in payload.model_dump(exclude_none=True).items()):
         invalidate(db, card.project_id)
     for key, value in payload.model_dump(exclude_none=True).items():
@@ -110,7 +120,9 @@ def recover(sessions):
         searches = db.scalars(select(LiteratureSearch).where(LiteratureSearch.status == "running")).all()
         for search in searches:
             search.status = "failed"
-            search.per_source_status = {"system": {"status": "failed", "hits": 0, "reason": "服务重启中断检索，请重新发起"}}
+            search.per_source_status = {
+                "system": {"status": "failed", "hits": 0, "reason": "服务重启中断检索，请重新发起"}
+            }
         db.commit()
 
 
@@ -118,6 +130,7 @@ async def add_pdf(app, project_id, file):
     import asyncio
     from ..db import uid
     from .documents import MAX_PDF_BYTES, extract_pdf, enrich_pdf
+
     with app.state.sessions() as db:
         projects.get(db, project_id)
     data = await file.read(MAX_PDF_BYTES + 1)

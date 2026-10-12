@@ -10,7 +10,10 @@ from ..datasets.models import Dataset, FieldPatch
 
 DOI = "10.17632/rrfwny7byp.1"
 SOURCE_URL = "https://data.mendeley.com/datasets/rrfwny7byp/1"
-FILE_URL = "https://data.mendeley.com/public-files/datasets/rrfwny7byp/files/0fcbe6dc-7a0d-49f0-8664-dde2ab80ecb6/file_downloaded"
+FILE_URL = (
+    "https://data.mendeley.com/public-files/datasets/rrfwny7byp/files/"
+    "0fcbe6dc-7a0d-49f0-8664-dde2ab80ecb6/file_downloaded"
+)
 EXPECTED_SIZE = 332_614_843
 COLUMNS = {
     "Symbol": "firm_id",
@@ -39,7 +42,10 @@ SOURCE = {
     "url": SOURCE_URL,
     "doi": DOI,
     "license": "CC BY 4.0",
-    "citation": "Wei, Daihui (2025), “Industry Peer Effect of Corporate Green Innovation”, Mendeley Data, V1, doi:10.17632/rrfwny7byp.1. 原始数据仅选列、重命名，不做行筛选。",
+    ("citation"): (
+        "Wei, Daihui (2025), “Industry Peer Effect of Corporate Green Innovation”, Mendeley "
+        "Data, V1, doi:10.17632/rrfwny7byp.1. 原始数据仅选列、重命名，不做行筛选。"
+    ),
 }
 
 

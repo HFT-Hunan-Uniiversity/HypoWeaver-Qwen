@@ -11,18 +11,18 @@ class EventSpec(BaseModel):
     reference: Literal[-1] = -1
     monotone_only: Literal[True] = True
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def consecutive(self):
         if not self.bins or self.bins[0] < -20 or self.bins[-1] > 20 or self.bins[0] >= -1 or self.bins[-1] < 0:
-            raise ValueError('事件窗口须覆盖处理前后，且限定在 -20 至 20')
-        if self.bins != [k for k in range(self.bins[0], self.bins[-1]+1) if k != -1]:
-            raise ValueError('事件分箱须连续且仅省略基期 -1')
+            raise ValueError("事件窗口须覆盖处理前后，且限定在 -20 至 20")
+        if self.bins != [k for k in range(self.bins[0], self.bins[-1] + 1) if k != -1]:
+            raise ValueError("事件分箱须连续且仅省略基期 -1")
         return self
 
 
 class SampleFilter(BaseModel):
     field: str
-    op: Literal['eq', 'ne', 'ge', 'le', 'in']
+    op: Literal["eq", "ne", "ge", "le", "in"]
     value: Any
 
 
@@ -33,8 +33,8 @@ class AnalysisSpec(BaseModel):
     outcome: str
     treatment: str
     controls: list[str] = Field(default_factory=list)
-    fe: list[Literal['unit', 'time']] = Field(default_factory=lambda: ['unit', 'time'])
-    cluster: str = 'unit'
+    fe: list[Literal["unit", "time"]] = Field(default_factory=lambda: ["unit", "time"])
+    cluster: str = "unit"
     event: EventSpec = Field(default_factory=EventSpec)
     robustness: list[Robustness] = Field(default_factory=list)
     permutation: Permutation = Field(default_factory=Permutation)
@@ -44,12 +44,12 @@ class AnalysisSpec(BaseModel):
 
 
 class AnalysisRun(Base):
-    __tablename__ = 'analysis_runs'
-    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid('run'))
-    project_id: Mapped[str] = mapped_column(ForeignKey('projects.id', ondelete='CASCADE'))
-    plan_id: Mapped[str] = mapped_column(ForeignKey('study_plans.id', ondelete='CASCADE'))
-    dataset_id: Mapped[str] = mapped_column(ForeignKey('datasets.id'))
-    status: Mapped[str] = mapped_column(default='queued')
+    __tablename__ = "analysis_runs"
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("run"))
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    plan_id: Mapped[str] = mapped_column(ForeignKey("study_plans.id", ondelete="CASCADE"))
+    dataset_id: Mapped[str] = mapped_column(ForeignKey("datasets.id"))
+    status: Mapped[str] = mapped_column(default="queued")
     steps: Mapped[dict] = mapped_column(JSON, default=dict)
     spec: Mapped[dict] = mapped_column(JSON)
     plan_snapshot: Mapped[dict] = mapped_column(JSON)

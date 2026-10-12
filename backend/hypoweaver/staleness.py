@@ -1,12 +1,13 @@
 """Mark downstream records without deleting historical results."""
+
 from sqlalchemy import update
 from .db import Base
 
 TARGETS = {
-    'direction': ['candidate_sets', 'study_plans', 'analysis_runs', 'proposals'],
-    'candidate': ['study_plans', 'analysis_runs', 'proposals'],
-    'plan': ['analysis_runs', 'proposals'],
-    'data': ['analysis_runs', 'proposals'],
+    "direction": ["candidate_sets", "study_plans", "analysis_runs", "proposals"],
+    "candidate": ["study_plans", "analysis_runs", "proposals"],
+    "plan": ["analysis_runs", "proposals"],
+    "data": ["analysis_runs", "proposals"],
 }
 
 

@@ -52,8 +52,16 @@ def issues(text, numbers, strength):
         "同一",
     ]:
         quantitative = quantitative.replace(phrase, "")
-    chinese_number = r"[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|行|次|期|年|月|日|倍|成|项)|翻倍|成倍|几分之几"
-    english_number = r"\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|triple)\b"
+    chinese_number = (
+        "[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|"
+        "行|次|期|年|月|日|倍|成|项)|翻倍|成倍|几分之几"
+    )
+    english_number = (
+        "\\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|"
+        "fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|"
+        "seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|"
+        "triple)\\b"
+    )
     if (
         re.search(r"\d", stripped)
         or re.search(chinese_number, quantitative)
