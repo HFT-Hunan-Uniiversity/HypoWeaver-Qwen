@@ -20,7 +20,7 @@ export default function Literature(){
  const include=useMutation({mutationFn:(card:Evidence)=>api(`/evidence/${card.id}`,body('PATCH',{included:!card.included})),onSuccess:refresh})
  const activeJob=job||searches.data?.find(s=>s.status==='running')?.job_id
  const offset=page*20
- return <><ProjectBack/><p className="eyebrow">LITERATURE RESEARCH</p><h1>文献联合调研</h1><p className="muted">检索并筛选证据，后续候选只使用你纳入的文献。</p><section className="panel"><div className="heading compact"><h2>检索式</h2><button className="quiet" disabled={suggest.isPending} onClick={()=>suggest.mutate()}>{suggest.isPending?'正在生成…':'根据方向生成'}</button></div><label>中英文检索式（每行一条，最多 6 条）<textarea rows={4} value={queries} onChange={e=>setQueries(e.target.value)} placeholder="输入关键词，或让模型根据研究方向生成"/></label><ErrorNote error={suggest.error||search.error}/><button disabled={search.isPending||!queries.trim()} onClick={()=>search.mutate()}>开始联合检索</button></section>
+ return <><ProjectBack/><p className="eyebrow">第二阶段 / 建立文献依据</p><h1>文献联合调研</h1><p className="muted">检索并筛选证据，后续候选只使用你纳入的文献。</p><section className="panel"><div className="heading compact"><h2>检索式</h2><button className="quiet" disabled={suggest.isPending} onClick={()=>suggest.mutate()}>{suggest.isPending?'正在生成…':'根据方向生成'}</button></div><label>中英文检索式（每行一条，最多 6 条）<textarea rows={4} value={queries} onChange={e=>setQueries(e.target.value)} placeholder="输入关键词，或让模型根据研究方向生成"/></label><ErrorNote error={suggest.error||search.error}/><button disabled={search.isPending||searches.data?.some(s=>s.status==='running')||!queries.trim()} onClick={()=>search.mutate()}>开始联合检索</button></section>
  {activeJob&&<JobProgress id={activeJob} onComplete={()=>refresh()}/>}
  <Landscape projectId={id!}/>
  <PdfUpload projectId={id!}/>
