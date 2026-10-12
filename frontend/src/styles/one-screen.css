@@ -426,3 +426,49 @@ button,
     display: none !important;
   }
 }
+
+/* 总览 */
+.overview-question {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+}
+.overview-body .project-overview__facts {
+  margin-top: 0;
+}
+.overview-body .project-overview__facts > div {
+  padding: 10px 16px;
+}
+.overview-numbers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+.overview-numbers > div {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.overview-numbers dt {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.overview-numbers dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.overview-lower .case-toggle {
+  margin-top: 0;
+}
+.settings-grid {
+  grid-template-columns: minmax(380px, 0.9fr) minmax(0, 1.1fr);
+}
+.settings-grid > .col-stack {
+  overflow: auto;
+}
+.project-list.scroll-region {
+  align-content: start;
+}
