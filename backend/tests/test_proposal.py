@@ -83,6 +83,6 @@ def test_empirical_numbers_claim_decisions_and_traceability(tmp_path):
 
 def test_numerical_words_cannot_bypass_injection():
     from hypoweaver.proposal.rendering import issues
-    for text in ['样本一百家企业','增长百分之五十','几十次置换','数百条观测','系数为零点七','样本 two hundred firms']:
+    for text in ['样本一百家企业','增长百分之五十','几十次置换','数百条观测','系数为零点七','样本 two hundred firms','约半数企业','三分之一的企业','几分之几','二〇二一年','结果翻倍']:
         assert issues(text,{},'associational'),text
     assert not issues('两者存在条件关联，进一步核对文献。',{},'associational')

@@ -17,9 +17,15 @@ def issues(text,numbers,strength):
     if any(k not in numbers for k in TOKEN.findall(text)):
         bad.append('存在未知数字占位符')
     stripped=TOKEN.sub('',text)
-    chinese_number = r'(?:百分之|千分之|万分之|[零〇一二两三四五六七八九十百千万亿数几半]+点[零〇一二三四五六七八九]+|[零〇一二两三四五六七八九十百千万亿数几]*[十百千万亿][零〇一二两三四五六七八九十百千万亿]*|[零〇一二两三四五六七八九半数几]+(?:家|名|个|条|行|次|期|年|月|日|倍|成|项|个百分点))'
-    english_number = r'\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion)\b'
-    if re.search(r'\d',stripped) or re.search(chinese_number,stripped) or re.search(english_number,stripped,re.I):
+    # Whitelist ordinary discourse words, then reject numeral glyphs even when
+    # embedded in fractions or percentages. This intentionally favors explicit
+    # placeholders over trying to infer whether a numerical claim is empirical.
+    quantitative = stripped
+    for phrase in ['两者','进一步','一方面','另一方面','一致','一般','统一','不一定','一定程度','一并','逐一','一旦','唯一','同一']:
+        quantitative = quantitative.replace(phrase,'')
+    chinese_number = r'[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|行|次|期|年|月|日|倍|成|项)|翻倍|成倍'
+    english_number = r'\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|triple)\b'
+    if re.search(r'\d',stripped) or re.search(chinese_number,quantitative) or re.search(english_number,stripped,re.I):
         bad.append('所有数字须使用给定占位符')
     if not check_wording(stripped,strength)['valid']:
         bad.append('存在超出结论上限的措辞')
