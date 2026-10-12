@@ -23,7 +23,7 @@ def issues(text,numbers,strength):
     quantitative = stripped
     for phrase in ['两者','进一步','一方面','另一方面','一致','一般','统一','不一定','一定程度','一并','逐一','一旦','唯一','同一']:
         quantitative = quantitative.replace(phrase,'')
-    chinese_number = r'[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|行|次|期|年|月|日|倍|成|项)|翻倍|成倍'
+    chinese_number = r'[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|行|次|期|年|月|日|倍|成|项)|翻倍|成倍|几分之几'
     english_number = r'\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|triple)\b'
     if re.search(r'\d',stripped) or re.search(chinese_number,quantitative) or re.search(english_number,stripped,re.I):
         bad.append('所有数字须使用给定占位符')
