@@ -1,3 +1,4 @@
+import { StageActions } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -52,13 +53,7 @@ export default function Plan() {
   const peer = current?.treatment_semantics === 'peer_exposure'
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>研究方案</h1>
-          <p className="muted">
-            变量、模型、稳健性与决策规则逐项审阅；确认后锁定，修改需新建版本。
-          </p>
-        </div>
+      <StageActions>
         <div className="action-cluster">
           <NeedsModel />
           <button
@@ -72,7 +67,7 @@ export default function Plan() {
             {plans.data?.length ? '重新起草方案' : '起草研究方案'}
           </button>
         </div>
-      </div>
+      </StageActions>
       <ErrorNote error={plans.error || tasks.error || draft.error || action.error} />
       {activeJob && <JobProgress id={activeJob} onComplete={refresh} />}
       {plans.isPending ? (

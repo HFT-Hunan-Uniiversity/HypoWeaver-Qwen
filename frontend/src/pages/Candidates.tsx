@@ -1,3 +1,4 @@
+import { StageActions } from '../components/shell/ShellContext'
 import CandidateActions from '../components/CandidateActions'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -144,11 +145,7 @@ export default function Candidates() {
   ]
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>缺口与候选</h1>
-          <p className="muted">比较研究增量、数据可得性与识别边界，再选择值得推进的问题。</p>
-        </div>
+      <StageActions>
         <div className="action-cluster">
           <NeedsModel />
           <button
@@ -159,7 +156,7 @@ export default function Candidates() {
             {sets.data?.length ? '重新生成候选' : '生成研究候选'}
           </button>
         </div>
-      </div>
+      </StageActions>
       <ErrorNote error={sets.error || cards.error || generate.error} />
       {activeJob && (
         <JobProgress

@@ -116,8 +116,6 @@ export default function Direction() {
   const q = useQuery({ queryKey: ['project', id], queryFn: () => api<Project>(`/projects/${id}`) })
   return (
     <>
-      <h1>研究方向</h1>
-      <p className="muted">写下问题与边界，后续研究围绕这些信息展开。</p>
       <ErrorNote error={q.error} />
       {q.data ? <Editor project={q.data} /> : q.isPending && <p>正在读取…</p>}
     </>

@@ -1,117 +1,71 @@
-import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Check, ChevronRight } from 'lucide-react'
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ArrowRight, PanelRight } from 'lucide-react'
+import StageBar from './StageBar'
+import { useShell, useViewportWide } from './ShellContext'
 import {
   STAGE_HINTS,
   STAGE_ORDER,
   STAGE_TITLES,
   STATUS_LABELS,
-  completedCount,
+  lockReason,
   stageKeyFromPath,
   statusTone,
   useOverview,
 } from '../../lib/stages'
 
-/** 项目内阶段页：旧版 DiscoveryPage 的头部 n/6 进度 + 左侧竖向 stepper + 底部上一步/下一步 */
+/** 阶段页：一行页头（左 阶段名+状态，中 横向六阶段条，右 主操作+下一阶段）+ 全宽内容区 */
 export default function StageLayout() {
   const { id } = useParams()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const overview = useOverview(id)
+  const { setActionsEl, toggleRail, railOpen } = useShell()
+  const wide = useViewportWide(1600)
   const key = stageKeyFromPath(pathname) || 'direction'
-  const index = STAGE_ORDER.indexOf(key)
   const stages = overview.data?.stages || []
   const status = stages.find((s) => s.key === key)?.status || 'not_started'
-  const done = completedCount(stages)
-  const prev = STAGE_ORDER[index - 1],
-    next = STAGE_ORDER[index + 1]
+  const next = STAGE_ORDER[STAGE_ORDER.indexOf(key) + 1]
+  const nextLock = next ? lockReason(stages, next) : null
   return (
-    <div className="product-page discovery-page">
-      <Link className="product-back no-print" to={`/p/${id}`}>
-        <ArrowLeft size={15} aria-hidden="true" />
-        {overview.data?.project.title || '项目总览'}
-      </Link>
-      <header className="discovery-page__header no-print">
-        <div>
-          <span className="product-eyebrow">
-            研究阶段 {index + 1} / 6 ·{' '}
-            <span className={`status-badge is-${statusTone(status)}`}>
-              {STATUS_LABELS[status] || status}
-            </span>
-          </span>
+    <div className="stage-page">
+      <header className="page-bar no-print">
+        <div className="page-bar__title" title={STAGE_HINTS[key]}>
           <h1>{STAGE_TITLES[key]}</h1>
-          <p>{STAGE_HINTS[key]}</p>
-        </div>
-        <span className="discovery-page__progress" title="已完成阶段数">
-          <span>
-            已完成 {done} / 6 · 当前第 {index + 1} 步
+          <span className={`status-badge is-${statusTone(status)}`}>
+            {STATUS_LABELS[status] || status}
           </span>
-          <i aria-hidden="true">
-            <b style={{ width: `${(done / 6) * 100}%` }} />
-          </i>
-        </span>
-      </header>
-      <div className="discovery-layout">
-        <nav className="discovery-steps no-print" aria-label="研究阶段">
-          {STAGE_ORDER.map((k, i) => {
-            const st = stages.find((s) => s.key === k)
-            const tone = statusTone(st?.status || 'not_started')
-            return (
-              <Link
-                key={k}
-                to={`/p/${id}/${k}`}
-                className={`${k === key ? 'is-current' : ''} ${tone === 'green' ? 'is-complete' : ''} tone-${tone}`}
-                aria-current={k === key ? 'step' : undefined}
-              >
-                <span className="discovery-steps__node" aria-hidden="true">
-                  {tone === 'green' ? <Check size={13} /> : i + 1}
-                </span>
-                <span>
-                  <small>
-                    步骤 {i + 1} · {STATUS_LABELS[st?.status || 'not_started']}
-                  </small>
-                  <strong>{STAGE_TITLES[k]}</strong>
-                  <em>{st?.summary || STAGE_HINTS[k]}</em>
-                </span>
-                <ChevronRight size={14} aria-hidden="true" />
-              </Link>
-            )
-          })}
-        </nav>
-        <section className="discovery-workspace">
-          <div className="discovery-step-content">
-            <Outlet />
-          </div>
-          <footer className="discovery-navigation no-print">
+        </div>
+        <StageBar projectId={id!} stages={stages} current={key} />
+        <div className="page-bar__actions">
+          <span className="page-bar__slot" ref={setActionsEl} />
+          {next && (
             <button
               type="button"
-              className="product-button"
-              disabled={!prev}
-              onClick={() => navigate(`/p/${id}/${prev}`)}
+              className={`product-button ${status === 'completed' ? 'is-primary' : ''}`}
+              disabled={!!nextLock}
+              title={nextLock || `进入「${STAGE_TITLES[next]}」`}
+              onClick={() => navigate(`/p/${id}/${next}`)}
             >
-              <ArrowLeft size={15} aria-hidden="true" />
-              上一阶段
+              下一阶段
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
-            <span>
-              <strong>{STAGE_TITLES[key]}</strong>
-              <small>所有内容已保存到当前项目；上游变更会让下游标记为过期</small>
-            </span>
-            {next ? (
-              <button
-                type="button"
-                className="product-button is-primary"
-                onClick={() => navigate(`/p/${id}/${next}`)}
-              >
-                下一阶段：{STAGE_TITLES[next]}
-                <ArrowRight size={15} aria-hidden="true" />
-              </button>
-            ) : (
-              <button type="button" className="product-button" onClick={() => navigate(`/p/${id}`)}>
-                返回项目总览
-                <ArrowRight size={15} aria-hidden="true" />
-              </button>
-            )}
-          </footer>
-        </section>
+          )}
+          {!wide && (
+            <button
+              type="button"
+              className="icon-button"
+              aria-pressed={railOpen}
+              title="进度与证据"
+              aria-label="进度与证据"
+              onClick={toggleRail}
+            >
+              <PanelRight size={15} />
+            </button>
+          )}
+        </div>
+      </header>
+      <div className="stage-body">
+        <Outlet />
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import './styles/tokens.css'
 import './styles/app.css'
 import './styles/shell.css'
 import './styles/skin.css'
+import './styles/one-screen.css'
 const client = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: () => {

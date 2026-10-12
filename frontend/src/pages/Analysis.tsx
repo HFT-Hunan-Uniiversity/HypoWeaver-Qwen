@@ -1,3 +1,4 @@
+import { StageActions } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -66,11 +67,7 @@ export default function Analysis() {
   }
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>统计检验</h1>
-          <p className="muted">按确认后的方案执行。每次运行保留当时的方案和绑定设定。</p>
-        </div>
+      <StageActions>
         <button
           disabled={
             !plan ||
@@ -81,7 +78,7 @@ export default function Analysis() {
         >
           运行已确认方案
         </button>
-      </div>
+      </StageActions>
       <ErrorNote error={runs.error || plans.error || start.error} />
       {!plan && (
         <p className="notice">

@@ -84,8 +84,6 @@ export default function Literature() {
   const offset = page * PAGE
   return (
     <>
-      <h1>文献联合调研</h1>
-      <p className="muted">检索并筛选证据，后续候选只使用你纳入的文献。</p>
       <div className="literature-top">
         <section className="panel">
           <div className="heading compact">
