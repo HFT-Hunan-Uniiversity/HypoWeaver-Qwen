@@ -97,4 +97,13 @@ class LiteratureClient:
 
     async def search_all(self, queries):
         results = await asyncio.gather(*(self.search(source, queries) for source in ["openalex", "crossref"]))
-        return merge_cards([card for cards, _ in results for card in cards]), dict(zip(["openalex", "crossref"], [status for _, status in results]))
+        names = ["openalex", "crossref"]
+        if self.settings.local_library_dir:
+            from .documents import search_local
+            try:
+                local = await asyncio.to_thread(search_local, self.settings.local_library_dir, queries)
+            except Exception as exc:
+                local = ([], {"status": "failed", "hits": 0, "reason": f"本地库读取失败（{type(exc).__name__}）"})
+            results.append(local)
+            names.append("local")
+        return merge_cards([card for cards, _ in results for card in cards]), dict(zip(names, [status for _, status in results]))

@@ -65,3 +65,40 @@ def test_empty_search_is_completed_and_interrupted_search_recovers(tmp_path):
         records=client.get(f'/api/projects/{p}/searches').json()
         assert not any(s['status']=='running' for s in records)
         assert any(s['status']=='failed' and 'system' in s['per_source_status'] for s in records)
+
+
+def test_pdf_upload_edit_and_local_library(tmp_path):
+    import pymupdf
+    import json
+    from hypoweaver.literature.documents import search_local
+    doc=pymupdf.open()
+    page=doc.new_page()
+    page.insert_text((40,50),'Carbon market study\n2024\nGreen innovation evidence from firms.')
+    doc.set_metadata({'title':'Carbon market study','author':'Test author'})
+    data=doc.tobytes()
+    doc.close()
+    with TestClient(create_app(Settings(data_dir=tmp_path/'data'))) as client:
+        p=client.post('/api/projects',json={'title':'PDF 验收'}).json()['id']
+        response=client.post(f'/api/projects/{p}/evidence/pdf',files={'file':('paper.pdf',data,'application/pdf')})
+        assert response.status_code==200
+        card=client.get(f'/api/projects/{p}/evidence').json()[0]
+        assert card['source']=='pdf' and card['year']==2024
+        assert 'Green innovation evidence' in card['fulltext_excerpt']
+        response=client.patch('/api/evidence/'+card['id'],json={'title':'Corrected title','year':2023})
+        assert response.json()['title']=='Corrected title' and response.json()['year']==2023
+    (tmp_path/'library.jsonl').write_text(json.dumps({'title':'Carbon market study','year':2024}))
+    cards,status=search_local(str(tmp_path),[{'text':'carbon'}])
+    assert len(cards)==1 and cards[0]['source']=='local' and status['status']=='ok'
+
+
+def test_malformed_local_rows_do_not_break_remote_search(tmp_path):
+    import json
+    (tmp_path/'library.jsonl').write_text('42\n[]\n'+json.dumps({'title':12})+'\n'+json.dumps({'title':'Carbon evidence'}))
+    def empty(request):
+        return httpx.Response(200,json={'results':[],'message':{'items':[]}})
+    client=LiteratureClient(Settings(local_library_dir=str(tmp_path)),httpx.MockTransport(empty))
+    cards,statuses=asyncio.run(client.search_all([{'text':'carbon'}]))
+    assert len(cards)==1 and cards[0]['title']=='Carbon evidence'
+    assert statuses['local']['status']=='failed'
+    assert '格式无效' in statuses['local']['reason']
+    assert statuses['crossref']['status']=='ok' and statuses['openalex']['status']=='ok'

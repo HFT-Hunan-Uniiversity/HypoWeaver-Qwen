@@ -1,5 +1,5 @@
 export async function api<T>(path:string, options:RequestInit={}):Promise<T> {
-  const response = await fetch('/api'+path,{...options,headers:{'Content-Type':'application/json',...options.headers}})
+  const response = await fetch('/api'+path,{...options,headers:{...(options.body instanceof FormData?{}:{'Content-Type':'application/json'}),...options.headers}})
   if (!response.ok) {
     const data = await response.json().catch(()=>null)
     throw new Error(data?.error?.message || `请求失败（${response.status}）`)

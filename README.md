@@ -24,3 +24,5 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 ```
 
 模型配置只从本地 `.env` 或环境变量读取。`.env.example` 提供配置示例；密钥、数据库、上传文件和碳市场原始数据均不入 Git。真实模型调用需要 DASHSCOPE_API_KEY 和 QWEN_MODEL，测试使用替代客户端。
+
+文献页支持最多 6 条手动中英文检索式、OpenAlex/Crossref 联合检索和 PDF 上传。可用 `LOCAL_LIBRARY_DIR` 指向一个已有本地目录：优先读取 `library.jsonl`（每行是一张证据卡，至少有字符串 title；可带 year、doi、authors、abstract、concepts），否则读取目录顶层 PDF。索引最多 10 MB/2000 行，PDF 最多 200 个，每个 30 MB；截断或坏行会在来源状态中提示。上传 PDF 提取前 100 页文字，保留前 12000 字摘录；扫描件需先 OCR。

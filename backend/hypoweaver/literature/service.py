@@ -103,3 +103,20 @@ def recover(sessions):
             search.status = "failed"
             search.per_source_status = {"system": {"status": "failed", "hits": 0, "reason": "服务重启中断检索，请重新发起"}}
         db.commit()
+
+
+async def add_pdf(app, project_id, file):
+    import asyncio
+    from ..db import uid
+    from .documents import MAX_PDF_BYTES, extract_pdf, enrich_pdf
+    with app.state.sessions() as db:
+        projects.get(db, project_id)
+    data = await file.read(MAX_PDF_BYTES + 1)
+    card = await asyncio.to_thread(extract_pdf, data, file.filename or "document.pdf")
+    card, note = await enrich_pdf(card, app.state.settings)
+    destination = app.state.settings.storage_dir() / "uploads" / project_id
+    destination.mkdir(parents=True, exist_ok=True)
+    (destination / (uid("pdf") + ".pdf")).write_bytes(data)
+    with app.state.sessions() as db:
+        save_cards(db, project_id, [card])
+    return {"message": note}

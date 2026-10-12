@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlalchemy.orm import Session
 from ..db import session
 from ..llm.service import get_llm
@@ -33,3 +33,8 @@ def list_evidence(project_id: str, db: Session = Depends(session)):
 @router.patch("/evidence/{card_id}")
 def update_evidence(card_id: str, payload: EvidencePatch, db: Session = Depends(session)):
     return service.serialize(service.patch(db, card_id, payload))
+
+
+@router.post("/projects/{project_id}/evidence/pdf")
+async def upload_pdf(project_id: str, file: UploadFile, request: Request):
+    return await service.add_pdf(request.app, project_id, file)
