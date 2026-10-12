@@ -33,6 +33,10 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 
 公开碳市场案例的下载、准备、字段含义与引用见 [DATA_carbon_case.md](docs/DATA_carbon_case.md)。运行 `cd backend && uv run python -m hypoweaver.cases.carbon fetch`，然后 `uv run python -m hypoweaver.cases.carbon prepare`；刷新数据页即可选择资产。
 
+如果已有该公开来源的原始 `data.dta`，可直接放入 `DATA_DIR/raw/data.dta`（默认是项目 `var/raw/data.dta`），然后在 `backend` 运行 `uv run python -m hypoweaver.cases.carbon prepare`，无需重复 fetch。prepare 会核验文件大小及所需字段，并登记准备后的资产。
+
+真实碳数据测试在 `DATA_DIR/hypoweaver.sqlite` 不存在，或库中没有 DOI 与 prepare 字段集合匹配的登记资产时会 skip；登记文件缺失或路径不一致则测试失败。先准备数据再运行全量测试，才能验证真实数据这一项。
+
 数据读取上限为单文件 500 MB、300 列、200 万行，`DATA_DIR` 下 `staging/`、`datasets/`、`raw/` 的合计文件大小上限为 3 GB。达到上限会停止新导入并显示原因，不会删除历史数据。`staging/` 存上传原件（含失败留下的片段），`datasets/` 存已登记资产引用的 CSV，`raw/` 存案例原件。需要释放空间时先备份并核对用途；不要删除 SQLite 正在引用的分析 CSV。产品暂不提供自动清理或历史资产删除功能。
 
 ## 从研究方向到提案

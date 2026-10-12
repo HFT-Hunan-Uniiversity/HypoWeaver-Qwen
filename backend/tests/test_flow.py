@@ -69,7 +69,9 @@ def test_complete_api_flow_and_stale_preservation(tmp_path):
             next(s for s in client.get(path + "/overview").json()["stages"] if s["key"] == "candidates")["status"]
             == "awaiting_selection"
         )
-        assert client.get(path + "/candidate-sets").json()[0]["llm_model"] == fake.model
+        candidate_set = client.get(path + "/candidate-sets").json()[0]
+        assert candidate_set["llm_model"] == fake.model
+        assert "model" not in candidate_set
         candidate = client.get(path + "/candidate-sets").json()[0]["candidates"][0]
         assert client.post("/api/candidates/" + candidate["id"] + ":select").status_code == 200
         plan_id = complete(client.post(path + "/plans"))["plan_id"]
@@ -125,6 +127,7 @@ def test_complete_api_flow_and_stale_preservation(tmp_path):
         before = client.get("/api/proposals/" + proposal_id).json()
         assert before["llm_model"] == fake.model
         assert before["interpretation"]["llm_model"] == fake.model
+        assert "model" not in before and "model" not in before["interpretation"]
         assert before["interpretation"]["paragraphs"]
         assert before["kind"] == "empirical" and not before["stale"]
         assert all(s["status"] == "completed" for s in client.get(path + "/overview").json()["stages"])

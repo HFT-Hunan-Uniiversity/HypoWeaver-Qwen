@@ -170,3 +170,13 @@ GET/PUT `/api/settings/llm`、候选集、提案版本及 interpretation 均统�
 设置请求使用 `extra="forbid"`，旧字段 `model` 或拼写错误字段返回 422，并给出“未知字段，不允许额外参数”的中文提示。验证错误不回显输入值或密钥；拒绝请求不会部分修改内存配置或持久文件。
 
 验证：配置、项目和方案相关 7 项测试通过；新增旧字段及其他未知字段的拒绝与不变性测试。前端未修改。
+
+### R3-03 · 回归测试与数据准备说明
+
+设置测试验证 llm_model 读写与重启持久化、旧库模型值与历史 null 的幂等保留、未知字段中文 422 及不发生部分写入。完整离线 API 流程验证候选集、方案、提案及 interpretation 的 llm_model，并检查候选集/提案/解读不再输出旧 model 键；plan.model 仍为统计字典。
+
+真实数据测试的 skip 条件：`DATA_DIR/hypoweaver.sqlite` 不存在，或不存在 DOI 与 prepare 字段集合匹配的登记资产。已登记文件缺失或路径不一致会失败。README 已说明可以把已有官方 `data.dta` 放在 `DATA_DIR/raw/data.dta` 后直接 prepare，无需重复 fetch。
+
+本机完整登记数据环境：全量 pytest **41 passed、0 skipped**；ruff format --check 为 73 files already formatted，E501 与 diff 检查通过。另以空 DATA_DIR 单独执行真实碳数据测试，得到预期 **1 skipped**，理由是尚无登记数据库；这次条件验证不算真实统计通过。前端零改动，未调用真实模型。
+
+GPT-6 Luna 独立复核全部三项并重跑全量测试：41 passed；73 文件格式检查和 E501 检查通过，未发现阻断问题。
