@@ -10,6 +10,7 @@ from .landscape.router import router as landscape_router
 from .literature.router import router as literature_router
 from .literature import service as literature_service
 from .literature.sources import LiteratureClient
+from .binding.router import router as binding_router
 from .datasets.router import router as datasets_router
 from .plans.router import router as plans_router
 from . import jobs
@@ -53,6 +54,7 @@ def create_app(settings=None):
     app.include_router(candidates_router)
     app.include_router(plans_router)
     app.include_router(datasets_router)
+    app.include_router(binding_router)
 
     @app.get("/api/health")
     def health():
