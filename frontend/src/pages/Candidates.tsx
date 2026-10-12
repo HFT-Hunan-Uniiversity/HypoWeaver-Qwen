@@ -1,3 +1,5 @@
+import { useUrlParam } from '../lib/urlState'
+import { ScrollRegion } from '../components/shell/ShellContext'
 import { StageActions } from '../components/shell/ShellContext'
 import CandidateActions from '../components/CandidateActions'
 import { useState } from 'react'
@@ -53,8 +55,8 @@ export default function Candidates() {
     qc = useQueryClient(),
     [version, setVersion] = useState(''),
     [job, setJob] = useState(''),
-    [view, setView] = useState<'detail' | 'compare'>('detail'),
     [focus, setFocus] = useState('')
+  const [view, setView] = useUrlParam('tab', 'detail', ['detail', 'compare'] as const)
   const sets = useQuery({
     queryKey: ['candidate-sets', id],
     queryFn: () => api<CandidateSet[]>(`/projects/${id}/candidate-sets`),
@@ -226,23 +228,29 @@ export default function Candidates() {
             ))}
           {current.status === 'ready' && (
             <>
-              <section className="panel">
-                <h2>推荐与取舍</h2>
+              <details className="reco-line">
+                <summary>
+                  <strong>推荐与取舍</strong>
+                  <span className="reco-line__text">{current.recommendation_text}</span>
+                  <span className="inline-meta">
+                    移除无效引用 {current.removed_references} 处 · 自审
+                    {current.review.revised ? '已修订一次' : '通过'}
+                  </span>
+                </summary>
                 <p>{current.recommendation_text}</p>
-                <p className="muted">
-                  已移除无效引用 {current.removed_references} 处 · 自审
-                  {current.review.revised ? '提出修订，已修订一次' : '通过'}
-                  {current.evidence_ids.length < included &&
-                    ' · 本次最多使用按年份排序的 80 张证据卡，每张摘要截取 1,200 字'}
-                </p>
+                {current.evidence_ids.length < included && (
+                  <p className="muted">
+                    本次最多使用按年份排序的 80 张证据卡，每张摘要截取 1,200 字。
+                  </p>
+                )}
                 {current.review.issues?.map((r, i) => (
                   <p key={i}>
                     {r.problem} · 建议：{r.suggestion}
                   </p>
                 ))}
-              </section>
+              </details>
               {view === 'compare' ? (
-                <div className="table-scroll">
+                <ScrollRegion className="fill compare-scroll" label="候选对比表">
                   <table className="compare-table">
                     <thead>
                       <tr>
@@ -269,11 +277,16 @@ export default function Candidates() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </ScrollRegion>
               ) : (
                 cand && (
-                  <div className="master-detail">
-                    <div className="master-list" role="tablist" aria-label="候选列表">
+                  <div className="master-detail fill">
+                    <div
+                      className="master-list scroll-region"
+                      data-scroll-region=""
+                      role="tablist"
+                      aria-label="候选列表"
+                    >
                       {current.candidates.map((c, i) => (
                         <button
                           key={c.id}
@@ -293,29 +306,35 @@ export default function Candidates() {
                         </button>
                       ))}
                     </div>
-                    <article className="panel candidate-card" key={cand.id}>
-                      <span className="eyebrow">{positioning[cand.positioning]}</span>
-                      <h2>{cand.title}</h2>
-                      <div className="two-columns">
-                        <div>
-                          <h3>研究缺口</h3>
-                          <p>{cand.gap}</p>
-                          <h3>待检验假设</h3>
-                          <p>{cand.hypothesis}</p>
-                          <h3>识别思路</h3>
-                          <p>{cand.identification}</p>
-                        </div>
-                        <div>
-                          <h3>可能机制</h3>
-                          {list(cand.mechanism)}
-                          <h3>所需数据</h3>
-                          {list(cand.required_data)}
-                          <h3>风险与边界</h3>
-                          {list(cand.risks)}
-                        </div>
+                    <article className="panel candidate-card fill" key={cand.id}>
+                      <div className="candidate-card__head">
+                        <span className="eyebrow">{positioning[cand.positioning]}</span>
+                        <h2>{cand.title}</h2>
                       </div>
-                      <h3>支持文献</h3>
-                      {chips(cand)}
+                      <ScrollRegion className="candidate-card__body" label="候选详情">
+                        <div className="three-columns">
+                          <div>
+                            <h3>研究缺口</h3>
+                            <p>{cand.gap}</p>
+                            <h3>待检验假设</h3>
+                            <p>{cand.hypothesis}</p>
+                          </div>
+                          <div>
+                            <h3>识别思路</h3>
+                            <p>{cand.identification}</p>
+                            <h3>可能机制</h3>
+                            {list(cand.mechanism)}
+                          </div>
+                          <div>
+                            <h3>所需数据</h3>
+                            {list(cand.required_data)}
+                            <h3>风险与边界</h3>
+                            {list(cand.risks)}
+                          </div>
+                        </div>
+                        <h3>支持文献</h3>
+                        {chips(cand)}
+                      </ScrollRegion>
                       <CandidateActions
                         candidate={cand}
                         projectId={id!}
