@@ -23,10 +23,10 @@ class ModelSpec(BaseModel):
 
     @model_validator(mode='after')
     def valid_event(self):
-        if self.event_window[0] >= -1 or self.event_window[1] < 0:
+        if self.event_window[0] >= -1 or self.event_window[1] < 0 or self.event_window[0] < -20 or self.event_window[1] > 20:
             raise ValueError('事件窗口必须同时覆盖处理前和处理后')
-        if self.bins != sorted(set(self.bins)) or -1 in self.bins or not self.bins or self.bins[0] != self.event_window[0] or self.bins[-1] != self.event_window[1]:
-            raise ValueError('事件分箱须升序、无重复，省略基期 -1，首尾与窗口一致')
+        if self.bins != [k for k in range(self.event_window[0], self.event_window[1]+1) if k != -1]:
+            raise ValueError('事件分箱须在窗口内连续，且仅省略基期 -1')
         return self
 
 
