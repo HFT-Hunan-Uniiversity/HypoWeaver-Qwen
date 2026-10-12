@@ -20,7 +20,9 @@ dependencies = [
     "linearmodels>=7.0",
 ]
 [dependency-groups]
-dev = ["pytest>=8,<9"]
+dev = ["pytest>=8,<9", "ruff>=0.14,<1"]
+[tool.ruff]
+line-length = 120
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

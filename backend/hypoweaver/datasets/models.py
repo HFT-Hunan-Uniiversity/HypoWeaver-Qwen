@@ -1,3 +1,4 @@
+from typing import Literal
 from pydantic import BaseModel, Field
 from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column
@@ -5,19 +6,19 @@ from ..db import Base, uid, now
 
 
 class DatasetUpload(Base):
-    __tablename__ = 'dataset_uploads'
-    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid('upload'))
+    __tablename__ = "dataset_uploads"
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("upload"))
     name: Mapped[str]
     format: Mapped[str]
     file_path: Mapped[str]
-    metadata_: Mapped[dict] = mapped_column('metadata', JSON)
+    metadata_: Mapped[dict] = mapped_column("metadata", JSON)
     created_at: Mapped[str] = mapped_column(default=now)
 
 
 class Dataset(Base):
-    __tablename__ = 'datasets'
-    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid('ds'))
-    project_id: Mapped[str | None] = mapped_column(ForeignKey('projects.id', ondelete='SET NULL'))
+    __tablename__ = "datasets"
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: uid("ds"))
+    project_id: Mapped[str | None] = mapped_column(ForeignKey("projects.id", ondelete="SET NULL"))
     name: Mapped[str]
     source: Mapped[dict] = mapped_column(JSON, default=dict)
     format: Mapped[str]
@@ -34,10 +35,10 @@ class Dataset(Base):
 
 
 class Source(BaseModel):
-    url: str = ''
-    doi: str = ''
-    license: str = ''
-    citation: str = ''
+    url: str = ""
+    doi: str = ""
+    license: str = ""
+    citation: str = ""
 
 
 class ImportInput(BaseModel):
@@ -54,3 +55,8 @@ class ImportInput(BaseModel):
 class DatasetPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     source: Source | None = None
+
+
+class FieldPatch(BaseModel):
+    semantics: Literal["real_assignment", "peer_exposure", "unknown"] | None = None
+    level: Literal["firm", "industry", "region", "other"] | None = None
