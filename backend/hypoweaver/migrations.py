@@ -2,6 +2,7 @@ from sqlalchemy import inspect, text
 
 
 ADDITIONS = {
+    "projects": {"case": "TEXT"},
     "candidate_sets": {"model": "TEXT"},
     "study_plans": {"llm_model": "TEXT"},
     "proposals": {"model": "TEXT", "interpretation": "JSON"},

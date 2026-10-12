@@ -58,13 +58,14 @@ def test_llm_config(tmp_path, monkeypatch):
 def test_additive_model_migration_preserves_old_rows(tmp_path):
     path = tmp_path / "old.sqlite"
     with sqlite3.connect(path) as db:
-        for table in ["candidate_sets", "study_plans", "proposals"]:
+        for table in ["projects", "candidate_sets", "study_plans", "proposals"]:
             db.execute(f"CREATE TABLE {table} (id TEXT PRIMARY KEY, value TEXT)")
             db.execute(f"INSERT INTO {table} VALUES (?, ?)", ("old", "preserved"))
     engine = create_engine(f"sqlite:///{path}")
     migrate(engine)
     migrate(engine)
     with sqlite3.connect(path) as db:
+        assert db.execute('SELECT value, "case" FROM projects').fetchone() == ("preserved", None)
         assert db.execute("SELECT value, llm_model FROM study_plans").fetchone() == ("preserved", None)
         assert db.execute("SELECT value, model, interpretation FROM proposals").fetchone() == ("preserved", None, None)
     engine.dispose()

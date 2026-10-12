@@ -11,9 +11,23 @@ from .semantics import public
 from .models import StudyPlan, PlanDraft, CarbonPlanDraft, DecisionRules, Permutation
 
 
-def schema_for(project):
-    text = (project.title + " " + str(project.direction)).lower()
-    return CarbonPlanDraft if "碳" in text or "carbon" in text or "emissions trading" in text else PlanDraft
+def schema_for(db, project, dataset_id=None):
+    from ..binding.models import VariableBinding
+    from ..datasets.models import Dataset
+    from ..cases.carbon import DOI
+
+    if project.case == "carbon":
+        return CarbonPlanDraft
+    bound = db.scalars(
+        select(Dataset)
+        .join(VariableBinding, VariableBinding.dataset_id == Dataset.id)
+        .join(StudyPlan, StudyPlan.id == VariableBinding.plan_id)
+        .where(StudyPlan.project_id == project.id)
+    ).all()
+    incoming = db.get(Dataset, dataset_id) if dataset_id else None
+    if incoming is not None:
+        bound.append(incoming)
+    return CarbonPlanDraft if any(d.source.get("doi") == DOI for d in bound) else PlanDraft
 
 
 def get(db, plan_id):
@@ -56,7 +70,8 @@ def draft(app, project_id, llm):
         candidate_id = candidate.id
         snapshot = serialize(candidate)
         direction = project.direction
-        schema = schema_for(project)
+        case = project.case
+        schema = schema_for(db, project)
 
     async def work(progress):
         progress("正在起草变量、识别设定与决策规则")
@@ -80,6 +95,8 @@ def draft(app, project_id, llm):
             current = db.get(Candidate, candidate_id)
             stale = (
                 project.direction != direction
+                or project.case != case
+                or schema_for(db, project) is not schema
                 or project.selected_candidate_id != candidate_id
                 or serialize(current) != snapshot
                 or db.get(CandidateSet, current.set_id).stale
@@ -92,7 +109,7 @@ def draft(app, project_id, llm):
 
 def edit(db, plan_id, payload):
     entity = get(db, plan_id)
-    data = schema_for(projects.get(db, entity.project_id)).model_validate(payload.model_dump()).model_dump()
+    data = schema_for(db, projects.get(db, entity.project_id)).model_validate(payload.model_dump()).model_dump()
     invalidate(db, entity.project_id, "plan")
     if entity.status != "draft":
         return create(db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model)
@@ -118,7 +135,7 @@ def confirm(db, plan_id):
         raise AppError("plan_superseded", "此方案已有新的确认版本，请新建版本后审阅")
     if entity.status == "confirmed":
         return entity
-    schema_for(projects.get(db, entity.project_id)).model_validate(serialize(entity))
+    schema_for(db, projects.get(db, entity.project_id)).model_validate(serialize(entity))
     for old in db.scalars(
         select(StudyPlan).where(StudyPlan.project_id == entity.project_id, StudyPlan.status == "confirmed")
     ).all():

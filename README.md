@@ -67,3 +67,5 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 - `PATCH /api/datasets/{id}/fields/{name}` 接受 `semantics`、`level`；方案接口返回 `treatment_semantics`，运行保存当时的语义快照。字段语义变化后，旧运行和提案标为过期。
 
 本轮仅交付后端与接口，前端设置界面由另一项工作接入。真实千问连接与生成验收按用户要求延后；离线接口测试不能替代真实连通性证据。
+
+项目创建和更新接口接受 `case: "carbon" | null`。碳市场稳健性约束仅由该标记或项目实际绑定资产的 DOI `10.17632/rrfwny7byp.1` 触发；仅上传/登记资产、标题或研究方向出现碳相关字样都不会触发。案例标记变更会使下游过期。
