@@ -6,6 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from .config import ROOT, Settings
 from .db import Base, create_database
 from .errors import AppError, install
+from .literature.router import router as literature_router
+from .literature import service as literature_service
+from .literature.sources import LiteratureClient
 from . import jobs
 from .llm.router import router as llm_router
 from .llm.service import LLM
@@ -20,6 +23,7 @@ def create_app(settings=None):
     async def lifespan(app):
         Base.metadata.create_all(engine)
         jobs.recover(sessions)
+        literature_service.recover(sessions)
         yield
         tasks = list(app.state.tasks)
         for task in tasks:
@@ -31,11 +35,13 @@ def create_app(settings=None):
     app.state.settings = settings
     app.state.sessions = sessions
     app.state.tasks = set()
+    app.state.literature_client = LiteratureClient(settings)
     app.state.llm = LLM(settings, sessions)
     install(app)
     app.include_router(projects_router)
     app.include_router(jobs.router)
     app.include_router(llm_router)
+    app.include_router(literature_router)
 
     @app.get("/api/health")
     def health():

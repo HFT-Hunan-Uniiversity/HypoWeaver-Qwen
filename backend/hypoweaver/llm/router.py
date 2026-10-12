@@ -28,8 +28,8 @@ async def status(request: Request, db: Session = Depends(session)):
     usage = db.execute(select(func.count(LLMCall.id), func.sum(LLMCall.input_tokens), func.sum(LLMCall.output_tokens))).one()
     calls = db.scalars(select(LLMCall).order_by(LLMCall.created_at.desc()).limit(20)).all()
     sources = await asyncio.gather(
-        probe("https://api.openalex.org/works", {"per_page": 1, "mailto": settings.contact_email}),
-        probe("https://api.crossref.org/works", {"rows": 1, "mailto": settings.contact_email}),
+        probe(settings.openalex_url, {"per_page": 1, "mailto": settings.contact_email}),
+        probe(settings.crossref_url, {"rows": 1, "mailto": settings.contact_email}),
     )
     return {"configured": bool(settings.dashscope_api_key and settings.qwen_model), "model": settings.qwen_model,
             "message": "已配置，请测试连接" if settings.dashscope_api_key and settings.qwen_model else "尚未配置模型密钥或模型名",

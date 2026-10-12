@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     dashscope_api_key: str = ""
     qwen_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     qwen_model: str = ""
+    openalex_url: str = "https://api.openalex.org/works"
+    crossref_url: str = "https://api.crossref.org/works"
     contact_email: str = ""
     local_library_dir: str = ""
 

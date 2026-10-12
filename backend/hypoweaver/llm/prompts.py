@@ -9,6 +9,7 @@ class Prompt:
 
 
 PROMPTS = {
+    "suggest_queries": Prompt("suggest_queries", "根据研究方向生成 3–6 条中英文检索式，兼顾概念、政策和结果变量；每条给出 lang 与 rationale。"),
     "connection_test": Prompt("connection_test", "请返回 message 字段，简短说明连接成功。"),
 }
 
