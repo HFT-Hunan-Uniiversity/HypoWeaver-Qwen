@@ -5,6 +5,7 @@ import { api, body } from '../api/client'
 import type { Dataset } from '../api/datasets'
 import { type StudyPlan, roles } from '../api/plans'
 import { ErrorNote } from './Shared'
+import { NeedsModel } from './ui/Bits'
 interface Value {
   field?: string | null
   formula?: string | null
@@ -112,13 +113,16 @@ function Editor({
               方案第 {plan.version} 版 · {dataset.name}
             </p>
           </div>
-          <button
-            className="secondary"
-            disabled={suggest.isPending}
-            onClick={() => suggest.mutate()}
-          >
-            {suggest.isPending ? '正在建议…' : '让模型建议绑定'}
-          </button>
+          <span className="action-cluster">
+            <NeedsModel />
+            <button
+              className="secondary"
+              disabled={suggest.isPending}
+              onClick={() => suggest.mutate()}
+            >
+              {suggest.isPending ? '正在建议…' : '让模型建议绑定'}
+            </button>
+          </span>
         </div>
         <p className="muted">
           支持

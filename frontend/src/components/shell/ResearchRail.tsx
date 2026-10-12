@@ -121,7 +121,11 @@ export default function ResearchRail({ projectId }: { projectId: string }) {
                 <dt>最近运行</dt>
                 <dd>
                   {f.run?.result
-                    ? `coef ${num(f.run.result.main.coef)} · p ${num(f.run.result.main.p)} · N ${f.run.result.main.n_obs.toLocaleString()}`
+                    ? [
+                        `coef ${num(f.run.result.main.coef)}`,
+                        `p ${num(f.run.result.main.p)}`,
+                        `N ${f.run.result.main.n_obs.toLocaleString()}`,
+                      ].join(' · ')
                     : '—'}
                 </dd>
               </div>

@@ -38,6 +38,11 @@ export interface StudyPlan {
   claims_planned: { id: string; text: string; type: string }[]
   boundary_notes: string
   treatment_is_real_assignment: boolean
+  /** R2-01：处理变量所绑定字段的语义；后端未提供时为 undefined */
+  treatment_semantics?: 'real_assignment' | 'peer_exposure' | 'unknown' | null
+  /** 生成该版本的模型名；plan.model 已被统计模型占用，故兼容 llm_model / generated_by.model */
+  llm_model?: string | null
+  generated_by?: { model?: string } | null
 }
 export const methods: Record<string, string> = {
   policy_causal: '政策 DID 框架',
@@ -59,4 +64,15 @@ export const robustKinds: Record<string, string> = {
   monotone_only: '仅单调处理路径',
   alt_outcome: '替换结果变量',
   add_controls: '增加控制变量',
+}
+export const semanticsLabels: Record<string, string> = {
+  real_assignment: '真实分配',
+  peer_exposure: '同群 / 暴露',
+  unknown: '未知',
+}
+export const levelLabels: Record<string, string> = {
+  firm: '企业',
+  industry: '行业',
+  region: '地区',
+  other: '其他',
 }

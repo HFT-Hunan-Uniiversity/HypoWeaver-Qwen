@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { ErrorNote } from './Shared'
+import { GeneratedBy } from './ui/Bits'
 export const strengths: Record<string, string> = {
   insufficient: '证据不足',
   preliminary: '初步线索',
@@ -25,6 +26,7 @@ type Claim = {
   user_decision: string
   chosen_strength: string
   final_text: string
+  model?: string | null
 }
 function Card({ claim }: { claim: Claim }) {
   const qc = useQueryClient(),
@@ -50,7 +52,9 @@ function Card({ claim }: { claim: Claim }) {
   )
   return (
     <article className="panel">
-      <h3>结论判定：{verdicts[claim.verdict]}</h3>
+      <h3>
+        结论判定：{verdicts[claim.verdict]} <GeneratedBy of={claim} />
+      </h3>
       <p>
         <strong>强度上限：{strengths[claim.max_strength]}</strong>
       </p>

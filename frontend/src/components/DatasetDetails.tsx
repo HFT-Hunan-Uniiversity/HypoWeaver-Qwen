@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { levelLabels, semanticsLabels } from '../api/plans'
 import { api, body } from '../api/client'
 import type { Dataset } from '../api/datasets'
 import { ErrorNote } from './Shared'
@@ -17,6 +18,21 @@ export default function DatasetDetails({
     mutationFn: () => api(`/datasets/${dataset.id}`, body('PATCH', { name, source })),
     onSuccess: () => {
       setSaved(true)
+      onSaved()
+    },
+  })
+  const qc = useQueryClient()
+  const hasSemantics = dataset.profile.some((p) => 'semantics' in p || 'level' in p)
+  const field = useMutation({
+    mutationFn: (v: { name: string; semantics?: string; level?: string }) =>
+      api(
+        `/datasets/${dataset.id}/fields/${encodeURIComponent(v.name)}`,
+        body('PATCH', { semantics: v.semantics, level: v.level }),
+      ),
+    onSuccess: () => {
+      // 字段语义影响结论上限：刷新数据、方案、运行、结论、提案与阶段过期状态
+      for (const k of ['datasets', 'overview', 'plans', 'runs', 'claims', 'proposals', 'readiness'])
+        qc.invalidateQueries({ queryKey: [k] })
       onSaved()
     },
   })
@@ -91,6 +107,12 @@ export default function DatasetDetails({
       </details>
       <section className="panel">
         <h2>字段档案</h2>
+        <p className="muted">
+          {hasSemantics
+            ? '“语义”决定结论上限：同群 / 暴露变量最高只能报告关联。修改后，依赖该数据的方案、运行与提案将标记为过期。'
+            : '字段语义与层级标注需要后端更新后才能编辑（R2-01）。'}
+        </p>
+        <ErrorNote error={field.error} />
         <div className="table-scroll">
           <table>
             <thead>
@@ -100,6 +122,8 @@ export default function DatasetDetails({
                 <th>缺失率</th>
                 <th>唯一值</th>
                 <th>范围</th>
+                <th>语义</th>
+                <th>层级</th>
               </tr>
             </thead>
             <tbody>
@@ -116,6 +140,44 @@ export default function DatasetDetails({
                     {p.min === null
                       ? '—'
                       : `${p.min.toLocaleString()} — ${p.max?.toLocaleString()}`}
+                  </td>
+                  <td>
+                    {hasSemantics ? (
+                      <select
+                        className="field-select"
+                        aria-label={`${p.name} 语义`}
+                        value={p.semantics || 'unknown'}
+                        disabled={field.isPending}
+                        onChange={(e) => field.mutate({ name: p.name, semantics: e.target.value })}
+                      >
+                        {Object.entries(semanticsLabels).map(([k, v]) => (
+                          <option key={k} value={k}>
+                            {v}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                  <td>
+                    {hasSemantics ? (
+                      <select
+                        className="field-select"
+                        aria-label={`${p.name} 层级`}
+                        value={p.level || 'other'}
+                        disabled={field.isPending}
+                        onChange={(e) => field.mutate({ name: p.name, level: e.target.value })}
+                      >
+                        {Object.entries(levelLabels).map(([k, v]) => (
+                          <option key={k} value={k}>
+                            {v}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      '—'
+                    )}
                   </td>
                 </tr>
               ))}

@@ -44,6 +44,7 @@ export interface Project {
   title: string
   direction: Direction
   updated_at: string
+  selected_candidate_id?: string | null
 }
 export interface Stage {
   key: string

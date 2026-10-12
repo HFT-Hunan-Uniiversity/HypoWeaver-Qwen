@@ -35,6 +35,9 @@ export interface Dataset {
     unique_count: number
     min: number | null
     max: number | null
+    /** R2-01：字段语义与层级；后端未落地时缺省 */
+    semantics?: 'real_assignment' | 'peer_exposure' | 'unknown' | null
+    level?: 'firm' | 'industry' | 'region' | 'other' | null
   }[]
 }
 export interface Inspection {

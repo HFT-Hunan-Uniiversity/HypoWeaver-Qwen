@@ -9,6 +9,7 @@ import ResultTable, { num } from '../components/ResultTable'
 import AnalysisCharts from '../components/AnalysisCharts'
 import JobProgress from '../components/JobProgress'
 import { ErrorNote } from '../components/Shared'
+import { GeneratedBy, VersionPills } from '../components/ui/Bits'
 const stepNames: Record<string, string> = {
   main: '主模型',
   event_study: '事件研究',
@@ -57,6 +58,12 @@ export default function Analysis() {
     },
   })
   const result = current?.result
+  const usedPlan = plans.data?.find((p) => p.id === current?.plan_id)
+  /** 变量中文标签：用方案里变量的中文定义，原始公式作为次要文字 */
+  const label = (expr: string) => {
+    const v = usedPlan?.variables.find((x) => x.name === expr || expr.includes(x.name))
+    return v ? `${v.definition.split(/[，,（(]/)[0]}` : expr
+  }
   return (
     <>
       <div className="page-heading">
@@ -100,54 +107,63 @@ export default function Analysis() {
         </section>
       ) : (
         <>
-          <label>
-            运行记录
-            <select
-              value={current.id}
-              onChange={(e) => {
-                setJob('')
-                setParams({ tab: 'results', run: e.target.value })
-              }}
-            >
-              {runs.data?.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {new Date(r.created_at).toLocaleString('zh-CN')} · 方案第{r.plan_snapshot.version}
-                  版 · {statusNames[r.status]}
-                  {r.stale ? ' · 已过期' : ''}
-                </option>
-              ))}
-            </select>
-          </label>
+          <VersionPills
+            label="运行记录"
+            value={current.id}
+            onChange={(v) => {
+              setJob('')
+              setParams({ tab: 'results', run: v })
+            }}
+            items={(runs.data || []).map((r) => ({
+              id: r.id,
+              label: new Date(r.created_at).toLocaleString('zh-CN', {
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              note:
+                `方案 v${r.plan_snapshot.version}` +
+                (r.status === 'succeeded' ? '' : ' · ' + statusNames[r.status]) +
+                (r.stale ? ' · 已过期' : ''),
+              tone: r.stale ? 'stale' : r.status === 'failed' ? 'failed' : undefined,
+            }))}
+          />
           {current.stale && (
             <p className="notice">上游方案、数据或绑定已变更，本次运行已过期；旧数字保留供核对。</p>
           )}
           {current.error && <p className="error">{current.error}</p>}
-          <section className="panel">
-            <h2>计算步骤</h2>
-            <div className="run-steps">
-              {Object.entries(current.steps).map(([key, s]) => (
-                <div key={key}>
-                  <strong>{stepNames[key] || key}</strong>
-                  <span className={s.status === 'failed' ? 'error' : 'muted'}>
-                    {statusNames[s.status] || s.status}
-                  </span>
-                  {s.error && <small>{s.error}</small>}
-                </div>
-              ))}
-            </div>
-          </section>
+          <div className="step-badges" aria-label="计算步骤">
+            {Object.entries(current.steps).map(([key, st]) => (
+              <span key={key} className={`is-${st.status}`} title={st.error || undefined}>
+                {stepNames[key] || key} · {statusNames[st.status] || st.status}
+              </span>
+            ))}
+          </div>
+          {Object.entries(current.steps)
+            .filter(([, st]) => st.error)
+            .map(([key, st]) => (
+              <p className="error" key={key}>
+                {stepNames[key] || key}：{st.error}
+              </p>
+            ))}
           {!result && current.status === 'failed' && <Claims runId={current.id} />}{' '}
           {result && (
-            <>
-              <section className="panel">
+            <div className="analysis-grid">
+              <section className="panel span-2">
                 <h2>主模型结果</h2>
-                <p className="muted">
-                  结果：{current.spec.outcome} · 核心解释：{current.spec.treatment} · 聚类：
+                <p>
+                  结果：{label(current.spec.outcome)} · 核心解释：{label(current.spec.treatment)} ·
+                  聚类：
                   {current.spec.cluster === 'unit'
                     ? '个体'
                     : current.spec.cluster === 'time'
                       ? '时间'
                       : current.spec.cluster}
+                </p>
+                <p className="muted">
+                  原始设定：<code>{current.spec.outcome}</code> ~{' '}
+                  <code>{current.spec.treatment}</code>
                 </p>
                 <ResultTable
                   rows={[
@@ -169,7 +185,7 @@ export default function Analysis() {
                 </p>
               </section>
               <AnalysisCharts result={result} />
-              <section className="panel">
+              <section className="panel span-2">
                 <h2>稳健性检查</h2>
                 {result.robustness.length ? (
                   <>
@@ -191,7 +207,7 @@ export default function Analysis() {
                 )}
               </section>
               {current.reproduction && (
-                <section className="panel">
+                <section className="panel span-2">
                   <h2>独立复算：{current.reproduction.consistent ? '一致' : '未全部一致'}</h2>
                   <p className="muted">{current.reproduction.method} · 容差 0.000001</p>
                   <p>最大相对差：{current.reproduction.max_relative_diff.toExponential(3)}</p>
@@ -221,9 +237,11 @@ export default function Analysis() {
                   </div>
                 </section>
               )}
-              <Claims runId={current.id} />
+              <div className="span-2">
+                <Claims runId={current.id} />
+              </div>
               {result.warnings.length > 0 && (
-                <section className="panel">
+                <section className="panel span-2">
                   <h2>解释边界与提示</h2>
                   <ul>
                     {result.warnings.map((w, i) => (
@@ -232,7 +250,7 @@ export default function Analysis() {
                   </ul>
                 </section>
               )}
-            </>
+            </div>
           )}
         </>
       )}

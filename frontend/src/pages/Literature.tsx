@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { ErrorNote } from '../components/Shared'
+import { NeedsModel } from '../components/ui/Bits'
 import Landscape from '../components/Landscape'
 import PdfUpload from '../components/PdfUpload'
 import EvidenceEdit from '../components/EvidenceEdit'
@@ -87,6 +88,7 @@ export default function Literature() {
       <section className="panel">
         <div className="heading compact">
           <h2>检索式</h2>
+          <NeedsModel />
           <button className="quiet" disabled={suggest.isPending} onClick={() => suggest.mutate()}>
             {suggest.isPending ? '正在生成…' : '根据方向生成'}
           </button>

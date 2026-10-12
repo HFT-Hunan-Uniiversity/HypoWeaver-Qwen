@@ -42,8 +42,18 @@ export function VersionPills({
   )
 }
 
-/** “由 <model> 生成” */
-export function GeneratedBy({ model }: { model?: string | null }) {
+/** 从结果对象取生成模型名：优先顶层字符串 model，其次 llm_model / generated_by.model */
+export function llmModelOf(obj: unknown): string | undefined {
+  if (!obj || typeof obj !== 'object') return undefined
+  const o = obj as { model?: unknown; llm_model?: unknown; generated_by?: { model?: unknown } }
+  for (const v of [o.model, o.llm_model, o.generated_by?.model])
+    if (typeof v === 'string' && v) return v
+  return undefined
+}
+
+/** “由 <model> 生成”；传 of= 结果对象或 model= 字符串 */
+export function GeneratedBy({ model: m, of }: { model?: string | null; of?: unknown }) {
+  const model = m || llmModelOf(of)
   if (!model) return null
   return (
     <span className="generated-by">

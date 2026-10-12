@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { ErrorNote } from '../components/Shared'
+import { FALLBACK_MODELS, useLlm } from '../lib/llm'
 interface Status {
   configured: boolean
   model: string
@@ -37,6 +38,16 @@ export default function Settings() {
     queryFn: () => api<Status>('/settings/status'),
     staleTime: 60000,
   })
+  const llm = useLlm()
+  const [picked, setPicked] = useState('')
+  const switchModel = useMutation({
+    mutationFn: (model: string) => api('/settings/llm', body('PUT', { model })),
+    onSuccess: () => {
+      setPicked('')
+      for (const k of ['llm', 'settings']) cache.invalidateQueries({ queryKey: [k] })
+    },
+  })
+  const models = llm.data?.models.length ? llm.data.models : FALLBACK_MODELS
   const test = useMutation({
     mutationFn: () => api<{ message: string }>('/settings/llm:test', body('POST')),
     onSuccess: (r) => setMessage(r.message),
@@ -56,8 +67,42 @@ export default function Settings() {
         q.data && (
           <>
             <section className="panel">
-              <h2>模型连接</h2>
-              <p>模型：{q.data.model || '未配置'}</p>
+              <h2>模型连接 · 千问</h2>
+              <p>
+                当前模型：
+                <strong>
+                  {llm.data?.model || q.data.model || '未设置（默认 qwen-plus）'}
+                </strong> · {(llm.data?.configured ?? q.data.configured) ? '已配置' : '未配置密钥'}
+              </p>
+              <div className="action-cluster" style={{ justifyContent: 'flex-start' }}>
+                <label style={{ margin: 0 }}>
+                  切换千问模型
+                  <select
+                    value={picked || llm.data?.model || q.data.model || 'qwen-plus'}
+                    disabled={!llm.data?.switchable || switchModel.isPending}
+                    onChange={(e) => setPicked(e.target.value)}
+                  >
+                    {Array.from(
+                      new Set([...(llm.data?.model ? [llm.data.model] : []), ...models]),
+                    ).map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="secondary"
+                  disabled={!llm.data?.switchable || !picked || switchModel.isPending}
+                  onClick={() => switchModel.mutate(picked)}
+                >
+                  {switchModel.isPending ? '正在保存…' : '保存模型'}
+                </button>
+              </div>
+              {llm.data && !llm.data.switchable && (
+                <p className="muted">后端尚未提供 /api/settings/llm，暂只能在 .env 中修改模型。</p>
+              )}
+              <ErrorNote error={switchModel.error || llm.error} />
               <p>{q.data.message}</p>
               <button
                 onClick={() => {

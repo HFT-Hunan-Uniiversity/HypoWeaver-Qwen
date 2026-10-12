@@ -8,6 +8,8 @@ import type { AnalysisResult } from '../api/analysis'
 import AnalysisCharts from '../components/AnalysisCharts'
 import JobProgress from '../components/JobProgress'
 import { ErrorNote } from '../components/Shared'
+import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
+import { useLlm } from '../lib/llm'
 const titles: Record<string, string> = {
   overview: '一页概览',
   question: '研究问题与贡献',
@@ -34,6 +36,7 @@ type ProposalRecord = {
   stale: boolean
   sections: Section[]
   removed_references: number
+  model?: string | null
   snapshot: { project: { title: string }; run: null | { id: string; result: AnalysisResult } }
 }
 function render(s: Section) {
@@ -102,6 +105,7 @@ export default function Proposal() {
     refetchInterval: (q) =>
       q.state.data?.some((j) => ['queued', 'running'].includes(j.status)) ? 1000 : false,
   })
+  const llm = useLlm()
   const active = query.data?.find((p) => p.id === params.get('proposal')) || query.data?.[0]
   const currentJob = job || jobs.data?.[0]?.id || ''
   const refresh = () => {
@@ -124,14 +128,19 @@ export default function Proposal() {
             <h1>研究提案</h1>
             <p className="muted">数字来自已保存的检验，叙述须遵守结论强度。</p>
           </div>
-          <button
-            disabled={
-              generate.isPending || jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
-            }
-            onClick={() => generate.mutate()}
-          >
-            生成新版本
-          </button>
+          <div className="action-cluster">
+            <NeedsModel />
+            <button
+              disabled={
+                generate.isPending ||
+                llm.data?.configured === false ||
+                jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
+              }
+              onClick={() => generate.mutate()}
+            >
+              生成新版本
+            </button>
+          </div>
         </div>
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (
@@ -152,17 +161,18 @@ export default function Proposal() {
       ) : (
         <>
           <div className="toolbar no-print">
-            <label>
-              提案版本
-              <select value={active.id} onChange={(e) => setParams({ proposal: e.target.value })}>
-                {query.data?.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    第{p.version}版 · {p.kind === 'plan_only' ? '计划型' : '含探索性结果'}
-                    {p.stale ? ' · 已过期' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <VersionPills
+              label="提案版本"
+              value={active.id}
+              onChange={(v) => setParams({ proposal: v })}
+              items={(query.data || []).map((p) => ({
+                id: p.id,
+                label: `第 ${p.version} 版`,
+                note: (p.kind === 'plan_only' ? '计划型' : '含结果') + (p.stale ? ' · 已过期' : ''),
+                tone: p.stale ? 'stale' : undefined,
+              }))}
+            />
+            <GeneratedBy of={active} />
             <a className="button secondary" href={`/api/proposals/${active.id}.md`} download>
               下载 Markdown
             </a>

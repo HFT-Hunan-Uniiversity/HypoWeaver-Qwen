@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
-import { type StudyPlan, methods } from '../api/plans'
+import { type StudyPlan, methods, semanticsLabels } from '../api/plans'
 import { ErrorNote } from '../components/Shared'
 import PlanEditor from '../components/PlanEditor'
 import JobProgress from '../components/JobProgress'
 import type { Job } from '../components/JobProgress'
+import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
+import { useLlm } from '../lib/llm'
 export default function Plan() {
   const { id } = useParams(),
     qc = useQueryClient(),
@@ -45,20 +47,30 @@ export default function Plan() {
       refresh()
     },
   })
+  const llm = useLlm()
+  const peer = current?.treatment_semantics === 'peer_exposure'
   return (
     <>
       <div className="page-heading">
         <div>
           <h1>研究方案</h1>
+          <p className="muted">
+            变量、模型、稳健性与决策规则逐项审阅；确认后锁定，修改需新建版本。
+          </p>
         </div>
-        <button
-          disabled={
-            draft.isPending || tasks.data?.some((j) => ['running', 'queued'].includes(j.status))
-          }
-          onClick={() => draft.mutate()}
-        >
-          {plans.data?.length ? '重新起草方案' : '起草研究方案'}
-        </button>
+        <div className="action-cluster">
+          <NeedsModel />
+          <button
+            disabled={
+              draft.isPending ||
+              llm.data?.configured === false ||
+              tasks.data?.some((j) => ['running', 'queued'].includes(j.status))
+            }
+            onClick={() => draft.mutate()}
+          >
+            {plans.data?.length ? '重新起草方案' : '起草研究方案'}
+          </button>
+        </div>
       </div>
       <ErrorNote error={plans.error || tasks.error || draft.error || action.error} />
       {activeJob && <JobProgress id={activeJob} onComplete={refresh} />}
@@ -72,89 +84,118 @@ export default function Plan() {
         </section>
       ) : (
         <>
-          <label>
-            方案版本
-            <select value={current.id} onChange={(e) => setVersion(e.target.value)}>
-              {plans.data?.map((p) => (
-                <option key={p.id} value={p.id}>
-                  第 {p.version} 版 ·{' '}
-                  {p.status === 'draft'
+          <div className="candidate-toolbar">
+            <VersionPills
+              label="方案版本"
+              value={current.id}
+              onChange={setVersion}
+              items={(plans.data || []).map((p) => ({
+                id: p.id,
+                label: `第 ${p.version} 版`,
+                note:
+                  (p.status === 'draft'
                     ? '草稿'
                     : p.status === 'confirmed'
                       ? '已确认'
-                      : '已有更新版'}
-                  {p.stale ? ' · 已过期' : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-          {current.stale && (
-            <p className="notice">
-              方向或候选已变更，此方案已过期。原内容保留，请根据当前候选重新起草。
-            </p>
-          )}
-          <section className="panel">
-            <h2>{methods[current.method_family]}</h2>
-            <p>
-              {current.variables.length} 个变量 · {current.robustness.length} 项稳健性检查 ·{' '}
-              {current.permutation.n} 次置换
-            </p>
-            <p>{current.boundary_notes}</p>
-            <div className="actions">
-              {current.status === 'draft' ? (
-                <button
-                  disabled={current.stale || action.isPending || dirty}
-                  onClick={() => setConfirming(true)}
-                >
-                  确认并锁定方案
-                </button>
-              ) : (
-                <button
-                  disabled={action.isPending || current.stale}
-                  onClick={() => action.mutate('new-version')}
-                >
-                  新建版本
-                </button>
-              )}
-              {current.status === 'confirmed' && (
-                <Link to={`/p/${id}/data?tab=binding`}>导入与绑定数据 →</Link>
-              )}
-            </div>
-          </section>
-          {dirty && <p className="notice">有尚未保存的编辑，请先保存草稿再确认。</p>}
-          <section className="panel">
-            <h2>重点审阅</h2>
-            {current.variables
-              .filter((v) => v.uncertain)
-              .map((v) => (
-                <p key={v.name}>
-                  <strong>待确认：{v.name}</strong> — {v.definition}
+                      : '已有更新版') + (p.stale ? ' · 已过期' : ''),
+                tone: p.stale ? 'stale' : undefined,
+              }))}
+            />
+            <GeneratedBy of={current} />
+          </div>
+          <div className="plan-layout">
+            <nav className="plan-nav" aria-label="方案目录">
+              <a href="#plan-summary">概要与确认</a>
+              <a href="#plan-review">重点审阅</a>
+              <a href="#plan-variables">变量与定义</a>
+              <a href="#plan-model">模型与识别</a>
+              <a href="#plan-robustness">稳健性检查</a>
+              <a href="#plan-rules">置换与决策规则</a>
+              <a href="#plan-claims">计划结论与边界</a>
+            </nav>
+            <div className="plan-main">
+              {current.stale && (
+                <p className="notice">
+                  方向或候选已变更，此方案已过期。原内容保留，请根据当前候选重新起草。
                 </p>
-              ))}
-            {!current.variables.some((v) => v.uncertain) && (
-              <p>未标记含义不确定的变量，仍需检查下列识别假设。</p>
-            )}
-            <ul>
-              {current.model.identification_assumptions.map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ul>
-            <p>
-              处理是否为真实分配：
-              <strong>
-                {current.treatment_is_real_assignment ? '已由用户标记为是' : '否 / 尚未核实'}
-              </strong>
-            </p>
-          </section>
-          <PlanEditor
-            key={current.id + JSON.stringify(current)}
-            plan={current}
-            onDirty={setDirty}
-            onSaved={(p) => {
-              setVersion(p.id)
-              refresh()
-            }}
-          />
+              )}
+              <section className="panel" id="plan-summary">
+                <h2>{methods[current.method_family]}</h2>
+                <p>
+                  {current.variables.length} 个变量 · {current.robustness.length} 项稳健性检查 ·{' '}
+                  {current.permutation.n} 次置换
+                </p>
+                <p>{current.boundary_notes}</p>
+                <div className="actions">
+                  {current.status === 'draft' ? (
+                    <button
+                      disabled={current.stale || action.isPending || dirty}
+                      onClick={() => setConfirming(true)}
+                    >
+                      确认并锁定方案
+                    </button>
+                  ) : (
+                    <button
+                      disabled={action.isPending || current.stale}
+                      onClick={() => action.mutate('new-version')}
+                    >
+                      新建版本
+                    </button>
+                  )}
+                  {current.status === 'confirmed' && (
+                    <Link to={`/p/${id}/data?tab=binding`}>导入与绑定数据 →</Link>
+                  )}
+                </div>
+              </section>
+              {dirty && <p className="notice">有尚未保存的编辑，请先保存草稿再确认。</p>}
+              <section className="panel" id="plan-review">
+                <h2>重点审阅</h2>
+                {current.variables
+                  .filter((v) => v.uncertain)
+                  .map((v) => (
+                    <p key={v.name}>
+                      <strong>待确认：{v.name}</strong> — {v.definition}
+                    </p>
+                  ))}
+                {!current.variables.some((v) => v.uncertain) && (
+                  <p>未标记含义不确定的变量，仍需检查下列识别假设。</p>
+                )}
+                <ul>
+                  {current.model.identification_assumptions.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+                <p>
+                  处理是否为真实分配：
+                  <strong>
+                    {current.treatment_is_real_assignment ? '已由用户标记为是' : '否 / 尚未核实'}
+                  </strong>
+                  {current.treatment_semantics && (
+                    <span className="muted">
+                      {' '}
+                      · 绑定字段语义：
+                      {semanticsLabels[current.treatment_semantics] || current.treatment_semantics}
+                    </span>
+                  )}
+                </p>
+                {peer && current.treatment_is_real_assignment && (
+                  <p className="error">
+                    冲突：处理变量绑定的字段是“同群 /
+                    暴露”变量，并非真实分配，结论最高只能到“关联”。请新建版本并取消该勾选。
+                  </p>
+                )}
+              </section>
+              <PlanEditor
+                key={current.id + JSON.stringify(current)}
+                plan={current}
+                onDirty={setDirty}
+                onSaved={(p) => {
+                  setVersion(p.id)
+                  refresh()
+                }}
+              />
+            </div>
+          </div>
           {confirming && (
             <div className="modal-backdrop">
               <section className="modal" role="dialog" aria-label="确认研究方案">

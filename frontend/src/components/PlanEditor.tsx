@@ -47,7 +47,7 @@ export default function PlanEditor({
             ))}
           </select>
         </label>
-        <h3>变量与定义</h3>
+        <h3 id="plan-variables">变量与定义</h3>
         {draft.variables.map((v, i) => (
           <div className="editor-row" key={i}>
             <label>
@@ -141,7 +141,7 @@ export default function PlanEditor({
         >
           添加变量
         </button>
-        <h3>模型与识别</h3>
+        <h3 id="plan-model">模型与识别</h3>
         {['unit', 'time'].map((x) => (
           <label className="check" key={x}>
             <input
@@ -230,7 +230,7 @@ export default function PlanEditor({
             }
           />
         </label>
-        <h3>稳健性检查</h3>
+        <h3 id="plan-robustness">稳健性检查</h3>
         {draft.robustness.map((r, i) => (
           <div className="editor-row" key={i}>
             <label>
@@ -330,7 +330,7 @@ export default function PlanEditor({
         >
           添加稳健性检查
         </button>
-        <h3>置换与决策规则</h3>
+        <h3 id="plan-rules">置换与决策规则</h3>
         <div className="two-columns">
           <label>
             置换次数
@@ -391,7 +391,7 @@ export default function PlanEditor({
             </label>
           ),
         )}
-        <h3>计划结论与边界</h3>
+        <h3 id="plan-claims">计划结论与边界</h3>
         {draft.claims_planned.map((c, i) => (
           <div className="editor-row" key={i}>
             <label>
@@ -468,6 +468,9 @@ export default function PlanEditor({
         <label className="check">
           <input
             type="checkbox"
+            disabled={
+              plan.treatment_semantics === 'peer_exposure' && !draft.treatment_is_real_assignment
+            }
             checked={draft.treatment_is_real_assignment}
             onChange={(e) => setDraft({ ...draft, treatment_is_real_assignment: e.target.checked })}
           />
@@ -476,6 +479,12 @@ export default function PlanEditor({
         <p className="muted">
           行业同群暴露不代表企业实际被纳入政策。此项为否时，最高只能报告关联。
         </p>
+        {plan.treatment_semantics === 'peer_exposure' && (
+          <p className={draft.treatment_is_real_assignment ? 'error' : 'notice'}>
+            处理变量绑定的字段在数据档案中标记为“同群 / 暴露”，不能勾选为真实分配
+            {draft.treatment_is_real_assignment ? '：当前勾选与字段语义冲突，请取消。' : '。'}
+          </p>
+        )}
       </fieldset>
       <ErrorNote error={save.error} />
       {!locked && !plan.stale && <button disabled={save.isPending}>保存方案草稿</button>}

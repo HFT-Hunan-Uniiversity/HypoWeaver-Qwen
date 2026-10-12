@@ -34,16 +34,20 @@ export default function JobProgress({
       }
     }
   }, [q.data, onComplete])
+  // 已成功的任务不再单独占一张卡片（B5）；进行中 / 失败以一行状态显示
+  if (q.data?.status === 'succeeded') return null
   return (
-    <div className="panel" role="status">
+    <div className={`job-line ${q.data?.status === 'failed' ? 'is-failed' : ''}`} role="status">
       <ErrorNote error={q.error} />
       {q.data ? (
         <>
-          <strong>{q.data.status === 'failed' ? '执行失败' : q.data.progress_text}</strong>
-          {q.data.error && <p className="error">{q.data.error}</p>}
+          <strong>
+            {q.data.status === 'failed' ? '执行失败' : q.data.progress_text || '正在执行…'}
+          </strong>
+          {q.data.error && <span>{q.data.error}</span>}
         </>
       ) : (
-        <p>正在读取进度…</p>
+        <span>正在读取进度…</span>
       )}
     </div>
   )

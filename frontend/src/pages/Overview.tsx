@@ -30,6 +30,8 @@ export default function Overview() {
   const done = completedCount(stages)
   const stale = stages.filter((s) => s.status === 'stale')
   const main = f.run?.result?.main
+  const panel = f.dataset?.panel
+  const period = panel?.time_min ? `${panel.time_min}–${panel.time_max}` : ''
   const status =
     done === 6
       ? ['green', '可交接']
@@ -66,9 +68,7 @@ export default function Overview() {
         <div>
           <span>数据资产与样本期</span>
           <strong title={f.dataset?.name}>
-            {f.dataset
-              ? `${f.dataset.name}${f.dataset.panel.time_min ? ` · ${f.dataset.panel.time_min}–${f.dataset.panel.time_max}` : ''}`
-              : '尚未运行检验'}
+            {f.dataset ? [f.dataset.name, period].filter(Boolean).join(' · ') : '尚未运行检验'}
           </strong>
         </div>
         <div>
