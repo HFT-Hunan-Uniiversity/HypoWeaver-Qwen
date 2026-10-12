@@ -18,7 +18,12 @@ def install(app):
     @app.exception_handler(ValidationError)
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
-        message = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())
+        messages = []
+        for error in exc.errors():
+            location = ".".join(map(str, error["loc"]))
+            detail = "未知字段，不允许额外参数" if error["type"] == "extra_forbidden" else error["msg"]
+            messages.append(f"{location}: {detail}")
+        message = "; ".join(messages)
         return JSONResponse({"error": {"code": "validation", "message": message}}, status_code=422)
 
     @app.exception_handler(HTTPException)

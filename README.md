@@ -61,7 +61,7 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 ### 第二轮后端接口约定
 
 - `GET /api/settings/llm` → `{base_url, llm_model, configured}`，不包含密钥，也不会主动调用模型。
-- `PUT /api/settings/llm` 接受可选的 `base_url`、`api_key`、`llm_model`；省略密钥保留现值，传空字符串清除。保存后后续请求使用新配置，进行中的任务保持启动时配置。默认地址和模型集中在后端 Settings / `.env.example`，模型名不限制枚举。
+- `PUT /api/settings/llm` 接受可选的 `base_url`、`api_key`、`llm_model`；省略密钥保留现值，传空字符串清除。保存后后续请求使用新配置，进行中的任务保持启动时配置。默认地址和模型集中在后端 Settings / `.env.example`，模型名不限制枚举。未知字段（包括旧名 `model`）返回 422 和中文提示，配置不会被部分写入。
 - 未配置时，生成查询、候选、方案、绑定建议、提案及连接测试均直接返回 HTTP 409 / `llm_not_configured`，不会创建待执行任务。前端可先 GET 配置，再跳转设置页填写。
 - 候选集、方案和提案版本统一用 `llm_model` 记录生成模型；提案的 `interpretation` 保存 `{llm_model, paragraphs, status}`。方案的 `model` 只表示统计模型设定。手工新建版本继承该来源；历史记录未知模型为 null，不补猜测值。
 - `PATCH /api/datasets/{id}/fields/{name}` 接受 `semantics`、`level`；方案接口返回 `treatment_semantics`，运行保存当时的语义快照。字段语义变化后，旧运行和提案标为过期。

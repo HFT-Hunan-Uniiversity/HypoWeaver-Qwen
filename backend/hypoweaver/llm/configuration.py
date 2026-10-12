@@ -1,11 +1,12 @@
 import os
 from urllib.parse import urlsplit
 from dotenv import dotenv_values, set_key
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from .service import LLM, configured
 
 
 class LLMConfigInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     base_url: str | None = Field(default=None, max_length=2000)
     api_key: str | None = Field(default=None, max_length=4096, repr=False)
     llm_model: str | None = Field(default=None, min_length=1, max_length=200)

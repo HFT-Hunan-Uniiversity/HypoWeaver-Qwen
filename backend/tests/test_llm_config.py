@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 from hypoweaver.app import create_app
@@ -103,3 +104,21 @@ def test_empty_environment_base_url_is_unconfigured(tmp_path):
     with TestClient(app) as client:
         assert client.get("/api/settings/llm").json()["configured"] is False
         assert client.post("/api/settings/llm:test").status_code == 409
+
+
+@pytest.mark.parametrize("unknown", ["model", "typo"])
+def test_llm_settings_reject_unknown_fields_without_mutation(tmp_path, unknown):
+    settings = Settings(_env_file=None, data_dir=tmp_path, llm_model="original", llm_api_key="")
+    with TestClient(create_app(settings)) as client:
+        before = client.put("/api/settings/llm", json={"llm_model": "saved"}).json()
+        saved = (tmp_path / ".env.llm").read_bytes()
+        response = client.put(
+            "/api/settings/llm",
+            json={"llm_model": "should-not-save", "api_key": "do-not-echo-this-key", unknown: "unexpected-value"},
+        )
+        assert response.status_code == 422
+        message = response.json()["error"]["message"]
+        assert unknown in message and "未知字段" in message
+        assert "do-not-echo-this-key" not in response.text
+        assert client.get("/api/settings/llm").json() == before
+        assert (tmp_path / ".env.llm").read_bytes() == saved
