@@ -9,4 +9,4 @@ export async function api<T>(path:string, options:RequestInit={}):Promise<T> {
 export const body = (method:string, data?:unknown):RequestInit => ({method,body:data===undefined?undefined:JSON.stringify(data)})
 export interface Direction {text:string;question:string;constraints:string[];domain:string}
 export interface Project {id:string;title:string;direction:Direction;updated_at:string}
-export interface Stage {key:string;label:string;status:string}
+export interface Stage {key:string;label:string;status:string;summary?:string}

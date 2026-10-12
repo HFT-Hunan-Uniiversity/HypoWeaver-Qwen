@@ -107,9 +107,15 @@ def update(db, dataset_id, payload):
     for key, value in payload.model_dump(exclude_none=True).items():
         setattr(item, key, value)
     # Metadata changes do not change observations; future proposals must refresh their citation.
-    if item.project_id:
-        from ..staleness import invalidate
-        invalidate(db, item.project_id, 'data')
+    from ..staleness import invalidate
+    from ..binding.models import VariableBinding
+    from ..plans.models import StudyPlan
+    from ..stats.models import AnalysisRun
+    projects = set(db.scalars(select(StudyPlan.project_id).join(VariableBinding, VariableBinding.plan_id==StudyPlan.id).where(VariableBinding.dataset_id==dataset_id)).all())
+    projects.update(db.scalars(select(AnalysisRun.project_id).where(AnalysisRun.dataset_id==dataset_id)).all())
+    if item.project_id: projects.add(item.project_id)
+    for project_id in projects:
+        invalidate(db, project_id, 'data')
     db.commit()
     return item
 

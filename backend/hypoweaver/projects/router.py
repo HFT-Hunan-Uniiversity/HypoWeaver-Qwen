@@ -24,8 +24,8 @@ def get_project(project_id: str, db: Session = Depends(session)):
 
 @router.patch("/{project_id}")
 def update_project(project_id: str, payload: ProjectPatch, db: Session = Depends(session)):
-    project = service.update(db, project_id, payload)
-    return {"project": ProjectOut.model_validate(project), "affected": []}
+    project, affected = service.update(db, project_id, payload)
+    return {"project": ProjectOut.model_validate(project), "affected": affected}
 
 
 @router.delete("/{project_id}", status_code=204)
@@ -37,4 +37,4 @@ def delete_project(project_id: str, db: Session = Depends(session)):
 @router.get("/{project_id}/overview")
 def overview(project_id: str, db: Session = Depends(session)):
     project = service.get(db, project_id)
-    return {"project": ProjectOut.model_validate(project), "stages": service.stage_status(project)}
+    return {"project": ProjectOut.model_validate(project), "stages": service.stage_status(db, project)}
