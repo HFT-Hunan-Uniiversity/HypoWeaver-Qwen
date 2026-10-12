@@ -1,87 +1,89 @@
 import { useState } from 'react'
-import { Link, Outlet, useLocation, useMatch } from 'react-router-dom'
-import { Menu, PanelRight } from 'lucide-react'
+import { Link, Outlet, useMatch } from 'react-router-dom'
+import { X } from 'lucide-react'
 import AppSidebar from './AppSidebar'
 import ResearchRail from './ResearchRail'
+import { ShellContext, useViewportWide } from './ShellContext'
 import { useLlm } from '../../lib/llm'
-import { STAGE_TITLES, stageKeyFromPath, useOverview } from '../../lib/stages'
 
 function ModelBanner() {
   const llm = useLlm()
-  if (!llm.data || llm.data.configured) return null
+  const [hidden, setHidden] = useState(() => sessionStorage.getItem('hw-model-banner') === '0')
+  if (!llm.data || llm.data.configured || hidden) return null
   return (
     <div className="model-banner" role="status">
       <strong>模型未配置</strong>
-      <span>生成检索式、候选、方案、解读与提案需要千问模型；检索、数据与统计检验不受影响。</span>
+      <span>生成类步骤暂不可用；检索、数据与统计检验不受影响。</span>
       <Link to="/settings">前往设置 →</Link>
+      <button
+        type="button"
+        className="model-banner__close"
+        aria-label="关闭提示"
+        onClick={() => {
+          sessionStorage.setItem('hw-model-banner', '0')
+          setHidden(true)
+        }}
+      >
+        <X size={14} />
+      </button>
     </div>
   )
 }
 
+/** 壳层：侧栏（≤1366 默认折叠）+ 主卡（视口高度，页面本身不滚动）+ 右栏（≥1600 常驻，其余抽屉） */
 export default function AppShell() {
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('hw-sidebar') === '1')
-  const [drawer, setDrawer] = useState(false)
-  const [rail, setRail] = useState(false)
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem('hw-sidebar')
+    return saved === null ? window.innerWidth <= 1366 : saved === '1'
+  })
+  const [railOpen, setRailOpen] = useState(false)
+  const [actionsEl, setActionsEl] = useState<HTMLElement | null>(null)
+  const wide = useViewportWide(1600)
   const project = useMatch('/p/:id/*')
   const id = project?.params.id
-  const { pathname } = useLocation()
-  const overview = useOverview(id)
-  const stage = stageKeyFromPath(pathname)
   const toggle = () => {
     localStorage.setItem('hw-sidebar', collapsed ? '0' : '1')
     setCollapsed(!collapsed)
   }
-  const isOverview = !!id && !stage
+  const showRail = !!id && (wide || railOpen)
   return (
-    <div
-      className={`shell ${collapsed ? 'is-collapsed' : ''} ${drawer ? 'is-drawer-open' : ''}`}
-      onClick={() => drawer && setDrawer(false)}
+    <ShellContext.Provider
+      value={{
+        railOpen: showRail,
+        toggleRail: () => setRailOpen(!railOpen),
+        actionsEl,
+        setActionsEl,
+      }}
     >
-      <a className="skip-link" href="#main-content">
-        跳到正文
-      </a>
-      <AppSidebar collapsed={collapsed} onToggle={toggle} activeProjectId={id} />
-      <div className="shell-main">
-        <div className="main-toolbar no-print">
-          <button
-            type="button"
-            className="main-toolbar__menu"
-            aria-label="打开侧边栏"
-            onClick={(e) => {
-              e.stopPropagation()
-              setDrawer(true)
-            }}
-          >
-            <Menu size={16} />
-          </button>
-          <div className="main-toolbar__title">
-            <strong>{id ? overview.data?.project.title || '研究项目' : 'HypoWeaver'}</strong>
-            <small>{stage ? STAGE_TITLES[stage] : id ? '项目总览' : '实证科研工作台'}</small>
+      <div className={`shell ${collapsed ? 'is-collapsed' : ''}`}>
+        <a className="skip-link" href="#main-content">
+          跳到正文
+        </a>
+        <AppSidebar collapsed={collapsed} onToggle={toggle} activeProjectId={id} />
+        <div className="shell-main">
+          <div className={`shell-body ${id && wide ? 'has-rail' : ''}`}>
+            <main id="main-content" className="shell-view">
+              <ModelBanner />
+              <Outlet />
+            </main>
+            {showRail && (
+              <div className={wide ? 'rail-dock' : 'rail-drawer'}>
+                {!wide && (
+                  <button
+                    type="button"
+                    className="rail-drawer__close"
+                    aria-label="关闭进度与证据"
+                    onClick={() => setRailOpen(false)}
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+                <ResearchRail projectId={id!} />
+              </div>
+            )}
           </div>
-          {id && !isOverview && (
-            <div className="main-toolbar__actions">
-              <button
-                type="button"
-                className="quiet-button rail-toggle"
-                aria-pressed={rail}
-                onClick={() => setRail(!rail)}
-              >
-                <PanelRight size={14} aria-hidden="true" />
-                进度与证据
-              </button>
-            </div>
-          )}
-        </div>
-        <ModelBanner />
-        <div
-          className={`shell-body ${id ? 'has-rail' : ''} ${rail || isOverview ? 'rail-open' : ''}`}
-        >
-          <main id="main-content" className="shell-view--scroll">
-            <Outlet />
-          </main>
-          {id && <ResearchRail projectId={id} />}
         </div>
       </div>
-    </div>
+    </ShellContext.Provider>
   )
 }

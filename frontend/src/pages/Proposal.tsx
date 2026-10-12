@@ -1,3 +1,4 @@
+import { StageActions } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -124,11 +125,7 @@ export default function Proposal() {
   return (
     <>
       <div className="no-print">
-        <div className="page-heading">
-          <div>
-            <h1>研究提案</h1>
-            <p className="muted">数字来自已保存的检验，叙述须遵守结论强度。</p>
-          </div>
+        <StageActions>
           <div className="action-cluster">
             <NeedsModel />
             <button
@@ -142,7 +139,7 @@ export default function Proposal() {
               生成新版本
             </button>
           </div>
-        </div>
+        </StageActions>
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (
           <JobProgress
