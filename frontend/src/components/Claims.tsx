@@ -26,7 +26,7 @@ type Claim = {
   user_decision: string
   chosen_strength: string
   final_text: string
-  model?: string | null
+  llm_model?: string | null
 }
 function Card({ claim }: { claim: Claim }) {
   const qc = useQueryClient(),

@@ -40,7 +40,7 @@ interface CandidateSet {
   error: string | null
   job_id: string | null
   evidence_ids: string[]
-  model?: string | null
+  llm_model?: string | null
 }
 const positioning: Record<string, string> = {
   high_increment_data_gap: '增量较高 · 数据有缺口',

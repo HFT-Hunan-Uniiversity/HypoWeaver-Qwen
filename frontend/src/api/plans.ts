@@ -40,9 +40,8 @@ export interface StudyPlan {
   treatment_is_real_assignment: boolean
   /** R2-01：处理变量所绑定字段的语义；后端未提供时为 undefined */
   treatment_semantics?: 'real_assignment' | 'peer_exposure' | 'unknown' | null
-  /** 生成该版本的模型名；plan.model 已被统计模型占用，故兼容 llm_model / generated_by.model */
+  /** 生成该版本的模型名（plan.model 是统计模型设定，勿混用） */
   llm_model?: string | null
-  generated_by?: { model?: string } | null
 }
 export const methods: Record<string, string> = {
   policy_causal: '政策 DID 框架',

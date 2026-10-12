@@ -42,12 +42,12 @@ export function VersionPills({
   )
 }
 
-/** 从结果对象取生成模型名：优先顶层字符串 model，其次 llm_model / generated_by.model */
+/** 从结果对象取生成模型名：统一读顶层 llm_model（兼容旧记录的 generated_by.model）。
+ * 注意：不读 obj.model —— 方案的 model 是统计模型设定。 */
 export function llmModelOf(obj: unknown): string | undefined {
   if (!obj || typeof obj !== 'object') return undefined
-  const o = obj as { model?: unknown; llm_model?: unknown; generated_by?: { model?: unknown } }
-  for (const v of [o.model, o.llm_model, o.generated_by?.model])
-    if (typeof v === 'string' && v) return v
+  const o = obj as { llm_model?: unknown; generated_by?: { model?: unknown } }
+  for (const v of [o.llm_model, o.generated_by?.model]) if (typeof v === 'string' && v) return v
   return undefined
 }
 
@@ -66,7 +66,7 @@ export function GeneratedBy({ model: m, of }: { model?: string | null; of?: unkn
 export function NeedsModel() {
   const llm = useLlm()
   if (llm.data?.configured)
-    return <span className="needs-model is-ok">模型 · {llm.data.model}</span>
+    return <span className="needs-model is-ok">模型 · {llm.data.llm_model}</span>
   return (
     <Link className="needs-model" to="/settings" title="此操作需要模型，点击前往设置">
       需要模型

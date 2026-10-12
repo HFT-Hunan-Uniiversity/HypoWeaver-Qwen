@@ -100,7 +100,7 @@ export default function AppSidebar({
           {!collapsed && <span>设置</span>}
           <span
             className={`sidebar__service ${llm.data?.configured ? 'is-ready' : ''}`}
-            title={llm.data?.configured ? `模型已配置：${llm.data.model}` : '模型未配置'}
+            title={llm.data?.configured ? `模型已配置：${llm.data.llm_model}` : '模型未配置'}
           />
         </NavLink>
       </div>

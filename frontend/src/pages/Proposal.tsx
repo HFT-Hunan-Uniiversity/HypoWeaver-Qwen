@@ -36,7 +36,8 @@ type ProposalRecord = {
   stale: boolean
   sections: Section[]
   removed_references: number
-  model?: string | null
+  llm_model?: string | null
+  interpretation?: { llm_model?: string | null } | null
   snapshot: { project: { title: string }; run: null | { id: string; result: AnalysisResult } }
 }
 function render(s: Section) {
@@ -199,6 +200,11 @@ export default function Proposal() {
             {active.sections.map((s) => (
               <div key={active.id + s.key}>
                 <SectionView section={s} proposalId={active.id} />
+                {s.key === 'results' && active.interpretation?.llm_model && (
+                  <p className="no-print">
+                    结果解读 <GeneratedBy of={active.interpretation} />
+                  </p>
+                )}
                 {s.key === 'results' && active.snapshot.run?.result && (
                   <AnalysisCharts result={active.snapshot.run.result} />
                 )}
