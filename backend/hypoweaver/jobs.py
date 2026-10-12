@@ -82,3 +82,16 @@ router = APIRouter(prefix="/api/jobs")
 @router.get("/{job_id}")
 def get_job(job_id: str, db: Session = Depends(session)):
     return get(db, job_id)
+
+
+project_router = APIRouter(prefix='/api/projects')
+
+
+@project_router.get('/{project_id}/jobs')
+def list_jobs(project_id: str, kind: str = '', db: Session = Depends(session)):
+    from .projects.service import get as get_project
+    get_project(db, project_id)
+    query = select(Job).where(Job.project_id == project_id)
+    if kind:
+        query = query.where(Job.kind == kind)
+    return [get(db, j.id) for j in db.scalars(query.order_by(Job.created_at.desc()).limit(10)).all()]
