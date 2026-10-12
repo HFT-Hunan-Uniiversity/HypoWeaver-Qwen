@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { type StudyPlan, methods, semanticsLabels } from '../api/plans'
 import { ErrorNote } from '../components/Shared'
-import PlanEditor from '../components/PlanEditor'
+import PlanEditor, { sectionTitles } from '../components/PlanEditor'
 import JobProgress from '../components/JobProgress'
 import type { Job } from '../components/JobProgress'
 import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
@@ -15,7 +15,8 @@ export default function Plan() {
     [version, setVersion] = useState(''),
     [job, setJob] = useState(''),
     [confirming, setConfirming] = useState(false),
-    [dirty, setDirty] = useState(false)
+    [dirty, setDirty] = useState(false),
+    [sec, setSec] = useState('summary')
   const plans = useQuery({
     queryKey: ['plans', id],
     queryFn: () => api<StudyPlan[]>(`/projects/${id}/plans`),
@@ -104,14 +105,19 @@ export default function Plan() {
             <GeneratedBy of={current} />
           </div>
           <div className="plan-layout">
-            <nav className="plan-nav" aria-label="方案目录">
-              <a href="#plan-summary">概要与确认</a>
-              <a href="#plan-review">重点审阅</a>
-              <a href="#plan-variables">变量与定义</a>
-              <a href="#plan-model">模型与识别</a>
-              <a href="#plan-robustness">稳健性检查</a>
-              <a href="#plan-rules">置换与决策规则</a>
-              <a href="#plan-claims">计划结论与边界</a>
+            <nav className="plan-nav" aria-label="方案分节">
+              {[['summary', '概要与重点审阅'], ...Object.entries(sectionTitles)].map(([k, t]) => (
+                <button
+                  type="button"
+                  key={k}
+                  className={sec === k ? 'is-active' : ''}
+                  aria-current={sec === k ? 'true' : undefined}
+                  onClick={() => setSec(k)}
+                >
+                  {t}
+                </button>
+              ))}
+              {dirty && <small className="plan-nav__dirty">有未保存的编辑</small>}
             </nav>
             <div className="plan-main">
               {current.stale && (
@@ -119,7 +125,7 @@ export default function Plan() {
                   方向或候选已变更，此方案已过期。原内容保留，请根据当前候选重新起草。
                 </p>
               )}
-              <section className="panel" id="plan-summary">
+              <section className="panel" id="plan-summary" hidden={sec !== 'summary'}>
                 <h2>{methods[current.method_family]}</h2>
                 <p>
                   {current.variables.length} 个变量 · {current.robustness.length} 项稳健性检查 ·{' '}
@@ -148,7 +154,7 @@ export default function Plan() {
                 </div>
               </section>
               {dirty && <p className="notice">有尚未保存的编辑，请先保存草稿再确认。</p>}
-              <section className="panel" id="plan-review">
+              <section className="panel" id="plan-review" hidden={sec !== 'summary'}>
                 <h2>重点审阅</h2>
                 {current.variables
                   .filter((v) => v.uncertain)
@@ -185,15 +191,18 @@ export default function Plan() {
                   </p>
                 )}
               </section>
-              <PlanEditor
-                key={current.id + JSON.stringify(current)}
-                plan={current}
-                onDirty={setDirty}
-                onSaved={(p) => {
-                  setVersion(p.id)
-                  refresh()
-                }}
-              />
+              <div hidden={sec === 'summary'}>
+                <PlanEditor
+                  section={sec}
+                  key={current.id + JSON.stringify(current)}
+                  plan={current}
+                  onDirty={setDirty}
+                  onSaved={(p) => {
+                    setVersion(p.id)
+                    refresh()
+                  }}
+                />
+              </div>
             </div>
           </div>
           {confirming && (

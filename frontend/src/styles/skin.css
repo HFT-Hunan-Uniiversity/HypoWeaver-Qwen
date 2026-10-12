@@ -1015,3 +1015,95 @@ table th {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
+
+/* 文献页紧凑化 */
+.literature-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.search-log {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.search-log details p {
+  margin: 4px 0;
+  font-size: var(--fz-sm);
+}
+details.panel > .panel,
+details.panel > section {
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.evidence-list.is-compact .evidence-card {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--hairline);
+}
+.evidence-list.is-compact .evidence-heading {
+  display: contents;
+}
+.evidence-list.is-compact .evidence-heading .check {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+.evidence-list.is-compact .evidence-main h3 {
+  margin: 0;
+  font-size: var(--fz-sm);
+  line-height: 1.45;
+}
+.evidence-list.is-compact .evidence-main p {
+  margin: 2px 0 4px;
+  font-size: 12px;
+}
+.evidence-list.is-compact .tags,
+.evidence-list.is-compact details {
+  grid-column: 2;
+}
+.evidence-list.is-compact .tags {
+  font-size: 11px;
+  gap: 6px;
+}
+.evidence-list.is-compact details {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+/* 方案分节导航（按钮） */
+.plan-nav button {
+  min-height: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fz-sm);
+  font-weight: 600;
+  text-align: left;
+}
+.plan-nav button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--brand);
+  border: 0;
+}
+.plan-nav button.is-active {
+  background: var(--surface);
+  color: var(--brand);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+.plan-nav__dirty {
+  padding: 6px 10px 2px;
+  color: var(--attention);
+  font-size: 11px;
+  font-weight: 650;
+}
+@media (max-width: 1100px) {
+  .literature-top {
+    grid-template-columns: 1fr;
+  }
+}

@@ -32,6 +32,7 @@ interface Search {
   job_id: string
   per_source_status: Record<string, { status: string; reason: string; hits: number }>
 }
+const PAGE = 12
 export default function Literature() {
   const { id } = useParams(),
     cache = useQueryClient()
@@ -80,43 +81,74 @@ export default function Literature() {
     onSuccess: refresh,
   })
   const activeJob = job || searches.data?.find((s) => s.status === 'running')?.job_id
-  const offset = page * 20
+  const offset = page * PAGE
   return (
     <>
       <h1>文献联合调研</h1>
       <p className="muted">检索并筛选证据，后续候选只使用你纳入的文献。</p>
-      <section className="panel">
-        <div className="heading compact">
-          <h2>检索式</h2>
-          <NeedsModel />
-          <button className="quiet" disabled={suggest.isPending} onClick={() => suggest.mutate()}>
-            {suggest.isPending ? '正在生成…' : '根据方向生成'}
+      <div className="literature-top">
+        <section className="panel">
+          <div className="heading compact">
+            <h2>检索式</h2>
+            <NeedsModel />
+            <button className="quiet" disabled={suggest.isPending} onClick={() => suggest.mutate()}>
+              {suggest.isPending ? '正在生成…' : '根据方向生成'}
+            </button>
+          </div>
+          <label>
+            中英文检索式（每行一条，最多 6 条）
+            <textarea
+              rows={4}
+              value={queries}
+              onChange={(e) => setQueries(e.target.value)}
+              placeholder="输入关键词，或让模型根据研究方向生成"
+            />
+          </label>
+          <ErrorNote error={suggest.error || search.error} />
+          <button
+            disabled={
+              search.isPending ||
+              searches.data?.some((s) => s.status === 'running') ||
+              !queries.trim()
+            }
+            onClick={() => search.mutate()}
+          >
+            开始联合检索
           </button>
-        </div>
-        <label>
-          中英文检索式（每行一条，最多 6 条）
-          <textarea
-            rows={4}
-            value={queries}
-            onChange={(e) => setQueries(e.target.value)}
-            placeholder="输入关键词，或让模型根据研究方向生成"
-          />
-        </label>
-        <ErrorNote error={suggest.error || search.error} />
-        <button
-          disabled={
-            search.isPending ||
-            searches.data?.some((s) => s.status === 'running') ||
-            !queries.trim()
-          }
-          onClick={() => search.mutate()}
-        >
-          开始联合检索
-        </button>
-      </section>
+        </section>
+        <section className="panel search-log">
+          <h2>检索记录</h2>
+          {!searches.data?.length ? (
+            <p className="muted">尚未执行检索</p>
+          ) : (
+            searches.data.map((s) => (
+              <details key={s.id} open={s.id === searches.data?.[0]?.id}>
+                <summary>
+                  {new Date(s.created_at).toLocaleString('zh-CN')} ·{' '}
+                  {s.status === 'running'
+                    ? '检索中'
+                    : s.status === 'failed'
+                      ? '检索失败'
+                      : `${s.hit_count} 条去重结果`}
+                </summary>
+                <p>{s.queries.map((q) => q.text).join('；')}</p>
+                {Object.entries(s.per_source_status).map(([source, status]) => (
+                  <p key={source} className={status.status === 'failed' ? 'error' : ''}>
+                    {source}：{status.status === 'ok' ? '成功' : '存在失败'} · {status.hits} 条{' '}
+                    {status.reason}
+                  </p>
+                ))}
+              </details>
+            ))
+          )}
+        </section>
+      </div>
       {activeJob && <JobProgress id={activeJob} onComplete={() => refresh()} />}
       <Landscape projectId={id!} />
-      <PdfUpload projectId={id!} />
+      <details className="panel">
+        <summary>上传 PDF 补充证据</summary>
+        <PdfUpload projectId={id!} />
+      </details>
       <ErrorNote error={cards.error || searches.error || include.error} />
       <section className="panel">
         <h2>
@@ -132,8 +164,8 @@ export default function Literature() {
           <p className="muted">还没有证据卡。输入检索式开始调研。</p>
         ) : (
           <>
-            <div className="evidence-list">
-              {cards.data.slice(offset, offset + 20).map((card) => (
+            <div className="evidence-list is-compact">
+              {cards.data.slice(offset, offset + PAGE).map((card) => (
                 <article className="evidence-card" key={card.id}>
                   <div className="evidence-heading">
                     <label className="check">
@@ -145,7 +177,7 @@ export default function Literature() {
                       />
                       纳入
                     </label>
-                    <div>
+                    <div className="evidence-main">
                       <h3>{card.title}</h3>
                       <p className="muted">
                         {card.authors.join('、') || '作者未提供'} · {card.year || '年份未提供'} ·{' '}
@@ -183,43 +215,17 @@ export default function Literature() {
                 上一页
               </button>
               <span>
-                第 {page + 1} / {Math.ceil(cards.data.length / 20)} 页
+                第 {page + 1} / {Math.ceil(cards.data.length / PAGE)} 页
               </span>
               <button
                 className="quiet"
-                disabled={offset + 20 >= cards.data.length}
+                disabled={offset + PAGE >= cards.data.length}
                 onClick={() => setPage(page + 1)}
               >
                 下一页
               </button>
             </div>
           </>
-        )}
-      </section>
-      <section className="panel">
-        <h2>检索记录</h2>
-        {!searches.data?.length ? (
-          <p className="muted">尚未执行检索</p>
-        ) : (
-          searches.data.map((s) => (
-            <details key={s.id} open={s.id === searches.data?.[0]?.id}>
-              <summary>
-                {new Date(s.created_at).toLocaleString('zh-CN')} ·{' '}
-                {s.status === 'running'
-                  ? '检索中'
-                  : s.status === 'failed'
-                    ? '检索失败'
-                    : `${s.hit_count} 条去重结果`}
-              </summary>
-              <p>{s.queries.map((q) => q.text).join('；')}</p>
-              {Object.entries(s.per_source_status).map(([source, status]) => (
-                <p key={source} className={status.status === 'failed' ? 'error' : ''}>
-                  {source}：{status.status === 'ok' ? '成功' : '存在失败'} · {status.hits} 条{' '}
-                  {status.reason}
-                </p>
-              ))}
-            </details>
-          ))
         )}
       </section>
     </>
