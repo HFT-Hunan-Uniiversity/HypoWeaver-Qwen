@@ -690,3 +690,67 @@ button,
 .stage-tabs.is-compact button {
   min-height: 36px;
 }
+
+/* 运行结果：2×2 */
+.results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.results-toolbar .step-badges {
+  margin: 0;
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+}
+.results-grid > .panel.fill {
+  margin: 0;
+}
+.results-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.results-cell > section,
+.results-cell > .panel {
+  margin: 0;
+}
+.results-cell > section:not(.panel) {
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.results-grid .chart {
+  height: 220px;
+}
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+.sub-tabs button {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+.sub-tabs button.is-active {
+  border-bottom-color: var(--brand);
+  color: var(--text);
+  font-weight: 600;
+}
+.results-cell h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
