@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import ROOT, Settings
 from .db import Base, create_database
 from .errors import AppError, install
+from .landscape.router import router as landscape_router
 from .literature.router import router as literature_router
 from .literature import service as literature_service
 from .literature.sources import LiteratureClient
@@ -42,6 +43,7 @@ def create_app(settings=None):
     app.include_router(jobs.router)
     app.include_router(llm_router)
     app.include_router(literature_router)
+    app.include_router(landscape_router)
 
     @app.get("/api/health")
     def health():
