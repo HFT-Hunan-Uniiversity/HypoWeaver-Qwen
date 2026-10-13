@@ -39,16 +39,20 @@ PROMPTS = {
         "draft_plan",
         (
             "根据候选起草完整方案，变量名用唯一英文标识，定义用中文；方法只允许policy_causal/"
-            "panel_association/mechanism_boundary。列出识别假设、uncertain与边界；"
+            "panel_association/mechanism_boundary。列出识别假设、uncertain与边界。"
+            "方案硬约束：outcome、treatment、unit、time 各恰好一个变量，所有变量名必须唯一。"
+            "候选含多个结果时，主结果只选一个，其余作为 alt_outcome 稳健性或计划结论说明，"
+            "不得写成第二个 outcome。robustness 内的 id 不重复，claims_planned 内的 id 也不重复。"
             "不得把计划写成已有结果。碳市场案例以policy_causal双向固定效应、企业聚类为主，"
             "建议行业聚类核验，至少四项可执行稳健性；行业同群暴露并非企业真实分配，"
             "treatment_is_real_assignment=false。Size为原始总资产，不是对数；"
-            "绿色发明结果可用log1p独立与联合之和。事件基期-1不放入bins，"
-            "端点分箱与event_window一致。稳健性kind仅限drop_controls/exclude_years/monotone_only/"
+            "绿色发明结果可用log1p独立与联合之和。事件分箱 bins 必须在 event_window 内连续，"
+            "且只省略基期 -1，端点与窗口一致。稳健性kind仅限drop_controls/exclude_years/monotone_only/"
             "alt_outcome/add_controls；args对应years数组/outcome公式/controls数组，其余为空。"
             "决策规则用默认正向、alpha=.05、pretrend_alpha=.10、robustness_share=.75、permutation_"
             "alpha=.05，置换499次。"
         ),
+        version="2",
     ),
     "generate_candidates": Prompt(
         "generate_candidates",
