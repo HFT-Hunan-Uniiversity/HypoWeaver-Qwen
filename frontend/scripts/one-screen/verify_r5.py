@@ -25,10 +25,10 @@ async def run(pg, vp):
         for p in d:
             if p['id'] == plan['id']:
                 p['suggested_binding'] = {'peer_exposure': {'field': 'industry_peer_exposure', 'formula': None},
-                                          'size': {'field': None, 'formula': 'log(total_assets)'}, 'lev': 'leverage'}
+                                          'size': {'field': None, 'formula': 'log(total_assets)'}, 'lev': {'field': 'leverage'}}
         await route.fulfill(response=r, json=d)
     await pg.route(f'**/api/projects/{P}/plans', plans_with_suggest)
-    await pg.route(f"**/api/plans/{plan['id']}/bindings", lambda r: r.fulfill(body='null', content_type='application/json'))
+    await pg.route(f"**/api/plans/{plan['id']}/bindings", lambda r: r.fulfill(json={'plan_id': plan['id'], 'dataset_id': saved['dataset_id'], 'bindings': {'peer_exposure': {'field': 'industry_peer_exposure'}}, 'confirmed': False, 'note': '建议预填，请重新确认', 'inherited_from': None}))
     await pg.goto(f'{BASE}/p/{P}/data?tab=binding'); await pg.wait_for_timeout(1500)
     tags = await pg.locator('.tag-suggested').count()
     note = await pg.locator('text=已按方案建议预填').count()
@@ -40,7 +40,7 @@ async def run(pg, vp):
 
     # 2) 继承绑定 confirmed=false + 一键确认（拦截 PUT，回显）
     puts = []
-    inherited = dict(saved, confirmed=False, inherited_from='plan_prev_mock')
+    inherited = dict(saved, confirmed=False, inherited_from='plan_prev_mock', note='继承自 v1，请重新确认')
     async def bindings(route):
         if route.request.method == 'PUT':
             b = json.loads(route.request.post_data); puts.append(b)
@@ -50,6 +50,7 @@ async def run(pg, vp):
     await pg.route(f"**/api/plans/{plan['id']}/bindings", bindings)
     await pg.goto(f'{BASE}/p/{P}/data?tab=binding'); await pg.wait_for_timeout(1500)
     badge = await pg.locator('.status-badge', has_text='待重新确认').count()
+    sugg_badge_ok = True
     ok, m = await fit('c')
     await pg.screenshot(path=f'{OUT}/{vp}_2_pending_reconfirm.png')
     await pg.click('text=一键确认绑定'); await pg.wait_for_timeout(1000)
@@ -65,8 +66,8 @@ async def run(pg, vp):
         if route.request.method != 'GET': return await route.continue_()
         r, d = await real(route)
         if d:
-            d[0].update(narrative_status='partial', narrative_error='模型输出未通过引用校验（2 节）',
-                        narrative_errors=[{'key': 'literature', 'reason': '引用了未纳入的证据编号'}, {'section': 'mechanism', 'error': '模型超时'}])
+            d[0].update(narrative_status='partial',
+                        narrative_failures=[{'section': 'literature', 'reason': '引用了未纳入的证据编号'}, {'section': 'hypotheses', 'reason': '模型超时'}])
         await route.fulfill(response=r, json=d)
     await pg.route(f'**/api/projects/{P}/proposals', proposals)
     await pg.goto(f'{BASE}/p/{P}/proposal'); await pg.wait_for_timeout(1500)

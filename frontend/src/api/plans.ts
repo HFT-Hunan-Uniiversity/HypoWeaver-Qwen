@@ -10,11 +10,8 @@ export interface Robustness {
   kind: string
   args: { years?: number[]; outcome?: string; controls?: string[] }
 }
-/** R5 可选：方案起草时给出的建议绑定，role_name → 字段或公式（也容忍直接给字段名字符串） */
-export type SuggestedBinding = Record<
-  string,
-  { field?: string | null; formula?: string | null } | string
->
+/** R5：方案起草时给出的建议绑定，role_name → {field} 或 {formula}（可缺省） */
+export type SuggestedBinding = Record<string, { field: string } | { formula: string }>
 export interface StudyPlan {
   suggested_binding?: SuggestedBinding | null
   id: string

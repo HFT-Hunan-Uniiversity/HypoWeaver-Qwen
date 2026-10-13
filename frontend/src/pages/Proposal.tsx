@@ -41,25 +41,14 @@ type ProposalRecord = {
   removed_references: number
   llm_model?: string | null
   interpretation?: { llm_model?: string | null } | null
-  /** R5 可选：叙述生成状态；partial 表示部分节未能生成（字段名为假设，见 narrativeIssues） */
-  narrative_status?: string | null
-  narrative_error?: string | null
-  narrative_errors?: NarrativeIssue[] | null
-  narrative_failures?: NarrativeIssue[] | null
+  /** R5：叙述生成状态；旧提案可能缺省 */
+  narrative_status?: 'complete' | 'partial' | null
+  /** R5：按节归并的失败原因 */
+  narrative_failures?: { section: string; reason: string }[] | null
   snapshot: { project: { title: string }; run: null | { id: string; result: AnalysisResult } }
 }
-type NarrativeIssue =
-  string | { key?: string; section?: string; reason?: string; error?: string; message?: string }
-/** 汇总失败原因：兼容字符串、{key/section, reason/error/message} 数组和单条 narrative_error */
 function narrativeIssues(p: ProposalRecord): string[] {
-  const list = [...(p.narrative_errors || []), ...(p.narrative_failures || [])].map((x) => {
-    if (typeof x === 'string') return x
-    const where = x.key || x.section
-    const why = x.reason || x.error || x.message || '未给出原因'
-    return where ? `${titles[where] || where}：${why}` : why
-  })
-  if (p.narrative_error) list.unshift(p.narrative_error)
-  return list
+  return (p.narrative_failures || []).map((x) => `${titles[x.section] || x.section}：${x.reason}`)
 }
 function render(s: Section) {
   return s.markdown.replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>

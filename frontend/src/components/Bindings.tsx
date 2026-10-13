@@ -15,18 +15,21 @@ interface SavedBinding {
   dataset_id: string
   bindings: Record<string, Value>
   confirmed: boolean
-  /** R5 可选：从上一版方案继承时的来源方案 id（字段名为假设，缺失时仅按 confirmed=false 判断） */
+  /** R5：从上一版方案继承时的源方案 id；继承绑定总是 confirmed=false */
   inherited_from?: string | null
+  /** 后端给出的说明，例如“继承自 v1，请重新确认” */
+  note?: string
+  /** 真实保存的绑定才有；GET 在无绑定时会返回由 suggested_binding 拼出的预填对象（无此字段） */
+  updated_at?: string
 }
 /** 方案的 suggested_binding 归一为 {field|formula}，丢弃空值 */
 function normalizeSuggested(plan: StudyPlan): Record<string, Value> {
   const out: Record<string, Value> = {}
   const names = new Set(plan.variables.map((v) => v.name))
   for (const [k, v] of Object.entries(plan.suggested_binding || {})) {
-    if (!names.has(k) || v == null) continue
-    const val = typeof v === 'string' ? { field: v } : v
-    if (val.field) out[k] = { field: val.field }
-    else if (val.formula) out[k] = { formula: val.formula }
+    if (!names.has(k) || !v) continue
+    if ('field' in v && v.field) out[k] = { field: v.field }
+    else if ('formula' in v && v.formula) out[k] = { formula: v.formula }
   }
   return out
 }
@@ -65,6 +68,9 @@ function Editor({
   dataset: Dataset
   saved: SavedBinding | null
 }) {
+  // 无真实绑定时，后端 GET 会把 suggested_binding 包装成未确认绑定返回；视作建议而非已保存
+  const isSuggestionOnly = !!saved && !saved.updated_at && !saved.inherited_from
+  if (isSuggestionOnly) saved = null
   const base = saved?.dataset_id === dataset.id ? saved.bindings : {}
   // 方案自带建议：只预填尚未绑定的角色，不保存、不确认
   const planSuggested = Object.fromEntries(
@@ -158,9 +164,8 @@ function Editor({
               <span
                 className="status-badge is-yellow"
                 title={
-                  saved?.inherited_from
-                    ? '绑定继承自上一版方案，需在本版重新确认'
-                    : '已保存的绑定尚未确认'
+                  saved?.note ||
+                  (saved?.inherited_from ? '绑定继承自上一版方案' : '已保存的绑定尚未确认')
                 }
               >
                 {saved?.inherited_from ? '待重新确认' : '待确认'}
@@ -192,7 +197,7 @@ function Editor({
           <div className="notice binding-reconfirm" role="status">
             <span>
               {saved?.inherited_from
-                ? '此绑定继承自上一版方案，字段映射已带入但尚未确认。核对无误后可一键确认。'
+                ? `${saved.note || '此绑定继承自上一版方案'}。字段映射已带入，核对无误后可一键确认。`
                 : '已保存的绑定尚未确认，检验前需要确认。'}
             </span>
             <button
