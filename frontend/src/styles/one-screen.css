@@ -1027,3 +1027,60 @@ button,
   width: auto;
   margin: 0;
 }
+
+/* 研究方向：两列全宽 */
+.direction-form {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  margin: 0;
+}
+.direction-grid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  min-height: 0;
+}
+.direction-grid label {
+  margin: 0;
+}
+.direction-tips {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 13px;
+}
+.direction-tips ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.direction-form > .actions {
+  margin-top: 12px;
+}
+.direction-grid > .col-stack > label {
+  display: flex;
+  flex-direction: column;
+}
+.direction-grid > .col-stack > label:has(textarea) {
+  flex: 1 1 0;
+  min-height: 120px;
+}
+.direction-grid textarea {
+  flex: 1 1 auto;
+  resize: none;
+}
+/* 内容少时卡片随内容收缩，不撑出整块空框 */
+.plan-summary-grid {
+  align-items: start;
+}
+.plan-summary-grid > .panel {
+  max-height: 100%;
+}
+.plan-editor-wrap > .plan-form {
+  flex: 0 1 auto;
+}
+.settings-grid > .panel.fill {
+  align-self: start;
+  max-height: 100%;
+}

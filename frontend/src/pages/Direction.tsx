@@ -30,7 +30,7 @@ function Editor({ project }: { project: Project }) {
   }
   return (
     <form
-      className="panel form"
+      className="panel form direction-form fill"
       onSubmit={(e) => {
         e.preventDefault()
         if (
@@ -44,40 +44,55 @@ function Editor({ project }: { project: Project }) {
         else mutation.mutate()
       }}
     >
-      <label>
-        研究方向
-        <textarea
-          required
-          rows={3}
-          value={draft.text}
-          onChange={(e) => field('text', e.target.value)}
-          placeholder="你希望研究什么现象？"
-        />
-      </label>
-      <label>
-        具体问题（可选）
-        <textarea
-          rows={3}
-          value={draft.question}
-          onChange={(e) => field('question', e.target.value)}
-        />
-      </label>
-      <label>
-        研究约束（每行一项）
-        <textarea
-          rows={3}
-          value={draft.constraints.join('\n')}
-          onChange={(e) => field('constraints', e.target.value.split('\n'))}
-        />
-      </label>
-      <label>
-        领域
-        <input
-          value={draft.domain}
-          onChange={(e) => field('domain', e.target.value)}
-          placeholder="例如：绿色金融"
-        />
-      </label>
+      <div className="direction-grid">
+        <div className="col-stack">
+          <label>
+            研究方向
+            <textarea
+              required
+              rows={5}
+              value={draft.text}
+              onChange={(e) => field('text', e.target.value)}
+              placeholder="你希望研究什么现象？"
+            />
+          </label>
+          <label>
+            具体问题（可选）
+            <textarea
+              rows={5}
+              value={draft.question}
+              onChange={(e) => field('question', e.target.value)}
+            />
+          </label>
+        </div>
+        <div className="col-stack">
+          <label>
+            研究约束（每行一项）
+            <textarea
+              rows={5}
+              value={draft.constraints.join('\n')}
+              onChange={(e) => field('constraints', e.target.value.split('\n'))}
+            />
+          </label>
+          <label>
+            领域
+            <input
+              value={draft.domain}
+              onChange={(e) => field('domain', e.target.value)}
+              placeholder="例如：绿色金融"
+            />
+          </label>
+          <aside className="direction-tips" aria-label="填写提示">
+            <strong>怎样写一个好方向</strong>
+            <ul>
+              <li>研究方向写现象与对象，例如“碳市场对企业绿色创新的影响”。</li>
+              <li>具体问题写可检验的关系：谁、在什么条件下、与什么相关。</li>
+              <li>约束写数据、样本期、方法或口径上的硬限制，后续候选与方案会遵守。</li>
+              <li>领域用于文献检索与候选生成的语境。</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
       <ErrorNote error={mutation.error} />
       <div className="actions">
         <span role="status">{saved ? '已保存' : ''}</span>
