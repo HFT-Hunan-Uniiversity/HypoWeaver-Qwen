@@ -1353,3 +1353,203 @@ button,
   white-space: normal;
   text-overflow: clip;
 }
+
+/* 总览 v3：按内容高度排两行（上：概要含案例开关/最近检验/关键信息；下：阶段进度通栏），不拉伸留白 */
+.overview-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, auto) auto;
+  grid-template-areas:
+    'summary test facts'
+    'stages stages stages';
+  align-content: start;
+}
+.overview-summary > .scroll-region {
+  flex: 0 1 auto;
+}
+.overview-settings {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+}
+.overview-settings .case-toggle {
+  margin: 0;
+}
+.overview-settings small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.overview-stage-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+}
+.overview-stage-grid > li {
+  display: flex;
+}
+.overview-stage-grid a {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* 阶段说明：单行，过长省略并以 title 提示全文 */
+.overview-stage-grid__body small,
+.overview-grid .overview-stage-grid__body small {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.overview-stage-grid .status-badge {
+  display: none;
+}
+@media (max-width: 1365px) {
+  .overview-stage-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) {
+  .overview-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+/* 内容均衡：概要通栏两列宽（长文本变矮）配关键信息；最近检验配阶段进度 */
+.overview-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'summary summary facts'
+    'test stages stages';
+}
+.overview-grid .overview-stage-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.overview-summary .overview-dl > div {
+  grid-template-columns: 4.5em minmax(0, 1fr);
+}
+
+/* 关键信息：标签与值左右排（标签列固定），值可换行 */
+.overview-dl.is-stacked > div {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  gap: 6px;
+}
+/* 阶段进度：卡片填满所在格，等高 */
+.overview-stages .overview-stage-grid {
+  flex: 1 1 auto;
+}
+/* 极矮视口（≤660 高，如 1024×576、1180×640）：只保留核心信息 */
+@media (max-height: 660px) {
+  .overview-grid {
+    gap: 8px;
+  }
+  .overview-grid .panel {
+    padding: 8px 12px;
+  }
+  .overview-grid .panel h2 {
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  .overview-direction-text {
+    display: none;
+  }
+  .overview-question {
+    font-size: 13.5px;
+  }
+  .overview-settings {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .overview-settings small {
+    display: none;
+  }
+  .overview-grid .overview-numbers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .overview-grid .overview-numbers > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 3px 8px;
+  }
+  .overview-grid .overview-numbers dd {
+    font-size: 14px;
+  }
+  .overview-test-actions .product-button {
+    min-height: 28px;
+    padding: 2px 10px;
+    font-size: 13px;
+  }
+  .overview-stage-grid a {
+    padding: 4px 8px;
+  }
+  .overview-stage-grid__body small {
+    display: none !important;
+  }
+  .overview-stages h2 + * {
+    margin-top: 0;
+  }
+  .overview-dl {
+    gap: 2px;
+  }
+  .stage-body > .notice {
+    padding: 4px 10px;
+  }
+}
+@media (max-height: 660px) {
+  .overview-grid .overview-numbers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 2px;
+  }
+  .overview-grid .overview-numbers > div {
+    padding: 0;
+    background: transparent;
+    border-bottom: 1px dashed var(--hairline);
+  }
+  .overview-grid .overview-numbers dt {
+    flex: 0 0 auto;
+  }
+  .overview-test-actions {
+    gap: 6px;
+    margin-top: 0;
+  }
+  .overview-stages > h2 small {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .overview-grid {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 0.85fr) minmax(0, 1.3fr);
+  }
+  .overview-dl.is-stacked > div {
+    grid-template-columns: 5.6em minmax(0, 1fr);
+  }
+}
+@media (max-height: 660px) and (max-width: 1100px) {
+  .overview-grid .overview-numbers {
+    grid-template-columns: 1fr;
+  }
+  .overview-dl__extra {
+    display: none !important;
+  }
+  .overview-summary .overview-card__head h2 {
+    font-size: 13.5px;
+  }
+}
+@media (max-height: 660px) and (max-width: 1100px) {
+  .overview-strength {
+    display: none;
+  }
+  .overview-summary .overview-dl {
+    display: none;
+  }
+  .overview-test-actions {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+  .overview-test-actions .product-button {
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+}

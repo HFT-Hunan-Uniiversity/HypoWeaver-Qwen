@@ -59,7 +59,7 @@ export default function Overview() {
           </div>
           <ScrollRegion label="项目概要">
             <p className="overview-question">{d.question || d.text || '尚未填写研究方向。'}</p>
-            {d.question && d.text && <p className="muted">{d.text}</p>}
+            {d.question && d.text && <p className="muted overview-direction-text">{d.text}</p>}
             <dl className="overview-dl">
               <div>
                 <dt>领域</dt>
@@ -72,6 +72,9 @@ export default function Overview() {
             </dl>
             <Link to={`/p/${id}/direction`}>编辑研究方向 →</Link>
           </ScrollRegion>
+          <div className="overview-settings">
+            <CaseToggle project={project} />
+          </div>
         </section>
         <section className="panel overview-card" style={{ gridArea: 'test' }}>
           <h2>最近一次检验</h2>
@@ -96,7 +99,7 @@ export default function Overview() {
                 </div>
               </dl>
               <p className="overview-strength">主结论强度：{strengthCell}</p>
-              <div className="actions">
+              <div className="actions overview-test-actions">
                 <Link className="product-button" to={`/p/${id}/data?tab=results`}>
                   完整结果与图表
                 </Link>
@@ -109,10 +112,6 @@ export default function Overview() {
             <p className="muted">尚未运行检验。完成方案与数据绑定后，在「数据与检验」中运行。</p>
           )}
         </section>
-        <section className="panel overview-card" style={{ gridArea: 'settings' }}>
-          <h2>项目设置</h2>
-          <CaseToggle project={project} />
-        </section>
         <section className="panel overview-card overview-stages" style={{ gridArea: 'stages' }}>
           <h2>
             阶段进度 <small className="inline-meta">已完成 {done} / 6</small>
@@ -124,7 +123,9 @@ export default function Overview() {
                   <span className="overview-stage-grid__idx">{i + 1}</span>
                   <span className="overview-stage-grid__body">
                     <strong>{STAGE_TITLES[s.key] || s.label}</strong>
-                    <small>{s.summary || STATUS_LABELS[s.status] || s.status}</small>
+                    <small title={s.summary || undefined}>
+                      {s.summary || STATUS_LABELS[s.status] || s.status}
+                    </small>
                   </span>
                   <span className={`status-badge is-${statusTone(s.status)}`}>
                     {STATUS_LABELS[s.status] || s.status}
@@ -160,6 +161,10 @@ export default function Overview() {
                   ? `第 ${f.plan.version} 版 · ${f.plan.status === 'confirmed' ? '已确认' : '草稿'}`
                   : '—'}
               </dd>
+            </div>
+            <div className="overview-dl__extra">
+              <dt>候选方向</dt>
+              <dd>{f.candidateCount ?? '—'} 个</dd>
             </div>
             <div>
               <dt>检验运行</dt>
