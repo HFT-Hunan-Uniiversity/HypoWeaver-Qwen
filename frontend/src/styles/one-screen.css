@@ -1553,3 +1553,14 @@ button,
     white-space: nowrap;
   }
 }
+
+/* sidebar project names: at most 2 lines + ellipsis (full name in title) */
+.sidebar__task-copy strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

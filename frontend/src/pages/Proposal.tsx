@@ -213,7 +213,7 @@ export default function Proposal() {
             </div>
           )}
           <div className="proposal-layout fill">
-            <nav className="proposal-toc no-print" aria-label="提案目录">
+            <nav className="proposal-toc no-print" data-scroll-region="" aria-label="提案目录">
               {active.sections.map((s) => (
                 <button
                   key={s.key}

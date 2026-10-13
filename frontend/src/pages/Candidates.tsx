@@ -231,7 +231,7 @@ export default function Candidates() {
               <details className="reco-line">
                 <summary>
                   <strong>推荐与取舍</strong>
-                  <span className="reco-line__text">{current.recommendation_text}</span>
+                  <span className="reco-line__text" title={current.recommendation_text}>{current.recommendation_text}</span>
                   <span className="inline-meta">
                     移除无效引用 {current.removed_references} 处 · 自审
                     {current.review.revised ? '已修订一次' : '通过'}
