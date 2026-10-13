@@ -84,7 +84,8 @@ export default function DatasetDetails({
       <details className="panel">
         <summary>来源、许可与引用说明</summary>
         <form
-          className="form"
+          className="form details-scroll"
+          data-scroll-region
           onSubmit={(e) => {
             e.preventDefault()
             save.mutate()

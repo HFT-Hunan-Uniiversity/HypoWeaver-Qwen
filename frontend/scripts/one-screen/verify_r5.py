@@ -79,6 +79,11 @@ async def run(pg, vp):
                         narrative_failures=[{'section': 'literature', 'reason': '引用了未纳入的证据编号'}, {'section': 'hypotheses', 'reason': '模型超时'}])
         await route.fulfill(response=r, json=d)
     await pg.route(f'**/api/projects/{P}/proposals', proposals)
+    # "重新生成本节"只在模型已配置时出现：此步模拟模型已配置
+    async def llm_on(route):
+        if route.request.method != 'GET': return await route.continue_()
+        await route.fulfill(json={'base_url': 'mock', 'llm_model': 'qwen-mock', 'configured': True})
+    await pg.route('**/api/settings/llm', llm_on)
     await pg.goto(f'{BASE}/p/{P}/proposal'); await pg.wait_for_timeout(1500)
     # 失败原因：能对应到章节的在该节原地显示（含"重新生成本节"），对不上的列在提示条里
     txt = await pg.locator('.proposal-scroll, .narrative-partial').all_inner_texts()
@@ -86,7 +91,7 @@ async def run(pg, vp):
     ok, m = await fit('p')
     await pg.screenshot(path=f'{OUT}/{vp}_4_proposal_partial.png')
     results.append((vp, '提案 narrative_status=partial', '模型超时' in txt and '引用了未纳入' in txt and '重新生成本节' in txt and ok, f'一屏 {ok}', txt.replace('\n', ' / ')))
-    await pg.unroute(f'**/api/projects/{P}/proposals')
+    await pg.unroute(f'**/api/projects/{P}/proposals'); await pg.unroute('**/api/settings/llm')
     # 3b) 无 narrative_status 时不显示
     await pg.goto(f'{BASE}/p/{P}/proposal'); await pg.wait_for_timeout(1200)
     results.append((vp, '提案缺字段降级', await pg.locator('.narrative-partial').count() == 0, '', None))

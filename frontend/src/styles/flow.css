@@ -287,8 +287,17 @@
 }
 .flow-ref[open] {
   max-height: 42vh;
-  display: flex;
-  flex-direction: column;
+  flex: 0 1 auto !important;
+  min-height: 0;
+  overflow: auto;
+}
+/* 展开参考面板时，论文列表与证据栏仍保留可用高度，各自内部滚动 */
+.lit-main.fill {
+  min-height: 170px;
+}
+.lit-side {
+  min-height: 0;
+  overflow: auto;
 }
 .link-button {
   background: none !important;
@@ -832,11 +841,51 @@ fieldset.flow-ro {
   flex-direction: column;
   gap: 12px;
 }
-fieldset.flow-ro > .fill,
+/* 只有最后一块（字段档案/绑定表）可压缩并内部滚动；概况条与折叠说明保持自然高度，避免被压扁后文字互相叠压 */
 fieldset.flow-ro > * {
+  flex-shrink: 0;
+}
+fieldset.flow-ro > .fill,
+fieldset.flow-ro > .binding-grid,
+fieldset.flow-ro > :last-child {
+  flex-shrink: 1;
   min-height: 0;
+}
+details.panel[open] > .details-scroll {
+  max-height: 38vh;
+  overflow: auto;
 }
 fieldset.flow-ro > .binding-grid,
 fieldset.flow-ro > :last-child {
   flex: 1 1 auto;
+}
+
+/* 窄屏（≤1100px）方案目录改为横排标签，不再竖排挤占正文高度 */
+@media (max-width: 1100px) {
+  .plan-layout.fill {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .plan-layout .plan-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+  }
+  .plan-layout .plan-nav button {
+    width: auto;
+    padding: 4px 10px;
+  }
+  .plan-layout .plan-nav button.is-active {
+    box-shadow: inset 0 -2px 0 var(--brand);
+  }
+}
+/* 矮屏（≤640px）检验结果四宫格每格至少 260px，整体在网格内滚动，避免图表被压成细条 */
+@media (max-height: 640px) {
+  .results-grid {
+    grid-template-rows: none;
+    grid-auto-rows: minmax(260px, auto);
+    overflow: auto;
+  }
 }

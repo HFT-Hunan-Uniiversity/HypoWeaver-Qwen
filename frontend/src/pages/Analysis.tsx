@@ -142,7 +142,7 @@ export default function Analysis() {
             ))}
           {!result && current.status === 'failed' && <Claims runId={current.id} />}{' '}
           {result && (
-            <div className="results-grid fill">
+            <div className="results-grid fill" data-scroll-region>
               <section className="panel fill">
                 <h2>主模型结果</h2>
                 <ScrollRegion label="主模型结果">

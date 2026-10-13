@@ -249,7 +249,7 @@ export default function Literature() {
   const offset = page * PAGE
 
   const reference = (
-    <details className="flow-ref panel">
+    <details className="flow-ref panel" data-scroll-region>
       <summary>参考与工具：检索式、检索记录、上传 PDF、文献图景</summary>
       <div className="lit-ref">
         <ScrollRegion label="检索式与记录">
@@ -441,7 +441,7 @@ export default function Literature() {
             </div>
           )}
         </div>
-        <aside className="panel lit-side" aria-label="已选证据">
+        <aside className="panel lit-side" aria-label="已选证据" data-scroll-region>
           <h2>已选证据 · {included.length} 篇</h2>
           {coverage.length ? (
             coverage.map((r) => (
