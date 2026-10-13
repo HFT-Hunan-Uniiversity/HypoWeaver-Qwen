@@ -1,6 +1,7 @@
 /** PROTOTYPE · 一次性页面 · 路由 /prototype/flow · 不连后端，全部是假数据。见 docs/flow.md */
 import { useEffect, useReducer, useState } from 'react'
-import { STAGES, initial, nextStage, primaryOf, reduce, type State, type Llm } from './flowMachine'
+import { STAGES, initial, nextStage, primaryOf, reduce, type State, type Llm, type Primary } from './flowMachine'
+import { Content, emptyDir, seedDir, answerDir, QCOUNT, dirMissing, type DirState } from './stages'
 import './flow-prototype.css'
 
 function upTo(n: number, extra: Partial<State> = {}, cur?: { step: number }): State {
@@ -16,9 +17,16 @@ function upTo(n: number, extra: Partial<State> = {}, cur?: { step: number }): St
 const SCENES: Record<string, () => State> = {
   fresh: () => ({ ...initial(), log: '新项目' }),
   intro: () => ({ ...upTo(0), introSeen: STAGES.map(() => false), introOpen: true, log: '首次进入方向' }),
+  'direction-empty': () => upTo(0, { log: '方向：空状态' }),
+  'direction-chat': () => upTo(0, { log: '方向：对话中' }),
+  'direction-complete': () => upTo(0, { log: '方向：方向卡完整' }),
   'overview-mid': () => ({ ...upTo(3), view: 'overview', log: '概览：做到研究计划' }),
   progress: () => upTo(1, { running: { stage: 1, done: 2 }, log: '检索中' }),
   'literature-results': () => upTo(1, { log: '检索完成' }, { step: 1 }),
+  'candidates-results': () => upTo(2, { log: '候选已生成' }, { step: 1 }),
+  'plan-draft': () => upTo(3, { log: '计划草案' }, { step: 1 }),
+  'data-empty': () => upTo(4, { log: '数据：空状态' }),
+  'proposal-empty': () => upTo(5, { log: '提案：空状态' }),
   'data-binding': () => upTo(4, { log: '数据已上传，待确认绑定' }, { step: 1 }),
   'llm-unconfigured': () => upTo(2, { llm: 'unconfigured', log: '模型未配置' }),
   'llm-failed': () => upTo(2, { llm: 'failed', failReason: '模型返回超时（第 3 项），可以重试', log: '模型调用失败' }),
@@ -46,104 +54,25 @@ const SCENES: Record<string, () => State> = {
 }
 
 const params = new URLSearchParams(location.search)
+function dirFor(scene: string): DirState {
+  if (scene === 'fresh' || scene === 'intro' || scene === 'direction-empty') return emptyDir
+  let d = seedDir('碳交易会不会让企业更绿色？')
+  const n = scene === 'direction-chat' ? 2 : QCOUNT
+  const ans = ['七个试点省市', '2008–2020', '想证明因果', '有上市公司面板数据']
+  for (let k = 0; k < n; k++) d = answerDir(d, ans[k])
+  return d
+}
 const freeze = params.has('freeze')
-
-const MOCK: Record<string, string[]> = {
-  literature: ['Zhang 2021 · 碳交易试点降低工业排放 12%', 'Li 2022 · 试点地区创新专利增加', 'Wang 2023 · 碳价波动对中小企业影响有限', 'Chen 2020 · 区域间存在排放转移'],
-  candidates: ['H1 碳交易试点提升企业绿色专利数量', 'H2 碳价越高，减排效果越强', 'H3 试点导致排放向非试点地区转移'],
-}
-
-function Content({ s, i }: { s: State; i: number }) {
-  const st = s.stages[i]
-  const id = STAGES[i].id
-  const step = st.step
-  const done = st.status === 'confirmed'
-  const ro = done
-  if (id === 'direction')
-    return (
-      <div className="fp-card fp-grow">
-        <label className="fp-label">研究方向</label>
-        <textarea className="fp-textarea" readOnly={ro} defaultValue="碳排放权交易试点是否促进了企业的绿色创新？" />
-        <p className="fp-hint">{ro ? '已确认，只读。' : '自动保存为草稿 · 刚刚'}</p>
-      </div>
-    )
-  if (id === 'literature' || id === 'candidates') {
-    if (step === 0 && !done && !st.prefilled) return <Empty text={id === 'literature' ? '还没有检索文献。点右上角主按钮开始。' : '还没有候选假设。点右上角主按钮生成。'} />
-    const items = MOCK[id]
-    return (
-      <div className="fp-card fp-grow">
-        <div className="fp-label">{id === 'literature' ? '勾选能支持研究的证据' : '选一条你想检验的假设'}</div>
-        {items.map((t, k) => (
-          <label key={t} className="fp-row">
-            <input type={id === 'literature' ? 'checkbox' : 'radio'} name={id} disabled={ro} defaultChecked={(step > 1 || done || st.prefilled) && (id === 'literature' ? k < 2 : k === 0)} />
-            {t}
-          </label>
-        ))}
-      </div>
-    )
-  }
-  if (id === 'plan') {
-    if (step === 0 && !done && !st.prefilled) return <Empty text="还没有研究计划。点右上角主按钮让系统起草。" />
-    return (
-      <div className="fp-card fp-grow">
-        <div className="fp-label">研究计划草案</div>
-        <p>因变量：绿色专利数量；自变量：是否碳交易试点 × 试点后；模型：双重差分；稳健性：PSM-DID、安慰剂检验。</p>
-      </div>
-    )
-  }
-  if (id === 'data') {
-    if (step === 0 && !done) return <Empty text="把数据表（CSV / Excel）拖到这里，或点右上角「上传数据」。" />
-    return (
-      <div className="fp-card fp-grow">
-        <div className="fp-label">{step === 1 ? '系统建议的变量绑定，确认无误后点主按钮' : '变量绑定'}</div>
-        <table className="fp-table">
-          <tbody>
-            <tr><th>变量</th><th>数据列</th><th></th></tr>
-            <tr><td>绿色专利数量</td><td>green_patents</td><td>{step === 1 ? '建议' : '✓'}</td></tr>
-            <tr><td>是否试点</td><td>pilot</td><td>{step === 1 ? '建议' : '✓'}</td></tr>
-            <tr><td>试点后</td><td>post_2013</td><td>{step === 1 ? '建议' : '✓'}</td></tr>
-          </tbody>
-        </table>
-        {step >= 3 || done ? <p className="fp-result">检验结果：DID 系数 0.084（p=0.012），结论强度：关联。</p> : null}
-      </div>
-    )
-  }
-  // proposal
-  if (step === 0 && !done) return <Empty text="前面阶段都已确认。点右上角「生成提案」。" />
-  const secs = ['研究背景', '文献综述', '假设', '研究设计', '初步结果']
-  return (
-    <div className="fp-card fp-grow fp-scroll">
-      {secs.map((sec) => {
-        const f = s.sectionFailures.find((x) => x.section === sec)
-        return (
-          <section key={sec} className={'fp-sec' + (f ? ' fp-sec-fail' : '')}>
-            <h4>{sec}</h4>
-            {f ? (
-              <p>
-                本节生成失败：{f.reason}{' '}
-                <button className="fp-btn-2" data-act="regen" onClick={() => window.dispatchEvent(new CustomEvent('fp-regen', { detail: sec }))}>
-                  重新生成本节
-                </button>
-              </p>
-            ) : (
-              <p>（模拟正文）{sec}的内容……</p>
-            )}
-          </section>
-        )
-      })}
-      <p className="fp-hint">自动保存 · 无需手动保存{s.exported ? ' · 已导出' : ''}</p>
-    </div>
-  )
-}
-
-function Empty({ text }: { text: string }) {
-  return <div className="fp-empty">{text}</div>
-}
 
 export default function FlowPrototype() {
   const sceneKey = params.get('scene') ?? 'fresh'
   const [s, dispatch] = useReducer(reduce, undefined, () => (SCENES[sceneKey] ?? SCENES.fresh)())
   const [showState, setShowState] = useState(false)
+  const [dir, setDir] = useState<DirState>(() => dirFor(sceneKey))
+  const early = ['fresh', 'intro', 'direction-empty', 'direction-chat', 'direction-complete', 'progress'].includes(sceneKey)
+  const [sel, setSel] = useState<number[]>(() => (sceneKey === 'literature-results' ? [0, 2] : early ? [] : [0, 1, 2]))
+  const [pick, setPick] = useState<number>(() => (sceneKey === 'candidates-results' || early ? -1 : 0))
+  const ui = { dir, setDir, sel, setSel, pick, setPick }
   useEffect(() => {
     if (!s.running || freeze) return
     const t = setTimeout(() => dispatch({ type: 'tick' }), 600)
@@ -154,7 +83,30 @@ export default function FlowPrototype() {
     window.addEventListener('fp-regen', h)
     return () => window.removeEventListener('fp-regen', h)
   }, [])
-  const p = primaryOf(s)
+  let p: Primary = primaryOf(s)
+  let onPrimary = () => dispatch({ type: 'primary' })
+  if (typeof s.view === 'number' && !s.running && s.stages[s.view].status !== 'confirmed') {
+    const v = s.view
+    const step = s.stages[v].step
+    if (v === 0) {
+      const miss = dirMissing(dir.card)
+      if (!dir.idea) p = { label: '确认方向并检索文献', tone: 'go', disabled: true, reason: '先在下方写一句想法' }
+      else if (miss.length) p = { label: '确认方向并检索文献', tone: 'go', disabled: true, reason: '方向卡还缺：' + miss.join('、') }
+      else {
+        p = { label: s.editing === 0 ? '确认方向' : '确认方向并检索文献', tone: 'go' }
+        onPrimary = () => { dispatch({ type: 'primary' }); if (s.editing !== 0 && s.llm === 'ok') dispatch({ type: 'primary' }) }
+      }
+    } else if ((v === 1 || v === 2) && step === 1) {
+      const ok = v === 1 ? sel.length > 0 : pick >= 0
+      if (ok) {
+        p = { label: '确认并进入下一阶段', tone: 'go' }
+        onPrimary = () => { dispatch({ type: 'primary' }); dispatch({ type: 'primary' }) }
+      } else {
+        p = { ...p, reason: v === 1 ? '在下方勾选至少一篇证据' : '在下方选一条假设' }
+        onPrimary = () => {}
+      }
+    }
+  }
   const i = s.view
   const next = nextStage(s)
 
@@ -184,7 +136,7 @@ export default function FlowPrototype() {
         })}
         <div className="fp-primary-wrap">
           {p.reason ? <span className="fp-reason">{p.reason}</span> : null}
-          <button className={'fp-primary ' + p.tone} disabled={p.disabled} onClick={() => dispatch({ type: 'primary' })} data-primary>
+          <button className={'fp-primary ' + p.tone} disabled={p.disabled} onClick={onPrimary} data-primary>
             {p.label} →
           </button>
         </div>
@@ -274,7 +226,7 @@ export default function FlowPrototype() {
                 </ul>
               </div>
             ) : (
-              <Content s={s} i={i} />
+              <Content s={s} i={i} d={dispatch} ui={ui} />
             )}
             <details className="fp-ref">
               <summary>参考信息</summary>
