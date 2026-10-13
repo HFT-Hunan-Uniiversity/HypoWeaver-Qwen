@@ -52,6 +52,25 @@ def reproduce(spec, frame, result=None):
     for check in [None, *spec.robustness]:
         label = check.change if check else "主模型"
         identifier = check.id if check else "main"
+        original = (
+            None
+            if result is None
+            else result["main"]
+            if check is None
+            else next((r for r in result["robustness"] if r["id"] == identifier), None)
+        )
+        if check and result is not None and (original is None or original.get("status") != "succeeded"):
+            rows.append(
+                {
+                    "id": identifier,
+                    "label": label,
+                    "status": "failed",
+                    "origin": "analysis",
+                    "error": (original or {}).get("error", "原稳健性未运行成功，不纳入复算一致性"),
+                    "original": original,
+                }
+            )
+            continue
         try:
             changed, raw = robustness_spec(spec, check, frame) if check else (spec, frame)
             estimate = refit(changed, raw)
@@ -104,7 +123,8 @@ def reproduce(spec, frame, result=None):
                 }
             )
     return {
-        "consistent": all(r["status"] == "consistent" for r in rows),
+        "consistent": all(r["status"] == "consistent" for r in rows if r.get("origin") != "analysis"),
+        "main_consistent": rows[0]["status"] == "consistent",
         "max_relative_diff": max((r.get("max_relative_diff", 0.0) for r in rows), default=0.0),
         "rows": rows,
         "tolerance": 1e-6,

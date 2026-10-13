@@ -39,7 +39,15 @@ def assess(plan, result, reproduction):
     rules = plan["decision_rules"]
     main = (result or {}).get("main")
     blockers = []
-    if not main or not reproduction or not reproduction.get("consistent"):
+    main_consistent = False
+    if reproduction:
+        rows = reproduction.get("rows")
+        main_consistent = (
+            reproduction.get("main_consistent", rows[0].get("status") == "consistent")
+            if rows
+            else reproduction.get("main_consistent", reproduction.get("consistent", False))
+        )
+    if not main or not main_consistent:
         verdict = "insufficient"
         blockers.append("主模型失败或独立复算未确认一致")
     else:
