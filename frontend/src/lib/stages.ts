@@ -65,3 +65,15 @@ export function useOverview(id: string | undefined) {
     enabled: !!id,
   })
 }
+
+/** 阶段是否已解锁；未解锁时返回原因（用于置灰 + tooltip） */
+export function lockReason(stages: Stage[], key: string): string | null {
+  const i = STAGE_ORDER.indexOf(key)
+  const me = stages.find((s) => s.key === key)
+  if (i <= 0 || !me || me.status !== 'not_started') return null
+  const blocker = stages
+    .slice(0, i)
+    .find((s) => ['not_started', 'failed', 'awaiting_selection', 'draft'].includes(s.status))
+  if (!blocker) return null
+  return `需先完成「${STAGE_TITLES[blocker.key]}」（当前：${STATUS_LABELS[blocker.status] || blocker.status}）`
+}

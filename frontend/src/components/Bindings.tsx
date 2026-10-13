@@ -1,3 +1,4 @@
+import { ScrollRegion } from './shell/ShellContext'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -104,14 +105,14 @@ function Editor({
   const ready = readiness.data,
     showSample = ready?.dataset_id === dataset.id && !dirty
   return (
-    <>
-      <section className="panel form">
-        <div className="page-heading">
+    <div className="binding-grid fill">
+      <section className="panel form fill binding-panel">
+        <div className="binding-head">
           <div>
             <h2>变量绑定</h2>
-            <p>
+            <span className="inline-meta">
               方案第 {plan.version} 版 · {dataset.name}
-            </p>
+            </span>
           </div>
           <span className="action-cluster">
             <NeedsModel />
@@ -124,7 +125,7 @@ function Editor({
             </button>
           </span>
         </div>
-        <p className="muted">
+        <p className="muted binding-hint">
           支持
           log、log1p、加减乘除。字段含义需人工核对；无定义的对数或除法记为缺失并从有效样本排除。
         </p>
@@ -134,166 +135,181 @@ function Editor({
             当前选择与已保存绑定的数据资产不同，保存后会替换绑定并让既有运行过期。
           </p>
         )}
-        {plan.variables.map((v) => {
-          const value = mapping[v.name] || {},
-            mode = value.formula !== undefined && value.formula !== null ? 'formula' : 'field',
-            s = suggestions.find((x) => x.role_name === v.name)
-          return (
-            <div className="editor-row" key={v.name}>
-              <strong>
-                {roles[v.role]} · {v.name}
-              </strong>
-              <p className="muted">
-                {v.definition}
-                {v.uncertain ? '（含义待确认）' : ''}
-              </p>
-              <label>
-                绑定方式
-                <select
-                  aria-label={`${v.name} 绑定方式`}
-                  value={mode}
-                  onChange={(e) =>
-                    change(v.name, e.target.value === 'formula' ? { formula: '' } : { field: '' })
-                  }
-                >
-                  <option value="field">数据字段</option>
-                  {!['unit', 'time'].includes(v.role) && <option value="formula">派生公式</option>}
-                </select>
-              </label>
-              {mode === 'field' ? (
+        <ScrollRegion className="binding-rows" label="变量绑定表">
+          <div className="binding-row binding-row--head" aria-hidden="true">
+            <span>变量</span>
+            <span>绑定方式</span>
+            <span>字段 / 公式</span>
+          </div>
+          {plan.variables.map((v) => {
+            const value = mapping[v.name] || {},
+              mode = value.formula !== undefined && value.formula !== null ? 'formula' : 'field',
+              s = suggestions.find((x) => x.role_name === v.name)
+            return (
+              <div className="binding-row" key={v.name}>
+                <div className="binding-row__var">
+                  <strong>
+                    {roles[v.role]} · {v.name}
+                  </strong>
+                  <small className="muted" title={v.definition}>
+                    {v.definition}
+                    {v.uncertain ? '（含义待确认）' : ''}
+                  </small>
+                </div>
                 <label>
-                  字段
+                  绑定方式
                   <select
-                    aria-label={`${v.name} 字段`}
-                    value={value.field || ''}
-                    onChange={(e) => change(v.name, { field: e.target.value })}
+                    aria-label={`${v.name} 绑定方式`}
+                    value={mode}
+                    onChange={(e) =>
+                      change(v.name, e.target.value === 'formula' ? { formula: '' } : { field: '' })
+                    }
                   >
-                    <option value="">请选择字段</option>
-                    {dataset.profile.map((p) => (
-                      <option key={p.name} value={p.name}>
-                        {p.name}
-                        {p.label ? ` · ${p.label}` : ''}
-                      </option>
-                    ))}
+                    <option value="field">数据字段</option>
+                    {!['unit', 'time'].includes(v.role) && (
+                      <option value="formula">派生公式</option>
+                    )}
                   </select>
                 </label>
-              ) : (
-                <label>
-                  公式
-                  <input
-                    aria-label={`${v.name} 公式`}
-                    value={value.formula || ''}
-                    onChange={(e) => change(v.name, { formula: e.target.value })}
-                    placeholder="例如：log1p(a + b)"
-                  />
-                </label>
-              )}
-              {s && (
-                <p className="muted">
-                  建议置信度 {(s.confidence * 100).toFixed(0)}% · {s.note}
-                </p>
-              )}
-            </div>
-          )
-        })}
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={confirmed}
-            onChange={(e) => {
-              setConfirmed(e.target.checked)
-              setDirty(true)
-            }}
-          />
-          我已核对字段含义与公式，确认此绑定
-        </label>
-        <ErrorNote error={save.error || suggest.error} />
-        <button
-          disabled={save.isPending || plan.stale || plan.status !== 'confirmed'}
-          onClick={() => save.mutate()}
-        >
-          {confirmed ? '保存并确认绑定' : '保存为未确认绑定'}
-        </button>
+                {mode === 'field' ? (
+                  <label>
+                    字段
+                    <select
+                      aria-label={`${v.name} 字段`}
+                      value={value.field || ''}
+                      onChange={(e) => change(v.name, { field: e.target.value })}
+                    >
+                      <option value="">请选择字段</option>
+                      {dataset.profile.map((p) => (
+                        <option key={p.name} value={p.name}>
+                          {p.name}
+                          {p.label ? ` · ${p.label}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <label>
+                    公式
+                    <input
+                      aria-label={`${v.name} 公式`}
+                      value={value.formula || ''}
+                      onChange={(e) => change(v.name, { formula: e.target.value })}
+                      placeholder="例如：log1p(a + b)"
+                    />
+                  </label>
+                )}
+                {s && (
+                  <p className="muted binding-row__note">
+                    建议置信度 {(s.confidence * 100).toFixed(0)}% · {s.note}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </ScrollRegion>
+        <div className="binding-foot">
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => {
+                setConfirmed(e.target.checked)
+                setDirty(true)
+              }}
+            />
+            我已核对字段含义与公式，确认此绑定
+          </label>
+          <ErrorNote error={save.error || suggest.error} />
+          <button
+            disabled={save.isPending || plan.stale || plan.status !== 'confirmed'}
+            onClick={() => save.mutate()}
+          >
+            {confirmed ? '保存并确认绑定' : '保存为未确认绑定'}
+          </button>
+        </div>
         {dirty && <p className="notice">编辑尚未保存，就绪结果只反映上次保存内容。</p>}
       </section>
-      <section className="panel">
+      <section className="panel fill">
         <h2>数据就绪检查</h2>
-        <ErrorNote error={readiness.error} />
-        {ready && (
-          <>
-            {showSample && ready.status === 'ready' ? (
-              <p className="success">数据已就绪，可以开始检验。</p>
-            ) : (
-              <p className="notice">
-                {dirty
-                  ? '请先保存当前编辑。'
-                  : ready.dataset_id && ready.dataset_id !== dataset.id
-                    ? '当前显示的数据尚未保存为本方案绑定。'
-                    : '尚未就绪，按下列事项补充。'}
-              </p>
-            )}
-            {ready.data_plan.length > 0 && (
-              <>
-                <h3>待补数据计划</h3>
-                <ul>
-                  {ready.data_plan.map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-            {showSample && ready.sample && (
-              <>
-                <p>
-                  有效样本 {ready.sample.n_valid.toLocaleString()} /{' '}
-                  {ready.sample.n_total.toLocaleString()} 行；排除{' '}
-                  {ready.sample.dropped.toLocaleString()} 行。
+        <ScrollRegion label="数据就绪检查">
+          <ErrorNote error={readiness.error} />
+          {ready && (
+            <>
+              {showSample && ready.status === 'ready' ? (
+                <p className="success">数据已就绪，可以开始检验。</p>
+              ) : (
+                <p className="notice">
+                  {dirty
+                    ? '请先保存当前编辑。'
+                    : ready.dataset_id && ready.dataset_id !== dataset.id
+                      ? '当前显示的数据尚未保存为本方案绑定。'
+                      : '尚未就绪，按下列事项补充。'}
                 </p>
-                <p>
-                  {ready.sample.n_units.toLocaleString()} 个个体 · {ready.sample.n_periods} 期 ·
-                  重复键 {ready.sample.duplicates}
-                </p>
-                {ready.sample.treated_units !== null ? (
-                  <>
-                    <p>
-                      曾暴露 {ready.sample.treated_units} 个体 · 从未暴露对照{' '}
-                      {ready.sample.control_units} 个体
-                    </p>
-                    <p>
-                      单调路径 {ready.sample.monotone_units} 个体 · 1→0 回退{' '}
-                      {ready.sample.reversal_transitions} 次
-                    </p>
-                    <h3>首次暴露年份</h3>
-                    <div className="cohort-list">
-                      {ready.sample.first_exposure.map((c) => (
-                        <span key={c.year}>
-                          {c.year} 年 <strong>{c.count}</strong>
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p>解释变量非二元变量，不划分处理与对照组。</p>
-                )}
-                <details>
-                  <summary>各变量缺失或无效值</summary>
+              )}
+              {ready.data_plan.length > 0 && (
+                <>
+                  <h3>待补数据计划</h3>
                   <ul>
-                    {Object.entries(ready.sample.invalid_by_variable).map(([k, n]) => (
-                      <li key={k}>
-                        {k}：{n} 行
-                      </li>
+                    {ready.data_plan.map((s, i) => (
+                      <li key={i}>{s}</li>
                     ))}
                   </ul>
-                </details>
-                {ready.status === 'ready' && (
-                  <Link to={`/p/${plan.project_id}/data?tab=results`}>进入运行结果 →</Link>
-                )}
-              </>
-            )}
-          </>
-        )}
+                </>
+              )}
+              {showSample && ready.sample && (
+                <>
+                  <p>
+                    有效样本 {ready.sample.n_valid.toLocaleString()} /{' '}
+                    {ready.sample.n_total.toLocaleString()} 行；排除{' '}
+                    {ready.sample.dropped.toLocaleString()} 行。
+                  </p>
+                  <p>
+                    {ready.sample.n_units.toLocaleString()} 个个体 · {ready.sample.n_periods} 期 ·
+                    重复键 {ready.sample.duplicates}
+                  </p>
+                  {ready.sample.treated_units !== null ? (
+                    <>
+                      <p>
+                        曾暴露 {ready.sample.treated_units} 个体 · 从未暴露对照{' '}
+                        {ready.sample.control_units} 个体
+                      </p>
+                      <p>
+                        单调路径 {ready.sample.monotone_units} 个体 · 1→0 回退{' '}
+                        {ready.sample.reversal_transitions} 次
+                      </p>
+                      <h3>首次暴露年份</h3>
+                      <div className="cohort-list">
+                        {ready.sample.first_exposure.map((c) => (
+                          <span key={c.year}>
+                            {c.year} 年 <strong>{c.count}</strong>
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p>解释变量非二元变量，不划分处理与对照组。</p>
+                  )}
+                  <details>
+                    <summary>各变量缺失或无效值</summary>
+                    <ul>
+                      {Object.entries(ready.sample.invalid_by_variable).map(([k, n]) => (
+                        <li key={k}>
+                          {k}：{n} 行
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                  {ready.status === 'ready' && (
+                    <Link to={`/p/${plan.project_id}/data?tab=results`}>进入运行结果 →</Link>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </ScrollRegion>
       </section>
-    </>
+    </div>
   )
 }
 function BoundEditor({ plan, dataset }: { plan: StudyPlan; dataset: Dataset }) {
@@ -332,7 +348,7 @@ export default function Bindings({ projectId, dataset }: { projectId: string; da
       <ErrorNote error={plans.error} />
       {plan ? (
         <>
-          <label>
+          <label className="inline-select">
             绑定到研究方案
             <select value={plan.id} onChange={(e) => setSelected(e.target.value)}>
               {confirmed.map((p) => (

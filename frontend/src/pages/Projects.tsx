@@ -1,3 +1,5 @@
+import PageBar from '../components/shell/PageBar'
+import { ScrollRegion } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -31,102 +33,104 @@ export default function Projects() {
     },
   })
   return (
-    <div className="product-page">
-      <header className="product-page__header">
-        <div>
-          <span className="product-eyebrow">研究工作台</span>
-          <h1>我的研究项目</h1>
-          <p className="muted">从一个问题出发，让文献、数据与判断相互印证。</p>
-        </div>
+    <div className="page-fill">
+      <PageBar title="我的研究项目">
+        <span className="inline-meta">从一个问题出发，让文献、数据与判断相互印证。</span>
         <button className="product-button is-primary" onClick={() => setOpen(true)}>
           ＋ 新建项目
         </button>
-      </header>
-      <ErrorNote error={query.error || remove.error} />
-      {query.isPending ? (
-        <p>正在读取项目…</p>
-      ) : query.data?.length ? (
-        <div className="project-list">
-          {query.data.map((p) => (
-            <article key={p.id}>
-              <div>
-                <Link className="project-title" to={`/p/${p.id}`}>
-                  {p.title}
-                </Link>
-                <p className="muted">{p.direction.text || '尚未填写研究方向'}</p>
-                <small>更新于 {new Date(p.updated_at).toLocaleString('zh-CN')}</small>
-              </div>
-              <button className="quiet" disabled={remove.isPending} onClick={() => setDeleting(p)}>
-                删除
-              </button>
-            </article>
-          ))}
-        </div>
-      ) : (
-        !query.error && (
-          <div className="empty">
-            <h2>把第一个研究问题放在这里</h2>
-            <p>创建项目后，依次整理文献、比较选题、制定方案并检验。</p>
-            <button onClick={() => setOpen(true)}>新建研究项目</button>
-          </div>
-        )
-      )}
-      {deleting && (
-        <div className="overlay">
-          <section
-            className="dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
-          >
-            <h2 id="delete-title">删除项目</h2>
-            <p>确认删除“{deleting.title}”？项目内容将被删除。</p>
-            <ErrorNote error={remove.error} />
-            <div className="actions">
-              <button className="quiet" onClick={() => setDeleting(null)}>
-                取消
-              </button>
-              <button disabled={remove.isPending} onClick={() => remove.mutate(deleting.id)}>
-                确认删除
-              </button>
+      </PageBar>
+      <div className="page-body">
+        <ErrorNote error={query.error || remove.error} />
+        {query.isPending ? (
+          <p>正在读取项目…</p>
+        ) : query.data?.length ? (
+          <ScrollRegion className="project-list fill" label="项目列表">
+            {query.data.map((p) => (
+              <article key={p.id}>
+                <div>
+                  <Link className="project-title" to={`/p/${p.id}`}>
+                    {p.title}
+                  </Link>
+                  <p className="muted">{p.direction.text || '尚未填写研究方向'}</p>
+                  <small>更新于 {new Date(p.updated_at).toLocaleString('zh-CN')}</small>
+                </div>
+                <button
+                  className="quiet"
+                  disabled={remove.isPending}
+                  onClick={() => setDeleting(p)}
+                >
+                  删除
+                </button>
+              </article>
+            ))}
+          </ScrollRegion>
+        ) : (
+          !query.error && (
+            <div className="empty">
+              <h2>把第一个研究问题放在这里</h2>
+              <p>创建项目后，依次整理文献、比较选题、制定方案并检验。</p>
+              <button onClick={() => setOpen(true)}>新建研究项目</button>
             </div>
-          </section>
-        </div>
-      )}
-      {open && (
-        <div className="overlay">
-          <section role="dialog" aria-modal="true" aria-labelledby="new-title" className="dialog">
-            <h2 id="new-title">新建研究项目</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                create.mutate()
-              }}
+          )
+        )}
+        {deleting && (
+          <div className="overlay">
+            <section
+              className="dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-title"
             >
-              <label>
-                项目标题
-                <input
-                  autoFocus
-                  required
-                  maxLength={200}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="例如：碳市场与企业绿色创新"
-                />
-              </label>
-              <ErrorNote error={create.error} />
+              <h2 id="delete-title">删除项目</h2>
+              <p>确认删除“{deleting.title}”？项目内容将被删除。</p>
+              <ErrorNote error={remove.error} />
               <div className="actions">
-                <button type="button" className="quiet" onClick={() => setOpen(false)}>
+                <button className="quiet" onClick={() => setDeleting(null)}>
                   取消
                 </button>
-                <button disabled={create.isPending || !title.trim()}>
-                  {create.isPending ? '正在创建…' : '创建项目'}
+                <button disabled={remove.isPending} onClick={() => remove.mutate(deleting.id)}>
+                  确认删除
                 </button>
               </div>
-            </form>
-          </section>
-        </div>
-      )}
+            </section>
+          </div>
+        )}
+        {open && (
+          <div className="overlay">
+            <section role="dialog" aria-modal="true" aria-labelledby="new-title" className="dialog">
+              <h2 id="new-title">新建研究项目</h2>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  create.mutate()
+                }}
+              >
+                <label>
+                  项目标题
+                  <input
+                    autoFocus
+                    required
+                    maxLength={200}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="例如：碳市场与企业绿色创新"
+                  />
+                </label>
+                <ErrorNote error={create.error} />
+                <div className="actions">
+                  <button type="button" className="quiet" onClick={() => setOpen(false)}>
+                    取消
+                  </button>
+                  <button disabled={create.isPending || !title.trim()}>
+                    {create.isPending ? '正在创建…' : '创建项目'}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
