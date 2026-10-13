@@ -7,7 +7,10 @@ import { ErrorNote } from '../components/Shared'
 import { QWEN_MODELS, useLlm } from '../lib/llm'
 interface Status {
   configured: boolean
-  model: string
+  /** R4-03 起的字段名 */
+  llm_model?: string | null
+  /** 旧后端字段，兼容保留 */
+  model?: string | null
   message: string
   usage: { calls: number; input_tokens: number; output_tokens: number }
   sources: Record<string, { status: string; reason?: string }>
@@ -75,7 +78,10 @@ export default function Settings() {
                   <p>
                     当前模型：
                     <strong>
-                      {llm.data?.llm_model || q.data.model || '未设置（默认 qwen-plus）'}
+                      {llm.data?.llm_model ||
+                        q.data.llm_model ||
+                        q.data.model ||
+                        '未设置（默认 qwen-plus）'}
                     </strong>{' '}
                     · {(llm.data?.configured ?? q.data.configured) ? '已配置' : '未配置密钥'}
                   </p>
@@ -83,7 +89,13 @@ export default function Settings() {
                     <label style={{ margin: 0 }}>
                       切换千问模型
                       <select
-                        value={picked || llm.data?.llm_model || q.data.model || 'qwen-plus'}
+                        value={
+                          picked ||
+                          llm.data?.llm_model ||
+                          q.data.llm_model ||
+                          q.data.model ||
+                          'qwen-plus'
+                        }
                         disabled={!llm.data?.switchable || switchModel.isPending}
                         onChange={(e) => setPicked(e.target.value)}
                       >
