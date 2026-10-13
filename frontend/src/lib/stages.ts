@@ -77,3 +77,25 @@ export function lockReason(stages: Stage[], key: string): string | null {
   if (!blocker) return null
   return `需先完成「${STAGE_TITLES[blocker.key]}」（当前：${STATUS_LABELS[blocker.status] || blocker.status}）`
 }
+
+/** 每个阶段一句"这里要做什么"（页头下方） */
+export const STAGE_TODO: Record<string, string> = {
+  direction: '用一句话写下想法，回答几个问题，把右侧方向卡补完整。',
+  literature: '系统检索文献，你勾选能支持研究的证据。',
+  candidates: '系统生成几条候选假设，你比较后选一条。',
+  plan: '系统起草研究计划，你检查后确认。',
+  data: '上传数据，确认系统建议的变量绑定，然后运行检验。',
+  proposal: '系统生成研究提案，你检查后确认并导出。',
+}
+
+/** 首次进入的引导卡 */
+export const STAGE_INTRO: Record<string, string> = {
+  direction:
+    '先用一句话说说你想研究什么。系统一次问一个问题，帮你整理成方向卡：研究问题、变量、范围和检索关键词。',
+  literature:
+    '系统按方向卡的关键词检索论文。你只需要勾选认可的证据；右侧会告诉你哪些变量关系还缺证据。',
+  candidates: '系统根据你勾选的证据提出几条可检验的候选假设，并推荐一条。你比较后选一条最想做的。',
+  plan: '系统把选定的假设变成变量、模型、稳健性检验和决策规则。你检查一遍，没问题就确认。',
+  data: '上传数据表后，系统会建议每个变量对应哪一列。你确认绑定，系统运行主回归和稳健性检验。',
+  proposal: '系统把前面所有已确认的内容写成研究提案。内容自动保存；某一节失败可以单独重新生成。',
+}

@@ -49,7 +49,7 @@ export default function Projects() {
             {query.data.map((p) => (
               <article key={p.id}>
                 <div>
-                  <Link className="project-title" to={`/p/${p.id}`}>
+                  <Link className="project-title" to={`/p/${p.id}?open=1`}>
                     {p.title}
                   </Link>
                   <p className="muted">{p.direction.text || '尚未填写研究方向'}</p>

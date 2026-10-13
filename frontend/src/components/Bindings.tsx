@@ -1,12 +1,12 @@
 import { ScrollRegion } from './shell/ShellContext'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import type { Dataset } from '../api/datasets'
 import { type StudyPlan, roles } from '../api/plans'
 import { ErrorNote } from './Shared'
-import { NeedsModel } from './ui/Bits'
+import { useLlm } from '../lib/llm'
 interface Value {
   field?: string | null
   formula?: string | null
@@ -59,14 +59,18 @@ interface Readiness {
     first_exposure: { year: number; count: number }[]
   }
 }
+/** 页面主按钮"确认数据绑定"调用的动作 */
+export type ConfirmBinding = (() => void) | null
 function Editor({
   plan,
   dataset,
   saved,
+  registerConfirm,
 }: {
   plan: StudyPlan
   dataset: Dataset
   saved: SavedBinding | null
+  registerConfirm?: (fn: ConfirmBinding) => void
 }) {
   // 无真实绑定时，后端 GET 会把 suggested_binding 包装成未确认绑定返回；视作建议而非已保存
   const isSuggestionOnly = !!saved && !saved.updated_at && !saved.inherited_from
@@ -84,13 +88,14 @@ function Editor({
     [confirmed, setConfirmed] = useState(saved?.dataset_id === dataset.id && saved.confirmed),
     [suggestions, setSuggestions] = useState<Suggestion[]>([]),
     [dirty, setDirty] = useState(Object.keys(planSuggested).length > 0)
+  const llmOk = useLlm().data?.configured !== false
   const pendingReconfirm = !!saved && saved.dataset_id === dataset.id && !saved.confirmed
   const readiness = useQuery({
     queryKey: ['readiness', plan.id],
     queryFn: () => api<Readiness>(`/plans/${plan.id}/readiness`),
   })
   const save = useMutation({
-    mutationFn: () =>
+    mutationFn: (asConfirmed: boolean) =>
       api(
         `/plans/${plan.id}/bindings`,
         body('PUT', {
@@ -98,11 +103,13 @@ function Editor({
           bindings: Object.fromEntries(
             Object.entries(mapping).filter(([, v]) => v.field || v.formula),
           ),
-          confirmed,
+          confirmed: asConfirmed,
         }),
       ),
-    onSuccess: () => {
+    onSuccess: (_, asConfirmed) => {
       setDirty(false)
+      setConfirmed(asConfirmed)
+      qc.invalidateQueries({ queryKey: ['overview'] })
       qc.invalidateQueries({ queryKey: ['bindings', plan.id] })
       qc.invalidateQueries({ queryKey: ['readiness', plan.id] })
     },
@@ -122,6 +129,18 @@ function Editor({
       qc.invalidateQueries({ queryKey: ['overview'] })
     },
   })
+  // 草稿自动保存（未确认）；确认由页头主按钮触发
+  useEffect(() => {
+    if (!dirty || plan.stale || plan.status !== 'confirmed') return
+    const t = setTimeout(() => save.mutate(false), 900)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapping, dirty])
+  useEffect(() => {
+    registerConfirm?.(plan.stale || plan.status !== 'confirmed' ? null : () => save.mutate(true))
+    return () => registerConfirm?.(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapping, plan.id, plan.stale])
   const suggest = useMutation({
     mutationFn: () =>
       api<{ bindings: Suggestion[] }>(
@@ -172,16 +191,17 @@ function Editor({
               </span>
             )}
           </div>
-          <span className="action-cluster">
-            <NeedsModel />
-            <button
-              className="secondary"
-              disabled={suggest.isPending}
-              onClick={() => suggest.mutate()}
-            >
-              {suggest.isPending ? '正在建议…' : '让模型建议绑定'}
-            </button>
-          </span>
+          {llmOk && (
+            <span className="action-cluster">
+              <button
+                className="secondary"
+                disabled={suggest.isPending}
+                onClick={() => suggest.mutate()}
+              >
+                {suggest.isPending ? '正在建议…' : '让模型建议绑定'}
+              </button>
+            </span>
+          )}
         </div>
         <p className="muted binding-hint">
           支持
@@ -197,17 +217,9 @@ function Editor({
           <div className="notice binding-reconfirm" role="status">
             <span>
               {saved?.inherited_from
-                ? `${saved.note || '此绑定继承自上一版方案'}。字段映射已带入，核对无误后可一键确认。`
-                : '已保存的绑定尚未确认，检验前需要确认。'}
+                ? `${saved.note || '此绑定继承自上一版方案'}。字段映射已带入，核对无误后点右上角「确认数据绑定」。`
+                : '已保存的绑定尚未确认，核对后点右上角「确认数据绑定」。'}
             </span>
-            <button
-              type="button"
-              disabled={reconfirm.isPending || dirty || plan.stale || plan.status !== 'confirmed'}
-              title={dirty ? '有未保存的编辑，请先保存或撤销' : undefined}
-              onClick={() => reconfirm.mutate()}
-            >
-              {reconfirm.isPending ? '正在确认…' : '一键确认绑定'}
-            </button>
           </div>
         )}
         {suggestedKeys.size > 0 && (
@@ -295,26 +307,18 @@ function Editor({
           })}
         </ScrollRegion>
         <div className="binding-foot">
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(e) => {
-                setConfirmed(e.target.checked)
-                setDirty(true)
-              }}
-            />
-            我已核对字段含义与公式，确认此绑定
-          </label>
+          <span className={`status-badge is-${confirmed && !dirty ? 'green' : 'yellow'}`}>
+            {confirmed && !dirty ? '绑定已确认' : '待确认'}
+          </span>
+          <span className="muted">
+            {save.isPending
+              ? '正在自动保存…'
+              : dirty
+                ? '编辑会自动保存为未确认草稿'
+                : '核对字段含义与公式后，点右上角「确认数据绑定」'}
+          </span>
           <ErrorNote error={save.error || suggest.error} />
-          <button
-            disabled={save.isPending || plan.stale || plan.status !== 'confirmed'}
-            onClick={() => save.mutate()}
-          >
-            {confirmed ? '保存并确认绑定' : '保存为未确认绑定'}
-          </button>
         </div>
-        {dirty && <p className="notice">编辑尚未保存，就绪结果只反映上次保存内容。</p>}
       </section>
       <section className="panel fill">
         <h2>数据就绪检查</h2>
@@ -386,9 +390,6 @@ function Editor({
                       ))}
                     </ul>
                   </details>
-                  {ready.status === 'ready' && (
-                    <Link to={`/p/${plan.project_id}/data?tab=results`}>进入运行结果 →</Link>
-                  )}
                 </>
               )}
             </>
@@ -398,7 +399,15 @@ function Editor({
     </div>
   )
 }
-function BoundEditor({ plan, dataset }: { plan: StudyPlan; dataset: Dataset }) {
+function BoundEditor({
+  plan,
+  dataset,
+  registerConfirm,
+}: {
+  plan: StudyPlan
+  dataset: Dataset
+  registerConfirm?: (fn: ConfirmBinding) => void
+}) {
   const saved = useQuery({
     queryKey: ['bindings', plan.id],
     queryFn: () => api<SavedBinding | null>(`/plans/${plan.id}/bindings`),
@@ -415,13 +424,22 @@ function BoundEditor({ plan, dataset }: { plan: StudyPlan; dataset: Dataset }) {
             plan={plan}
             dataset={dataset}
             saved={saved.data || null}
+            registerConfirm={registerConfirm}
           />
         )
       )}
     </>
   )
 }
-export default function Bindings({ projectId, dataset }: { projectId: string; dataset: Dataset }) {
+export default function Bindings({
+  projectId,
+  dataset,
+  registerConfirm,
+}: {
+  projectId: string
+  dataset: Dataset
+  registerConfirm?: (fn: ConfirmBinding) => void
+}) {
   const [selected, setSelected] = useState('')
   const plans = useQuery({
     queryKey: ['plans', projectId],
@@ -444,7 +462,7 @@ export default function Bindings({ projectId, dataset }: { projectId: string; da
               ))}
             </select>
           </label>
-          <BoundEditor plan={plan} dataset={dataset} />
+          <BoundEditor plan={plan} dataset={dataset} registerConfirm={registerConfirm} />
         </>
       ) : (
         <section className="panel">

@@ -1,24 +1,33 @@
-import { Link, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { useFlow } from '../components/flow/FlowContext'
+import { nextFlowStage } from '../lib/flow'
 import { ErrorNote } from '../components/Shared'
 import { ScrollRegion } from '../components/shell/ShellContext'
 import CaseToggle, { CaseTag } from '../components/CaseToggle'
 import { strengths } from '../components/Claims'
 import { num } from '../components/ResultTable'
 import { useProjectFacts } from '../lib/facts'
-import {
-  STAGE_TITLES,
-  STATUS_LABELS,
-  completedCount,
-  nextStage,
-  statusTone,
-  useOverview,
-} from '../lib/stages'
+import { STAGE_TITLES, STAGE_TODO, useOverview } from '../lib/stages'
+
+const FLOW_LABEL = { locked: '未解锁', active: '进行中', confirmed: '已确认', stale: '需要更新' }
+const FLOW_TONE = { locked: 'gray', active: 'orange', confirmed: 'green', stale: 'yellow' }
 
 /** 总览：与阶段页共用 StageLayout 外壳（一行页头 + 紧凑阶段条 + 继续按钮），下方网格填满一屏 */
 export default function Overview() {
   const { id } = useParams()
   const q = useOverview(id)
   const f = useProjectFacts(id)
+  const { flow } = useFlow()
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const next = nextFlowStage(flow)
+  // 打开项目时：若有阶段正等你确认（已有内容、尚未确认），直接进入该阶段
+  useEffect(() => {
+    if (params.get('open') && next && next.backend !== 'not_started')
+      navigate(`/p/${id}/${next.key}`, { replace: true })
+  }, [params, next, id, navigate])
   if (q.isPending) return <p className="loading-line">正在读取项目…</p>
   if (!q.data)
     return (
@@ -26,10 +35,8 @@ export default function Overview() {
         <ErrorNote error={q.error} />
       </div>
     )
-  const { project, stages } = q.data
-  const next = nextStage(stages)
-  const done = completedCount(stages)
-  const stale = stages.filter((s) => s.status === 'stale')
+  const { project } = q.data
+  const done = flow.filter((s) => s.status === 'confirmed').length
   const main = f.run?.result?.main
   const panel = f.dataset?.panel
   const period = panel?.time_min ? `${panel.time_min}–${panel.time_max}` : ''
@@ -45,12 +52,31 @@ export default function Overview() {
   const d = project.direction
   return (
     <>
-      {stale.length > 0 && (
-        <p className="notice" role="status">
-          {stale.map((s) => STAGE_TITLES[s.key]).join('、')}
-          已过期：上游信息已变化，旧内容保留，可在对应阶段重新生成或运行。
-        </p>
-      )}
+      <section
+        className={`overview-next ${next?.status === 'stale' ? 'is-stale' : ''}`}
+        aria-label="下一步"
+      >
+        <div>
+          <span className="eyebrow">下一步</span>
+          <h2>
+            {next
+              ? `阶段 ${flow.indexOf(next) + 1} · ${STAGE_TITLES[next.key]}：${next.status === 'stale' ? '上游已修改，需要更新' : STAGE_TODO[next.key]}`
+              : '六个阶段都已确认 · 可以导出研究提案'}
+          </h2>
+        </div>
+        <button
+          type="button"
+          className="product-button is-primary flow-primary"
+          onClick={() => navigate(`/p/${id}/${next?.key || 'proposal'}`)}
+        >
+          {next
+            ? next.status === 'stale'
+              ? '去更新'
+              : `去${STAGE_TITLES[next.key]}`
+            : '查看研究提案'}
+          <ArrowRight size={14} aria-hidden="true" />
+        </button>
+      </section>
       <div className="overview-grid fill">
         <section className="panel overview-card overview-summary" style={{ gridArea: 'summary' }}>
           <div className="overview-card__head">
@@ -117,33 +143,32 @@ export default function Overview() {
             阶段进度 <small className="inline-meta">已完成 {done} / 6</small>
           </h2>
           <ol className="overview-stage-grid">
-            {stages.map((s, i) => (
-              <li key={s.key} className={`tone-${statusTone(s.status)}`}>
-                <Link to={`/p/${id}/${s.key}`}>
+            {flow.map((s, i) => (
+              <li key={s.key} className={`tone-${FLOW_TONE[s.status]}`}>
+                <Link to={`/p/${id}/${s.key}`} aria-disabled={s.status === 'locked'}>
                   <span className="overview-stage-grid__idx">{i + 1}</span>
                   <span className="overview-stage-grid__body">
-                    <strong>{STAGE_TITLES[s.key] || s.label}</strong>
+                    <strong>{STAGE_TITLES[s.key]}</strong>
                     <small title={s.summary || undefined}>
-                      {s.summary || STATUS_LABELS[s.status] || s.status}
+                      {s.summary || FLOW_LABEL[s.status]}
                     </small>
                   </span>
-                  <span className={`status-badge is-${statusTone(s.status)}`}>
-                    {STATUS_LABELS[s.status] || s.status}
+                  <span className={`status-badge is-${FLOW_TONE[s.status]}`}>
+                    {FLOW_LABEL[s.status]}
                   </span>
                 </Link>
               </li>
             ))}
           </ol>
-          {next && (
-            <p className="muted">
-              下一步：
-              <Link to={`/p/${id}/${next.key}`}>{STAGE_TITLES[next.key]} →</Link>
-            </p>
-          )}
         </section>
         <section className="panel overview-card" style={{ gridArea: 'facts' }}>
           <h2>关键信息</h2>
-          <dl className="overview-dl is-stacked">
+          <dl
+            className="overview-dl is-stacked scroll-region"
+            data-scroll-region=""
+            tabIndex={0}
+            aria-label="关键信息"
+          >
             <div>
               <dt>数据与样本期</dt>
               <dd>

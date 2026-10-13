@@ -1,4 +1,4 @@
-import { ScrollRegion, StageActions } from '../components/shell/ShellContext'
+import { ScrollRegion } from '../components/shell/ShellContext'
 import { useUrlParam } from '../lib/urlState'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
@@ -73,18 +73,6 @@ export default function Analysis() {
   }
   return (
     <>
-      <StageActions>
-        <button
-          disabled={
-            !plan ||
-            start.isPending ||
-            runs.data?.some((r) => ['queued', 'running'].includes(r.status))
-          }
-          onClick={() => start.mutate()}
-        >
-          运行已确认方案
-        </button>
-      </StageActions>
       <ErrorNote error={runs.error || plans.error || start.error} />
       {!plan && (
         <p className="notice">

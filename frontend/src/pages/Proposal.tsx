@@ -1,9 +1,8 @@
 import { fmtNumber } from '../components/ResultTable'
 import { ScrollRegion } from '../components/shell/ShellContext'
 import { useUrlParam } from '../lib/urlState'
-import { StageActions } from '../components/shell/ShellContext'
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -12,7 +11,9 @@ import type { AnalysisResult } from '../api/analysis'
 import AnalysisCharts from '../components/AnalysisCharts'
 import JobProgress from '../components/JobProgress'
 import { ErrorNote } from '../components/Shared'
-import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
+import { GeneratedBy, VersionPills } from '../components/ui/Bits'
+import { useFlow, useFlowStage, useStageUi } from '../components/flow/FlowContext'
+import { EmptyState, ProgressView } from '../components/flow/FlowBits'
 import { useLlm } from '../lib/llm'
 const titles: Record<string, string> = {
   overview: '一页概览',
@@ -58,23 +59,39 @@ function render(s: Section) {
       : fmtNumber(Number(s.injected_numbers_ref[key])),
   )
 }
-function SectionView({ section, proposalId }: { section: Section; proposalId: string }) {
+function SectionView({
+  section,
+  proposalId,
+  failure,
+  onRegenerate,
+  readOnly,
+}: {
+  section: Section
+  proposalId: string
+  failure?: string
+  onRegenerate?: () => void
+  readOnly?: boolean
+}) {
   const [editing, setEditing] = useState(false),
     [draft, setDraft] = useState(section.markdown),
     qc = useQueryClient()
   const save = useMutation({
     mutationFn: () =>
       api(`/proposals/${proposalId}/sections/${section.key}`, body('PATCH', { markdown: draft })),
-    onSuccess: () => {
-      setEditing(false)
-      qc.invalidateQueries({ queryKey: ['proposals'] })
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['proposals'] }),
   })
+  // 叙述编辑自动保存（不再有"保存叙述"按钮）
+  useEffect(() => {
+    if (!editing || draft === section.markdown) return
+    const t = setTimeout(() => save.mutate(), 900)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, editing])
   return (
     <section className={'proposal-section ' + (!section.editable ? 'injected' : '')}>
       <div className="section-heading">
         <h2>{titles[section.key]}</h2>
-        {section.editable && (
+        {section.editable && !readOnly && (
           <button
             className="secondary no-print"
             onClick={() => {
@@ -82,19 +99,32 @@ function SectionView({ section, proposalId }: { section: Section; proposalId: st
               setEditing(!editing)
             }}
           >
-            {editing ? '取消编辑' : '编辑叙述'}
+            {editing ? '完成编辑' : '编辑叙述'}
           </button>
         )}
         {!section.editable && <span className="badge no-print">系统生成 · 只读</span>}
       </div>
+      {failure && (
+        <div className="notice proposal-fail no-print" role="status">
+          <span>本节生成失败：{failure}</span>
+          {onRegenerate && (
+            <button
+              type="button"
+              className="product-button is-quiet"
+              onClick={onRegenerate}
+              title="后端暂无单节重生成接口：会生成新的提案版本"
+            >
+              重新生成本节
+            </button>
+          )}
+        </div>
+      )}
       {editing ? (
         <div className="no-print">
           <p className="muted">数字占位符不可增加、删除或更换。新数字请回到方案与检验中更新。</p>
           <textarea rows={8} value={draft} onChange={(e) => setDraft(e.target.value)} />
           <ErrorNote error={save.error} />
-          <button onClick={() => save.mutate()} disabled={save.isPending}>
-            保存叙述
-          </button>
+          <small className="muted">{save.isPending ? '正在自动保存…' : '编辑会自动保存'}</small>
         </div>
       ) : (
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{render(section)}</ReactMarkdown>
@@ -117,7 +147,10 @@ export default function Proposal() {
     refetchInterval: (q) =>
       q.state.data?.some((j) => ['queued', 'running'].includes(j.status)) ? 1000 : false,
   })
-  const llm = useLlm()
+  const navigate = useNavigate()
+  const { confirm } = useFlow()
+  const stage = useFlowStage('proposal')
+  const llmOk = useLlm().data?.configured !== false
   const active = query.data?.find((p) => p.id === params.get('proposal')) || query.data?.[0]
   const currentJob = job || jobs.data?.[0]?.id || ''
   const refresh = () => {
@@ -132,6 +165,45 @@ export default function Proposal() {
       refresh()
     },
   })
+  const busy =
+    generate.isPending || !!jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
+  const failedJob = jobs.data?.[0]?.status === 'failed' ? '提案生成失败' : null
+  const needNew = !active || (active.stale && stage.status !== 'confirmed')
+  const exportMd = () => {
+    if (!active) return
+    const a = document.createElement('a')
+    a.href = `/api/proposals/${active.id}.md`
+    a.download = ''
+    a.click()
+  }
+  useStageUi({
+    checklist: [
+      { label: '生成提案', done: !!active && !active.stale },
+      { label: '确认提案', done: stage.status === 'confirmed' },
+      { label: '导出', done: false },
+    ],
+    primary: busy
+      ? { label: '正在生成提案…', busy: true }
+      : needNew
+        ? {
+            label: active ? '重新生成提案' : '生成提案',
+            needsLlm: true,
+            onClick: () => generate.mutate(),
+            error: generate.error ? (generate.error as Error).message : failedJob,
+          }
+        : stage.status === 'confirmed'
+          ? { label: '导出', onClick: exportMd, reason: 'Markdown · 也可打印为 PDF' }
+          : {
+              label: '确认提案',
+              reason:
+                active.narrative_status === 'partial'
+                  ? `${active.narrative_failures?.length || 0} 节生成失败，可先重新生成`
+                  : `第 ${active.version} 版`,
+              onClick: () => {
+                if (!confirm('proposal')) navigate(`/p/${id}/proposal`)
+              },
+            },
+  })
   const [sec, setSec] = useUrlParam<string>('sec', '')
   useEffect(() => {
     if (sec) document.getElementById('sec-' + sec)?.scrollIntoView({ block: 'start' })
@@ -141,21 +213,6 @@ export default function Proposal() {
   return (
     <>
       <div className="no-print">
-        <StageActions>
-          <div className="action-cluster">
-            <NeedsModel />
-            <button
-              disabled={
-                generate.isPending ||
-                llm.data?.configured === false ||
-                jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
-              }
-              onClick={() => generate.mutate()}
-            >
-              生成新版本
-            </button>
-          </div>
-        </StageActions>
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (
           <JobProgress
@@ -167,11 +224,26 @@ export default function Proposal() {
           />
         )}
       </div>
-      {!active ? (
-        <section className="panel">
-          <h2>尚无提案</h2>
-          <p>选定候选并起草方案后即可生成。没有数据时生成计划型提案，列出待补数据。</p>
-        </section>
+      {busy ? (
+        <ProgressView
+          title="正在生成研究提案"
+          detail="按已确认的方向、证据、候选、方案和检验结果逐节撰写。完成后自动显示。"
+          steps={Object.values(titles)
+            .slice(0, 10)
+            .map((t) => ({ label: t, state: 'todo' as const }))}
+        />
+      ) : !active ? (
+        <EmptyState
+          title="这里会生成一份完整的研究提案"
+          what="包括研究问题、文献依据、研究缺口、假设与机制、识别设计、数据与变量、探索性结果、结论与边界。数字和图表由系统注入，内容自动保存。"
+          example={{
+            title: '假设与机制',
+            body: 'H1：同行业出现控排企业后，行业内上市公司的绿色发明专利申请增加……',
+          }}
+          action={
+            stage.editable ? { label: '生成提案', onClick: () => generate.mutate() } : undefined
+          }
+        />
       ) : (
         <>
           <div className="toolbar no-print">
@@ -187,29 +259,30 @@ export default function Proposal() {
               }))}
             />
             <GeneratedBy of={active} />
-            <a className="button secondary" href={`/api/proposals/${active.id}.md`} download>
-              下载 Markdown
-            </a>
-            <button className="secondary" onClick={() => window.print()}>
+            <button className="product-button is-quiet" onClick={() => window.print()}>
               打印 / 保存 PDF
             </button>
           </div>
           {active.stale && (
-            <p className="notice">上游信息已变更，本提案已过期。历史正文保留，请生成新版本。</p>
+            <p className="notice">
+              上游内容已修改，本提案需要更新。历史正文保留，点右上角重新生成。
+            </p>
           )}
           {active.narrative_status === 'partial' && (
             <div className="notice narrative-partial" role="status">
               <strong>叙述部分生成：</strong>
-              部分章节未能由模型生成，已保留可用内容与系统生成的数字、图表；可稍后重新生成新版本。
-              {narrativeIssues(active).length > 0 ? (
-                <ul>
-                  {narrativeIssues(active).map((m, i) => (
-                    <li key={i}>{m}</li>
-                  ))}
-                </ul>
-              ) : (
+              {narrativeIssues(active).length} 节未能由模型生成，已在对应位置标出，可单独重新生成。
+              {narrativeIssues(active).length === 0 && (
                 <span className="muted"> 后端未返回具体失败原因。</span>
               )}
+              {(active.narrative_failures || [])
+                .filter((f) => !active.sections.some((s) => s.key === f.section))
+                .map((f) => (
+                  <span key={f.section} className="muted">
+                    {' '}
+                    {titles[f.section] || f.section}：{f.reason}
+                  </span>
+                ))}
             </div>
           )}
           <div className="proposal-layout fill">
@@ -244,7 +317,13 @@ export default function Proposal() {
                 <p className="muted">已移除无效引用 {active.removed_references} 处</p>
                 {active.sections.map((s) => (
                   <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
-                    <SectionView section={s} proposalId={active.id} />
+                    <SectionView
+                      section={s}
+                      proposalId={active.id}
+                      readOnly={!stage.editable}
+                      failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
+                      onRegenerate={stage.editable && llmOk ? () => generate.mutate() : undefined}
+                    />
                     {s.key === 'results' && active.interpretation?.llm_model && (
                       <p className="no-print">
                         结果解读 <GeneratedBy of={active.interpretation} />

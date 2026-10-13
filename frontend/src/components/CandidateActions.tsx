@@ -11,11 +11,14 @@ export default function CandidateActions({
   projectId,
   cards,
   stale,
+  editOnly,
 }: {
   candidate: Candidate
   projectId: string
   cards: Evidence[]
   stale: boolean
+  /** 只保留"编辑候选"（选择由页面单选完成） */
+  editOnly?: boolean
 }) {
   const qc = useQueryClient(),
     [editing, setEditing] = useState(false),
@@ -55,10 +58,12 @@ export default function CandidateActions({
         >
           编辑候选
         </button>
-        <button disabled={chosen || stale || choose.isPending} onClick={() => choose.mutate()}>
-          {chosen ? '当前已选' : '选择此候选'}
-        </button>
-        {chosen && <Link to={`/p/${projectId}/plan`}>起草研究方案 →</Link>}
+        {!editOnly && (
+          <button disabled={chosen || stale || choose.isPending} onClick={() => choose.mutate()}>
+            {chosen ? '当前已选' : '选择此候选'}
+          </button>
+        )}
+        {chosen && !editOnly && <Link to={`/p/${projectId}/plan`}>起草研究方案 →</Link>}
       </div>
       {candidate.user_edited && <p className="muted">已由你编辑；原自审意见对应生成时内容。</p>}
       {editing && (

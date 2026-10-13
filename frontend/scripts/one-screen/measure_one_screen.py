@@ -5,8 +5,7 @@ from playwright.async_api import async_playwright
 d = json.load(open('/tmp/fake_ids')); P = d['P']
 SEC = ['方法与变量', '模型与识别', '稳健性检查', '置换与决策规则', '计划结论与边界']
 VIEWS = [('01_项目列表', '/', None), ('02_总览', f'/p/{P}', None), ('03_方向', f'/p/{P}/direction', None),
-         ('04_文献', f'/p/{P}/literature', None), ('05_候选_逐个', f'/p/{P}/candidates', None),
-         ('05b_候选_对比', f'/p/{P}/candidates', 'text=对比视图'), ('06_方案_概要', f'/p/{P}/plan', None)] + [
+         ('04_文献', f'/p/{P}/literature', None), ('05_候选', f'/p/{P}/candidates', None), ('06_方案_概要', f'/p/{P}/plan', None)] + [
          (f'06{chr(98+i)}_方案_{t}', f'/p/{P}/plan', f'.plan-nav >> text={t}') for i, t in enumerate(SEC)] + [
          ('07_数据_资产', f'/p/{P}/data?tab=assets', None), ('07b_数据_绑定', f'/p/{P}/data?tab=binding', None),
          ('08_数据_结果', f'/p/{P}/data?tab=results', None), ('09_提案', f'/p/{P}/proposal', None), ('10_设置', '/settings', None)]

@@ -1,0 +1,133 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
+import type { Stage } from '../../api/client'
+import {
+  cancelEdit,
+  confirmStage,
+  deriveFlow,
+  loadLocal,
+  saveLocal,
+  startEdit,
+  type FlowStage,
+  type LocalFlow,
+  type StageKey,
+} from '../../lib/flow'
+
+/** 主按钮描述：页面只声明"现在该做什么"，位置与样式由外壳统一决定 */
+export interface PrimarySpec {
+  label: string
+  onClick?: () => void
+  disabled?: boolean
+  /** 显示在主按钮左侧的一句原因 / 提示 */
+  reason?: string
+  /** 此动作需要模型：未配置时主按钮变为"去设置模型" */
+  needsLlm?: boolean
+  /** 上次执行失败的原因：主按钮变为"重试" */
+  error?: string | null
+  /** 系统处理中 */
+  busy?: boolean
+}
+export interface CheckItem {
+  label: string
+  done: boolean
+}
+export interface StageUi {
+  primary?: PrimarySpec
+  checklist?: CheckItem[]
+  /** 进入编辑（已确认阶段解锁重改）时页面需要执行的动作，例如方案新建版本 */
+  onStartEdit?: () => void
+}
+
+interface FlowCtx {
+  projectId: string
+  flow: FlowStage[]
+  local: LocalFlow
+  uiRef: React.MutableRefObject<StageUi | null>
+  uiSig: string
+  setUiSig: (s: string) => void
+  /** 确认并进入下一阶段：返回是否为"编辑后的确认" */
+  confirm: (key: StageKey) => boolean
+  edit: (key: StageKey) => void
+  cancel: (key: StageKey) => void
+}
+const Ctx = createContext<FlowCtx | null>(null)
+
+export function FlowProvider({
+  projectId,
+  stages,
+  children,
+}: {
+  projectId: string
+  stages: Stage[]
+  children: ReactNode
+}) {
+  const [local, setLocal] = useState<LocalFlow>(() => loadLocal(projectId))
+  useEffect(() => {
+    setLocal(loadLocal(projectId))
+  }, [projectId])
+  const flow = useMemo(() => deriveFlow(stages, local), [stages, local])
+  const uiRef = useRef<StageUi | null>(null)
+  const [uiSig, setUiSig] = useState('')
+  const update = useCallback(
+    (l: LocalFlow) => {
+      saveLocal(projectId, l)
+      setLocal(l)
+    },
+    [projectId],
+  )
+  const value: FlowCtx = {
+    projectId,
+    flow,
+    local,
+    uiRef,
+    uiSig,
+    setUiSig,
+    confirm: (key) => {
+      const wasEdit = !!local.editing[key]
+      update(confirmStage(local, flow, key))
+      return wasEdit
+    },
+    edit: (key) => update(startEdit(local, key)),
+    cancel: (key) => update(cancelEdit(local, key)),
+  }
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
+export function useFlow() {
+  const c = useContext(Ctx)
+  if (!c) throw new Error('useFlow outside FlowProvider')
+  return c
+}
+
+/** 当前阶段的流程状态；editable=进行中或需要更新（已确认的阶段只读，需先"修改此阶段"） */
+export function useFlowStage(key: StageKey) {
+  const { flow, local } = useFlow()
+  const st = flow.find((s) => s.key === key)!
+  return {
+    ...st,
+    editing: !!local.editing[key],
+    editable: st.status === 'active' || st.status === 'stale',
+  }
+}
+
+/** 页面声明主按钮 / 任务清单。函数取最新引用，签名变化时刷新外壳 */
+export function useStageUi(ui: StageUi) {
+  const { uiRef, setUiSig } = useFlow()
+  const latest = useRef(ui)
+  latest.current = ui
+  uiRef.current = ui
+  const sig = JSON.stringify(ui, (_, v) => (typeof v === 'function' ? 1 : v))
+  useEffect(() => {
+    uiRef.current = latest.current
+    setUiSig(sig)
+  }, [sig, uiRef, setUiSig])
+  useEffect(
+    () => () => {
+      if (uiRef.current === latest.current) {
+        uiRef.current = null
+        setUiSig('')
+      }
+    },
+    [uiRef, setUiSig],
+  )
+}

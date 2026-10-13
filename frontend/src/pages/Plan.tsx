@@ -1,7 +1,6 @@
 import { useUrlParam } from '../lib/urlState'
-import { StageActions } from '../components/shell/ShellContext'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { type StudyPlan, methods, semanticsLabels } from '../api/plans'
@@ -9,14 +8,16 @@ import { ErrorNote } from '../components/Shared'
 import PlanEditor, { sectionTitles } from '../components/PlanEditor'
 import JobProgress from '../components/JobProgress'
 import type { Job } from '../components/JobProgress'
-import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
+import { GeneratedBy, VersionPills } from '../components/ui/Bits'
+import { useFlow, useFlowStage, useStageUi } from '../components/flow/FlowContext'
+import { EmptyState, ProgressView } from '../components/flow/FlowBits'
+import { useOverview } from '../lib/stages'
 import { useLlm } from '../lib/llm'
 export default function Plan() {
   const { id } = useParams(),
     qc = useQueryClient(),
     [version, setVersion] = useState(''),
     [job, setJob] = useState(''),
-    [confirming, setConfirming] = useState(false),
     [dirty, setDirty] = useState(false)
   const [sec, setSec] = useUrlParam<string>('sec', 'summary')
   const plans = useQuery({
@@ -46,39 +47,74 @@ export default function Plan() {
     mutationFn: (op: string) => api<StudyPlan>(`/plans/${current!.id}:${op}`, body('POST')),
     onSuccess: (p) => {
       setVersion(p.id)
-      setConfirming(false)
       refresh()
+      if (p.status === 'confirmed' && !confirm('plan')) navigate(`/p/${id}/data`)
     },
   })
-  const llm = useLlm()
+  const navigate = useNavigate()
+  const { confirm } = useFlow()
+  const stage = useFlowStage('plan')
+  const llmOk = useLlm().data?.configured !== false
+  const selected = useOverview(id).data?.project.selected_candidate_id
+  const running =
+    draft.isPending || tasks.data?.some((j) => ['running', 'queued'].includes(j.status))
+  const failedTask =
+    tasks.data?.[0]?.status === 'failed' ? tasks.data[0].error || '方案起草失败' : null
+  const draftable = !current || current.stale
+  useStageUi({
+    onStartEdit: () => current?.status === 'confirmed' && action.mutate('new-version'),
+    primary: running
+      ? { label: '正在起草…', busy: true }
+      : !selected
+        ? { label: '起草研究计划', disabled: true, reason: '先在候选阶段选定一条假设' }
+        : draftable
+          ? {
+              label: current ? '重新起草研究计划' : '起草研究计划',
+              needsLlm: true,
+              onClick: () => draft.mutate(),
+              error: draft.error ? (draft.error as Error).message : failedTask,
+            }
+          : current.status === 'draft'
+            ? {
+                label: '确认并进入下一阶段',
+                disabled: dirty || action.isPending,
+                busy: action.isPending,
+                reason: dirty
+                  ? '正在自动保存编辑…'
+                  : `第 ${current.version} 版草稿 · ${current.variables.filter((v) => v.uncertain).length} 个变量含义待确认`,
+                error: action.error ? (action.error as Error).message : null,
+                onClick: () => action.mutate('confirm'),
+              }
+            : {
+                label: '确认并进入下一阶段',
+                onClick: () => !confirm('plan') && navigate(`/p/${id}/data`),
+              },
+  })
   const peer = current?.treatment_semantics === 'peer_exposure'
   return (
     <>
-      <StageActions>
-        <div className="action-cluster">
-          <NeedsModel />
-          <button
-            disabled={
-              draft.isPending ||
-              llm.data?.configured === false ||
-              tasks.data?.some((j) => ['running', 'queued'].includes(j.status))
-            }
-            onClick={() => draft.mutate()}
-          >
-            {plans.data?.length ? '重新起草方案' : '起草研究方案'}
-          </button>
-        </div>
-      </StageActions>
       <ErrorNote error={plans.error || tasks.error || draft.error || action.error} />
       {activeJob && <JobProgress id={activeJob} onComplete={refresh} />}
       {plans.isPending ? (
-        <p>正在读取方案…</p>
+        <p className="loading-line">正在读取方案…</p>
+      ) : running ? (
+        <ProgressView
+          title="正在起草研究计划"
+          detail="把选定的假设变成变量、模型、稳健性检验与决策规则。完成后自动显示。"
+        />
       ) : !current ? (
-        <section className="panel">
-          <h2>先选定一个研究问题</h2>
-          <p>选择候选后，可生成变量、模型、稳健性与决策规则，再逐项审阅确认。</p>
-          <Link to={`/p/${id}/candidates`}>前往选择候选 →</Link>
-        </section>
+        <EmptyState
+          title="这里会出现一份研究计划草案"
+          what="包括：变量怎么度量、用什么模型、做哪些稳健性检验、置换与决策规则。你检查一遍，没问题就确认。"
+          example={{
+            title: '双重差分（DID）· 企业与年份双向固定效应',
+            body: '因变量 绿色专利数 · 处理 试点×试点后 · 稳健性：PSM-DID、安慰剂检验',
+          }}
+          blocked={!selected ? '先在候选阶段选定一条假设。' : undefined}
+          action={
+            stage.editable ? { label: '起草研究计划', onClick: () => draft.mutate() } : undefined
+          }
+        />
       ) : (
         <>
           <div className="candidate-toolbar">
@@ -113,7 +149,7 @@ export default function Plan() {
                   {t}
                 </button>
               ))}
-              {dirty && <small className="plan-nav__dirty">有未保存的编辑</small>}
+              {dirty && <small className="plan-nav__dirty">正在自动保存…</small>}
             </nav>
             <div className="plan-main">
               {current.stale && (
@@ -134,28 +170,12 @@ export default function Plan() {
                     {current.permutation.n} 次置换
                   </p>
                   <p>{current.boundary_notes}</p>
-                  <div className="actions">
-                    {current.status === 'draft' ? (
-                      <button
-                        disabled={current.stale || action.isPending || dirty}
-                        onClick={() => setConfirming(true)}
-                      >
-                        确认并锁定方案
-                      </button>
-                    ) : (
-                      <button
-                        disabled={action.isPending || current.stale}
-                        onClick={() => action.mutate('new-version')}
-                      >
-                        新建版本
-                      </button>
-                    )}
-                    {current.status === 'confirmed' && (
-                      <Link to={`/p/${id}/data?tab=binding`}>导入与绑定数据 →</Link>
-                    )}
-                  </div>
+                  {stage.editable && !running && llmOk && (
+                    <button className="product-button is-quiet" onClick={() => draft.mutate()}>
+                      按当前候选重新起草
+                    </button>
+                  )}
                 </section>
-                {dirty && <p className="notice">有尚未保存的编辑，请先保存草稿再确认。</p>}
                 <section
                   className="panel scroll-region"
                   data-scroll-region=""
@@ -214,29 +234,6 @@ export default function Plan() {
               </div>
             </div>
           </div>
-          {confirming && (
-            <div className="modal-backdrop">
-              <section className="modal" role="dialog" aria-label="确认研究方案">
-                <h2>锁定当前已保存的方案</h2>
-                <p>
-                  请先保存所有编辑。确认后将按本版本的变量与决策阈值执行；后续修改需要新建版本。
-                </p>
-                <p>
-                  尚有 {current.variables.filter((v) => v.uncertain).length}{' '}
-                  个含义待确认的变量。该标记会保留。
-                </p>
-                <ErrorNote error={action.error} />
-                <div className="actions">
-                  <button className="secondary" onClick={() => setConfirming(false)}>
-                    返回审阅
-                  </button>
-                  <button disabled={action.isPending} onClick={() => action.mutate('confirm')}>
-                    确认锁定
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
         </>
       )}
     </>

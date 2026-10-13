@@ -29,6 +29,14 @@ export default function PlanEditor({
     mutationFn: () => api<StudyPlan>(`/plans/${plan.id}`, body('PATCH', draft)),
     onSuccess: onSaved,
   })
+  // 自动保存草稿：停止编辑 0.8 秒后写入（不再有"保存方案草稿"按钮）
+  const dirty = JSON.stringify(draft) !== JSON.stringify(plan)
+  useEffect(() => {
+    if (!dirty || locked || plan.stale) return
+    const t = setTimeout(() => save.mutate(), 800)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, dirty, locked, plan.stale])
   const numbers = (text: string) =>
     text
       .split(/[,，\s]+/)
@@ -521,8 +529,14 @@ export default function PlanEditor({
         </div>
       </fieldset>
       <ErrorNote error={save.error} />
-      {!locked && !plan.stale && <button disabled={save.isPending}>保存方案草稿</button>}
-      {locked && <p className="muted">已锁定。修改请新建版本；既有版本及决策规则保留。</p>}
+      {!locked && !plan.stale && (
+        <p className="muted">{save.isPending ? '正在自动保存…' : '编辑会自动保存为草稿。'}</p>
+      )}
+      {locked && (
+        <p className="muted">
+          已确认锁定。要修改请点页头的"修改此阶段"，会生成新版本；既有版本保留。
+        </p>
+      )}
     </form>
   )
 }

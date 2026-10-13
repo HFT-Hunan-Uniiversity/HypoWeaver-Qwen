@@ -1,138 +1,358 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, body, type Direction as DirectionType, type Project } from '../api/client'
+import { api, body, type Project } from '../api/client'
 import { ErrorNote } from '../components/Shared'
+import { ScrollRegion } from '../components/shell/ShellContext'
+import { useFlow, useFlowStage, useStageUi } from '../components/flow/FlowContext'
+import {
+  applyAnswer,
+  cardMissing,
+  EXAMPLE_IDEAS,
+  fromDirection,
+  nextQuestion,
+  toDirection,
+  type DirCard,
+} from '../lib/directionCard'
+
+type Msg = { who: 'ai' | 'me'; text: string }
+const draftKey = (id: string) => `hw.dirdraft.${id}`
+
+/** 研究方向：左侧一次一问的澄清对话，右侧逐步填满的方向卡（可直接编辑）。草稿自动保存在本机，确认时写入项目。 */
 function Editor({ project }: { project: Project }) {
-  const [draft, setDraft] = useState<DirectionType>(project.direction),
-    [saved, setSaved] = useState(false),
-    [confirm, setConfirm] = useState(false)
-  const cache = useQueryClient()
-  const overview = useQuery({
-    queryKey: ['overview', project.id],
-    queryFn: () =>
-      api<{ stages: { key: string; status: string }[] }>(`/projects/${project.id}/overview`),
-  })
-  const mutation = useMutation({
-    mutationFn: () => api(`/projects/${project.id}`, body('PATCH', { direction: draft })),
+  const navigate = useNavigate()
+  const qc = useQueryClient()
+  const { confirm } = useFlow()
+  const stage = useFlowStage('direction')
+  const ro = !stage.editable
+  const stored = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(draftKey(project.id)) || 'null') as {
+        card: DirCard
+        chat: Msg[]
+      } | null
+    } catch {
+      return null
+    }
+  })()
+  const [card, setCard] = useState<DirCard>(
+    () => (!ro && stored?.card) || fromDirection(project.direction),
+  )
+  const [chat, setChat] = useState<Msg[]>(() => (!ro && stored?.chat) || [])
+  const [input, setInput] = useState('')
+  const [savedAt, setSavedAt] = useState<string>('')
+  const msgEnd = useRef<HTMLDivElement>(null)
+  const q = nextQuestion(card)
+  const missing = cardMissing(card)
+  const started = !!card.idea || !!card.question || chat.length > 0
+
+  // 草稿自动保存（本机）
+  useEffect(() => {
+    if (ro || !started) return
+    const t = setTimeout(() => {
+      localStorage.setItem(draftKey(project.id), JSON.stringify({ card, chat }))
+      setSavedAt(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
+    }, 500)
+    return () => clearTimeout(t)
+  }, [card, chat, ro, started, project.id])
+  useEffect(() => {
+    const box = msgEnd.current?.parentElement
+    if (box) box.scrollTop = box.scrollHeight
+  }, [chat.length])
+
+  const save = useMutation({
+    mutationFn: () =>
+      api(`/projects/${project.id}`, body('PATCH', { direction: toDirection(card) })),
     onSuccess: () => {
-      setSaved(true)
-      setConfirm(false)
-      cache.invalidateQueries()
-      cache.invalidateQueries({ queryKey: ['projects'] })
-      cache.invalidateQueries({ queryKey: ['overview', project.id] })
-      cache.invalidateQueries({ queryKey: ['project', project.id] })
+      localStorage.removeItem(draftKey(project.id))
+      qc.invalidateQueries()
+      const wasEdit = confirm('direction')
+      if (!wasEdit) navigate(`/p/${project.id}/literature?auto=1`)
     },
   })
-  const field = (key: keyof DirectionType, value: string | string[]) => {
-    setSaved(false)
-    setDraft({ ...draft, [key]: value })
+
+  useStageUi({
+    primary: !started
+      ? { label: '确认方向并检索文献', disabled: true, reason: '先在下方写一句想法' }
+      : missing.length
+        ? {
+            label: '确认方向并检索文献',
+            disabled: true,
+            reason: '方向卡还缺：' + missing.join('、'),
+          }
+        : {
+            label: stage.editing ? '确认方向' : save.isPending ? '正在保存…' : '确认方向并检索文献',
+            busy: save.isPending,
+            error: save.error ? (save.error as Error).message : null,
+            onClick: () => save.mutate(),
+          },
+  })
+
+  const start = (idea: string) => {
+    const c: DirCard = {
+      ...card,
+      idea,
+      question: card.question || idea.replace(/[？?]$/, '') + '？',
+    }
+    setCard(c)
+    const nq = nextQuestion(c)
+    setChat([
+      { who: 'me', text: idea },
+      { who: 'ai', text: '我先把它整理到右边的方向卡里。还差几件事，一次问一个：' + (nq?.q || '') },
+    ])
   }
-  return (
-    <form
-      className="panel form direction-form fill"
-      onSubmit={(e) => {
-        e.preventDefault()
-        if (
-          JSON.stringify(draft) !== JSON.stringify(project.direction) &&
-          (project.direction.text ||
-            overview.data?.stages.some(
-              (s) => !['direction', 'literature'].includes(s.key) && s.status !== 'not_started',
-            ))
-        )
-          setConfirm(true)
-        else mutation.mutate()
-      }}
-    >
-      <div className="direction-grid">
-        <div className="col-stack">
-          <label>
-            研究方向
-            <textarea
-              required
-              rows={5}
-              value={draft.text}
-              onChange={(e) => field('text', e.target.value)}
-              placeholder="你希望研究什么现象？"
-            />
-          </label>
-          <label>
-            具体问题（可选）
-            <textarea
-              rows={5}
-              value={draft.question}
-              onChange={(e) => field('question', e.target.value)}
-            />
-          </label>
+  const answer = (text: string) => {
+    if (!q || !text.trim()) return
+    const c = applyAnswer(card, q, text.trim())
+    setCard(c)
+    const nq = nextQuestion(c)
+    setChat([
+      ...chat,
+      { who: 'me', text: text.trim() },
+      { who: 'ai', text: nq ? nq.q : '方向卡已经完整了。检查一下右边，没问题就点右上角确认。' },
+    ])
+    setInput('')
+  }
+  const set = <K extends keyof DirCard>(k: K, v: DirCard[K]) => setCard({ ...card, [k]: v })
+  const list = (s: string) =>
+    s
+      .split(/[、,，]/)
+      .map((x) => x.trim())
+      .filter(Boolean)
+
+  if (!started && !ro)
+    return (
+      <section className="flow-empty fill">
+        <h2>先用一句话说说你想研究什么</h2>
+        <p>
+          不用写得很专业。系统会一次问你一个问题，把它整理成一张方向卡：研究问题、变量、范围、检索关键词。
+        </p>
+        <form
+          className="dir-idea"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (input.trim()) start(input.trim())
+            setInput('')
+          }}
+        >
+          <input
+            aria-label="你的研究想法"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="例如：碳交易会不会让企业更绿色？"
+          />
+          <button className="product-button" disabled={!input.trim()}>
+            开始
+          </button>
+        </form>
+        <p className="muted">或者从一个例子开始：</p>
+        <div className="dir-chips">
+          {EXAMPLE_IDEAS.map((e) => (
+            <button key={e} type="button" className="dir-chip" onClick={() => start(e)}>
+              {e}
+            </button>
+          ))}
         </div>
-        <div className="col-stack">
-          <label>
-            研究约束（每行一项）
-            <textarea
-              rows={5}
-              value={draft.constraints.join('\n')}
-              onChange={(e) => field('constraints', e.target.value.split('\n'))}
-            />
-          </label>
-          <label>
-            领域
-            <input
-              value={draft.domain}
-              onChange={(e) => field('domain', e.target.value)}
-              placeholder="例如：绿色金融"
-            />
-          </label>
-          <aside className="direction-tips" aria-label="填写提示">
-            <strong>怎样写一个好方向</strong>
-            <ul>
-              <li>研究方向写现象与对象，例如“碳市场对企业绿色创新的影响”。</li>
-              <li>具体问题写可检验的关系：谁、在什么条件下、与什么相关。</li>
-              <li>约束写数据、样本期、方法或口径上的硬限制，后续候选与方案会遵守。</li>
-              <li>领域用于文献检索与候选生成的语境。</li>
-            </ul>
-          </aside>
-        </div>
-      </div>
-      <ErrorNote error={mutation.error} />
-      <div className="actions">
-        <span role="status">{saved ? '已保存' : ''}</span>
-        <button disabled={mutation.isPending}>
-          {mutation.isPending ? '正在保存…' : '保存研究方向'}
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => setChat([{ who: 'ai', text: '好的，直接在右边填写方向卡即可。' }])}
+        >
+          跳过对话，直接填方向卡
         </button>
-      </div>
-      {confirm && (
-        <div className="overlay">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="impact-title"
-            className="dialog"
-          >
-            <h2 id="impact-title">修改方向会影响后续研究</h2>
-            <p>
-              已有候选、研究方案、检验运行和提案会标记为过期，历史内容仍然保留。请按新方向重新审阅后续工作。
-            </p>
-            <div className="actions">
-              <button type="button" className="quiet" onClick={() => setConfirm(false)}>
-                继续编辑
-              </button>
-              <button type="button" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-                保存并标记过期
-              </button>
+      </section>
+    )
+
+  return (
+    <div className="dir-split fill">
+      <section className="panel dir-chat" aria-label="澄清对话">
+        <h2>和系统对话 · 一次一个问题</h2>
+        <ScrollRegion className="dir-msgs" label="对话记录">
+          {chat.length === 0 && ro && <p className="muted">方向已确认。</p>}
+          {chat.length === 0 && !ro && (
+            <div className="dir-msg is-ai">
+              {q
+                ? '方向卡还没填完。' + q.q
+                : '方向卡已经完整了。检查一下右边，没问题就点右上角确认。'}
             </div>
-          </section>
-        </div>
-      )}
-    </form>
+          )}
+          {chat.map((m, i) => (
+            <div key={i} className={`dir-msg is-${m.who}`}>
+              {m.text}
+            </div>
+          ))}
+          <div ref={msgEnd} />
+        </ScrollRegion>
+        {!ro && q && (
+          <div className="dir-ask">
+            {q.chips.length > 0 && (
+              <div className="dir-chips is-left">
+                {q.chips.map((c) => (
+                  <button key={c} type="button" className="dir-chip" onClick={() => answer(c)}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+            <form
+              className="dir-idea"
+              onSubmit={(e) => {
+                e.preventDefault()
+                answer(input)
+              }}
+            >
+              <input
+                aria-label="回答"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={q.hint || '或者自己写…'}
+              />
+              <button className="product-button" disabled={!input.trim()}>
+                发送
+              </button>
+            </form>
+          </div>
+        )}
+      </section>
+      <section className="panel dir-card" aria-label="方向卡">
+        <h2>
+          方向卡
+          {missing.length ? (
+            <span className="dir-miss">还缺：{missing.join('、')}</span>
+          ) : (
+            <span className="dir-ok">✓ 完整</span>
+          )}
+          {!ro && savedAt && <small className="muted">草稿已自动保存 · {savedAt}</small>}
+        </h2>
+        <ScrollRegion className="dir-fields" label="方向卡字段">
+          <Field
+            label="研究问题"
+            value={card.question}
+            ro={ro}
+            onChange={(v) => set('question', v)}
+            area
+          />
+          <Field
+            label="变量"
+            value={card.vars.join('、')}
+            ro={ro}
+            ph="原因、结果（顿号分隔）"
+            onChange={(v) => set('vars', list(v))}
+            tags={card.vars}
+          />
+          <div className="dir-two">
+            <Field
+              label="地区 / 对象"
+              value={card.region}
+              ro={ro}
+              onChange={(v) => set('region', v)}
+            />
+            <Field label="时间" value={card.period} ro={ro} onChange={(v) => set('period', v)} />
+          </div>
+          <Field label="因果 / 关联" value={card.claim} ro={ro} onChange={(v) => set('claim', v)} />
+          <div className="dir-two">
+            <Field
+              label="手上数据"
+              value={card.data}
+              ro={ro}
+              ph="可选"
+              onChange={(v) => set('data', v)}
+            />
+            <Field
+              label="领域"
+              value={card.domain}
+              ro={ro}
+              ph="可选，例如：绿色金融"
+              onChange={(v) => set('domain', v)}
+            />
+          </div>
+          <Field
+            label="检索关键词"
+            value={card.keywords.join('、')}
+            ro={ro}
+            ph="根据变量自动生成，可修改"
+            onChange={(v) => set('keywords', list(v))}
+            tags={card.keywords}
+            kw
+          />
+          <Field
+            label="原始想法"
+            value={card.idea}
+            ro={ro}
+            ph="一句话想法"
+            onChange={(v) => set('idea', v)}
+          />
+          {card.other.length > 0 && <p className="muted">其他约束：{card.other.join('；')}</p>}
+        </ScrollRegion>
+        <ErrorNote error={save.error} />
+      </section>
+    </div>
   )
 }
+
+function Field(props: {
+  label: string
+  value: string
+  ro: boolean
+  onChange: (v: string) => void
+  ph?: string
+  area?: boolean
+  tags?: string[]
+  kw?: boolean
+}) {
+  const { label, value, ro, onChange, ph, area, tags, kw } = props
+  const [focus, setFocus] = useState(false)
+  const cls = `dir-input ${value ? 'is-filled' : ''}`
+  return (
+    <label className="dir-field">
+      <span>{label}</span>
+      {tags && tags.length > 0 && !focus ? (
+        <button
+          type="button"
+          className={`dir-tags ${kw ? 'is-kw' : ''}`}
+          disabled={ro}
+          onClick={() => setFocus(true)}
+          title={ro ? undefined : '点击编辑'}
+        >
+          {tags.map((t) => (
+            <i key={t}>{t}</i>
+          ))}
+        </button>
+      ) : area ? (
+        <textarea
+          className={cls}
+          rows={2}
+          readOnly={ro}
+          value={value}
+          placeholder={ph || '待补充 · 可直接填写'}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      ) : (
+        <input
+          className={cls}
+          readOnly={ro}
+          value={value}
+          autoFocus={focus}
+          onBlur={() => setFocus(false)}
+          placeholder={ph || '待补充 · 可直接填写'}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </label>
+  )
+}
+
 export default function Direction() {
   const { id } = useParams()
   const q = useQuery({ queryKey: ['project', id], queryFn: () => api<Project>(`/projects/${id}`) })
   return (
     <>
       <ErrorNote error={q.error} />
-      {q.data ? <Editor project={q.data} /> : q.isPending && <p>正在读取…</p>}
+      {q.data ? (
+        <Editor key={q.data.id} project={q.data} />
+      ) : (
+        q.isPending && <p className="loading-line">正在读取…</p>
+      )}
     </>
   )
 }

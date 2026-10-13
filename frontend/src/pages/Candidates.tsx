@@ -1,19 +1,17 @@
-import { useUrlParam } from '../lib/urlState'
-import { ScrollRegion } from '../components/shell/ShellContext'
-import { StageActions } from '../components/shell/ShellContext'
-import CandidateActions from '../components/CandidateActions'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, body } from '../api/client'
+import { api, body, type Project } from '../api/client'
 import { ErrorNote } from '../components/Shared'
-import { GeneratedBy, NeedsModel, VersionPills } from '../components/ui/Bits'
-import { useLlm } from '../lib/llm'
-import { useOverview } from '../lib/stages'
-import { Link } from 'react-router-dom'
+import { ScrollRegion } from '../components/shell/ShellContext'
+import { GeneratedBy, VersionPills } from '../components/ui/Bits'
 import JobProgress from '../components/JobProgress'
 import EvidenceChip from '../components/EvidenceChip'
 import type { Evidence } from '../components/EvidenceChip'
+import CandidateActions from '../components/CandidateActions'
+import { useFlow, useFlowStage, useStageUi } from '../components/flow/FlowContext'
+import { EmptyState, ProgressView } from '../components/flow/FlowBits'
+import { useLlm } from '../lib/llm'
 export interface Candidate {
   id: string
   title: string
@@ -50,13 +48,34 @@ const positioning: Record<string, string> = {
   feasible_limited_increment: '可行性较高 · 增量有限',
   balanced: '增量与可行性平衡',
 }
+/** 可检验性（前端估算，后端暂无评分字段）：证据越多、识别思路越明确、风险越少越高 */
+export function testability(c: Candidate) {
+  const s =
+    45 +
+    Math.min(4, c.evidence_ids.length) * 8 +
+    (c.identification ? 12 : 0) +
+    (c.positioning === 'feasible_limited_increment' ? 8 : c.positioning === 'balanced' ? 4 : 0) -
+    Math.min(4, c.risks.length) * 4
+  return Math.max(10, Math.min(98, s))
+}
+/** 推荐：推荐说明中点名的候选，否则取可检验性最高者 */
+function recommended(set: CandidateSet) {
+  const named = set.candidates.find(
+    (c) => c.title && set.recommendation_text.includes(c.title.slice(0, 8)),
+  )
+  if (named) return named.id
+  return [...set.candidates].sort((a, b) => testability(b) - testability(a))[0]?.id
+}
+
 export default function Candidates() {
-  const { id } = useParams(),
-    qc = useQueryClient(),
-    [version, setVersion] = useState(''),
-    [job, setJob] = useState(''),
-    [focus, setFocus] = useState('')
-  const [view, setView] = useUrlParam('tab', 'detail', ['detail', 'compare'] as const)
+  const { id } = useParams()
+  const qc = useQueryClient()
+  const navigate = useNavigate()
+  const { confirm } = useFlow()
+  const stage = useFlowStage('candidates')
+  const llmOk = useLlm().data?.configured !== false
+  const [version, setVersion] = useState('')
+  const [job, setJob] = useState('')
   const sets = useQuery({
     queryKey: ['candidate-sets', id],
     queryFn: () => api<CandidateSet[]>(`/projects/${id}/candidate-sets`),
@@ -65,298 +84,219 @@ export default function Candidates() {
     queryKey: ['evidence', id],
     queryFn: () => api<Evidence[]>(`/projects/${id}/evidence`),
   })
+  const project = useQuery({
+    queryKey: ['project', id],
+    queryFn: () => api<Project>(`/projects/${id}`),
+  })
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['candidate-sets', id] })
+    qc.invalidateQueries({ queryKey: ['overview', id] })
+  }
   const generate = useMutation({
     mutationFn: () => api<{ job_id: string }>(`/projects/${id}/candidate-sets`, body('POST')),
     onSuccess: (d) => {
       setJob(d.job_id)
       setVersion('')
-      qc.invalidateQueries({ queryKey: ['candidate-sets', id] })
+      refresh()
     },
   })
-  const current = sets.data?.find((s) => s.id === version) || sets.data?.[0],
-    activeJob = job || (current?.status === 'generating' ? current.job_id : '')
-  const llm = useLlm()
+  const choose = useMutation({
+    mutationFn: (cid: string) => api(`/candidates/${cid}:select`, body('POST')),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project', id] })
+      qc.invalidateQueries({ queryKey: ['plans', id] })
+      qc.invalidateQueries({ queryKey: ['overview', id] })
+    },
+  })
+  const current = sets.data?.find((s) => s.id === version) || sets.data?.[0]
+  const generating = generate.isPending || current?.status === 'generating'
   const included = cards.data?.filter((c) => c.included).length ?? 0
-  const configured = llm.data?.configured ?? true
-  const selectedId = useOverview(id).data?.project.selected_candidate_id
-  const cand = current?.candidates.find((c) => c.id === focus) || current?.candidates[0]
-  const cited = new Set(current?.candidates.flatMap((c) => c.evidence_ids) || []),
-    unused = cards.data?.filter((c) => c.included && !cited.has(c.id)) || []
-  const list = (xs: string[]) => (
-    <ul>
-      {xs.map((x, j) => (
-        <li key={j}>{x}</li>
-      ))}
-    </ul>
-  )
-  const chips = (c: Candidate) => (
-    <div className="evidence-chips">
-      {c.evidence_ids.map((ref) => {
-        const card = cards.data?.find((x) => x.id === ref)
-        return card ? (
-          <EvidenceChip key={ref} card={card} />
-        ) : (
-          <span key={ref}>引用文献已不可用</span>
-        )
-      })}
-    </div>
-  )
-  const empty = () => {
-    if (cards.isPending || llm.isPending) return <p className="loading-line">正在检查证据与模型…</p>
-    if (included < 2)
-      return (
-        <section className="empty-state">
-          <h2>先纳入至少两篇文献</h2>
-          <p>当前已纳入 {included} 张证据卡。候选的每条主张都需引用已纳入的文献。</p>
-          <Link className="product-button is-primary" to={`/p/${id}/literature`}>
-            前往文献调研
-          </Link>
-        </section>
-      )
-    if (!configured)
-      return (
-        <section className="empty-state">
-          <h2>证据已就绪，等待配置模型</h2>
-          <p>
-            已纳入 {included} 张证据卡，足以生成 2–4 个候选。生成与自审需要千问模型，当前尚未配置。
-          </p>
-          <Link className="product-button is-primary" to="/settings">
-            前往设置配置模型
-          </Link>
-        </section>
-      )
+  const selectedId = project.data?.selected_candidate_id
+  const ready = current?.status === 'ready' ? current : undefined
+  const chosen = ready?.candidates.find((c) => c.id === selectedId)
+  const rec = ready ? recommended(ready) : undefined
+  const failed = current?.status === 'failed' ? current.error || '候选生成失败' : null
+
+  useStageUi({
+    checklist: [
+      { label: '生成候选', done: !!ready },
+      { label: '选一条假设', done: !!chosen },
+    ],
+    primary: generating
+      ? { label: '正在生成…', busy: true }
+      : !ready || (stage.status === 'stale' && current?.stale)
+        ? included < 2
+          ? {
+              label: '生成候选假设',
+              disabled: true,
+              reason: `需先在文献阶段选至少 2 篇证据（当前 ${included}）`,
+            }
+          : {
+              label: ready ? '重新生成候选' : '生成候选假设',
+              needsLlm: true,
+              onClick: () => generate.mutate(),
+              error: generate.error ? (generate.error as Error).message : failed,
+            }
+        : !chosen
+          ? { label: '选择一个候选', disabled: true, reason: '在下方选一条假设' }
+          : {
+              label: '确认并进入下一阶段',
+              reason: `已选：${chosen.title.slice(0, 18)}${chosen.title.length > 18 ? '…' : ''}`,
+              onClick: () => {
+                if (!confirm('candidates')) navigate(`/p/${id}/plan`)
+              },
+            },
+  })
+
+  if (sets.isPending) return <p className="loading-line">正在读取候选…</p>
+  if (generating)
     return (
-      <section className="empty-state">
-        <h2>可以生成研究候选了</h2>
-        <p>已纳入 {included} 张证据卡。模型将生成 2–4 个实质不同的候选并自审引用。</p>
-        <button className="product-button is-primary" onClick={() => generate.mutate()}>
-          生成研究候选
-        </button>
-      </section>
+      <>
+        {(job || current?.job_id) && (
+          <JobProgress id={job || current!.job_id!} onComplete={refresh} />
+        )}
+        <ProgressView
+          title="正在生成候选假设"
+          detail={`基于已选的 ${included} 篇证据生成 2–4 条候选，并自审引用。完成后自动显示。`}
+        />
+      </>
     )
-  }
-  const rows: [string, (c: Candidate) => React.ReactNode][] = [
-    ['定位', (c) => positioning[c.positioning]],
-    ['研究缺口', (c) => c.gap],
-    ['待检验假设', (c) => c.hypothesis],
-    ['可能机制', (c) => list(c.mechanism)],
-    ['所需数据', (c) => list(c.required_data)],
-    ['识别思路', (c) => c.identification],
-    ['风险与边界', (c) => list(c.risks)],
-    ['支持文献', (c) => `${c.evidence_ids.length} 篇`],
-  ]
+  if (!ready)
+    return (
+      <>
+        <ErrorNote error={sets.error || generate.error} />
+        <EmptyState
+          title="这里会出现几条可以比较的候选假设"
+          what="每条写明：假设表述、涉及变量与机制、有几篇证据支持、需要什么数据、可检验性评分。系统会推荐一条并说明理由。"
+          example={{
+            title: '碳交易试点提升了企业绿色专利数量',
+            body: '可检验性 86 · 证据 3 篇 · 需要：上市公司面板 2008–2020',
+          }}
+          blocked={
+            included < 2 ? `先在文献阶段选至少 2 篇证据（当前 ${included} 篇）。` : undefined
+          }
+          action={
+            stage.editable ? { label: '生成候选假设', onClick: () => generate.mutate() } : undefined
+          }
+        />
+      </>
+    )
+
   return (
     <>
-      <StageActions>
-        <div className="action-cluster">
-          <NeedsModel />
-          <button
-            disabled={generate.isPending || current?.status === 'generating' || !configured}
-            title={configured ? undefined : '需要先配置模型'}
-            onClick={() => generate.mutate()}
-          >
-            {sets.data?.length ? '重新生成候选' : '生成研究候选'}
+      <ErrorNote error={sets.error || choose.error || generate.error} />
+      <div className="cand-toolbar">
+        {(sets.data?.length || 0) > 1 && (
+          <VersionPills
+            label="候选版本"
+            value={current!.id}
+            onChange={setVersion}
+            items={(sets.data || []).map((s) => ({
+              id: s.id,
+              label: `第 ${s.version} 版`,
+              note: (s.status === 'failed' ? '生成失败' : '') + (s.stale ? '需要更新' : ''),
+              tone: s.stale ? 'stale' : s.status === 'failed' ? 'failed' : undefined,
+            }))}
+          />
+        )}
+        <p className="cand-reco" title={ready.recommendation_text}>
+          <strong>推荐理由</strong> {ready.recommendation_text}
+        </p>
+        <GeneratedBy of={ready} />
+        {stage.editable && llmOk && (
+          <button className="product-button is-quiet" onClick={() => generate.mutate()}>
+            重新生成
           </button>
-        </div>
-      </StageActions>
-      <ErrorNote error={sets.error || cards.error || generate.error} />
-      {activeJob && (
-        <JobProgress
-          id={activeJob}
-          onComplete={() => qc.invalidateQueries({ queryKey: ['candidate-sets', id] })}
-        />
+        )}
+      </div>
+      {ready.stale && (
+        <p className="notice">上游证据已变更，这一版候选需要更新：可重新生成，或确认后继续沿用。</p>
       )}
-      {sets.isPending ? (
-        <p className="loading-line">正在读取候选…</p>
-      ) : !current ? (
-        empty()
-      ) : (
-        <>
-          <div className="candidate-toolbar">
-            <VersionPills
-              label="候选版本"
-              value={current.id}
-              onChange={(v) => {
-                setVersion(v)
-                setFocus('')
-              }}
-              items={(sets.data || []).map((s) => ({
-                id: s.id,
-                label: `第 ${s.version} 版`,
-                note:
-                  (s.status === 'ready' ? '' : s.status === 'failed' ? '生成失败' : '生成中') +
-                  (s.stale ? '已过期' : ''),
-                tone: s.stale ? 'stale' : s.status === 'failed' ? 'failed' : undefined,
-              }))}
-            />
-            <div className="action-cluster">
-              <GeneratedBy of={current} />
-              {current.status === 'ready' && (
-                <div className="view-switch" role="tablist" aria-label="视图">
-                  <button
-                    role="tab"
-                    aria-selected={view === 'detail'}
-                    className={view === 'detail' ? 'is-active' : ''}
-                    onClick={() => setView('detail')}
-                  >
-                    逐个审阅
-                  </button>
-                  <button
-                    role="tab"
-                    aria-selected={view === 'compare'}
-                    className={view === 'compare' ? 'is-active' : ''}
-                    onClick={() => setView('compare')}
-                  >
-                    对比视图
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-          {current.stale && (
-            <p className="notice" role="status">
-              上游证据已变更，此版本已过期。旧内容保留，可重新生成。
-            </p>
-          )}
-          {current.error &&
-            (/模型|API_KEY|llm_not_configured/i.test(current.error) ? (
-              <p className="notice">
-                {current.error} <Link to="/settings">前往设置 →</Link>
-              </p>
-            ) : (
-              <p className="error">{current.error}</p>
-            ))}
-          {current.status === 'ready' && (
-            <>
-              <details className="reco-line">
-                <summary>
-                  <strong>推荐与取舍</strong>
-                  <span className="reco-line__text" title={current.recommendation_text}>{current.recommendation_text}</span>
-                  <span className="inline-meta">
-                    移除无效引用 {current.removed_references} 处 · 自审
-                    {current.review.revised ? '已修订一次' : '通过'}
-                  </span>
-                </summary>
-                <p>{current.recommendation_text}</p>
-                {current.evidence_ids.length < included && (
-                  <p className="muted">
-                    本次最多使用按年份排序的 80 张证据卡，每张摘要截取 1,200 字。
+      <div className="cand-grid fill" role="radiogroup" aria-label="候选假设">
+        {ready.candidates.map((c, i) => {
+          const score = testability(c)
+          const isRec = c.id === rec
+          const on = c.id === selectedId
+          return (
+            <article
+              key={c.id}
+              className={`cand-card ${on ? 'is-on' : ''} ${isRec ? 'is-rec' : ''}`}
+            >
+              <div className={`cand-card__rec ${isRec ? '' : 'is-none'}`}>
+                {isRec ? '系统推荐' : `候选 ${i + 1}`}
+              </div>
+              <label className="cand-card__head">
+                <input
+                  type="radio"
+                  name="candidate"
+                  checked={on}
+                  disabled={!stage.editable || choose.isPending}
+                  onChange={() => choose.mutate(c.id)}
+                />
+                <span>{c.title}</span>
+              </label>
+              <ScrollRegion className="cand-card__body" label={`候选 ${i + 1} 详情`}>
+                <dl>
+                  <dt>假设</dt>
+                  <dd>{c.hypothesis}</dd>
+                  <dt>机制</dt>
+                  <dd className="cand-tags">
+                    {c.mechanism.slice(0, 3).map((m) => (
+                      <i key={m} title={m}>
+                        {m.length > 14 ? m.slice(0, 14) + '…' : m}
+                      </i>
+                    ))}
+                  </dd>
+                  <dt>支持证据</dt>
+                  <dd>{c.evidence_ids.length} 篇</dd>
+                  <dt>需要数据</dt>
+                  <dd>{c.required_data.slice(0, 2).join('；')}</dd>
+                  <dt>可检验性</dt>
+                  <dd>
+                    <span className="cand-score" title="前端按证据数、识别思路、风险估算">
+                      <i style={{ width: score + '%' }} />
+                    </span>{' '}
+                    {score}
+                  </dd>
+                  <dt>定位</dt>
+                  <dd>{positioning[c.positioning] || c.positioning}</dd>
+                </dl>
+                <details>
+                  <summary>缺口、识别思路、风险与证据</summary>
+                  <p>
+                    <strong>研究缺口：</strong>
+                    {c.gap}
                   </p>
-                )}
-                {current.review.issues?.map((r, i) => (
-                  <p key={i}>
-                    {r.problem} · 建议：{r.suggestion}
+                  <p>
+                    <strong>识别思路：</strong>
+                    {c.identification}
                   </p>
-                ))}
-              </details>
-              {view === 'compare' ? (
-                <ScrollRegion className="fill compare-scroll" label="候选对比表">
-                  <table className="compare-table">
-                    <thead>
-                      <tr>
-                        <th>字段</th>
-                        {current.candidates.map((c, i) => (
-                          <th key={c.id} className={c.id === selectedId ? 'is-chosen' : ''}>
-                            候选 {i + 1}
-                            {c.id === selectedId ? ' · 当前已选' : ''}
-                            <div>{c.title}</div>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows.map(([label, f]) => (
-                        <tr key={label}>
-                          <th>{label}</th>
-                          {current.candidates.map((c) => (
-                            <td key={c.id} className={c.id === selectedId ? 'is-chosen' : ''}>
-                              {f(c)}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </ScrollRegion>
-              ) : (
-                cand && (
-                  <div className="master-detail fill">
-                    <div
-                      className="master-list scroll-region"
-                      data-scroll-region=""
-                      role="tablist"
-                      aria-label="候选列表"
-                    >
-                      {current.candidates.map((c, i) => (
-                        <button
-                          key={c.id}
-                          role="tab"
-                          aria-selected={c.id === cand.id}
-                          className={c.id === cand.id ? 'is-active' : ''}
-                          onClick={() => setFocus(c.id)}
-                        >
-                          <b>0{i + 1}</b>
-                          <span>
-                            <strong>{c.title}</strong>
-                            <small>
-                              {positioning[c.positioning]} · {c.evidence_ids.length} 篇文献
-                              {c.id === selectedId && <span className="chosen"> · 已选</span>}
-                            </small>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                    <article className="panel candidate-card fill" key={cand.id}>
-                      <div className="candidate-card__head">
-                        <span className="eyebrow">{positioning[cand.positioning]}</span>
-                        <h2>{cand.title}</h2>
-                      </div>
-                      <ScrollRegion className="candidate-card__body" label="候选详情">
-                        <div className="three-columns">
-                          <div>
-                            <h3>研究缺口</h3>
-                            <p>{cand.gap}</p>
-                            <h3>待检验假设</h3>
-                            <p>{cand.hypothesis}</p>
-                          </div>
-                          <div>
-                            <h3>识别思路</h3>
-                            <p>{cand.identification}</p>
-                            <h3>可能机制</h3>
-                            {list(cand.mechanism)}
-                          </div>
-                          <div>
-                            <h3>所需数据</h3>
-                            {list(cand.required_data)}
-                            <h3>风险与边界</h3>
-                            {list(cand.risks)}
-                          </div>
-                        </div>
-                        <h3>支持文献</h3>
-                        {chips(cand)}
-                      </ScrollRegion>
-                      <CandidateActions
-                        candidate={cand}
-                        projectId={id!}
-                        cards={cards.data || []}
-                        stale={current.stale}
-                      />
-                    </article>
+                  <ul>
+                    {c.risks.map((r) => (
+                      <li key={r}>{r}</li>
+                    ))}
+                  </ul>
+                  <div className="evidence-chips">
+                    {c.evidence_ids.map((ref) => {
+                      const card = cards.data?.find((x) => x.id === ref)
+                      return card ? <EvidenceChip key={ref} card={card} /> : null
+                    })}
                   </div>
-                )
-              )}
-              <details className="panel">
-                <summary>未被本版候选引用的已纳入文献（{unused.length}）</summary>
-                <div className="evidence-chips">
-                  {unused.map((c) => (
-                    <EvidenceChip key={c.id} card={c} />
-                  ))}
-                </div>
-              </details>
-            </>
-          )}
-        </>
-      )}
+                  {stage.editable && (
+                    <CandidateActions
+                      candidate={c}
+                      projectId={id!}
+                      cards={cards.data || []}
+                      stale={ready.stale}
+                      editOnly
+                    />
+                  )}
+                </details>
+              </ScrollRegion>
+            </article>
+          )
+        })}
+      </div>
     </>
   )
 }

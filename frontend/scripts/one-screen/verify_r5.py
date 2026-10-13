@@ -48,18 +48,27 @@ async def run(pg, vp):
         else:
             await route.fulfill(json=dict(inherited))
     await pg.route(f"**/api/plans/{plan['id']}/bindings", bindings)
+    # 流程：数据阶段待确认（绑定未确认），后续未开始 → 主按钮为"确认数据绑定"
+    async def overview(route):
+        r, d = await real(route)
+        for s in d['stages']:
+            if s['key'] == 'data': s['status'] = 'ready'
+            if s['key'] == 'proposal': s['status'] = 'not_started'
+        await route.fulfill(response=r, json=d)
+    await pg.route(f'**/api/projects/{P}/overview', overview)
     await pg.goto(f'{BASE}/p/{P}/data?tab=binding'); await pg.wait_for_timeout(1500)
     badge = await pg.locator('.status-badge', has_text='待重新确认').count()
     sugg_badge_ok = True
     ok, m = await fit('c')
     await pg.screenshot(path=f'{OUT}/{vp}_2_pending_reconfirm.png')
-    await pg.click('text=一键确认绑定'); await pg.wait_for_timeout(1000)
+    primary = await pg.locator('[data-primary]').inner_text()
+    await pg.click('[data-primary]'); await pg.wait_for_timeout(1000)
     badge_after = await pg.locator('.status-badge', has_text='待重新确认').count()
     await pg.screenshot(path=f'{OUT}/{vp}_3_after_reconfirm.png')
-    good = badge == 1 and badge_after == 0 and len(puts) == 1 and puts[0]['confirmed'] is True and puts[0]['bindings'] == saved['bindings']
+    good = '确认数据绑定' in primary and badge == 1 and badge_after == 0 and len(puts) == 1 and puts[0]['confirmed'] is True and puts[0]['bindings'] == saved['bindings']
     results.append((vp, 'confirmed=false 待重新确认 + 一键确认', good and ok,
                     f'徽章 前{badge}/后{badge_after}；PUT {len(puts)} 次 confirmed={puts[0]["confirmed"] if puts else None} 映射原样={bool(puts) and puts[0]["bindings"] == saved["bindings"]}；一屏 {ok}', None))
-    await pg.unroute(f"**/api/plans/{plan['id']}/bindings")
+    await pg.unroute(f"**/api/plans/{plan['id']}/bindings"); await pg.unroute(f'**/api/projects/{P}/overview')
 
     # 3) 提案 narrative_status=partial
     async def proposals(route):
@@ -71,10 +80,12 @@ async def run(pg, vp):
         await route.fulfill(response=r, json=d)
     await pg.route(f'**/api/projects/{P}/proposals', proposals)
     await pg.goto(f'{BASE}/p/{P}/proposal'); await pg.wait_for_timeout(1500)
-    txt = await pg.locator('.narrative-partial').inner_text() if await pg.locator('.narrative-partial').count() else ''
+    # 失败原因：能对应到章节的在该节原地显示（含"重新生成本节"），对不上的列在提示条里
+    txt = await pg.locator('.proposal-scroll, .narrative-partial').all_inner_texts()
+    txt = ' '.join(txt) + (' 有重新生成本节' if await pg.locator('text=重新生成本节').count() else '')
     ok, m = await fit('p')
     await pg.screenshot(path=f'{OUT}/{vp}_4_proposal_partial.png')
-    results.append((vp, '提案 narrative_status=partial', '模型超时' in txt and '引用了未纳入' in txt and ok, f'一屏 {ok}', txt.replace('\n', ' / ')))
+    results.append((vp, '提案 narrative_status=partial', '模型超时' in txt and '引用了未纳入' in txt and '重新生成本节' in txt and ok, f'一屏 {ok}', txt.replace('\n', ' / ')))
     await pg.unroute(f'**/api/projects/{P}/proposals')
     # 3b) 无 narrative_status 时不显示
     await pg.goto(f'{BASE}/p/{P}/proposal'); await pg.wait_for_timeout(1200)
