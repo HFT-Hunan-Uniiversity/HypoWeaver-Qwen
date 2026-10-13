@@ -13,6 +13,7 @@ from ..binding.service import readiness
 from ..claims.service import list_ as claims_list, LABELS
 from ..claims.models import STRENGTHS
 from .models import Proposal
+from .metadata import source_year, validation_metadata
 from .rendering import NARRATIVE, TOKEN, issues, result_table, render_markdown
 
 
@@ -98,12 +99,16 @@ async def build_proposal(snapshot, llm, project_id, progress):
     active = [c for c in claims if c["user_decision"] not in {"deferred", "rejected"}]
     strength = min((c["chosen_strength"] for c in active), key=STRENGTHS.index, default="insufficient")
     numbers = {}
+    metadata = validation_metadata(snapshot)
     result_md = result_table(result, numbers)
     if run and run.get("reproduction"):
         numbers["reproduction.max_diff"] = run["reproduction"]["max_relative_diff"]
         result_md += "\n\n独立复算最大相对差：{{num:reproduction.max_diff}}。"
     if snapshot["dataset"]:
         numbers["dataset.rows"] = snapshot["dataset"]["n_rows"]
+        year = source_year(snapshot["dataset"].get("source") or {})
+        if year is not None:
+            numbers["dataset.source_year"] = year
         import math
 
         panel = snapshot["dataset"].get("panel", {})
@@ -128,6 +133,7 @@ async def build_proposal(snapshot, llm, project_id, progress):
         "section_keys": NARRATIVE,
         "kind": "empirical" if run else "plan_only",
         "numbers": numbers,
+        "metadata": metadata,
         "max_strength": strength,
         "data_plan": snapshot["readiness"].get("data_plan", []),
         "binding": snapshot["binding"],
@@ -168,7 +174,9 @@ async def build_proposal(snapshot, llm, project_id, progress):
     if active and run:
         from .narrative import generate_interpretations
 
-        interpretation, interpretation_errors = await generate_interpretations(llm, active, numbers, project_id)
+        interpretation, interpretation_errors = await generate_interpretations(
+            llm, active, numbers, project_id, metadata
+        )
         narrative_errors.extend(interpretation_errors)
     conclusions = []
     for c in claims:
@@ -179,7 +187,7 @@ async def build_proposal(snapshot, llm, project_id, progress):
         else:
             final_text = (
                 c["final_text"]
-                if not issues(c["final_text"], numbers, c["chosen_strength"])
+                if not issues(c["final_text"], numbers, c["chosen_strength"], metadata)
                 else conservative[c["chosen_strength"]]
             )
             paragraph = interpretation.get(c["claim_id"], conservative[c["chosen_strength"]])
@@ -281,7 +289,9 @@ def edit(db, identifier, key, payload):
     section = next((s for s in entity.sections if s["key"] == key), None)
     if not section or not section["editable"]:
         raise AppError("section_locked", "此节包含系统结果或引用，只能重新生成，不能直接修改")
-    problems = issues(payload.markdown, section["injected_numbers_ref"], section["max_strength"])
+    problems = issues(
+        payload.markdown, section["injected_numbers_ref"], section["max_strength"], validation_metadata(entity.snapshot)
+    )
     if TOKEN.findall(payload.markdown) != TOKEN.findall(section["markdown"]):
         problems.append("不能增加、删除或更换数字占位符")
     if problems:

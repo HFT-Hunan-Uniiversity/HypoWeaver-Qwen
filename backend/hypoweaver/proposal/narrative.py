@@ -21,7 +21,9 @@ async def generate_sections(llm, payload, project_id):
                 for paragraph in section.markdown.split("\n\n"):
                     problems.extend(
                         {"section": key, "snippet": paragraph, "rule": rule}
-                        for rule in issues(paragraph, payload["numbers"], payload["max_strength"])
+                        for rule in issues(
+                            paragraph, payload["numbers"], payload["max_strength"], payload.get("metadata")
+                        )
                     )
                 if not problems:
                     accepted[key] = section
@@ -39,7 +41,7 @@ async def generate_sections(llm, payload, project_id):
     return accepted, [p for group in failures.values() for p in group]
 
 
-async def generate_interpretations(llm, claims, numbers, project_id):
+async def generate_interpretations(llm, claims, numbers, project_id, metadata=None):
     from .models import Interpretation
 
     accepted, failures = {}, {}
@@ -55,7 +57,7 @@ async def generate_interpretations(llm, claims, numbers, project_id):
             reasons = (
                 ["结论标识缺失或重复"]
                 if len(matches) != 1
-                else issues(matches[0].text, numbers, claim["chosen_strength"])
+                else issues(matches[0].text, numbers, claim["chosen_strength"], metadata)
             )
             if reasons:
                 failures[key] = [

@@ -1,5 +1,6 @@
 import re
 from ..claims.service import check_wording
+from .metadata import without_metadata
 
 TITLES = {
     "overview": "一页概览",
@@ -49,12 +50,12 @@ def numerical_prose(text):
     )
 
 
-def issues(text, numbers, strength):
+def issues(text, numbers, strength, metadata=None):
     bad = []
     if any(k not in numbers for k in TOKEN.findall(text)):
         bad.append("存在未知数字占位符")
     stripped = TOKEN.sub("", text)
-    quantitative = numerical_prose(stripped)
+    quantitative = numerical_prose(without_metadata(stripped, metadata) if metadata else stripped)
     for phrase in [
         "零膨胀",
         "零值",
@@ -66,6 +67,11 @@ def issues(text, numbers, strength):
         "进一步",
         "一方面",
         "另一方面",
+        "另一个",
+        "另一项",
+        "另一",
+        "其一",
+        "之一",
         "一致",
         "一般",
         "统一",
