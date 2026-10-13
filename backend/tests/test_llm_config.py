@@ -122,3 +122,20 @@ def test_llm_settings_reject_unknown_fields_without_mutation(tmp_path, unknown):
         assert "do-not-echo-this-key" not in response.text
         assert client.get("/api/settings/llm").json() == before
         assert (tmp_path / ".env.llm").read_bytes() == saved
+
+
+def test_settings_status_uses_llm_model(tmp_path, monkeypatch):
+    import hypoweaver.llm.router as llm_router
+
+    async def offline_probe(url, params):
+        return {"status": "ok"}
+
+    monkeypatch.setattr(llm_router, "probe", offline_probe)
+    settings = Settings(_env_file=None, data_dir=tmp_path, llm_model="status-test-model", llm_api_key="")
+    with TestClient(create_app(settings)) as client:
+        response = client.get("/api/settings/status")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["llm_model"] == "status-test-model" and "model" not in data
+        assert data["configured"] is False
+        assert set(data["sources"]) == {"openalex", "crossref"}

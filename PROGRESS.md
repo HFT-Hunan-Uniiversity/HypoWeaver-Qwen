@@ -194,3 +194,9 @@ GPT-6 Luna 独立复核全部三项并重跑全量测试：41 passed；73 文件
 draft_plan 提示词明确 outcome/treatment/unit/time 各恰好一个变量、变量名唯一、窗口内事件分箱连续且仅省略 -1、稳健性与结论列表内部 id 不重复。多结果候选仅选一个主结果，其余放入 alt_outcome 稳健性或计划结论说明，不得增加第二个 outcome。提示词版本升为 2，便于调用日志辨认。
 
 验证：对照 PlanDraft 业务校验器核对，Ruff 格式与 E501 检查通过。提示词修改尚未经真实模型调用验证。
+
+### R4-03 · 状态接口模型字段一致
+
+GET `/api/settings/status` 顶层模型字段改为 llm_model，调用记录表及 recent_calls 中的 model 保留。配置状态、用量与来源连通性字段不变。
+
+验证：配置与状态接口相关 6 项测试通过；状态路由测试返回 llm_model 且无顶层 model，来源探测使用离线测试替身，不发出外网请求。

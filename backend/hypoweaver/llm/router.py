@@ -36,7 +36,7 @@ async def status(request: Request, db: Session = Depends(session)):
     )
     return {
         "configured": configured(settings),
-        "model": settings.llm_model,
+        "llm_model": settings.llm_model,
         "message": "已配置，请测试连接" if configured(settings) else "尚未配置模型密钥或模型名",
         "usage": {"calls": usage[0], "input_tokens": usage[1] or 0, "output_tokens": usage[2] or 0},
         "sources": dict(zip(["openalex", "crossref"], sources)),
