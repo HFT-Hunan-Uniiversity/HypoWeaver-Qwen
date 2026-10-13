@@ -28,6 +28,7 @@ PROMPTS = {
         (
             "按section_keys完整撰写中文研究提案各节，key不得重复，evidence_ids只能引用给定证据；"
             "数字均用输入numbers中存在的{{num:key}}占位符，不直接写数字，文内不要写证据ID，"
+            "年份、样本起止年份和企业数也必须使用dataset.year_min、dataset.year_max、dataset.n_units等已有占位符。"
             "引用统一放evidence_ids。尊重max_strength，计划型提案只写待检验命题与待补数据，"
             "不编造结果。不能把数据集当成已发表的论文结论。收到rewrite_reasons则修正。"
         ),

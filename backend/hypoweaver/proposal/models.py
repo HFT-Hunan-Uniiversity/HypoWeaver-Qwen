@@ -10,6 +10,8 @@ class Proposal(Base):
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     llm_model: Mapped[str | None]
     interpretation: Mapped[dict | None] = mapped_column(JSON)
+    narrative_status: Mapped[str | None]
+    narrative_errors: Mapped[list | None] = mapped_column(JSON)
     version: Mapped[int]
     kind: Mapped[str]
     sections: Mapped[list] = mapped_column(JSON)

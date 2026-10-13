@@ -5,7 +5,12 @@ ADDITIONS = {
     "projects": {"case": "TEXT"},
     "candidate_sets": {"llm_model": "TEXT"},
     "study_plans": {"llm_model": "TEXT", "suggested_binding": "JSON"},
-    "proposals": {"llm_model": "TEXT", "interpretation": "JSON"},
+    "proposals": {
+        "llm_model": "TEXT",
+        "interpretation": "JSON",
+        "narrative_status": "TEXT",
+        "narrative_errors": "JSON",
+    },
 }
 
 

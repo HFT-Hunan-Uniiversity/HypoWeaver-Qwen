@@ -82,6 +82,8 @@ def render_markdown(proposal):
         "# " + proposal.snapshot["project"]["title"],
         "计划型提案（尚无实证结果）" if proposal.kind == "plan_only" else "含探索性结果的研究提案",
     ]
+    if getattr(proposal, "narrative_status", None) == "partial":
+        parts.append("> 部分叙述未通过校验，已保留合格章节，其余使用默认说明；请查看失败原因。")
     if proposal.stale:
         parts.append("> 上游信息已变更，本提案已过期。")
     for section in proposal.sections:

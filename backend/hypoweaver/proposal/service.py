@@ -12,7 +12,7 @@ from ..binding.models import VariableBinding
 from ..binding.service import readiness
 from ..claims.service import list_ as claims_list, LABELS
 from ..claims.models import STRENGTHS
-from .models import Proposal, Interpretation, SectionsDraft
+from .models import Proposal, Interpretation
 from .rendering import NARRATIVE, TOKEN, issues, result_table, render_markdown
 
 
@@ -103,6 +103,16 @@ async def build_proposal(snapshot, llm, project_id, progress):
         result_md += "\n\n独立复算最大相对差：{{num:reproduction.max_diff}}。"
     if snapshot["dataset"]:
         numbers["dataset.rows"] = snapshot["dataset"]["n_rows"]
+        import math
+
+        panel = snapshot["dataset"].get("panel", {})
+        for key, source in [("year_min", "time_min"), ("year_max", "time_max"), ("n_units", "n_units")]:
+            try:
+                value = float(panel[source])
+                if math.isfinite(value):
+                    numbers["dataset." + key] = int(value) if value.is_integer() else value
+            except (KeyError, TypeError, ValueError):
+                pass
     valid = {c["id"]: c for c in snapshot["evidence"]}
     removed = 0
     sections = []
@@ -122,22 +132,9 @@ async def build_proposal(snapshot, llm, project_id, progress):
         "binding": snapshot["binding"],
         "dataset": snapshot["dataset"],
     }
-    output = await checked_call(
-        llm,
-        "write_proposal_sections",
-        payload,
-        SectionsDraft,
-        project_id,
-        lambda o: (
-            [problem for s in o.sections for problem in issues(s.markdown, numbers, strength)]
-            + (
-                []
-                if {s.key for s in o.sections} == set(NARRATIVE) and len(o.sections) == len(NARRATIVE)
-                else ["章节须完整且不重复"]
-            )
-        ),
-    )
-    generated = {s.key: s for s in output.sections} if output else {}
+    from .narrative import generate_sections
+
+    generated, narrative_errors = await generate_sections(llm, payload, project_id)
     defaults = {
         "overview": "本提案围绕所选研究问题组织文献依据、变量与可执行方案。",
         "question": "研究问题及预期贡献仍需结合文献与数据条件进一步核实。",
@@ -201,18 +198,20 @@ async def build_proposal(snapshot, llm, project_id, progress):
                 "研究者已" + ("暂缓" if c["user_decision"] == "deferred" else "拒绝") + "该条结论，不作为本提案结论。"
             )
         else:
+            final_text = (
+                c["final_text"]
+                if not issues(c["final_text"], numbers, c["chosen_strength"])
+                else conservative[c["chosen_strength"]]
+            )
+            paragraph = interpretation.get(c["claim_id"], conservative[c["chosen_strength"]])
+            extra = " " + paragraph if paragraph.strip() != final_text.strip() else ""
             conclusions.append(
                 ("研究者尚未确认。" if c["user_decision"] == "pending" else "")
                 + "采用强度："
                 + LABELS[c["chosen_strength"]]
                 + "。"
-                + (
-                    c["final_text"]
-                    if not issues(c["final_text"], numbers, c["chosen_strength"])
-                    else conservative[c["chosen_strength"]]
-                )
-                + " "
-                + interpretation.get(c["claim_id"], conservative[c["chosen_strength"]])
+                + final_text
+                + extra
             )
     sections += [
         {"key": "results", "markdown": result_md, "injected_numbers_ref": numbers, "editable": False},
@@ -260,6 +259,8 @@ async def build_proposal(snapshot, llm, project_id, progress):
         "llm_model": model_name(llm),
         "paragraphs": interpretation,
         "status": "generated" if interpretation else "not_generated",
+        "narrative_status": "partial" if narrative_errors else "complete",
+        "narrative_errors": narrative_errors,
     }
     return sections, removed, interpretation_record
 
@@ -278,6 +279,8 @@ def start(app, project_id, llm):
             version = (db.scalar(select(func.max(Proposal.version)).where(Proposal.project_id == project_id)) or 0) + 1
             entity = Proposal(
                 llm_model=model_name(llm),
+                narrative_status=interpretation["narrative_status"],
+                narrative_errors=interpretation["narrative_errors"],
                 interpretation=interpretation,
                 project_id=project_id,
                 version=version,
