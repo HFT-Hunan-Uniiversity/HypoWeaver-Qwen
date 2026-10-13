@@ -41,7 +41,25 @@ type ProposalRecord = {
   removed_references: number
   llm_model?: string | null
   interpretation?: { llm_model?: string | null } | null
+  /** R5 可选：叙述生成状态；partial 表示部分节未能生成（字段名为假设，见 narrativeIssues） */
+  narrative_status?: string | null
+  narrative_error?: string | null
+  narrative_errors?: NarrativeIssue[] | null
+  narrative_failures?: NarrativeIssue[] | null
   snapshot: { project: { title: string }; run: null | { id: string; result: AnalysisResult } }
+}
+type NarrativeIssue =
+  string | { key?: string; section?: string; reason?: string; error?: string; message?: string }
+/** 汇总失败原因：兼容字符串、{key/section, reason/error/message} 数组和单条 narrative_error */
+function narrativeIssues(p: ProposalRecord): string[] {
+  const list = [...(p.narrative_errors || []), ...(p.narrative_failures || [])].map((x) => {
+    if (typeof x === 'string') return x
+    const where = x.key || x.section
+    const why = x.reason || x.error || x.message || '未给出原因'
+    return where ? `${titles[where] || where}：${why}` : why
+  })
+  if (p.narrative_error) list.unshift(p.narrative_error)
+  return list
 }
 function render(s: Section) {
   return s.markdown.replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>
@@ -188,6 +206,21 @@ export default function Proposal() {
           </div>
           {active.stale && (
             <p className="notice">上游信息已变更，本提案已过期。历史正文保留，请生成新版本。</p>
+          )}
+          {active.narrative_status === 'partial' && (
+            <div className="notice narrative-partial" role="status">
+              <strong>叙述部分生成：</strong>
+              部分章节未能由模型生成，已保留可用内容与系统生成的数字、图表；可稍后重新生成新版本。
+              {narrativeIssues(active).length > 0 ? (
+                <ul>
+                  {narrativeIssues(active).map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="muted"> 后端未返回具体失败原因。</span>
+              )}
+            </div>
           )}
           <div className="proposal-layout fill">
             <nav className="proposal-toc no-print" aria-label="提案目录">
