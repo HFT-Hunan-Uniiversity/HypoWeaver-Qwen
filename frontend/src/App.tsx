@@ -47,16 +47,16 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route
-            path="/p/:id"
-            element={
-              <Suspense fallback={loading}>
-                <Overview />
-              </Suspense>
-            }
-          />
           <Route path="/p/:id/analysis" element={<AnalysisRedirect />} />
           <Route element={<StageLayout />}>
+            <Route
+              path="/p/:id"
+              element={
+                <Suspense fallback={loading}>
+                  <Overview />
+                </Suspense>
+              }
+            />
             {(
               [
                 ['direction', <Direction />],
