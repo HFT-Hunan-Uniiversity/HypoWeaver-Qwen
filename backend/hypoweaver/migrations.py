@@ -3,6 +3,7 @@ from sqlalchemy import inspect, text
 
 ADDITIONS = {
     "projects": {"case": "TEXT"},
+    "variable_bindings": {"inherited_from": "TEXT"},
     "candidate_sets": {"llm_model": "TEXT"},
     "study_plans": {"llm_model": "TEXT", "suggested_binding": "JSON"},
     "proposals": {

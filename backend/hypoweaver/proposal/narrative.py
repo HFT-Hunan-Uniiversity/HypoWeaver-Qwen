@@ -77,3 +77,20 @@ async def generate_interpretations(llm, claims, numbers, project_id):
             "rewrite_reasons": [p for group in failures.values() for p in group],
         }
     return accepted, [p for group in failures.values() for p in group]
+
+
+def failure_summary(errors):
+    """The API exposes one compact record per section, including older stored diagnostics."""
+    grouped = {}
+    for error in errors or []:
+        section = error["section"]
+        snippet = " ".join(error.get("snippet", "").split())
+        if len(snippet) > 200:
+            snippet = snippet[:200] + "…"
+        reason = error.get("reason") or error.get("rule", "叙述校验未通过")
+        if snippet:
+            reason += "：" + snippet
+        reasons = grouped.setdefault(section, [])
+        if reason not in reasons:
+            reasons.append(reason)
+    return [{"section": section, "reason": "；".join(reasons)} for section, reasons in grouped.items()]

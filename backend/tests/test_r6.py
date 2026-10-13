@@ -58,3 +58,43 @@ def test_quantities_and_positive_causal_claims_still_fail(text):
 def test_three_actual_failed_paragraphs_pass(paragraph):
     assert "零值" in paragraph["text"]
     assert issues(paragraph["text"], {}, "associational") == []
+
+
+def test_narrative_failure_api_alias_grouping_and_legacy_rows(tmp_path):
+    from fastapi.testclient import TestClient
+    from hypoweaver.app import create_app
+    from hypoweaver.config import Settings
+    from hypoweaver.proposal.models import Proposal
+
+    app = create_app(Settings(data_dir=tmp_path))
+    with TestClient(app) as client:
+        project = client.post("/api/projects", json={"title": "兼容接口"}).json()["id"]
+        errors = [
+            {"section": "data", "rule": "数字须占位", "snippet": "样本100家"},
+            {"section": "data", "rule": "因果超限", "snippet": "导致增长"},
+            {"section": "data", "rule": "数字须占位", "snippet": "样本100家"},
+            {"section": "gap", "rule": "章节缺失", "snippet": ""},
+        ]
+        with app.state.sessions() as db:
+            proposal = Proposal(
+                project_id=project,
+                version=1,
+                kind="plan_only",
+                sections=[],
+                snapshot={"project": {"title": "兼容接口"}},
+                narrative_status="partial",
+                narrative_errors=errors,
+            )
+            db.add(proposal)
+            db.commit()
+            identifier = proposal.id
+        detail = client.get("/api/proposals/" + identifier).json()
+        listing = client.get(f"/api/projects/{project}/proposals").json()[0]
+        expected = [
+            {"section": "data", "reason": "数字须占位：样本100家；因果超限：导致增长"},
+            {"section": "gap", "reason": "章节缺失"},
+        ]
+        assert detail["narrative_failures"] == detail["narrative_errors"] == expected
+        assert listing["narrative_failures"] == expected
+        with app.state.sessions() as db:
+            assert db.get(Proposal, identifier).narrative_errors == errors

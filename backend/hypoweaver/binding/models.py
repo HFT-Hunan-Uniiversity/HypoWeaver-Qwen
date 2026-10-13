@@ -37,4 +37,5 @@ class VariableBinding(Base):
     dataset_id: Mapped[str] = mapped_column(ForeignKey("datasets.id"))
     bindings: Mapped[dict] = mapped_column(JSON)
     confirmed: Mapped[bool] = mapped_column(default=False)
+    inherited_from: Mapped[str | None]
     updated_at: Mapped[str] = mapped_column(default=now)

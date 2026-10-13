@@ -10,11 +10,24 @@ from .models import VariableBinding, BindingOutput
 from .expressions import resolve
 
 
+def public(db, binding):
+    data = serialize(binding)
+    source = db.get(plans.StudyPlan, binding.inherited_from) if binding.inherited_from else None
+    data["note"] = (
+        f"继承自 v{source.version}，" + ("已确认" if binding.confirmed else "请重新确认")
+        if source
+        else "请重新确认"
+        if not binding.confirmed
+        else ""
+    )
+    return data
+
+
 def get(db, plan_id):
     plan = plans.get(db, plan_id)
     binding = db.get(VariableBinding, plan_id)
     if binding:
-        return {**serialize(binding), "note": "请重新确认" if not binding.confirmed else ""}
+        return public(db, binding)
     from ..datasets.context import for_project
     from ..projects.service import get as get_project
 
@@ -27,6 +40,7 @@ def get(db, plan_id):
         "bindings": plan.suggested_binding,
         "confirmed": False,
         "note": "建议预填，请重新确认",
+        "inherited_from": None,
     }
 
 
@@ -62,7 +76,7 @@ def save(db, plan_id, payload):
     if changed:
         invalidate(db, plan.project_id, "data")
     db.commit()
-    return serialize(binding)
+    return public(db, binding)
 
 
 def materialize(plan, frame, bindings):

@@ -88,7 +88,9 @@ def test_carbon_draft_context_prefill_confirm_suggest_and_inheritance(tmp_path):
             inherited = client.get("/api/plans/" + new.json()["id"] + "/bindings").json()
             assert inherited["dataset_id"] == dataset_id
             assert inherited["bindings"] == saved.json()["bindings"]
-            assert inherited["confirmed"] is False and "请重新确认" in inherited["note"]
+            assert inherited["confirmed"] is False
+            assert inherited["inherited_from"] == plan["id"]
+            assert inherited["note"] == f"继承自 v{plan['version']}，请重新确认"
         new = client.post(base + ":new-version").json()
         new["robustness"][2]["args"]["outcome"] = "log1p(nonexistent)"
         assert client.patch("/api/plans/" + new["id"], json=new).status_code == 200

@@ -66,6 +66,7 @@ def create(db, project_id, candidate_id, data, stale=False, llm_model=None, inhe
                     plan_id=entity.id,
                     dataset_id=previous.dataset_id,
                     confirmed=False,
+                    inherited_from=inherit_from,
                     bindings={n: deepcopy(v) for n, v in previous.bindings.items() if n in names},
                 )
             )

@@ -74,6 +74,17 @@ def list_(db, project_id):
 
 def public(entity):
     data = serialize(entity)
+    from .narrative import failure_summary
+
+    failures = failure_summary(entity.narrative_errors)
+    data["narrative_failures"] = failures
+    data["narrative_errors"] = failures  # Compatibility alias for one release.
+    if isinstance(data.get("interpretation"), dict):
+        data["interpretation"] = {
+            **data["interpretation"],
+            "narrative_failures": failures,
+            "narrative_errors": failures,
+        }
     data["markdown"] = render_markdown(entity)
     return data
 
