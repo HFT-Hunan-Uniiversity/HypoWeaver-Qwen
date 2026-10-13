@@ -43,7 +43,7 @@ class PlanLLM(CandidateLLM):
         return await super().generate(name, payload, schema, project_id)
 
 
-def seed_selected(client, app, case="carbon"):
+def seed_selected(client, app, case=None):
     p = client.post("/api/projects", json={"title": "碳市场方案验收", "case": case}).json()["id"]
     with app.state.sessions() as db:
         save_cards(
@@ -74,7 +74,7 @@ def drain(client, app):
 def test_plan_selection_lock_new_version_validation_and_stale(tmp_path):
     app = create_app(Settings(data_dir=tmp_path))
     with TestClient(app) as client:
-        p, candidate = seed_selected(client, app)
+        p, candidate = seed_selected(client, app, case="carbon")
         job = client.post(f"/api/projects/{p}/plans").json()["job_id"]
         drain(client, app)
         assert client.get("/api/jobs/" + job).json()["status"] == "succeeded"

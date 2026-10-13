@@ -184,18 +184,45 @@ def readiness(db, plan_id):
 async def suggest(db, plan_id, dataset_id, llm):
     plan = plans.get(db, plan_id)
     dataset = datasets.get(db, dataset_id)
+    from ..datasets.context import fields
+    from ..cases.carbon import FIELD_NOTES
+
     output = await llm.generate(
         "suggest_bindings",
         {
             "variables": plan.variables,
-            "fields": [{"name": f["name"], "label": f["label"], "type": f["type"]} for f in dataset.profile],
+            "fields": fields(dataset),
+            "case_field_notes": {k: v for k, v in FIELD_NOTES.items() if k in dataset.selected_columns},
+            "suggested_binding": plan.suggested_binding,
         },
         BindingOutput,
         plan.project_id,
     )
     # Suggestions are not saved or confirmed on behalf of the user.
     names = {v["name"] for v in plan.variables}
+    frame = pd.DataFrame({f["name"]: pd.Series(dtype=float) for f in dataset.profile})
+    suggested = {}
+    for b in output.bindings:
+        if b.role_name in names:
+            try:
+                resolve(b.model_dump(), frame)
+                suggested[b.role_name] = b.model_dump()
+            except AppError:
+                continue
+    for name, value in (plan.suggested_binding or {}).items():
+        if name not in names:
+            continue
+        try:
+            resolve(value, frame)
+        except AppError:
+            continue
+        suggested[name] = {
+            **value,
+            "role_name": name,
+            "confidence": 0.95,
+            "note": "方案预设与当前字段匹配；请核对实际含义并确认",
+        }
     return {
-        "bindings": [b.model_dump() for b in output.bindings if b.role_name in names],
+        "bindings": list(suggested.values()),
         "note": "建议尚未保存，请核对字段含义及公式后确认",
     }

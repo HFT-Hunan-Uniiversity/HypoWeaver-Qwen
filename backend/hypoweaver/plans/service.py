@@ -47,12 +47,28 @@ def list_(db, project_id):
     ]
 
 
-def create(db, project_id, candidate_id, data, stale=False, llm_model=None):
+def create(db, project_id, candidate_id, data, stale=False, llm_model=None, inherit_from=None):
     version = (db.scalar(select(func.max(StudyPlan.version)).where(StudyPlan.project_id == project_id)) or 0) + 1
     entity = StudyPlan(
         llm_model=llm_model, project_id=project_id, candidate_id=candidate_id, version=version, stale=stale, **data
     )
     db.add(entity)
+    db.flush()
+    if inherit_from:
+        from ..binding.models import VariableBinding
+        from copy import deepcopy
+
+        previous = db.get(VariableBinding, inherit_from)
+        if previous:
+            names = {v["name"] for v in entity.variables}
+            db.add(
+                VariableBinding(
+                    plan_id=entity.id,
+                    dataset_id=previous.dataset_id,
+                    confirmed=False,
+                    bindings={n: deepcopy(v) for n, v in previous.bindings.items() if n in names},
+                )
+            )
     projects.get(db, project_id).updated_at = now()
     db.commit()
     return entity
@@ -121,7 +137,9 @@ def edit(db, plan_id, payload):
     data = schema_for(db, projects.get(db, entity.project_id)).model_validate(payload.model_dump()).model_dump()
     invalidate(db, entity.project_id, "plan")
     if entity.status != "draft":
-        return create(db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model)
+        return create(
+            db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model, inherit_from=entity.id
+        )
     for key, value in data.items():
         setattr(entity, key, value)
     projects.get(db, entity.project_id).updated_at = now()
@@ -133,7 +151,9 @@ def new_version(db, plan_id):
     entity = get(db, plan_id)
     data = PlanDraft.model_validate(serialize(entity)).model_dump()
     invalidate(db, entity.project_id, "plan")
-    return create(db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model)
+    return create(
+        db, entity.project_id, entity.candidate_id, data, entity.stale, entity.llm_model, inherit_from=entity.id
+    )
 
 
 def confirm(db, plan_id):
