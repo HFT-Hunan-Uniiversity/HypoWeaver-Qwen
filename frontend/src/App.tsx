@@ -11,6 +11,8 @@ const Candidates = lazy(() => import('./pages/Candidates'))
 const Plan = lazy(() => import('./pages/Plan'))
 const Data = lazy(() => import('./pages/Data'))
 const Proposal = lazy(() => import('./pages/Proposal'))
+// PROTOTYPE 一次性路由，见 docs/flow.md
+const FlowPrototype = lazy(() => import('./prototype/flow/FlowPrototype'))
 
 /** 旧链接 /p/:id/analysis → 数据与检验 · 运行结果 */
 function AnalysisRedirect() {
@@ -30,6 +32,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/prototype/flow"
+          element={
+            <Suspense fallback={loading}>
+              <FlowPrototype />
+            </Suspense>
+          }
+        />
         <Route element={<AppShell />}>
           <Route
             path="/"
