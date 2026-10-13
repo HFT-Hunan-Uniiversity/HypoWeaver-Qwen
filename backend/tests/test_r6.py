@@ -153,3 +153,26 @@ def test_patch_validates_before_write_and_draft_expands_drop_controls(tmp_path):
                 "leverage",
                 "profitability",
             ]
+
+
+def test_actual_failed_sections_pass_generation_without_repair():
+    import asyncio
+    from hypoweaver.proposal.narrative import generate_sections
+    from hypoweaver.proposal.rendering import NARRATIVE
+
+    paragraphs = json.loads((Path(__file__).parent / "fixtures" / "r6_narrative_paragraphs.json").read_text())
+    originals = {p["section"]: p["text"] for p in paragraphs}
+
+    class CapturedNarrative:
+        calls = 0
+
+        async def generate(self, name, payload, schema, project_id=None):
+            self.calls += 1
+            return schema.model_validate(
+                {"sections": [{"key": key, "markdown": originals.get(key, "继续核实研究材料。")} for key in NARRATIVE]}
+            )
+
+    llm = CapturedNarrative()
+    accepted, errors = asyncio.run(generate_sections(llm, {"numbers": {}, "max_strength": "associational"}, "test"))
+    assert llm.calls == 1 and errors == [] and len(accepted) == len(NARRATIVE)
+    assert all(accepted[key].markdown == text for key, text in originals.items())

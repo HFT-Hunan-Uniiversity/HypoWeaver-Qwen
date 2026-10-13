@@ -61,7 +61,7 @@ def test_additive_model_migration_preserves_old_rows(tmp_path):
     path = tmp_path / "old.sqlite"
     legacy_interpretation = {"model": "legacy-model", "paragraphs": {"main": "原解读"}, "status": "generated"}
     with sqlite3.connect(path) as db:
-        for table in ["projects", "candidate_sets", "study_plans", "proposals"]:
+        for table in ["projects", "candidate_sets", "study_plans", "proposals", "variable_bindings"]:
             db.execute(f"CREATE TABLE {table} (id TEXT PRIMARY KEY, value TEXT)")
             db.execute(f"INSERT INTO {table} VALUES (?, ?)", ("old", "preserved"))
         for table in ["candidate_sets", "proposals"]:
@@ -76,6 +76,7 @@ def test_additive_model_migration_preserves_old_rows(tmp_path):
     migrate(engine)
     with sqlite3.connect(path) as db:
         assert db.execute('SELECT value, "case" FROM projects').fetchone() == ("preserved", None)
+        assert db.execute("SELECT value, inherited_from FROM variable_bindings").fetchone() == ("preserved", None)
         assert db.execute("SELECT value, llm_model FROM study_plans").fetchone() == ("preserved", None)
         for table in ["candidate_sets", "proposals"]:
             assert db.execute(f"SELECT model, llm_model FROM {table} WHERE id = ?", ("old",)).fetchone() == (
@@ -93,9 +94,11 @@ def test_additive_model_migration_preserves_old_rows(tmp_path):
         )
         assert unknown == {"llm_model": None}
         db.execute("UPDATE candidate_sets SET llm_model = ? WHERE id = ?", ("newer-model", "old"))
+        db.execute("UPDATE variable_bindings SET inherited_from = ? WHERE id = ?", ("source-plan", "old"))
     migrate(engine)
     with sqlite3.connect(path) as db:
         assert db.execute("SELECT llm_model FROM candidate_sets WHERE id = ?", ("old",)).fetchone()[0] == "newer-model"
+        assert db.execute("SELECT inherited_from FROM variable_bindings").fetchone()[0] == "source-plan"
     engine.dispose()
 
 

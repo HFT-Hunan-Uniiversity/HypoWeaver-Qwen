@@ -82,3 +82,10 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 - 复算返回 `main_consistent`；整体 consistent 只覆盖主模型及原先成功的稳健性。原先失败项仍在 rows 中标为 failed、origin=analysis。主结论仅以主模型复算作为复算门槛，其余稳健性、置换、前趋势规则继续独立适用。
 - 提案接口返回 `narrative_status: complete | partial | null` 与 `narrative_errors`。旧提案未知状态为 null。失败原因含 section、snippet、rule，结果解读另含 claim_id；两次仍未通过的部分才用默认说明，合格章节/解读保留。年份也使用 `dataset.year_min/year_max` 占位符，企业数使用 `dataset.n_units`。本轮未接入前端状态展示。
 - 文献联合检索先去重，按各来源及各查询的相关性名次做倒数名次融合；新卡默认仅纳入排序前 40 条，其他卡仍可手动纳入。重新检索不会覆盖已有卡的手工纳入/排除状态。
+
+### 第六轮后端接口约定
+
+- 数字校验排除常见非数量术语、字段标识、公式和反引号代码；中文数字需带量词/单位才触发。未注入的真实数量仍被拦截，否定因果语境不作为肯定因果表述。
+- 提案 `narrative_failures` 为 `[{section, reason}]`，同节多条规则与段落摘要合并。`narrative_errors` 暂保留一版，作为同结构兼容别名；数据库中的原始诊断不改写，旧提案也在读取时转换。
+- 继承绑定返回 `inherited_from`（来源方案 ID），未确认时 note 为“继承自 vN，请重新确认”。历史未知来源为 null，不猜测来源；重新确认后 note 显示已确认。
+- 方案 PATCH 与确认复用稳健性参数校验，非法编辑返回中文 422，既不保存新版本也不使下游过期。空 args 的 drop_controls 在保存前展开为基准控制变量名列表。
