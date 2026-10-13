@@ -1,3 +1,4 @@
+import ast
 import operator
 import numpy as np
 import pandas as pd
@@ -130,6 +131,10 @@ def robustness_spec(spec, check, frame):
         controls = check.args.get("controls")
         if not isinstance(controls, list) or not controls or not all(isinstance(c, str) for c in controls):
             raise AppError("robustness_args", "增加控制检查需要非空 controls 列表")
+        canonical = lambda text: ast.dump(ast.parse(text, mode="eval"))
+        baseline = {canonical(c) for c in changed.controls}
+        if any(canonical(c) in baseline for c in controls):
+            raise AppError("robustness_args", "不能加入已在基准模型中的控制变量，这属于空检验")
         changed.controls = list(dict.fromkeys([*changed.controls, *controls]))
     return changed, raw
 

@@ -49,6 +49,51 @@ SOURCE = {
 }
 
 
+FIELD_NOTES = {
+    "industry_peer_exposure": "行业同群政策暴露，行业层级的0/1指标，并非企业真实处理分配。",
+    "total_assets": "原始总资产，基准模型使用log(total_assets)。",
+    "green_invention_independent": "独立申请绿色发明专利数。",
+    "green_invention_joint": "联合申请绿色发明专利数。",
+    "green_all_independent": "独立申请全部绿色专利数。",
+    "green_all_joint": "联合申请全部绿色专利数。",
+}
+
+
+def plan_defaults(data):
+    """Case defaults are executable definitions, independent of model naming."""
+    definitions = [
+        (
+            "outcome",
+            "patents",
+            "绿色发明专利申请的对数",
+            {"formula": "log1p(green_invention_independent + green_invention_joint)"},
+        ),
+        ("treatment", "exposure", FIELD_NOTES["industry_peer_exposure"], {"field": "industry_peer_exposure"}),
+        ("unit", "firm", "企业代码", {"field": "firm_id"}),
+        ("time", "year", "年份", {"field": "year"}),
+        ("control", "log_assets", "总资产的自然对数", {"formula": "log(total_assets)"}),
+        ("control", "leverage", "资产负债率", {"field": "leverage"}),
+        ("control", "profitability", "总资产收益率", {"field": "return_on_assets"}),
+    ]
+    return {
+        **data,
+        "method_family": "policy_causal",
+        "variables": [{"role": r, "name": n, "definition": d, "uncertain": False} for r, n, d, _ in definitions],
+        "suggested_binding": {n: b for _, n, _, b in definitions},
+        "robustness": [
+            {"id": "exclude_years", "kind": "exclude_years", "change": "剔除疫情年份", "args": {"years": [2020, 2021]}},
+            {"id": "drop_controls", "kind": "drop_controls", "change": "去除基准控制变量", "args": {}},
+            {
+                "id": "alt_outcome",
+                "kind": "alt_outcome",
+                "change": "改用全部绿色专利",
+                "args": {"outcome": "log1p(green_all_independent + green_all_joint)"},
+            },
+            {"id": "monotone_only", "kind": "monotone_only", "change": "仅保留暴露不回退企业", "args": {}},
+        ],
+    }
+
+
 def fetch(settings):
     directory = settings.storage_dir() / "raw"
     directory.mkdir(parents=True, exist_ok=True)

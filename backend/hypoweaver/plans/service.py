@@ -91,6 +91,10 @@ def draft(app, project_id, llm):
             project_id,
         )
         data = output.model_dump()
+        if case == "carbon":
+            from ..cases.carbon import plan_defaults
+
+            data = plan_defaults(data)
         # Only the human editor can assert real treatment assignment.
         data["treatment_is_real_assignment"] = False
         data["decision_rules"] = DecisionRules().model_dump()
