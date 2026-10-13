@@ -10,6 +10,19 @@ export const strengths: Record<string, string> = {
   associational: '关联',
   causal_cautious: '谨慎因果',
 }
+/** 强度由低到高；只用于把下拉选项截到后端返回的 max_strength，不推算上限。 */
+export const STRENGTH_ORDER = [
+  'insufficient',
+  'preliminary',
+  'mixed',
+  'associational',
+  'causal_cautious',
+] as const
+/** 采用强度可选项：不高于后端上限；上限未知时只给出上限本身。 */
+export function strengthChoices(max: string): string[] {
+  const i = (STRENGTH_ORDER as readonly string[]).indexOf(max)
+  return i < 0 ? [max] : STRENGTH_ORDER.slice(0, i + 1)
+}
 const verdicts: Record<string, string> = {
   supportive: '支持',
   mixed: '混合',
@@ -33,7 +46,11 @@ function Card({ claim }: { claim: Claim }) {
     [decision, setDecision] = useState(
       claim.user_decision === 'pending' ? 'accepted' : claim.user_decision,
     ),
-    [strength, setStrength] = useState(claim.chosen_strength),
+    [strength, setStrength] = useState(
+      strengthChoices(claim.max_strength).includes(claim.chosen_strength)
+        ? claim.chosen_strength
+        : claim.max_strength,
+    ),
     [text, setText] = useState(claim.final_text)
   const mutation = useMutation({
     mutationFn: () =>
@@ -46,17 +63,15 @@ function Card({ claim }: { claim: Claim }) {
       qc.invalidateQueries({ queryKey: ['proposals'] })
     },
   })
-  const choices = Object.keys(strengths).slice(
-    0,
-    Object.keys(strengths).indexOf(claim.max_strength) + 1,
-  )
+  const choices = strengthChoices(claim.max_strength)
   return (
     <article className="panel">
       <h3>
         结论判定：{verdicts[claim.verdict]} <GeneratedBy of={claim} />
       </h3>
       <p>
-        <strong>强度上限：{strengths[claim.max_strength]}</strong>
+        <strong>强度上限：{strengths[claim.max_strength] || claim.max_strength}</strong>
+        <small className="muted"> · 由后端结论评估给出</small>
       </p>
       <p>{claim.allowed_wording}</p>
       {claim.blockers.length > 0 && (
@@ -80,7 +95,7 @@ function Card({ claim }: { claim: Claim }) {
         <select value={strength} onChange={(e) => setStrength(e.target.value)}>
           {choices.map((k) => (
             <option key={k} value={k}>
-              {strengths[k]}
+              {strengths[k] || k}
             </option>
           ))}
         </select>
