@@ -61,6 +61,8 @@ export default function Overview() {
           className={`status-badge is-${f.strength === 'causal_cautious' ? 'orange' : 'green'}`}
         >
           {strengths[f.strength]}
+          {['deferred', 'rejected'].includes(f.strengthDecision || '') &&
+            (f.strengthDecision === 'deferred' ? '（已暂缓）' : '（已拒绝）')}
         </span>
       ) : (
         '—'

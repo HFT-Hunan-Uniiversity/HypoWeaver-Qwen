@@ -92,7 +92,11 @@ export default function ResearchRail({ projectId }: { projectId: string }) {
                   <small>主系数</small>
                 </span>
                 <span>
-                  <strong>{f.strength ? strengths[f.strength] : '—'}</strong>
+                  <strong>
+                    {f.strength ? strengths[f.strength] : '—'}
+                    {f.strengthDecision === 'deferred' && '（已暂缓）'}
+                    {f.strengthDecision === 'rejected' && '（已拒绝）'}
+                  </strong>
                   <small>结论强度</small>
                 </span>
               </div>
