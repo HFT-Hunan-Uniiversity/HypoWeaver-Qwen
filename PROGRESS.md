@@ -180,3 +180,11 @@ GET/PUT `/api/settings/llm`、候选集、提案版本及 interpretation 均统�
 本机完整登记数据环境：全量 pytest **41 passed、0 skipped**；ruff format --check 为 73 files already formatted，E501 与 diff 检查通过。另以空 DATA_DIR 单独执行真实碳数据测试，得到预期 **1 skipped**，理由是尚无登记数据库；这次条件验证不算真实统计通过。前端零改动，未调用真实模型。
 
 GPT-6 Luna 独立复核全部三项并重跑全量测试：41 passed；73 文件格式检查和 E501 检查通过，未发现阻断问题。
+
+## 第四轮
+
+### R4-01 · 可读的结构化输出修复错误
+
+修复消息逐条包含 loc、type、msg，保留中文业务校验文字；显式不提取 input、ctx 或错误文档链接。调用记录 error 保存同一 JSON 摘要的前 500 字符；第二次仍非法时仍记录该次摘要并按原规则失败，不增加重试次数。
+
+验证：LLM/任务相关 4 项测试通过。新增多 outcome 回归，经真实 PlanDraft 验证产生中文错误，第二次请求携带该错误，合法输出成功；日志与修复摘要一致，不包含测试输入标记。仅使用离线 SDK 测试客户端，未发起真实模型调用。

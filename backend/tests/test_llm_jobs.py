@@ -1,4 +1,6 @@
 import asyncio
+import copy
+import json
 from types import SimpleNamespace
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -13,13 +15,14 @@ from hypoweaver.errors import AppError
 class FakeLLM:
     """SDK-shaped client exercising the real structured output repair seam."""
 
-    def __init__(self):
+    def __init__(self, outputs=None):
+        self.outputs = outputs or ["invalid JSON", '{"message":"连接成功"}']
         self.chat = SimpleNamespace(completions=self)
         self.requests = []
 
     async def create(self, **kwargs):
-        self.requests.append(kwargs)
-        text = "invalid JSON" if len(self.requests) == 1 else '{"message":"连接成功"}'
+        self.requests.append(copy.deepcopy(kwargs))
+        text = self.outputs[len(self.requests) - 1]
         return SimpleNamespace(
             choices=[SimpleNamespace(message=SimpleNamespace(content=text))],
             usage=SimpleNamespace(prompt_tokens=10, completion_tokens=5),
@@ -91,3 +94,36 @@ def test_background_job_success_failure_and_recovery(tmp_path):
         recovered = client.get(f"/api/jobs/{interrupted_id}").json()
         assert recovered["status"] == "failed"
         assert "重启" in recovered["error"]
+
+
+def test_multiple_outcomes_repair_includes_readable_error(tmp_path):
+    from hypoweaver.plans.models import PlanDraft
+    from test_plans import plan_payload
+
+    valid = plan_payload()
+    invalid = copy.deepcopy(valid)
+    invalid["variables"].append(
+        {"role": "outcome", "name": "second_result", "definition": "private-input-marker", "uncertain": False}
+    )
+    settings = Settings(data_dir=tmp_path, llm_api_key="test-only", llm_model="test-model")
+    app = create_app(settings)
+    fake = FakeLLM([json.dumps(invalid), json.dumps(valid)])
+    with TestClient(app) as client:
+        llm = LLM(settings, app.state.sessions, fake)
+        result = client.portal.call(llm.generate, "draft_plan", {}, PlanDraft)
+        assert sum(variable.role == "outcome" for variable in result.variables) == 1
+        assert len(fake.requests) == 2
+        repair = fake.requests[1]["messages"][-1]["content"]
+        summary = repair.split("校验错误：", 1)[1]
+        errors = json.loads(summary)
+        assert all(set(error) == {"loc", "type", "msg"} for error in errors)
+        assert errors[0]["loc"] == [] and errors[0]["type"] == "value_error"
+        assert "outcome 角色必须恰好有一个变量" in repair
+        assert "private-input-marker" not in repair
+        with app.state.sessions() as db:
+            calls = db.scalars(select(LLMCall).order_by(LLMCall.created_at)).all()
+            assert [call.status for call in calls] == ["invalid_output", "succeeded"]
+            assert calls[0].error == summary[:500]
+            assert "outcome 角色必须恰好有一个变量" in calls[0].error
+            assert "private-input-marker" not in calls[0].error
+            assert calls[1].error is None

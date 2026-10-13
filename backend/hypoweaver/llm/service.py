@@ -62,8 +62,12 @@ class LLM:
                     record["status"] = "succeeded"
                     return result
                 except ValidationError as exc:
-                    errors = [{"loc": list(e["loc"]), "type": e["type"]} for e in exc.errors(include_input=False)]
-                    record.update(status="invalid_output", error="结构化输出校验失败")
+                    errors = [
+                        {"loc": list(error["loc"]), "type": error["type"], "msg": error["msg"]}
+                        for error in exc.errors(include_input=False, include_context=False, include_url=False)
+                    ]
+                    summary = json.dumps(errors, ensure_ascii=False)
+                    record.update(status="invalid_output", error=summary[:500])
                     if attempt:
                         raise AppError("llm_invalid_output", "模型输出经一次修复后仍不符合要求，请重试") from exc
                     messages.extend(
@@ -71,7 +75,7 @@ class LLM:
                             {"role": "assistant", "content": content},
                             {
                                 "role": "user",
-                                "content": "请修复 JSON，遵守原始 Schema。校验错误：" + json.dumps(errors),
+                                "content": "请修复 JSON，遵守原始 Schema。校验错误：" + summary,
                             },
                         ]
                     )
