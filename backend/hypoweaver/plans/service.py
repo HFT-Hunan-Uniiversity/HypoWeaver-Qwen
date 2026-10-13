@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from sqlalchemy import select, func
 from .. import jobs
 from ..llm.service import model_name
@@ -8,6 +9,7 @@ from ..projects import service as projects
 from ..candidates.models import Candidate, CandidateSet
 from ..literature.service import serialize
 from .semantics import public
+from .robustness import expand_drop_controls, validate_plan
 from .models import StudyPlan, PlanDraft, CarbonPlanDraft, DecisionRules, Permutation
 
 
@@ -49,6 +51,7 @@ def list_(db, project_id):
 
 def create(db, project_id, candidate_id, data, stale=False, llm_model=None, inherit_from=None):
     version = (db.scalar(select(func.max(StudyPlan.version)).where(StudyPlan.project_id == project_id)) or 0) + 1
+    data = expand_drop_controls(data)
     entity = StudyPlan(
         llm_model=llm_model, project_id=project_id, candidate_id=candidate_id, version=version, stale=stale, **data
     )
@@ -139,6 +142,8 @@ def edit(db, plan_id, payload):
     data = schema_for(db, project).model_validate(payload.model_dump()).model_dump()
     if project.case == "carbon" and data["method_family"] != "policy_causal":
         raise AppError("carbon_method", "碳市场案例的方法固定为policy_causal", 422)
+    data = expand_drop_controls(data)
+    validate_plan(db, SimpleNamespace(id=entity.id, project_id=entity.project_id, **data))
     invalidate(db, entity.project_id, "plan")
     if entity.status != "draft":
         return create(
@@ -169,8 +174,6 @@ def confirm(db, plan_id):
     if entity.status == "confirmed":
         return entity
     schema_for(db, projects.get(db, entity.project_id)).model_validate(serialize(entity))
-    from .robustness import validate_plan
-
     validate_plan(db, entity)
     for old in db.scalars(
         select(StudyPlan).where(StudyPlan.project_id == entity.project_id, StudyPlan.status == "confirmed")

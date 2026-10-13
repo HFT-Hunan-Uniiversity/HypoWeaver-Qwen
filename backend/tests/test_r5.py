@@ -93,8 +93,7 @@ def test_carbon_draft_context_prefill_confirm_suggest_and_inheritance(tmp_path):
             assert inherited["note"] == f"继承自 v{plan['version']}，请重新确认"
         new = client.post(base + ":new-version").json()
         new["robustness"][2]["args"]["outcome"] = "log1p(nonexistent)"
-        assert client.patch("/api/plans/" + new["id"], json=new).status_code == 200
-        bad = client.post("/api/plans/" + new["id"] + ":confirm")
+        bad = client.patch("/api/plans/" + new["id"], json=new)
         assert bad.status_code == 422 and "nonexistent" in bad.json()["error"]["message"]
 
 

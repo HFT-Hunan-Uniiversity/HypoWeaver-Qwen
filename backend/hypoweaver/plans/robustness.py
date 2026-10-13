@@ -39,6 +39,15 @@ def expression(text, mappings, fields=None):
         raise AppError("robustness_args", "变量或公式无法解析，请使用已有字段、log/log1p与加减乘除") from exc
 
 
+def expand_drop_controls(data):
+    data = deepcopy(data)
+    controls = [v["name"] for v in data["variables"] if v["role"] == "control"]
+    for check in data["robustness"]:
+        if check["kind"] == "drop_controls" and not check["args"]:
+            check["args"] = {"controls": list(controls)}
+    return data
+
+
 def compile_checks(plan, mappings, fields=None):
     baseline = [expression(v["name"], mappings, fields) for v in plan.variables if v["role"] == "control"]
     baseline_keys = {canonical(c) for c in baseline}
@@ -53,7 +62,11 @@ def compile_checks(plan, mappings, fields=None):
                     # These are already raw expressions: don't resolve aliases twice.
                     resolved = values
                 else:
-                    if not isinstance(values, list) or not values or not all(isinstance(v, str) for v in values):
+                    if (
+                        not isinstance(values, list)
+                        or (not values and (kind != "drop_controls" or baseline))
+                        or not all(isinstance(v, str) for v in values)
+                    ):
                         raise AppError("robustness_args", "controls必须是非空变量/公式列表")
                     resolved = [expression(v, mappings, fields) for v in values]
                 keys = {canonical(c) for c in resolved}
@@ -78,15 +91,18 @@ def compile_checks(plan, mappings, fields=None):
 
 
 def validate_plan(db, plan):
-    from ..binding.service import get
+    from ..binding.models import VariableBinding
     from ..datasets.service import get as dataset_get
-
     from ..datasets.context import for_project
     from ..projects.service import get as project_get
 
-    binding = get(db, plan.id)
-    dataset = dataset_get(db, binding["dataset_id"]) if binding else for_project(db, project_get(db, plan.project_id))
-    mappings = binding["bindings"] if binding else plan.suggested_binding or {}
+    binding = db.get(VariableBinding, plan.id)
+    dataset = dataset_get(db, binding.dataset_id) if binding else for_project(db, project_get(db, plan.project_id))
+    names = {v["name"] for v in plan.variables}
+    mappings = {
+        **(plan.suggested_binding or {}),
+        **({k: v for k, v in binding.bindings.items() if k in names} if binding else {}),
+    }
     fields = {f["name"] for f in dataset.profile} if dataset else None
     try:
         compile_checks(plan, mappings, fields)

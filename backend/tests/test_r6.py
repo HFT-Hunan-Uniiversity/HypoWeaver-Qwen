@@ -98,3 +98,58 @@ def test_narrative_failure_api_alias_grouping_and_legacy_rows(tmp_path):
         assert listing["narrative_failures"] == expected
         with app.state.sessions() as db:
             assert db.get(Proposal, identifier).narrative_errors == errors
+
+
+def test_patch_validates_before_write_and_draft_expands_drop_controls(tmp_path):
+    from fastapi.testclient import TestClient
+    from hypoweaver.app import create_app
+    from hypoweaver.config import Settings
+    from test_plans import seed_selected, drain
+    from hypoweaver.plans.models import StudyPlan
+    from hypoweaver.plans.robustness import validate_plan
+    from hypoweaver.errors import AppError
+    from types import SimpleNamespace
+
+    app = create_app(Settings(data_dir=tmp_path))
+    with TestClient(app) as client:
+        project, _ = seed_selected(client, app, case="carbon")
+        client.post(f"/api/projects/{project}/plans")
+        drain(client, app)
+        plan = client.get(f"/api/projects/{project}/plans").json()[0]
+        base = "/api/plans/" + plan["id"]
+        drop = next(r for r in plan["robustness"] if r["kind"] == "drop_controls")
+        assert drop["args"]["controls"] == ["log_assets", "leverage", "profitability"]
+        original = client.get(base).json()
+        for confirmed in [False, True]:
+            if confirmed:
+                assert client.post(base + ":confirm").status_code == 200
+                original = client.get(base).json()
+            invalid = {
+                **plan,
+                "robustness": [
+                    *plan["robustness"],
+                    {"id": "invalid", "kind": "alt_outcome", "change": "错误公式", "args": {"outcome": "unknown ** 2"}},
+                ],
+            }
+            with app.state.sessions() as db:
+                preview = SimpleNamespace(**{**invalid, "project_id": project})
+                with pytest.raises(AppError) as caught:
+                    validate_plan(db, preview)
+            response = client.patch(base, json=invalid)
+            assert response.status_code == 422
+            assert response.json()["error"]["message"] == caught.value.message
+            assert client.get(base).json() == original
+            assert len(client.get(f"/api/projects/{project}/plans").json()) == 1
+        # An empty drop specification submitted by an editor is normalized as well.
+        plan["robustness"] = [{**r, "args": {}} if r["kind"] == "drop_controls" else r for r in plan["robustness"]]
+        edited = client.patch(base, json=plan)
+        assert edited.status_code == 200, edited.text
+        fresh = edited.json()
+        assert fresh["version"] == 2
+        with app.state.sessions() as db:
+            saved = db.get(StudyPlan, fresh["id"])
+            assert next(r for r in saved.robustness if r["kind"] == "drop_controls")["args"]["controls"] == [
+                "log_assets",
+                "leverage",
+                "profitability",
+            ]
