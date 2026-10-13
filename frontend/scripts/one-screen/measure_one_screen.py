@@ -106,4 +106,5 @@ async def main():
         row.append(str(max(x['regions_scrolling'] for x in v.values())))
         print('\t'.join(row))
     print('ALL PASS' if ok else 'FAILED'); sys.exit(0 if ok else 1)
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

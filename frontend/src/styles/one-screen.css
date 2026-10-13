@@ -1084,3 +1084,29 @@ button,
   align-self: start;
   max-height: 100%;
 }
+
+/* R5：建议绑定 / 待重新确认 / 提案部分生成 */
+.tag-suggested {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px dashed var(--brand);
+  border-radius: 999px;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+.binding-reconfirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.binding-reconfirm button {
+  flex: 0 0 auto;
+}
+.narrative-partial ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

@@ -11,3 +11,5 @@ uv run --with pillow python scripts/one-screen/compare_one_screen.py            
 断言：1440×900 与 1280×800 下每个视图的文档与 `.shell-view` 均不出现整页滚动；内容横向跨度 ≥ 内容区 75%（宽度利用率）；
 除 `[data-scroll-region]` 外不允许溢出滚动容器。最大连续空白矩形 >30% 时打 ⚠ 供人工复核（不判失败）。失败时退出码非 0。
 截图写入 `/workspace/hw/review/screens/one-screen/{1440x900,1280x800}/`，结果写入同目录 `measure.json`。
+
+`verify_r5.py`：用 Playwright route 拦截模拟 R5 字段（suggested_binding、继承绑定 confirmed=false、提案 narrative_status=partial、settings/status 的 llm_model/旧 model），PUT 也被拦截不写数据；截图到 `screens/one-screen/r5/`。

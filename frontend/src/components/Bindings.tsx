@@ -15,6 +15,20 @@ interface SavedBinding {
   dataset_id: string
   bindings: Record<string, Value>
   confirmed: boolean
+  /** R5 可选：从上一版方案继承时的来源方案 id（字段名为假设，缺失时仅按 confirmed=false 判断） */
+  inherited_from?: string | null
+}
+/** 方案的 suggested_binding 归一为 {field|formula}，丢弃空值 */
+function normalizeSuggested(plan: StudyPlan): Record<string, Value> {
+  const out: Record<string, Value> = {}
+  const names = new Set(plan.variables.map((v) => v.name))
+  for (const [k, v] of Object.entries(plan.suggested_binding || {})) {
+    if (!names.has(k) || v == null) continue
+    const val = typeof v === 'string' ? { field: v } : v
+    if (val.field) out[k] = { field: val.field }
+    else if (val.formula) out[k] = { formula: val.formula }
+  }
+  return out
 }
 interface Suggestion extends Value {
   role_name: string
@@ -51,13 +65,20 @@ function Editor({
   dataset: Dataset
   saved: SavedBinding | null
 }) {
+  const base = saved?.dataset_id === dataset.id ? saved.bindings : {}
+  // 方案自带建议：只预填尚未绑定的角色，不保存、不确认
+  const planSuggested = Object.fromEntries(
+    Object.entries(normalizeSuggested(plan)).filter(([k]) => !(base[k]?.field || base[k]?.formula)),
+  )
   const qc = useQueryClient(),
-    [mapping, setMapping] = useState<Record<string, Value>>(
-      saved?.dataset_id === dataset.id ? saved.bindings : {},
+    [mapping, setMapping] = useState<Record<string, Value>>({ ...base, ...planSuggested }),
+    [suggestedKeys, setSuggestedKeys] = useState<Set<string>>(
+      () => new Set(Object.keys(planSuggested)),
     ),
     [confirmed, setConfirmed] = useState(saved?.dataset_id === dataset.id && saved.confirmed),
     [suggestions, setSuggestions] = useState<Suggestion[]>([]),
-    [dirty, setDirty] = useState(false)
+    [dirty, setDirty] = useState(Object.keys(planSuggested).length > 0)
+  const pendingReconfirm = !!saved && saved.dataset_id === dataset.id && !saved.confirmed
   const readiness = useQuery({
     queryKey: ['readiness', plan.id],
     queryFn: () => api<Readiness>(`/plans/${plan.id}/readiness`),
@@ -80,6 +101,21 @@ function Editor({
       qc.invalidateQueries({ queryKey: ['readiness', plan.id] })
     },
   })
+  // 一键确认：沿用现有 PUT /plans/{id}/bindings，原样提交已保存绑定并置 confirmed=true
+  const reconfirm = useMutation({
+    mutationFn: () =>
+      api(
+        `/plans/${plan.id}/bindings`,
+        body('PUT', { dataset_id: saved!.dataset_id, bindings: saved!.bindings, confirmed: true }),
+      ),
+    onSuccess: () => {
+      setConfirmed(true)
+      setDirty(false)
+      qc.invalidateQueries({ queryKey: ['bindings', plan.id] })
+      qc.invalidateQueries({ queryKey: ['readiness', plan.id] })
+      qc.invalidateQueries({ queryKey: ['overview'] })
+    },
+  })
   const suggest = useMutation({
     mutationFn: () =>
       api<{ bindings: Suggestion[] }>(
@@ -99,6 +135,11 @@ function Editor({
   })
   const change = (name: string, value: Value) => {
     setMapping({ ...mapping, [name]: value })
+    if (suggestedKeys.has(name)) {
+      const n = new Set(suggestedKeys)
+      n.delete(name)
+      setSuggestedKeys(n)
+    }
     setConfirmed(false)
     setDirty(true)
   }
@@ -113,6 +154,18 @@ function Editor({
             <span className="inline-meta">
               方案第 {plan.version} 版 · {dataset.name}
             </span>
+            {pendingReconfirm && (
+              <span
+                className="status-badge is-yellow"
+                title={
+                  saved?.inherited_from
+                    ? '绑定继承自上一版方案，需在本版重新确认'
+                    : '已保存的绑定尚未确认'
+                }
+              >
+                {saved?.inherited_from ? '待重新确认' : '待确认'}
+              </span>
+            )}
           </div>
           <span className="action-cluster">
             <NeedsModel />
@@ -135,6 +188,29 @@ function Editor({
             当前选择与已保存绑定的数据资产不同，保存后会替换绑定并让既有运行过期。
           </p>
         )}
+        {pendingReconfirm && (
+          <div className="notice binding-reconfirm" role="status">
+            <span>
+              {saved?.inherited_from
+                ? '此绑定继承自上一版方案，字段映射已带入但尚未确认。核对无误后可一键确认。'
+                : '已保存的绑定尚未确认，检验前需要确认。'}
+            </span>
+            <button
+              type="button"
+              disabled={reconfirm.isPending || dirty || plan.stale || plan.status !== 'confirmed'}
+              title={dirty ? '有未保存的编辑，请先保存或撤销' : undefined}
+              onClick={() => reconfirm.mutate()}
+            >
+              {reconfirm.isPending ? '正在确认…' : '一键确认绑定'}
+            </button>
+          </div>
+        )}
+        {suggestedKeys.size > 0 && (
+          <p className="notice" role="status">
+            已按方案建议预填 {suggestedKeys.size} 个变量（标注“建议”），尚未保存或确认。
+          </p>
+        )}
+        <ErrorNote error={reconfirm.error} />
         <ScrollRegion className="binding-rows" label="变量绑定表">
           <div className="binding-row binding-row--head" aria-hidden="true">
             <span>变量</span>
@@ -150,6 +226,11 @@ function Editor({
                 <div className="binding-row__var">
                   <strong>
                     {roles[v.role]} · {v.name}
+                    {suggestedKeys.has(v.name) && (
+                      <span className="tag-suggested" title="来自方案的建议绑定，尚未保存">
+                        建议
+                      </span>
+                    )}
                   </strong>
                   <small className="muted" title={v.definition}>
                     {v.definition}
