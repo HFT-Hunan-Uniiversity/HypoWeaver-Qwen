@@ -101,7 +101,7 @@ def issues(text, numbers, strength, metadata=None):
         or re.search(english_number, quantitative, re.I)
     ):
         bad.append("所有数字须使用给定占位符")
-    if not check_wording(stripped, strength)["valid"]:
+    if not check_wording(stripped, strength, (metadata or {}).get("titles", []))["valid"]:
         bad.append("存在超出结论上限的措辞")
     return bad
 

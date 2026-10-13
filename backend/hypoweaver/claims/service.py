@@ -14,9 +14,12 @@ LABELS = {
 }
 
 
-def check_wording(text, max_strength):
+def check_wording(text, max_strength, known_titles=()):
     if max_strength == "causal_cautious":
         return {"valid": True, "violations": []}
+    for title in sorted(set(known_titles), key=len, reverse=True):
+        if title:
+            text = text.replace(title, " ")
     cleaned = re.sub(
         (
             "不能解释为因果|不代表因果关系|不构成因果证据|无法确认因果关系|不能据此推断因果|"
@@ -29,16 +32,34 @@ def check_wording(text, max_strength):
     )
     # Negation is scoped to the current clause; double negation does not license a causal claim.
     cleaned = re.sub(
-        r"(?:不能|不足以|不支持|无法)(?:(?!否认|排除|不|但|却|然而)[^，。；！？,;!?\n]){0,30}因果"
+        r"(?:尚不能|不能|不足以|不支持|无法|不作|不据此|不宜|避免)"
+        r"(?:(?!否认|排除|不|但|却|然而)[^，。；！？,;!?\n]){0,30}因果"
         r"(?:关系|解释|证据|效应)?",
         "",
         cleaned,
     )
+    cleaned = re.sub(
+        r"(?:待|具备|获得|补齐|满足)(?:(?!但|却|然而)[^，。；！？,;!?\n]){0,60}后再"
+        r"(?:考虑|开展)(?:(?!但|却|然而)[^，。；！？,;!?\n]){0,30}因果(?:识别|研究|分析|设计)*",
+        "",
+        cleaned,
+    )
+    # Book-title brackets or an attribution cue identify titles, not quoted author claims.
+    english_prose = re.sub(
+        r"《[^》\n]*》|(?:标题(?:为|是)?|文献(?:为|是)?|论文(?:为|是)?|数据集(?:为|是)?|(?:发布|发表)的)"
+        r'\s*[:：]?\s*(?:“[^”\n]*”|「[^」\n]*」|"[^"\n]*")',
+        " ",
+        cleaned,
+    )
     pattern = (
-        "促进|导致|造成|驱动|引致|因果|\\b(?:caus(?:e[sd]?|ing|al(?:ity)?)|promot(?:e[sd]?|"
+        "\\b(?:caus(?:e[sd]?|ing|al(?:ity)?)|promot(?:e[sd]?|"
         "ing)|induc(?:e[sd]?|ing)|driv(?:e[sn]?|ing)|led to|leads? to|effect of)\\b"
     )
-    violations = list(dict.fromkeys(re.findall(pattern, cleaned, flags=re.I)))
+    violations = list(
+        dict.fromkeys(
+            re.findall("促进|导致|造成|驱动|引致|因果", cleaned) + re.findall(pattern, english_prose, flags=re.I)
+        )
+    )
     return {"valid": not violations, "violations": violations}
 
 
