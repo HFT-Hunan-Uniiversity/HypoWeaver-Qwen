@@ -200,3 +200,11 @@ draft_plan 提示词明确 outcome/treatment/unit/time 各恰好一个变量、�
 GET `/api/settings/status` 顶层模型字段改为 llm_model，调用记录表及 recent_calls 中的 model 保留。配置状态、用量与来源连通性字段不变。
 
 验证：配置与状态接口相关 6 项测试通过；状态路由测试返回 llm_model 且无顶层 model，来源探测使用离线测试替身，不发出外网请求。
+
+### R4-04 · 修复链路及完整回归
+
+新增回归覆盖多 outcome 首次失败、第二次修复消息包含“outcome 角色必须恰好有一个变量”、合法方案成功、调用记录提示词版本为 2，以及两次均非法时只调用两次且两条日志各保留本次摘要前 500 字符。状态接口测试验证 llm_model 顶层字段。
+
+验证：全量后端 **44 passed、0 skipped**；73 个 Python 文件 ruff format --check 通过，E501 和 diff 检查通过。真实碳数据测试复用已有 DATA_DIR 登记资产；测试共用现有虚拟环境，没有复制依赖。未改前端，也没有调用真实模型。当前主目录是独立前端工作分支 feat/one-screen，本轮后端在工作区内的 v2 工作树保存与推送，并同步回当前前端分支供本地运行，保留其原有前端代码。
+
+GPT-6 Luna 独立复核并重跑全量测试：44 passed、0 skipped，73 文件格式检查及 E501 通过，未发现阻断缺陷。

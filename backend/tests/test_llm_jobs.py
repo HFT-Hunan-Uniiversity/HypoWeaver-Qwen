@@ -1,6 +1,7 @@
 import asyncio
 import copy
 import json
+import pytest
 from types import SimpleNamespace
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -127,3 +128,25 @@ def test_multiple_outcomes_repair_includes_readable_error(tmp_path):
             assert "outcome 角色必须恰好有一个变量" in calls[0].error
             assert "private-input-marker" not in calls[0].error
             assert calls[1].error is None
+            assert all(call.prompt_version == "2" for call in calls)
+
+
+def test_repeated_invalid_output_logs_readable_summary_up_to_500_characters(tmp_path):
+    from hypoweaver.plans.models import PlanDraft
+
+    invalid = json.dumps({"variables": [{} for _ in range(12)]})
+    settings = Settings(data_dir=tmp_path, llm_api_key="test-only", llm_model="test-model")
+    app = create_app(settings)
+    fake = FakeLLM([invalid, invalid])
+    with TestClient(app) as client:
+        llm = LLM(settings, app.state.sessions, fake)
+        with pytest.raises(AppError, match="一次修复后仍不符合要求"):
+            client.portal.call(llm.generate, "draft_plan", {}, PlanDraft)
+        assert len(fake.requests) == 2
+        summary = fake.requests[1]["messages"][-1]["content"].split("校验错误：", 1)[1]
+        assert len(summary) > 500
+        assert all(set(error) == {"loc", "type", "msg"} for error in json.loads(summary))
+        with app.state.sessions() as db:
+            calls = db.scalars(select(LLMCall).order_by(LLMCall.created_at)).all()
+            assert [call.status for call in calls] == ["invalid_output", "invalid_output"]
+            assert all(call.error == summary[:500] and len(call.error) == 500 for call in calls)
