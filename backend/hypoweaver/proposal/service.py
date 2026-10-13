@@ -191,14 +191,13 @@ async def build_proposal(snapshot, llm, project_id, progress):
                 else conservative[c["chosen_strength"]]
             )
             paragraph = interpretation.get(c["claim_id"], conservative[c["chosen_strength"]])
-            extra = " " + paragraph if paragraph.strip() != final_text.strip() else ""
+            conclusion = paragraph if final_text.strip() in paragraph else final_text + " " + paragraph
             conclusions.append(
                 ("研究者尚未确认。" if c["user_decision"] == "pending" else "")
                 + "采用强度："
                 + LABELS[c["chosen_strength"]]
                 + "。"
-                + final_text
-                + extra
+                + conclusion
             )
     sections += [
         {"key": "results", "markdown": result_md, "injected_numbers_ref": numbers, "editable": False},
