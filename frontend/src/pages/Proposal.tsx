@@ -1,3 +1,4 @@
+import { fmtNumber } from '../components/ResultTable'
 import { ScrollRegion } from '../components/shell/ShellContext'
 import { useUrlParam } from '../lib/urlState'
 import { StageActions } from '../components/shell/ShellContext'
@@ -54,7 +55,7 @@ function render(s: Section) {
   return s.markdown.replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>
     s.injected_numbers_ref[key] === null
       ? '未估计'
-      : String(Number(Number(s.injected_numbers_ref[key]).toPrecision(6))),
+      : fmtNumber(Number(s.injected_numbers_ref[key])),
   )
 }
 function SectionView({ section, proposalId }: { section: Section; proposalId: string }) {
