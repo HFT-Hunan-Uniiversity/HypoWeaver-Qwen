@@ -34,7 +34,11 @@ def save_cards(db, project_id, cards, search_id=None):
     before = [serialize(c) for c in existing if c.included]
     by_doi = {doi_normalize(card.doi): card for card in existing if card.doi}
     by_title = {title_key(card.title, card.year): card for card in existing}
-    for values in merge_cards(cards):
+    merged = merge_cards(cards)
+    if search_id:
+        merged.sort(key=lambda c: c.get("_relevance", 0), reverse=True)
+    for rank, values in enumerate(merged):
+        values.pop("_relevance", None)
         doi = values.get("doi")
         title = title_key(values["title"], values.get("year"))
         card = by_doi.get(doi) if doi else by_title.get(title)
@@ -46,6 +50,8 @@ def save_cards(db, project_id, cards, search_id=None):
                 if key in enriched:
                     setattr(card, key, enriched[key])
         else:
+            if search_id:
+                values["included"] = rank < 40
             card = EvidenceCard(project_id=project_id, search_id=search_id, **values)
             db.add(card)
         if doi:

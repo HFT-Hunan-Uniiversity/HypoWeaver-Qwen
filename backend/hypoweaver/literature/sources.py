@@ -69,6 +69,8 @@ def merge_cards(cards):
             merged.append(card)
         else:
             existing = merged[match]
+            if "_relevance" in card:
+                existing["_relevance"] = existing.get("_relevance", 0) + card["_relevance"]
             existing["sources"] = sorted(
                 set(existing.get("sources", [existing["source"]]) + card.get("sources", [card["source"]]))
             )
@@ -112,7 +114,10 @@ class LiteratureClient:
                             else payload.get("message", {}).get("items", [])
                         )
                         converter = openalex_card if source == "openalex" else crossref_card
-                        cards.extend(converter(row) for row in rows)
+                        # Reciprocal rank fusion treats each provider/query ranking equally.
+                        cards.extend(
+                            {**converter(row), "_relevance": 1 / (60 + rank)} for rank, row in enumerate(rows, 1)
+                        )
                         query_log.append({"query": query["text"], "hits": len(rows), "status": "ok"})
                         break
                     except (httpx.HTTPError, ValueError, TypeError, KeyError, AttributeError, IndexError) as exc:
