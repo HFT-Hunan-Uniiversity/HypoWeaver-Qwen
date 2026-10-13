@@ -106,7 +106,18 @@ def robustness_spec(spec, check, frame):
     changed = spec.model_copy(deep=True)
     raw = frame
     if check.kind == "drop_controls":
-        changed.controls = []
+        from ..plans.robustness import canonical
+
+        requested = check.args.get("controls")
+        if requested is None:
+            changed.controls = []
+        else:
+            if not isinstance(requested, list) or not all(isinstance(c, str) for c in requested):
+                raise AppError("robustness_args", "移除控制检查需要controls变量列表")
+            keys = {canonical(c) for c in requested}
+            if not keys <= {canonical(c) for c in changed.controls}:
+                raise AppError("robustness_args", "移除的控制变量不在基准模型中")
+            changed.controls = [c for c in changed.controls if canonical(c) not in keys]
     elif check.kind == "exclude_years":
         years = check.args.get("years")
         if not isinstance(years, list) or not years:

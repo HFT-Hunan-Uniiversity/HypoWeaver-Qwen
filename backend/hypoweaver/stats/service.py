@@ -26,6 +26,9 @@ LABELS = {
 }
 
 
+from ..plans.robustness import compile_checks
+
+
 def compile_spec(plan, binding):
     mappings = binding.bindings
 
@@ -47,7 +50,7 @@ def compile_spec(plan, binding):
         fe=plan.model["fixed_effects"],
         cluster=plan.model["cluster"],
         event={"bins": plan.model["bins"]},
-        robustness=plan.robustness,
+        robustness=compile_checks(plan, mappings),
         permutation=plan.permutation,
         mechanism=role.get("mechanism"),
         moderator=role.get("moderator"),

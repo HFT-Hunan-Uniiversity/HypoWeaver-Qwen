@@ -145,6 +145,9 @@ def confirm(db, plan_id):
     if entity.status == "confirmed":
         return entity
     schema_for(db, projects.get(db, entity.project_id)).model_validate(serialize(entity))
+    from .robustness import validate_plan
+
+    validate_plan(db, entity)
     for old in db.scalars(
         select(StudyPlan).where(StudyPlan.project_id == entity.project_id, StudyPlan.status == "confirmed")
     ).all():
