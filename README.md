@@ -73,3 +73,12 @@ cd backend && uv run uvicorn hypoweaver.app:app --port 8000
 本轮仅交付后端与接口，前端设置界面由另一项工作接入。真实千问连接与生成验收按用户要求延后；离线接口测试不能替代真实连通性证据。
 
 项目创建和更新接口接受 `case: "carbon" | null`。碳市场稳健性约束仅由该标记或项目实际绑定资产的 DOI `10.17632/rrfwny7byp.1` 触发；仅上传/登记资产、标题或研究方向出现碳相关字样都不会触发。案例标记变更会使下游过期。
+
+### 第五轮后端接口约定
+
+- 候选生成及方案起草按最新方案绑定查找项目数据；未绑定且 `case=carbon` 时使用已登记的“碳市场企业面板 · Mendeley V1”。有数据时传入 `dataset_fields`（name、label、type、semantics、level、missing_rate），否则省略。不可由已有字段和白名单公式构造的概念应写入边界。
+- 方案可带 `suggested_binding: {变量名: {field | formula}}`。`GET /api/plans/{id}/bindings` 在尚未保存绑定时返回预填建议及 dataset_id、confirmed=false、note；已有绑定优先。新版本只继承同名变量及数据资产，必须重新确认。预填与建议都不代表已保存或确认。
+- `case=carbon` 起草固定为 policy_causal：行业同群暴露、绿色发明对数结果及总资产对数/杠杆率/资产收益率控制，默认四项稳健性由案例模块提供。确认时解析稳健性中的方案变量别名；有可用数据时校验真实字段，无法解析返回中文 422。尚无数据时仅能校验公式语法；完整绑定被确认时再校验实际字段。新增已在基准中的控制变量会被拒绝。
+- 复算返回 `main_consistent`；整体 consistent 只覆盖主模型及原先成功的稳健性。原先失败项仍在 rows 中标为 failed、origin=analysis。主结论仅以主模型复算作为复算门槛，其余稳健性、置换、前趋势规则继续独立适用。
+- 提案接口返回 `narrative_status: complete | partial | null` 与 `narrative_errors`。旧提案未知状态为 null。失败原因含 section、snippet、rule，结果解读另含 claim_id；两次仍未通过的部分才用默认说明，合格章节/解读保留。年份也使用 `dataset.year_min/year_max` 占位符，企业数使用 `dataset.n_units`。本轮未接入前端状态展示。
+- 文献联合检索先去重，按各来源及各查询的相关性名次做倒数名次融合；新卡默认仅纳入排序前 40 条，其他卡仍可手动纳入。重新检索不会覆盖已有卡的手工纳入/排除状态。

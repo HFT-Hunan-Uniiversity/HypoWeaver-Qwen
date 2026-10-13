@@ -81,7 +81,14 @@ def validate_plan(db, plan):
     from ..binding.service import get
     from ..datasets.service import get as dataset_get
 
+    from ..datasets.context import for_project
+    from ..projects.service import get as project_get
+
     binding = get(db, plan.id)
+    dataset = dataset_get(db, binding["dataset_id"]) if binding else for_project(db, project_get(db, plan.project_id))
     mappings = binding["bindings"] if binding else plan.suggested_binding or {}
-    fields = {f["name"] for f in dataset_get(db, binding["dataset_id"]).profile} if binding else None
-    compile_checks(plan, mappings, fields)
+    fields = {f["name"] for f in dataset.profile} if dataset else None
+    try:
+        compile_checks(plan, mappings, fields)
+    except AppError as exc:
+        raise AppError("robustness_args", exc.message, 422) from exc

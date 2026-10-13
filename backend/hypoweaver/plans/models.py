@@ -78,6 +78,8 @@ class PlanDraft(BaseModel):
     def unique_roles(self):
         if len({v.name for v in self.variables}) != len(self.variables):
             raise ValueError("变量名必须唯一")
+        if self.suggested_binding and not set(self.suggested_binding) <= {v.name for v in self.variables}:
+            raise ValueError("建议绑定只能包含方案已有变量名")
         for role in ["outcome", "treatment", "unit", "time"]:
             if sum(v.role == role for v in self.variables) != 1:
                 raise ValueError(f"{role} 角色必须恰好有一个变量")

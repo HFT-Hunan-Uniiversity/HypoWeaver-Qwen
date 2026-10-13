@@ -15,6 +15,8 @@ def test_peer_exposure_caps_at_association(tmp_path):
         drain(client, app)
         plan = client.get(f"/api/projects/{project}/plans").json()[0]
         base = "/api/plans/" + plan["id"]
+        plan["robustness"][-1]["args"] = {"outcome": "y"}
+        assert client.patch(base, json=plan).status_code == 200
         client.post(base + ":confirm")
         plan = client.post(base + ":new-version").json()
         base = "/api/plans/" + plan["id"]

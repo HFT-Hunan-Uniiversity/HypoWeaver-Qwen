@@ -74,15 +74,6 @@ def reproduce(spec, frame, result=None):
         try:
             changed, raw = robustness_spec(spec, check, frame) if check else (spec, frame)
             estimate = refit(changed, raw)
-            original = (
-                None
-                if result is None
-                else result["main"]
-                if check is None
-                else next(
-                    (r for r in result["robustness"] if r["id"] == identifier and r["status"] == "succeeded"), None
-                )
-            )
             differences = (
                 {}
                 if original is None

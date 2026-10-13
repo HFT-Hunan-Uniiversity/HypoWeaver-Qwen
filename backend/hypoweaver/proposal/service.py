@@ -12,7 +12,7 @@ from ..binding.models import VariableBinding
 from ..binding.service import readiness
 from ..claims.service import list_ as claims_list, LABELS
 from ..claims.models import STRENGTHS
-from .models import Proposal, Interpretation
+from .models import Proposal
 from .rendering import NARRATIVE, TOKEN, issues, result_table, render_markdown
 
 
@@ -76,16 +76,6 @@ def public(entity):
     data = serialize(entity)
     data["markdown"] = render_markdown(entity)
     return data
-
-
-async def checked_call(llm, name, payload, schema, project_id, validate):
-    for attempt in range(2):
-        output = await llm.generate(name, payload, schema, project_id)
-        problems = validate(output)
-        if not problems:
-            return output
-        payload = {**payload, "previous": output.model_dump(), "rewrite_reasons": problems}
-    return None
 
 
 async def build_proposal(snapshot, llm, project_id, progress):
@@ -165,32 +155,10 @@ async def build_proposal(snapshot, llm, project_id, progress):
         "causal_cautious": "仅在识别假设成立时支持谨慎的因果解释。",
     }
     if active and run:
-        output = await checked_call(
-            llm,
-            "interpret_results",
-            {"claims": active, "numbers": numbers},
-            Interpretation,
-            project_id,
-            lambda o: (
-                [
-                    p
-                    for item in o.paragraphs
-                    for p in issues(
-                        item.text,
-                        numbers,
-                        next((c["chosen_strength"] for c in active if c["claim_id"] == item.claim_id), "insufficient"),
-                    )
-                ]
-                + (
-                    []
-                    if {p.claim_id for p in o.paragraphs} == {c["claim_id"] for c in active}
-                    and len(o.paragraphs) == len(active)
-                    else ["结论标识须完整且有效"]
-                )
-            ),
-        )
-        if output:
-            interpretation = {p.claim_id: p.text for p in output.paragraphs}
+        from .narrative import generate_interpretations
+
+        interpretation, interpretation_errors = await generate_interpretations(llm, active, numbers, project_id)
+        narrative_errors.extend(interpretation_errors)
     conclusions = []
     for c in claims:
         if c["user_decision"] in {"deferred", "rejected"}:

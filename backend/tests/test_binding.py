@@ -14,6 +14,8 @@ def test_binding_safe_formulas_readiness_and_missing_data_plan(tmp_path):
         drain(client, app)
         plan = client.get(f"/api/projects/{p}/plans").json()[0]
         base = "/api/plans/" + plan["id"]
+        plan["robustness"][-1]["args"] = {"outcome": "y"}
+        assert client.patch(base, json=plan).status_code == 200
         assert client.get(base + "/readiness").json()["status"] == "not_ready"
         client.post(base + ":confirm")
         frame = pd.DataFrame(

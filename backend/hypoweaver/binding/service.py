@@ -46,6 +46,10 @@ def save(db, plan_id, payload):
         if variables[name]["role"] in {"unit", "time"} and value.formula:
             raise AppError("invalid_key", "个体和时间标识请直接绑定字段")
         resolve(value.model_dump(), data)
+    if payload.confirmed and set(variables) <= set(payload.bindings):
+        from ..plans.robustness import compile_checks
+
+        compile_checks(plan, {k: v.model_dump() for k, v in payload.bindings.items()}, set(data.columns))
     binding = db.get(VariableBinding, plan_id)
     if binding is None:
         binding = VariableBinding(plan_id=plan_id)

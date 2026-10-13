@@ -19,6 +19,8 @@ def test_carbon_constraints_use_case_or_bound_doi_not_title(tmp_path):
         drain(client, app)
         plan = client.get(f"/api/projects/{project}/plans").json()[0]
         base = "/api/plans/" + plan["id"]
+        plan["robustness"][-1]["args"] = {"outcome": "y"}
+        assert client.patch(base, json=plan).status_code == 200
         limited = {**plan, "robustness": plan["robustness"][:3]}
         assert client.patch(base, json=limited).status_code == 200
         assert client.post(base + ":confirm").status_code == 200

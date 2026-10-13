@@ -134,7 +134,10 @@ def draft(app, project_id, llm):
 
 def edit(db, plan_id, payload):
     entity = get(db, plan_id)
-    data = schema_for(db, projects.get(db, entity.project_id)).model_validate(payload.model_dump()).model_dump()
+    project = projects.get(db, entity.project_id)
+    data = schema_for(db, project).model_validate(payload.model_dump()).model_dump()
+    if project.case == "carbon" and data["method_family"] != "policy_causal":
+        raise AppError("carbon_method", "碳市场案例的方法固定为policy_causal", 422)
     invalidate(db, entity.project_id, "plan")
     if entity.status != "draft":
         return create(
