@@ -163,7 +163,7 @@ def test_numerical_words_cannot_bypass_injection():
         "增长百分之五十",
         "几十次置换",
         "数百条观测",
-        "系数为零点七",
+        "变化为零点七个百分点",
         "样本 two hundred firms",
         "约半数企业",
         "三分之一的企业",

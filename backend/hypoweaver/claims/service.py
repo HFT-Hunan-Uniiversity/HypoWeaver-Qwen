@@ -27,6 +27,13 @@ def check_wording(text, max_strength):
         text,
         flags=re.I,
     )
+    # Negation is scoped to the current clause; double negation does not license a causal claim.
+    cleaned = re.sub(
+        r"(?:不能|不足以|不支持|无法)(?:(?!否认|排除|不|但|却|然而)[^，。；！？,;!?\n]){0,30}因果"
+        r"(?:关系|解释|证据|效应)?",
+        "",
+        cleaned,
+    )
     pattern = (
         "促进|导致|造成|驱动|引致|因果|\\b(?:caus(?:e[sd]?|ing|al(?:ity)?)|promot(?:e[sd]?|"
         "ing)|induc(?:e[sd]?|ing)|driv(?:e[sn]?|ing)|led to|leads? to|effect of)\\b"

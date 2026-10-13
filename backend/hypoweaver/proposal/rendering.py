@@ -26,17 +26,43 @@ def number(value):
     return format(value, ".6g")
 
 
+def numerical_prose(text):
+    """Exclude code spans, balanced log calls and arithmetic expressions from number checks."""
+    text = re.sub(r"```[\s\S]*?```|`[^`\n]*`", "", text)
+    spans = []
+    for match in re.finditer(r"(?<![A-Za-z0-9_])log(?:1p)?\s*\(", text):
+        depth = 1
+        for end in range(match.end(), len(text)):
+            depth += (text[end] == "(") - (text[end] == ")")
+            if depth == 0:
+                spans.append((match.start(), end + 1))
+                break
+    for start, end in reversed(spans):
+        text = text[:start] + " " * (end - start) + text[end:]
+    identifier = r"[A-Za-z_][A-Za-z0-9_]*"
+    term = rf"(?:{identifier}|\d+(?:\.\d+)?)"
+    arithmetic = rf"(?<![A-Za-z0-9_]){term}(?:\s*[+*/-]\s*{term})+"
+    text = re.sub(arithmetic, lambda m: "" if re.search(r"[A-Za-z_]", m[0]) else m[0], text)
+    # Keep English number words as prose; digit/underscore-bearing identifiers are fields.
+    return re.sub(
+        rf"(?<![A-Za-z0-9_]){identifier}", lambda m: "" if re.search(r"[0-9_]", m[0]) or m[0] == "log" else m[0], text
+    )
+
+
 def issues(text, numbers, strength):
     bad = []
     if any(k not in numbers for k in TOKEN.findall(text)):
         bad.append("存在未知数字占位符")
     stripped = TOKEN.sub("", text)
-    # Whitelist ordinary discourse words, then reject numeral glyphs even when
-    # embedded in fractions or percentages. This intentionally favors explicit
-    # placeholders over trying to infer whether a numerical claim is empirical.
-    quantitative = stripped
+    quantitative = numerical_prose(stripped)
     for phrase in [
+        "零膨胀",
+        "零值",
+        "二元",
+        "两类",
         "两者",
+        "单一",
+        "首次",
         "进一步",
         "一方面",
         "另一方面",
@@ -53,19 +79,20 @@ def issues(text, numbers, strength):
     ]:
         quantitative = quantitative.replace(phrase, "")
     chinese_number = (
-        "[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟]|[数几](?:家|名|个|条|"
-        "行|次|期|年|月|日|倍|成|项)|翻倍|成倍|几分之几"
+        r"[零〇一二两三四五六七八九十百千万亿半壹贰叁肆伍陆柒捌玖拾佰仟数几]+"
+        r"(?:点[零〇一二两三四五六七八九]+)?\s*"
+        r"(?:家|名|个|条|行|次|期|年|月|日|天|倍|成|项|类|组|种|份|篇|例|人|元|岁|分|秒|小时|数|%|％)"
+        r"|翻倍|成倍"
     )
     english_number = (
-        "\\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|"
-        "fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|"
-        "seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|"
-        "triple)\\b"
+        r"\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|"
+        r"fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|"
+        r"seventy|eighty|ninety|hundred|thousand|million|billion|half|quarter|third|double|triple)\b"
     )
     if (
-        re.search(r"\d", stripped)
+        re.search(r"\d", quantitative)
         or re.search(chinese_number, quantitative)
-        or re.search(english_number, stripped, re.I)
+        or re.search(english_number, quantitative, re.I)
     ):
         bad.append("所有数字须使用给定占位符")
     if not check_wording(stripped, strength)["valid"]:
