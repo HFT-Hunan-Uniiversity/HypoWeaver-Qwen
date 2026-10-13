@@ -71,7 +71,7 @@ export default function AppSidebar({
               </p>
             </div>
             {projects.data?.length === 0 && <p className="sidebar__empty">还没有项目。</p>}
-            <div className="sidebar__list" role="list">
+            <div className="sidebar__list" role="list" data-scroll-region="" aria-label="项目列表">
               {projects.data?.map((p) => (
                 <Link
                   role="listitem"

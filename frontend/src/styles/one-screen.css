@@ -1241,3 +1241,115 @@ button,
 .overview-stage-grid .tone-red a {
   border-left: 3px solid var(--negative);
 }
+
+/* 总览 v2：行高按内容分配（上行占余量，阶段与设置行随内容），关键信息上下排 */
+.overview-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.95fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'summary test facts'
+    'stages stages settings';
+}
+.overview-stages {
+  grid-column: auto;
+}
+.overview-grid .overview-numbers dd {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+.overview-dl.is-stacked > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.overview-dl.is-stacked dd {
+  overflow-wrap: anywhere;
+}
+.overview-dl > div {
+  grid-template-columns: 5.5em minmax(0, 1fr);
+}
+.overview-card {
+  overflow: auto;
+}
+.overview-stage-grid {
+  margin: 0;
+}
+.overview-stage-grid a {
+  padding: 6px 10px;
+}
+.overview-stage-grid__body small {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.overview-stages > p.muted {
+  margin: 6px 0 0;
+}
+/* 侧栏：项目列表占满剩余高度，在自身区域内滚动 */
+.sidebar__projects {
+  flex: 1 1 auto;
+}
+.sidebar__list {
+  overscroll-behavior: contain;
+}
+/* 矮视口（≤800 高，如 MacBook Air 1280×720）：压缩总览纵向占用 */
+@media (max-height: 800px) {
+  .overview-grid {
+    gap: 10px;
+  }
+  .overview-grid .panel {
+    padding: 10px 14px;
+  }
+  .overview-grid .panel h2 {
+    margin-bottom: 6px;
+  }
+  .overview-grid .overview-numbers {
+    gap: 6px;
+    margin: 2px 0 6px;
+  }
+  .overview-grid .overview-numbers > div {
+    padding: 4px 8px;
+  }
+  .overview-grid .overview-numbers dd {
+    font-size: 15px;
+  }
+  .overview-stage-grid {
+    gap: 6px;
+  }
+  .overview-stage-grid a {
+    padding: 4px 8px;
+  }
+  .overview-stages > p.muted {
+    display: none;
+  }
+  .overview-dl {
+    gap: 4px;
+  }
+  .overview-dl.is-stacked > div {
+    display: grid;
+    grid-template-columns: 6.5em minmax(0, 1fr);
+    gap: 6px;
+  }
+  .overview-question {
+    font-size: 14px;
+  }
+  .overview-strength {
+    margin-bottom: 6px;
+  }
+}
+/* 侧栏项目名：最多两行完整换行，不用省略号 */
+.sidebar__task-copy strong,
+.sidebar__task-copy small {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.sidebar__task-copy small {
+  font-size: 11px;
+}
+.binding-row__var small {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}

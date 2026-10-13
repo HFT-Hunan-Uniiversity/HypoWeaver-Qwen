@@ -10,6 +10,8 @@ VIEWS = [('01_项目列表', '/', None), ('02_总览', f'/p/{P}', None), ('03_�
          (f'06{chr(98+i)}_方案_{t}', f'/p/{P}/plan', f'.plan-nav >> text={t}') for i, t in enumerate(SEC)] + [
          ('07_数据_资产', f'/p/{P}/data?tab=assets', None), ('07b_数据_绑定', f'/p/{P}/data?tab=binding', None),
          ('08_数据_结果', f'/p/{P}/data?tab=results', None), ('09_提案', f'/p/{P}/proposal', None), ('10_设置', '/settings', None)]
+VIEWPORTS = [(1280, 720), (1366, 768), (1440, 900)]
+SIDEBAR_OPEN = '--collapsed' not in sys.argv
 WIDTH_MIN = 0.75   # 内容横向跨度须 ≥ 可用宽度 75%（硬断言）
 BLANK_WARN = 0.30  # 最大连续空白矩形 > 内容区 30% 时告警（软提示，人工复核截图）
 JS = """() => {
@@ -67,39 +69,61 @@ JS = """() => {
     }
     blank = best / (GX * GY);
   }
+  // 截断/溢出：scroll region 之外，元素内容超出自身且被裁剪，或触发了 text-overflow 省略
+  const clipped = [];
+  for (const el of document.querySelectorAll('body *')) {
+    if (el.closest('svg') || el.closest('.recharts-wrapper')) continue;
+    const inRegion = !!el.closest('[data-scroll-region]');
+    if (el.matches('input, select, textarea, option, svg, img, canvas, .sr-only, [hidden]')) continue;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || !el.getClientRects().length) continue;
+    if (el.clientWidth <= 2 && el.clientHeight <= 2) continue;
+    const ox = cs.overflowX, oy = cs.overflowY;
+    const w = el.scrollWidth > el.clientWidth + 1, h = el.scrollHeight > el.clientHeight + 1;
+    const hasText = (el.innerText || '').trim().length > 0;
+    if (!hasText) continue;
+    let why = '';
+    if (cs.textOverflow === 'ellipsis' && w) why = '省略号';
+    else if (inRegion) continue;  // 区域内只查省略号；裁剪/滚动属于区域本身
+    else if (w && ox !== 'visible') why = '横向裁剪';
+    else if (h && oy !== 'visible' && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, body, html')) why = '纵向裁剪';
+    if (why) clipped.push(why + ':' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName) + '「' + (el.innerText || '').trim().slice(0, 14) + '」');
+  }
   const r = v.getBoundingClientRect();
   return { need: Math.round(r.top + v.scrollHeight), view: innerHeight,
            page_scroll: doc.scrollHeight > doc.clientHeight + 1 || v.scrollHeight > v.clientHeight + 1,
            other_scroll: bad, regions_scrolling: regions,
+           clipped: clipped,
            width_util: Math.round(width_util * 100) / 100, blank: Math.round(blank * 100) / 100 };
 }"""
 async def main():
-    args = sys.argv[1:]; shots = '--shots' in args; only = [a for a in args if a != '--shots']
+    args = sys.argv[1:]; shots = '--shots' in args; only = [a for a in args if not a.startswith('--')]
     out = {}
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        for vw, vh in [(1440, 900), (1280, 800)]:
+        for vw, vh in VIEWPORTS:
             pg = await b.new_page(viewport={'width': vw, 'height': vh})
             await pg.goto('http://localhost:8001/'); await pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+            if SIDEBAR_OPEN: await pg.evaluate("localStorage.setItem('hw-sidebar', '0')")  # 与用户 Mac 一致：侧栏展开（最坏情况）
             for name, path, click in VIEWS:
                 if only and not any(o in name for o in only): continue
                 await pg.goto(f'http://localhost:8001{path}'); await pg.wait_for_load_state('networkidle'); await pg.wait_for_timeout(900)
                 if click: await pg.click(click); await pg.wait_for_timeout(400)
-                m = await pg.evaluate(JS); m['pass'] = not m['page_scroll'] and not m['other_scroll'] and m['width_util'] >= WIDTH_MIN
+                m = await pg.evaluate(JS); m['pass'] = not m['page_scroll'] and not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN
                 out.setdefault(name, {})[f'{vw}x{vh}'] = m
                 if shots: await pg.screenshot(path=f'/workspace/hw/review/screens/one-screen/{vw}x{vh}/{name}.png')
             await pg.close()
         await b.close()
     json.dump(out, open('/workspace/hw/review/screens/one-screen/measure.json', 'w'), ensure_ascii=False, indent=1)
     ok = True
-    print('视图\t1440×900 需要/视口\t宽度\t空白\t通过\t1280×800 需要/视口\t宽度\t空白\t通过\t局部滚动区')
+    print('视图\t' + '\t'.join(f'{w}×{h} 需要/视口\t宽度\t空白\t通过' for w, h in VIEWPORTS) + '\t局部滚动区')
     for k, v in out.items():
         row = [k]
-        for vp in ['1440x900', '1280x800']:
+        for vp in [f'{w}x{h}' for w, h in VIEWPORTS]:
             m = v.get(vp)
             if not m: row += ['-'] * 4; continue
             ok &= m['pass']
-            why = m['other_scroll'][:2] + (['宽度<75%'] if m['width_util'] < WIDTH_MIN else [])
+            why = m['other_scroll'][:2] + m['clipped'][:3] + (['宽度<75%'] if m['width_util'] < WIDTH_MIN else [])
             row += [f"{m['need']}/{m['view']}", f"{m['width_util']:.0%}",
                     f"{m['blank']:.0%}" + (' ⚠' if m['blank'] > BLANK_WARN else ''),
                     '✓' if m['pass'] else '✗ ' + ','.join(why)]

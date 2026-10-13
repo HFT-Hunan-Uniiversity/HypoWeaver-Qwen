@@ -52,7 +52,7 @@ export default function Overview() {
         </p>
       )}
       <div className="overview-grid fill">
-        <section className="panel overview-card overview-summary">
+        <section className="panel overview-card overview-summary" style={{ gridArea: 'summary' }}>
           <div className="overview-card__head">
             <h2>{project.title}</h2>
             <CaseTag project={project} />
@@ -73,7 +73,7 @@ export default function Overview() {
             <Link to={`/p/${id}/direction`}>编辑研究方向 →</Link>
           </ScrollRegion>
         </section>
-        <section className="panel overview-card">
+        <section className="panel overview-card" style={{ gridArea: 'test' }}>
           <h2>最近一次检验</h2>
           {main ? (
             <>
@@ -109,11 +109,11 @@ export default function Overview() {
             <p className="muted">尚未运行检验。完成方案与数据绑定后，在「数据与检验」中运行。</p>
           )}
         </section>
-        <section className="panel overview-card">
+        <section className="panel overview-card" style={{ gridArea: 'settings' }}>
           <h2>项目设置</h2>
           <CaseToggle project={project} />
         </section>
-        <section className="panel overview-card overview-stages">
+        <section className="panel overview-card overview-stages" style={{ gridArea: 'stages' }}>
           <h2>
             阶段进度 <small className="inline-meta">已完成 {done} / 6</small>
           </h2>
@@ -140,11 +140,11 @@ export default function Overview() {
             </p>
           )}
         </section>
-        <section className="panel overview-card">
+        <section className="panel overview-card" style={{ gridArea: 'facts' }}>
           <h2>关键信息</h2>
-          <dl className="overview-dl">
+          <dl className="overview-dl is-stacked">
             <div>
-              <dt>数据资产与样本期</dt>
+              <dt>数据与样本期</dt>
               <dd>
                 {f.dataset ? [f.dataset.name, period].filter(Boolean).join(' · ') : '尚未运行检验'}
               </dd>
@@ -166,7 +166,7 @@ export default function Overview() {
               <dd>{f.runCount ?? 0} 次</dd>
             </div>
             <div>
-              <dt>结论强度（主结论）</dt>
+              <dt title="取主结论的强度">主结论强度</dt>
               <dd>{strengthCell}</dd>
             </div>
           </dl>
