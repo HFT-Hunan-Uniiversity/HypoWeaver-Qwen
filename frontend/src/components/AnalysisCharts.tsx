@@ -79,7 +79,9 @@ export default function AnalysisCharts({ result }: { result: AnalysisResult }) {
       )}
       {permutation && (
         <section className="panel">
-          <h2>置换检验</h2>
+          <h2>
+            置换检验 <small className="inline-meta">无控制变量模型</small>
+          </h2>
           <p>
             {permutation.n} 次有效置换 · 双侧 p 值 {pvalue(permutation.p)} · 耗时{' '}
             {num(permutation.elapsed_seconds, 2)} 秒
