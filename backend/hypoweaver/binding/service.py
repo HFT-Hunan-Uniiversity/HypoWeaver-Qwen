@@ -11,9 +11,23 @@ from .expressions import resolve
 
 
 def get(db, plan_id):
-    plans.get(db, plan_id)
+    plan = plans.get(db, plan_id)
     binding = db.get(VariableBinding, plan_id)
-    return serialize(binding) if binding else None
+    if binding:
+        return {**serialize(binding), "note": "请重新确认" if not binding.confirmed else ""}
+    from ..datasets.context import for_project
+    from ..projects.service import get as get_project
+
+    dataset = for_project(db, get_project(db, plan.project_id))
+    if not dataset or not plan.suggested_binding:
+        return None
+    return {
+        "plan_id": plan_id,
+        "dataset_id": dataset.id,
+        "bindings": plan.suggested_binding,
+        "confirmed": False,
+        "note": "建议预填，请重新确认",
+    }
 
 
 def save(db, plan_id, payload):

@@ -41,6 +41,9 @@ def start(app, project_id, llm):
     with app.state.sessions() as db:
         project = projects.get(db, project_id)
         direction = project.direction
+        from ..datasets.context import payload as data_payload
+
+        data_context = data_payload(db, project)
         all_cards = [serialize(c) for c in evidence(db, project_id) if c.included]
         if len(all_cards) < 2:
             raise AppError("evidence_required", "请先纳入至少两张证据卡")
@@ -82,7 +85,12 @@ def start(app, project_id, llm):
 
     async def work(progress):
         try:
-            payload = {"direction": direction, "evidence": cards, "landscape": build_landscape(all_cards)}
+            payload = {
+                **data_context,
+                "direction": direction,
+                "evidence": cards,
+                "landscape": build_landscape(all_cards),
+            }
             progress("正在基于已纳入文献生成候选")
             output = await llm.generate("generate_candidates", payload, CandidateOutput, project_id)
             candidates = clean(output)

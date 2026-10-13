@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from ..db import Base, uid, now
+from ..binding.models import BindingValue
 
 MethodFamily = Literal["policy_causal", "panel_association", "mechanism_boundary"]
 
@@ -70,6 +71,7 @@ class PlanDraft(BaseModel):
     decision_rules: DecisionRules = Field(default_factory=DecisionRules)
     claims_planned: list[PlannedClaim] = Field(min_length=1)
     boundary_notes: str = Field(min_length=1)
+    suggested_binding: dict[str, BindingValue] | None = None
     treatment_is_real_assignment: bool = False
 
     @model_validator(mode="after")
@@ -99,6 +101,7 @@ class StudyPlan(Base):
     status: Mapped[str] = mapped_column(default="draft")
     method_family: Mapped[str]
     variables: Mapped[list] = mapped_column(JSON)
+    suggested_binding: Mapped[dict | None] = mapped_column(JSON)
     model: Mapped[dict] = mapped_column(JSON)
     robustness: Mapped[list] = mapped_column(JSON)
     permutation: Mapped[dict] = mapped_column(JSON)

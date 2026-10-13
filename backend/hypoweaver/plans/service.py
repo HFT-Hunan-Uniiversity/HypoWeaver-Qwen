@@ -72,12 +72,17 @@ def draft(app, project_id, llm):
         direction = project.direction
         case = project.case
         schema = schema_for(db, project)
+        from ..datasets.context import payload as data_payload
+
+        data_context = data_payload(db, project)
 
     async def work(progress):
         progress("正在起草变量、识别设定与决策规则")
         output = await llm.generate(
             "draft_plan",
             {
+                **data_context,
+                "case": case,
                 "candidate": snapshot,
                 "direction": direction,
                 "supported_methods": ["policy_causal", "panel_association", "mechanism_boundary"],

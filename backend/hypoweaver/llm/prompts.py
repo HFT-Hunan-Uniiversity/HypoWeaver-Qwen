@@ -8,6 +8,12 @@ class Prompt:
     version: str = "1"
 
 
+DATA_FIELDS = (
+    "有dataset_fields时，每个变量必须能由已有字段或白名单公式log、log1p、加减乘除构造，"
+    "禁止虚构字段；无法构造的概念写入boundaries/boundary_notes，不作为变量。"
+    "方案提供suggested_binding，键为变量name，值为field或formula。"
+)
+
 PROMPTS = {
     "interpret_results": Prompt(
         "interpret_results",
@@ -38,7 +44,7 @@ PROMPTS = {
     "draft_plan": Prompt(
         "draft_plan",
         (
-            "根据候选起草完整方案，变量名用唯一英文标识，定义用中文；方法只允许policy_causal/"
+            DATA_FIELDS + "根据候选起草完整方案，变量名用唯一英文标识，定义用中文；方法只允许policy_causal/"
             "panel_association/mechanism_boundary。列出识别假设、uncertain与边界。"
             "方案硬约束：outcome、treatment、unit、time 各恰好一个变量，所有变量名必须唯一。"
             "候选含多个结果时，主结果只选一个，其余作为 alt_outcome 稳健性或计划结论说明，"
@@ -57,7 +63,7 @@ PROMPTS = {
     "generate_candidates": Prompt(
         "generate_candidates",
         (
-            "依据证据生成2–4个有实质差异的研究候选，完整说明缺口、假设、机制、数据、识别、风险、定"
+            DATA_FIELDS + "依据证据生成2–4个有实质差异的研究候选，完整说明缺口、假设、机制、数据、识别、风险、定"
             "位，每个至少引用两张给定证据。仅提出证据支持的增量，不编造研究结论。"
             "推荐说明解释取舍，不打分。收到review时据此修订一次。"
         ),
