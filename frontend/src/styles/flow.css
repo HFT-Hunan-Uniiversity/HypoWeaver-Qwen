@@ -1002,3 +1002,95 @@ fieldset.flow-ro > :last-child {
   background: color-mix(in srgb, var(--danger) 88%, #000);
   color: #fff;
 }
+
+/* ===== 整页纵向滚动（阶段页）=====
+   阶段页内容按自然高度自上而下排布，由 .shell-view 整页滚动；卡片内不再出现内部滚动条或被裁剪。
+   阶段条（页头）吸顶。总览、项目列表、设置等短页仍保持一屏紧凑布局（.page-body）。 */
+.shell-view:has(> .stage-page) {
+  overflow-y: auto;
+}
+.stage-page > .page-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+}
+.stage-body,
+.page-body {
+  flex: 0 0 auto !important;
+  min-height: auto !important;
+}
+.stage-body .fill,
+.page-body .fill,
+.stage-body [data-scroll-region],
+.page-body [data-scroll-region],
+.stage-body .scroll-region,
+.page-body .scroll-region,
+.stage-body .lit-list,
+.page-body .lit-list,
+.stage-body .lit-side,
+.page-body .lit-side,
+.stage-body .lit-side__list,
+.page-body .lit-side__list,
+.stage-body .results-cell,
+.page-body .results-cell,
+.stage-body .proposal-scroll,
+.page-body .proposal-scroll,
+.stage-body .binding-rows,
+.page-body .binding-rows,
+.stage-body .plan-main,
+.page-body .plan-main,
+.stage-body .overview-card,
+.page-body .overview-card,
+.stage-body details.panel[open] > .details-scroll,
+.page-body details.panel[open] > .details-scroll {
+  flex: 0 0 auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow-y: visible !important;
+}
+.stage-body .fill,
+.page-body .fill {
+  grid-template-rows: none !important;
+}
+.stage-body fieldset.flow-ro > *,
+.page-body fieldset.flow-ro > * {
+  flex: 0 0 auto !important;
+}
+.stage-body .flow-ref[open],
+.page-body .flow-ref[open] {
+  max-height: none !important;
+  overflow: visible !important;
+}
+/* 检验结果：全宽纵向堆叠，每张卡自然高度 */
+.results-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.results-stack > .panel {
+  margin: 0;
+}
+.results-stack .chart {
+  height: auto;
+}
+.stage-page {
+  flex: 1 0 auto !important;
+  min-height: auto !important;
+}
+
+.page-fill {
+  flex: 1 0 auto !important;
+  min-height: auto !important;
+}
+/* 宽表在窄屏也排得下：表单控件可收缩、长字段名可断行 */
+.stage-body table select,
+.stage-body table input {
+  min-width: 0;
+  width: 100%;
+}
+.stage-body table td,
+.stage-body table th {
+  overflow-wrap: anywhere;
+}

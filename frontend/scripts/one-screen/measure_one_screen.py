@@ -1,4 +1,5 @@
-"""一屏验收：每个视图在 1440×900 / 1280×800 下不得整页滚动，只允许 [data-scroll-region] 内滚动。
+"""版面验收（整页滚动版）：内容页允许整页纵向滚动；但任何卡片/区块不得出现内部纵向滚动条，内容不得被裁剪或无提示省略。
+（2026-10-14 起替代旧的"一屏不滚动"规则；侧栏项目列表、文本框、弹窗/抽屉、左侧阶段进度栏不在此列。）
 用法：python measure_one_screen.py [--shots] [视图名关键字...]   （脚本后端 :8001）"""
 import json, sys, asyncio
 from playwright.async_api import async_playwright
@@ -18,12 +19,11 @@ JS = """() => {
   const v = document.querySelector('.shell-view');
   const doc = document.scrollingElement;
   const bad = [];
-  for (const el of document.querySelectorAll('body *')) {
-    if (el.closest('[data-scroll-region]') && !el.matches('[data-scroll-region]')) continue;
-    if (el.matches('[data-scroll-region], textarea, .task-context__scroll, .sidebar__list')) continue;
+  for (const el of document.querySelectorAll('.shell-view *')) {
+    if (el.matches('textarea, select, option') || el.closest('[role="dialog"], .side-drawer, .modal, .rail-drawer, .rail-dock')) continue;
     const oy = getComputedStyle(el).overflowY;
-    if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1)
-      bad.push((el.className && el.className.toString().slice(0, 40)) || el.tagName);
+    if ((oy === 'auto' || oy === 'scroll' || oy === 'hidden') && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0 && oy !== 'hidden')
+      bad.push('内部滚动:' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName));
   }
   const regions = [...document.querySelectorAll('[data-scroll-region]')].filter(e => e.scrollHeight > e.clientHeight + 1).length;
   // 宽度利用率与大块空白：以内容区 .stage-body/.page-body 为基准，统计可见“叶子”内容（文字、控件、图表）
@@ -88,9 +88,8 @@ JS = """() => {
     const numeric = /^[-+−]?[0-9.,]+(e[-+]?\d+)?%?$/i.test((el.innerText || '').trim());
     if (cs.textOverflow === 'ellipsis' && w && (!titled || numeric)) why = '省略号';
     else if (cs.textOverflow === 'ellipsis' && w) continue;
-    else if (inRegion) continue;  // 区域内只查省略号；裁剪/滚动属于区域本身
     else if (w && ox !== 'visible') why = '横向裁剪';
-    else if (h && oy !== 'visible' && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, body, html')) why = '纵向裁剪';
+    else if (h && oy !== 'visible' && !el.closest('.sidebar, [role="dialog"], .rail-dock, .rail-drawer') && !el.matches('textarea') && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, body, html')) why = '纵向裁剪';
     if (why) clipped.push(why + ':' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName) + '「' + (el.innerText || '').trim().slice(0, 14) + '」');
   }
   // 卡片内部空白与同行等高（总览 .overview-grid 卡片）
@@ -140,7 +139,7 @@ async def main():
                 if only and not any(o in name for o in only): continue
                 await pg.goto(f'http://localhost:8001{path}'); await pg.wait_for_load_state('networkidle'); await pg.wait_for_timeout(900)
                 if click: await pg.click(click); await pg.wait_for_timeout(400)
-                m = await pg.evaluate(JS); m['pass'] = not m['page_scroll'] and not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and not m['row_mismatch'] and not m['ov_blank_bad']
+                m = await pg.evaluate(JS); m['pass'] = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and not m['row_mismatch'] and not m['ov_blank_bad']
                 out.setdefault(name, {})[f'{vw}x{vh}'] = m
                 if shots: await pg.screenshot(path=f'/workspace/hw/review/screens/one-screen/{vw}x{vh}/{name}.png')
             await pg.close()

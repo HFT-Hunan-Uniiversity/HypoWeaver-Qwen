@@ -124,12 +124,24 @@ async def run(a):
                             if await loc.count(): await loc.first.click()
                         await pg.wait_for_timeout(300)
                     tag = name + ('_intro' if intro else '')
-                    hits = await pg.evaluate(JS, TOL)
+                    # 整页滚动：逐屏滚动主视图检查（吸顶页头属浮层，被它盖住的文字跳过）
+                    hits, sh = [], await pg.evaluate("(document.querySelector('.shell-view')||{}).scrollHeight||0")
+                    for y in range(0, max(1, sh - H + 1), max(200, H - 120)):
+                        await pg.evaluate(f"(() => {{ const v = document.querySelector('.shell-view'); if (v) v.scrollTop = {y} }})()")
+                        await pg.wait_for_timeout(60)
+                        hits += [h for h in await pg.evaluate(JS, TOL) if h not in hits]
+                    await pg.evaluate("(() => { const v = document.querySelector('.shell-view'); if (v) v.scrollTop = 0 })()")
                     total += len(hits)
                     print(f"{'PASS' if not hits else 'FAIL'} {W}x{H} {tag}" + ''.join(f'\n    {h}' for h in hits[:12]))
                     if a.shots:
                         d = os.path.join(a.shots, f'{W}x{H}'); os.makedirs(d, exist_ok=True)
-                        await pg.screenshot(path=os.path.join(d, tag + '.png'))
+                        if a.full:  # 整页截图：临时把视口拉高到内容高度
+                            fh = await pg.evaluate("(() => { const v = document.querySelector('.shell-view'); return v ? v.scrollHeight - v.clientHeight : 0 })()")
+                            await pg.set_viewport_size({'width': W, 'height': H + max(0, fh)}); await pg.wait_for_timeout(400)
+                            await pg.screenshot(path=os.path.join(d, tag + '.png'))
+                            await pg.set_viewport_size({'width': W, 'height': H})
+                        else:
+                            await pg.screenshot(path=os.path.join(d, tag + '.png'))
                 await ctx.close()
         await br.close()
     print('ALL PASS' if total == 0 else f'{total} OVERLAPS')
@@ -138,5 +150,5 @@ async def run(a):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--base', default='http://localhost:5193'); ap.add_argument('--project', required=True)
-    ap.add_argument('--shots'); ap.add_argument('--only', default=''); ap.add_argument('--fresh', help='一个尚未填写方向的项目 id（可选）'); ap.add_argument('--viewports', default='1024x576,1280x720,1440x900')
+    ap.add_argument('--shots'); ap.add_argument('--only', default=''); ap.add_argument('--full', action='store_true', help='整页截图'); ap.add_argument('--fresh', help='一个尚未填写方向的项目 id（可选）'); ap.add_argument('--viewports', default='1024x576,1280x720,1440x900')
     sys.exit(1 if asyncio.run(run(ap.parse_args())) else 0)

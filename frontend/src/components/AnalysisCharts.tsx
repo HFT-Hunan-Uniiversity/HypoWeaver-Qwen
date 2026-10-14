@@ -13,7 +13,13 @@ import {
 } from 'recharts'
 import type { AnalysisResult } from '../api/analysis'
 import { num, pvalue } from './ResultTable'
-export default function AnalysisCharts({ result }: { result: AnalysisResult }) {
+export default function AnalysisCharts({
+  result,
+  only,
+}: {
+  result: AnalysisResult
+  only?: 'event' | 'permutation'
+}) {
   const event = result.event,
     permutation = result.permutation
   const eventData = event
@@ -35,7 +41,7 @@ export default function AnalysisCharts({ result }: { result: AnalysisResult }) {
   )
   return (
     <>
-      {event && (
+      {event && only !== 'permutation' && (
         <section className="panel">
           <h2>事件研究</h2>
           <p className="muted">
@@ -77,7 +83,7 @@ export default function AnalysisCharts({ result }: { result: AnalysisResult }) {
           </p>
         </section>
       )}
-      {permutation && (
+      {permutation && only !== 'event' && (
         <section className="panel">
           <h2>
             置换检验 <small className="inline-meta">无控制变量模型</small>
