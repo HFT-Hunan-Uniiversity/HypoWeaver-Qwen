@@ -56,8 +56,8 @@
 /* —— 主按钮 —— */
 .page-bar .flow-primary {
   min-height: 36px;
-  padding: 0 16px;
-  font-size: 14px;
+  padding: 0 var(--space-4);
+  font-size: var(--fz-body);
   box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--brand) 55%, transparent);
 }
 .flow-primary.is-warn {
@@ -98,13 +98,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 20px 0;
+  padding: 8px var(--space-5) 0;
   min-width: 0;
 }
 .flow-subhead h1 {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: var(--fz-h2);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -142,7 +142,7 @@
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
-  padding: 0 20px;
+  padding: 0 var(--space-5);
 }
 .flow-checklist {
   display: flex;
@@ -167,7 +167,7 @@
   height: 16px;
   border-radius: 50%;
   border: 1px solid currentColor;
-  font-size: 10px;
+  font-size: var(--fz-2xs);
 }
 .flow-checklist li.is-done {
   color: var(--positive);
@@ -178,10 +178,10 @@
 }
 .flow-intro {
   flex: 0 0 auto;
-  margin: 8px 20px 0;
+  margin: 8px var(--space-5) 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 7px 8px 7px 14px;
   border-radius: var(--radius-sm);
   background: #eef4ff;
@@ -208,7 +208,7 @@
   gap: 10px;
   text-align: center;
   border-radius: var(--radius);
-  padding: 20px;
+  padding: var(--space-5);
   min-height: 0;
 }
 .flow-progress {
@@ -221,7 +221,7 @@
 .flow-progress h2,
 .flow-empty h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: var(--fz-h2);
   font-family: var(--font-serif);
   font-weight: 500;
 }
@@ -263,7 +263,7 @@
   flex-direction: column;
   gap: 2px;
   text-align: left;
-  padding: 10px 16px;
+  padding: 10px var(--space-4);
   min-width: min(460px, 90%);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-sm);
@@ -273,7 +273,7 @@
 }
 .flow-empty__example small {
   color: var(--text-faint);
-  font-size: 11px;
+  font-size: var(--fz-eyebrow);
   letter-spacing: 0.1em;
 }
 .flow-ref {
@@ -315,9 +315,9 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-5);
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 14px var(--space-5);
   border: 2px solid var(--brand);
   border-radius: var(--radius);
   background: var(--surface);
@@ -327,18 +327,18 @@
 }
 .overview-next h2 {
   margin: 2px 0 0;
-  font-size: 18px;
+  font-size: var(--fz-h2);
   font-family: var(--font-serif);
   font-weight: 500;
 }
 .overview-next .eyebrow {
-  font-size: 11px;
+  font-size: var(--fz-eyebrow);
   letter-spacing: 0.18em;
   color: var(--brand);
 }
 .overview-next .flow-primary {
   min-height: 40px;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
   flex: none;
 }
 
@@ -346,7 +346,7 @@
 .dir-split {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
 }
 .dir-chat,
 .dir-card {
@@ -369,7 +369,7 @@
 }
 .dir-msg {
   max-width: 82%;
-  padding: 7px 12px;
+  padding: 7px var(--space-3);
   border-radius: 12px;
   font-size: var(--fz-sm);
   line-height: 1.5;
@@ -513,7 +513,7 @@ textarea.dir-input {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 22px;
+  gap: 6px var(--space-5);
   padding: 6px 14px;
   background: var(--surface);
   border: 1px solid var(--hairline);
@@ -521,7 +521,7 @@ textarea.dir-input {
   font-size: var(--fz-sm);
 }
 .lit-strip b {
-  font-size: 18px;
+  font-size: var(--fz-h2);
   color: var(--brand);
 }
 .lit-strip small {
@@ -552,7 +552,7 @@ textarea.dir-input {
 .lit-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .lit-list-wrap {
   display: flex;
@@ -573,7 +573,7 @@ textarea.dir-input {
 }
 .lit-paper {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 10px 14px;
   background: var(--surface);
   border: 1px solid var(--hairline);
@@ -595,7 +595,7 @@ textarea.dir-input {
 }
 .lit-paper h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fz-body);
   font-weight: 650;
   line-height: 1.4;
 }
@@ -639,7 +639,7 @@ textarea.dir-input {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   font-size: var(--fz-sm);
 }
 .lit-pager button {
@@ -680,7 +680,7 @@ textarea.dir-input {
 .lit-ref {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
   margin-top: 8px;
 }
@@ -689,7 +689,7 @@ textarea.dir-input {
 .cand-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
 }
 .cand-reco {
@@ -713,14 +713,14 @@ textarea.dir-input {
 .cand-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 .cand-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-height: 0;
-  padding: 12px 14px;
+  padding: var(--space-3) 14px;
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
@@ -746,7 +746,7 @@ textarea.dir-input {
   gap: 8px;
   margin: 0;
   font-weight: 650;
-  font-size: 15px;
+  font-size: var(--fz-h3);
   line-height: 1.4;
   cursor: pointer;
 }
@@ -822,14 +822,14 @@ textarea.dir-input {
     padding: 6px 14px;
   }
   .overview-next h2 {
-    font-size: 15px;
+    font-size: var(--fz-h3);
   }
   .overview-next .flow-primary {
     min-height: 32px;
   }
   .flow-intro {
     margin-top: 4px;
-    padding: 3px 6px 3px 12px;
+    padding: 3px 6px 3px var(--space-3);
   }
 }
 fieldset.flow-ro {
@@ -839,7 +839,7 @@ fieldset.flow-ro {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 /* 只有最后一块（字段档案/绑定表）可压缩并内部滚动；概况条与折叠说明保持自然高度，避免被压扁后文字互相叠压 */
 fieldset.flow-ro > * {
@@ -887,5 +887,67 @@ fieldset.flow-ro > :last-child {
     grid-template-rows: none;
     grid-auto-rows: minmax(260px, auto);
     overflow: auto;
+  }
+}
+
+/* —— 密度：统一字号/间距阶梯后的收紧（随视口 clamp）—— */
+.page-bar .flow-primary,
+.product-button,
+.discovery-form input,
+.discovery-form select,
+.gap-editor input {
+  min-height: var(--ctl-h);
+}
+.overview-next .flow-primary {
+  min-height: var(--ctl-h);
+}
+.proposal-document {
+  padding: clamp(14px, 4.8vw - 35px, 40px);
+  margin: var(--space-3) auto;
+}
+.proposal-section {
+  padding: var(--space-4) 0;
+  line-height: 1.75;
+}
+.proposal-document h1 {
+  font-size: var(--fz-display);
+  line-height: 1.3;
+  margin: var(--space-2) 0 var(--space-3);
+}
+.proposal-section h2 {
+  font-size: var(--fz-h2);
+}
+.proposal-document .section-heading button {
+  padding: 3px 8px;
+}
+/* 总览：字号收紧后，上行按内容取高，余量交给阶段进度（阶段卡片拉伸），避免概要卡内大块空白 */
+@media (max-height: 640px) {
+  .overview-grid {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .overview-stages {
+    display: flex;
+    flex-direction: column;
+  }
+  .overview-stage-grid {
+    flex: 1 1 auto;
+    grid-auto-rows: 1fr;
+  }
+}
+/* 字号收紧后矮屏也有空间：恢复概要卡里的领域/约束与主结论强度 */
+@media (max-height: 660px) and (max-width: 1100px) {
+  .overview-summary .overview-dl {
+    display: grid;
+  }
+}
+@media (max-height: 660px) {
+  .overview-grid .overview-numbers {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-height: 660px) {
+  .overview-next {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
   }
 }

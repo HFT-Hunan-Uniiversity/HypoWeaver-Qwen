@@ -71,7 +71,7 @@
 .model-banner {
   flex: 0 0 auto;
   min-height: 30px;
-  padding: 4px 12px 4px 16px;
+  padding: 4px var(--space-3) 4px var(--space-4);
   font-size: var(--fz-sm);
 }
 .model-banner__close {
@@ -101,9 +101,9 @@
   flex: 0 0 52px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
   min-width: 0;
-  padding: 0 16px 0 20px;
+  padding: 0 var(--space-4) 0 var(--space-5);
   border-bottom: 1px solid var(--hairline);
 }
 .page-bar__title {
@@ -116,7 +116,7 @@
 .page-bar__title h1 {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: var(--fz-h2);
   font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
@@ -141,7 +141,7 @@
 .page-bar button,
 .page-bar .button {
   min-height: 32px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   font-size: var(--fz-sm);
 }
 .page-bar label {
@@ -218,7 +218,7 @@ a.stage-bar__item:hover {
   border-radius: 50%;
   background: var(--surface);
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: var(--fz-eyebrow);
   font-weight: 700;
 }
 .stage-bar__text strong {
@@ -227,7 +227,7 @@ a.stage-bar__item:hover {
 }
 .stage-bar__text small {
   display: block;
-  font-size: 12px;
+  font-size: var(--fz-xs);
   color: var(--text-muted);
   max-width: 150px;
   overflow: hidden;
@@ -309,8 +309,8 @@ a.stage-bar__item:hover {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px 20px 16px;
+  gap: var(--space-3);
+  padding: 14px var(--space-5) var(--space-4);
 }
 .stage-body > *,
 .page-body > * {
@@ -330,18 +330,18 @@ a.stage-bar__item:hover {
   min-height: 0;
 }
 .panel {
-  padding: 14px 16px;
+  padding: 14px var(--space-4);
 }
 .panel h2 {
   margin: 0 0 8px;
-  font-size: 15px;
+  font-size: var(--fz-h3);
 }
 .panel p {
   margin: 4px 0;
 }
 .stage-body .notice,
 .stage-body .error {
-  padding: 6px 12px;
+  padding: 6px var(--space-3);
   font-size: var(--fz-sm);
 }
 label {
@@ -352,7 +352,7 @@ textarea,
 select {
   margin-top: 4px;
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 button,
 .button,
@@ -364,19 +364,19 @@ button,
 .cols-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .cols-side {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .col-stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
   min-width: 0;
 }
@@ -431,13 +431,13 @@ button,
 .overview-question {
   margin: 0;
   color: var(--text);
-  font-size: 15px;
+  font-size: var(--fz-h3);
 }
 .overview-body .project-overview__facts {
   margin-top: 0;
 }
 .overview-body .project-overview__facts > div {
-  padding: 10px 16px;
+  padding: 10px var(--space-4);
 }
 .overview-numbers {
   display: grid;
@@ -452,11 +452,11 @@ button,
 }
 .overview-numbers dt {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fz-xs);
 }
 .overview-numbers dd {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fz-h2);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -477,11 +477,11 @@ button,
 .lit-grid {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr) 360px;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .lit-grid > .scroll-region {
-  gap: 12px;
+  gap: var(--space-3);
   padding-right: 2px;
 }
 .lit-grid .chart-grid {
@@ -518,7 +518,7 @@ button,
 }
 .lit-grid h3 {
   margin: 10px 0 4px;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 
 /* 候选 */
@@ -537,7 +537,7 @@ button,
 }
 .reco-line > summary > strong {
   flex: 0 0 auto;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 .reco-line__text {
   flex: 1 1 auto;
@@ -556,7 +556,7 @@ button,
 .master-detail.fill {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   align-items: stretch;
   min-height: 0;
 }
@@ -580,16 +580,16 @@ button,
 .three-columns {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 .three-columns h3,
 .candidate-card__body > h3 {
   margin: 8px 0 4px;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 .three-columns p,
 .three-columns li {
-  font-size: 13.5px;
+  font-size: var(--fz-body);
 }
 .candidate-card > .candidate-actions,
 .candidate-card > :last-child {
@@ -629,7 +629,7 @@ button,
   gap: 8px;
 }
 .stage-tabs.is-compact small {
-  font-size: 12px;
+  font-size: var(--fz-xs);
 }
 .info-strip {
   display: flex;
@@ -642,7 +642,7 @@ button,
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 16px;
+  padding: 8px var(--space-4);
   border-right: 1px solid var(--hairline);
   min-width: 0;
 }
@@ -651,10 +651,10 @@ button,
 }
 .info-strip span {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fz-xs);
 }
 .info-strip strong {
-  font-size: 14px;
+  font-size: var(--fz-body);
   font-weight: 600;
 }
 .side-drawer {
@@ -697,7 +697,7 @@ button,
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 16px;
+  gap: 8px var(--space-4);
 }
 .results-toolbar .step-badges {
   margin: 0;
@@ -706,7 +706,7 @@ button,
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .results-grid > .panel.fill {
@@ -715,14 +715,14 @@ button,
 .results-cell {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .results-cell > section,
 .results-cell > .panel {
   margin: 0;
 }
 .results-cell > section:not(.panel) {
-  padding: 14px 16px;
+  padding: 14px var(--space-4);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
   background: var(--surface);
@@ -738,7 +738,7 @@ button,
 }
 .sub-tabs button {
   min-height: 32px;
-  padding: 4px 12px;
+  padding: 4px var(--space-3);
   border: 0;
   border-bottom: 2px solid transparent;
   border-radius: 0;
@@ -752,14 +752,14 @@ button,
 }
 .results-cell h2 {
   margin: 0 0 8px;
-  font-size: 15px;
+  font-size: var(--fz-h3);
 }
 
 /* 提案：目录 + 正文 */
 .proposal-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .proposal-toc {
@@ -811,7 +811,7 @@ button,
 /* 研究方案 */
 .plan-layout.fill {
   align-items: stretch;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .plan-layout .plan-nav {
@@ -819,7 +819,7 @@ button,
   align-self: start;
 }
 .plan-main {
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .plan-main > * {
@@ -907,7 +907,7 @@ button,
 .plan-sec--rules:not([hidden]) {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px 12px;
+  gap: 10px var(--space-3);
   align-items: end;
 }
 .plan-sec--rules > .two-columns {
@@ -929,7 +929,7 @@ button,
 .plan-sec--variables > .editor-row + .editor-row label:not(.check) > *,
 .plan-sec--robustness > .editor-row + .editor-row label > * {
   margin-top: 0;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 .plan-sec--variables > .editor-row + .editor-row .check {
   padding-bottom: 8px;
@@ -939,7 +939,7 @@ button,
 .binding-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .binding-grid > .panel {
@@ -950,7 +950,7 @@ button,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .binding-head h2 {
   display: inline;
@@ -958,7 +958,7 @@ button,
 }
 .binding-hint {
   margin: 4px 0 8px;
-  font-size: 13px;
+  font-size: var(--fz-sm);
 }
 .binding-rows {
   flex: 1 1 auto;
@@ -967,7 +967,7 @@ button,
 .binding-row {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) 130px minmax(0, 1.2fr);
-  gap: 4px 12px;
+  gap: 4px var(--space-3);
   align-items: center;
   padding: 6px 4px;
   border-bottom: 1px solid var(--hairline);
@@ -979,7 +979,7 @@ button,
   padding: 6px 4px;
   background: var(--surface);
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fz-xs);
   font-weight: 600;
 }
 .binding-row label {
@@ -988,7 +988,7 @@ button,
 }
 .binding-row label > * {
   margin-top: 0;
-  font-size: 14px;
+  font-size: var(--fz-body);
 }
 .binding-row__var {
   display: flex;
@@ -999,12 +999,12 @@ button,
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 13px;
+  font-size: var(--fz-sm);
 }
 .binding-row__note {
   grid-column: 1 / -1;
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fz-sm);
 }
 .binding-foot {
   display: flex;
@@ -1039,7 +1039,7 @@ button,
   flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 24px;
+  gap: var(--space-4) var(--space-5);
   min-height: 0;
 }
 .direction-grid label {
@@ -1049,14 +1049,14 @@ button,
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   background: var(--surface-2);
-  font-size: 13px;
+  font-size: var(--fz-sm);
 }
 .direction-tips ul {
   margin: 6px 0 0;
   padding-left: 18px;
 }
 .direction-form > .actions {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 .direction-grid > .col-stack > label {
   display: flex;
@@ -1093,7 +1093,7 @@ button,
   border: 1px dashed var(--brand);
   border-radius: 999px;
   color: var(--brand);
-  font-size: 12px;
+  font-size: var(--fz-xs);
   font-weight: 500;
   vertical-align: 1px;
 }
@@ -1101,7 +1101,7 @@ button,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .binding-reconfirm button {
   flex: 0 0 auto;
@@ -1116,7 +1116,7 @@ button,
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.9fr);
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 .overview-card {
@@ -1170,7 +1170,7 @@ button,
   height: 24px;
   border-radius: 50%;
   background: var(--surface);
-  font-size: 12px;
+  font-size: var(--fz-xs);
   font-weight: 650;
 }
 .overview-stage-grid__body {
@@ -1182,7 +1182,7 @@ button,
 .overview-stage-grid__body small {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 12.5px;
+  font-size: var(--fz-sm);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -1201,11 +1201,11 @@ button,
 }
 .overview-dl dt {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--fz-sm);
 }
 .overview-dl dd {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--fz-body);
 }
 .overview-strength {
   margin: 0 0 8px;
@@ -1220,7 +1220,7 @@ button,
 }
 .overview-grid .overview-numbers dd {
   overflow: hidden;
-  font-size: 16px;
+  font-size: var(--fz-h3);
   text-overflow: ellipsis;
 }
 @media (max-width: 1366px) {
@@ -1311,7 +1311,7 @@ button,
     padding: 4px 8px;
   }
   .overview-grid .overview-numbers dd {
-    font-size: 15px;
+    font-size: var(--fz-h3);
   }
   .overview-stage-grid {
     gap: 6px;
@@ -1331,7 +1331,7 @@ button,
     gap: 6px;
   }
   .overview-question {
-    font-size: 14px;
+    font-size: var(--fz-body);
   }
   .overview-strength {
     margin-bottom: 6px;
@@ -1346,7 +1346,7 @@ button,
   overflow-wrap: anywhere;
 }
 .sidebar__task-copy small {
-  font-size: 11px;
+  font-size: var(--fz-eyebrow);
 }
 .binding-row__var small {
   overflow: visible;
@@ -1377,7 +1377,7 @@ button,
 .overview-settings small {
   display: block;
   margin-top: 2px;
-  font-size: 12.5px;
+  font-size: var(--fz-sm);
   line-height: 1.45;
 }
 .overview-stage-grid {
@@ -1442,17 +1442,17 @@ button,
     gap: 8px;
   }
   .overview-grid .panel {
-    padding: 8px 12px;
+    padding: 8px var(--space-3);
   }
   .overview-grid .panel h2 {
     margin-bottom: 4px;
-    font-size: 14px;
+    font-size: var(--fz-body);
   }
   .overview-direction-text {
     display: none;
   }
   .overview-question {
-    font-size: 13.5px;
+    font-size: var(--fz-body);
   }
   .overview-settings {
     margin-top: 6px;
@@ -1473,12 +1473,12 @@ button,
     padding: 3px 8px;
   }
   .overview-grid .overview-numbers dd {
-    font-size: 14px;
+    font-size: var(--fz-body);
   }
   .overview-test-actions .product-button {
     min-height: 28px;
     padding: 2px 10px;
-    font-size: 13px;
+    font-size: var(--fz-sm);
   }
   .overview-stage-grid a {
     padding: 4px 8px;
@@ -1499,7 +1499,7 @@ button,
 @media (max-height: 660px) {
   .overview-grid .overview-numbers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 12px;
+    column-gap: var(--space-3);
     row-gap: 2px;
   }
   .overview-grid .overview-numbers > div {
@@ -1534,7 +1534,7 @@ button,
     display: none !important;
   }
   .overview-summary .overview-card__head h2 {
-    font-size: 13.5px;
+    font-size: var(--fz-body);
   }
 }
 @media (max-height: 660px) and (max-width: 1100px) {
