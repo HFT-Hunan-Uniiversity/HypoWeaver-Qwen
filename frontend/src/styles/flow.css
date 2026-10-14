@@ -951,3 +951,54 @@ fieldset.flow-ro > :last-child {
     padding-bottom: var(--space-2);
   }
 }
+
+/* —— 侧栏项目删除 —— */
+.sidebar__row {
+  position: relative;
+}
+.sidebar__del {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-xs);
+  background: var(--surface) !important;
+  color: var(--text-muted) !important;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.sidebar__row:hover .sidebar__del,
+.sidebar__del:focus-visible {
+  opacity: 1;
+}
+.sidebar__row:hover .sidebar__task {
+  padding-right: 36px;
+}
+.sidebar__del:hover {
+  color: var(--danger) !important;
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent) !important;
+}
+@media (hover: none) {
+  .sidebar__del {
+    opacity: 0.7;
+  }
+}
+.danger-text {
+  color: var(--danger);
+}
+.sidebar-del-dialog .product-button.is-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+.sidebar-del-dialog .product-button.is-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 88%, #000);
+  color: #fff;
+}
