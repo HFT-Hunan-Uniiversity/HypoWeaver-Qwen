@@ -1,3 +1,4 @@
+import ProcessTimeline, { jobSeconds } from '../components/flow/ProcessTimeline'
 import { useUrlParam } from '../lib/urlState'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -117,6 +118,22 @@ export default function Plan() {
         />
       ) : (
         <>
+          <ProcessTimeline
+            title="方案起草"
+            seconds={jobSeconds(
+              tasks.data?.find((j) => j.status === 'succeeded') as Parameters<typeof jobSeconds>[0],
+            )}
+            steps={[
+              {
+                key: 'draft',
+                label: `起草第 ${current.version} 版 · ${current.variables.length} 个变量 · ${current.robustness.length} 项稳健性`,
+                state: 'done',
+              },
+              ...(current.status === 'confirmed'
+                ? [{ key: 'status', label: '研究者确认锁定', state: 'done' as const }]
+                : []),
+            ]}
+          />
           <div className="candidate-toolbar">
             <VersionPills
               label="方案版本"

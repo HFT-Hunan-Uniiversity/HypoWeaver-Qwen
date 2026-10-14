@@ -1,3 +1,8 @@
+import ProcessTimeline, {
+  jobSeconds,
+  useStageJob,
+  type StepState,
+} from '../components/flow/ProcessTimeline'
 import { ScrollRegion } from '../components/shell/ShellContext'
 import { useUrlParam } from '../lib/urlState'
 import { useState } from 'react'
@@ -65,6 +70,45 @@ export default function Analysis() {
     },
   })
   const result = current?.result
+  const runJob = useStageJob(id, 'analysis', current?.job_id)
+  /** 时间线每步展开的明细：只取本次运行结果里已有的数字 */
+  const stepDetail = (key: string) => {
+    if (!result) return undefined
+    if (key === 'main')
+      return (
+        <p>
+          系数 {num(result.main.coef)}，SE {num(result.main.se)}，p {num(result.main.p)}，N{' '}
+          {result.main.n_obs.toLocaleString()}
+        </p>
+      )
+    if (key === 'robustness' && result.robustness.length)
+      return (
+        <ul>
+          {result.robustness.map((r) => (
+            <li key={r.id}>
+              {r.change}：
+              {r.status === 'succeeded' ? `系数 ${num(r.coef)}，p ${num(r.p)}` : r.error}
+            </li>
+          ))}
+        </ul>
+      )
+    if (key === 'event_study' && result.event?.pretrend_wald)
+      return <p>前趋势联合检验 p {num(result.event.pretrend_wald.p)}</p>
+    if (key === 'permutation' && result.permutation)
+      return (
+        <p>
+          {result.permutation.n} 次置换，双侧 p {num(result.permutation.p)}
+        </p>
+      )
+    if (key === 'reproduction' && current?.reproduction)
+      return (
+        <p>
+          {current.reproduction.consistent ? '全部一致' : '未全部一致'}，最大相对差{' '}
+          {current.reproduction.max_relative_diff.toExponential(3)}
+        </p>
+      )
+    return undefined
+  }
   const usedPlan = plans.data?.find((p) => p.id === current?.plan_id)
   /** 变量中文标签：用方案里变量的中文定义，原始公式作为次要文字 */
   const label = (expr: string) => {
@@ -121,14 +165,23 @@ export default function Analysis() {
                 tone: r.stale ? 'stale' : r.status === 'failed' ? 'failed' : undefined,
               }))}
             />
-            <div className="step-badges" aria-label="计算步骤">
-              {Object.entries(current.steps).map(([key, st]) => (
-                <span key={key} className={`is-${st.status}`} title={st.error || undefined}>
-                  {stepNames[key] || key} · {statusNames[st.status] || st.status}
-                </span>
-              ))}
-            </div>
           </div>
+          <ProcessTimeline
+            title="检验运行"
+            seconds={jobSeconds(runJob)}
+            steps={Object.entries(current.steps).map(([key, st]) => ({
+              key,
+              label: `${stepNames[key] || key}${st.status === 'succeeded' ? '' : ' · ' + (statusNames[st.status] || st.status)}${st.error ? '：' + st.error : ''}`,
+              state: (st.status === 'succeeded' || st.status === 'not_applicable'
+                ? 'done'
+                : st.status === 'running'
+                  ? 'now'
+                  : st.status === 'failed'
+                    ? 'failed'
+                    : 'todo') as StepState,
+              detail: stepDetail(key),
+            }))}
+          />
           {current.stale && (
             <p className="notice">上游方案、数据或绑定已变更，本次运行已过期；旧数字保留供核对。</p>
           )}

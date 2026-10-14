@@ -8,6 +8,7 @@ import './styles/shell.css'
 import './styles/skin.css'
 import './styles/one-screen.css'
 import './styles/flow.css'
+import './styles/claws.css'
 const client = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: () => {

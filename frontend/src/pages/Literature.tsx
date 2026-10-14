@@ -1,3 +1,8 @@
+import ProcessTimeline, {
+  jobSeconds,
+  useStageJob,
+  type StepState,
+} from '../components/flow/ProcessTimeline'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -33,7 +38,15 @@ interface Search {
   created_at: string
   status: string
   job_id: string
-  per_source_status: Record<string, { status: string; reason: string; hits: number }>
+  per_source_status: Record<
+    string,
+    {
+      status: string
+      reason: string
+      hits: number
+      queries?: { query: string; hits: number; status: string }[]
+    }
+  >
 }
 const PAGE = 30
 const norm = (s: string) =>
@@ -137,6 +150,7 @@ export default function Literature() {
   const list = cards.data || []
   const included = list.filter((c) => c.included)
   const lastSearch = searches.data?.[0]
+  const searchJob = useStageJob(id, 'literature', lastSearch?.job_id)
   const lastFailed =
     lastSearch?.status === 'failed'
       ? '上次检索失败：' +
@@ -339,6 +353,45 @@ export default function Literature() {
   return (
     <>
       <ErrorNote error={include.error || search.error} />
+      {lastSearch && lastSearch.status !== 'running' && (
+        <ProcessTimeline
+          title="文献检索"
+          seconds={jobSeconds(searchJob)}
+          steps={[
+            {
+              key: 'q',
+              label: `生成检索式 · ${lastSearch.queries.length} 条`,
+              state: 'done',
+              detail: (
+                <ul>
+                  {lastSearch.queries.map((q) => (
+                    <li key={q.text}>{q.text}</li>
+                  ))}
+                </ul>
+              ),
+            },
+            ...Object.entries(lastSearch.per_source_status).map(([src, v]) => ({
+              key: src,
+              label: `检索 ${src} · ${v.hits} 条${v.reason ? ` · ${v.reason}` : ''}`,
+              state: (v.status === 'ok' ? 'done' : 'failed') as StepState,
+              detail: v.queries?.length ? (
+                <ul>
+                  {v.queries.map((q) => (
+                    <li key={q.query}>
+                      {q.query} · {q.hits} 条{q.status !== 'ok' ? `（${q.status}）` : ''}
+                    </li>
+                  ))}
+                </ul>
+              ) : undefined,
+            })),
+            {
+              key: 'dedupe',
+              label: `合并去重 · ${lastSearch.hit_count} 条`,
+              state: (lastSearch.status === 'failed' ? 'failed' : 'done') as StepState,
+            },
+          ]}
+        />
+      )}
       <div className="lit-strip" aria-label="检索摘要">
         <div>
           <b>{list.length}</b> 篇论文

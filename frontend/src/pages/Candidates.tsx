@@ -1,3 +1,4 @@
+import ProcessTimeline, { jobSeconds, useStageJob } from '../components/flow/ProcessTimeline'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -116,6 +117,7 @@ export default function Candidates() {
   const chosen = ready?.candidates.find((c) => c.id === selectedId)
   const rec = ready ? recommended(ready) : undefined
   const failed = current?.status === 'failed' ? current.error || '候选生成失败' : null
+  const candJob = useStageJob(id, 'candidates', current?.job_id)
 
   useStageUi({
     checklist: [
@@ -185,6 +187,38 @@ export default function Candidates() {
   return (
     <>
       <ErrorNote error={sets.error || choose.error || generate.error} />
+      <ProcessTimeline
+        title="候选生成"
+        seconds={jobSeconds(candJob)}
+        steps={[
+          {
+            key: 'gen',
+            label: `依据 ${ready.evidence_ids.length} 条纳入证据生成 ${ready.candidates.length} 条候选`,
+            state: 'done',
+            detail: (
+              <ul>
+                {ready.candidates.map((c) => (
+                  <li key={c.id}>{c.title}</li>
+                ))}
+              </ul>
+            ),
+          },
+          {
+            key: 'review',
+            label: `自动审查 · ${ready.review.decision === 'pass' ? '通过' : ready.review.decision}${ready.review.issues?.length ? ` · ${ready.review.issues.length} 条意见` : ''}`,
+            state: 'done',
+            detail: ready.review.issues?.length ? (
+              <ul>
+                {ready.review.issues.map((x, i) => (
+                  <li key={i}>
+                    {x.problem}；{x.suggestion}
+                  </li>
+                ))}
+              </ul>
+            ) : undefined,
+          },
+        ]}
+      />
       <div className="cand-toolbar">
         {(sets.data?.length || 0) > 1 && (
           <VersionPills

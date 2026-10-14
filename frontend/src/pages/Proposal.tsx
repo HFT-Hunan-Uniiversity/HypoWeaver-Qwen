@@ -15,6 +15,8 @@ import { GeneratedBy, VersionPills } from '../components/ui/Bits'
 import { useFlow, useFlowStage, useStageUi } from '../components/flow/FlowContext'
 import { EmptyState, ProgressView } from '../components/flow/FlowBits'
 import { useLlm } from '../lib/llm'
+import { Copy, Download, FileText } from 'lucide-react'
+import ProcessTimeline, { jobSeconds, useStageJob } from '../components/flow/ProcessTimeline'
 const titles: Record<string, string> = {
   overview: '一页概览',
   question: '研究问题与贡献',
@@ -169,6 +171,27 @@ export default function Proposal() {
     generate.isPending || !!jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
   const failedJob = jobs.data?.[0]?.status === 'failed' ? '提案生成失败' : null
   const needNew = !active || (active.stale && stage.status !== 'confirmed')
+  const propJob = useStageJob(id, 'proposal', currentJob || undefined)
+  const [docOpen, setDocOpen] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const fullText = active ? active.sections.map((x) => render(x)).join('\n\n') : ''
+  /** 字数：汉字逐字计，其余按词计 */
+  const wordCount =
+    (fullText.match(/[\u4e00-\u9fff]/g)?.length || 0) +
+    (fullText.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9]+/g)?.length || 0)
+  const copyMd = async () => {
+    if (!active) return
+    let text = fullText
+    try {
+      const r = await fetch(`/api/proposals/${active.id}.md`)
+      if (r.ok) text = await r.text()
+    } catch {
+      /* 退回到页面上的正文 */
+    }
+    await navigator.clipboard?.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
   const exportMd = () => {
     if (!active) return
     const a = document.createElement('a')
@@ -285,58 +308,122 @@ export default function Proposal() {
                 ))}
             </div>
           )}
-          <div className="proposal-layout fill">
-            <nav className="proposal-toc no-print" data-scroll-region="" aria-label="提案目录">
-              {active.sections.map((s) => (
-                <button
-                  key={s.key}
-                  className={sec === s.key ? 'is-active' : ''}
-                  aria-current={sec === s.key ? 'true' : undefined}
-                  onClick={() => {
-                    setSec(s.key)
-                    document.getElementById('sec-' + s.key)?.scrollIntoView({ block: 'start' })
-                  }}
-                >
-                  {titles[s.key] || s.key}
-                </button>
-              ))}
-            </nav>
-            <ScrollRegion className="proposal-scroll" label="提案正文">
-              <article className="proposal-document">
-                {active.snapshot.run && (
-                  <Link className="no-print" to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
-                    查看本提案的原始检验与复算 →
-                  </Link>
-                )}
-                <p className="eyebrow">
-                  {active.kind === 'plan_only'
-                    ? '计划型提案 · 尚无实证结果'
-                    : '研究提案 · 含探索性结果'}
-                </p>
-                <h1>{active.snapshot.project.title}</h1>
-                <p className="muted">已移除无效引用 {active.removed_references} 处</p>
-                {active.sections.map((s) => (
-                  <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
-                    <SectionView
-                      section={s}
-                      proposalId={active.id}
-                      readOnly={!stage.editable}
-                      failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
-                      onRegenerate={stage.editable && llmOk ? () => generate.mutate() : undefined}
-                    />
-                    {s.key === 'results' && active.interpretation?.llm_model && (
-                      <p className="no-print">
-                        结果解读 <GeneratedBy of={active.interpretation} />
-                      </p>
-                    )}
-                    {s.key === 'results' && active.snapshot.run?.result && (
-                      <AnalysisCharts result={active.snapshot.run.result} />
-                    )}
-                  </div>
-                ))}
-              </article>
-            </ScrollRegion>
+          <ProcessTimeline
+            title="提案生成"
+            seconds={jobSeconds(propJob)}
+            steps={[
+              {
+                key: 'gen',
+                label: `生成第 ${active.version} 版 · ${active.sections.length} 节`,
+                state: 'done',
+              },
+              {
+                key: 'narr',
+                label:
+                  active.narrative_status === 'partial'
+                    ? `叙述部分生成 · ${(active.narrative_failures || []).length} 节失败`
+                    : '叙述与数字注入完成',
+                state: active.narrative_status === 'partial' ? 'failed' : 'done',
+                detail: active.narrative_failures?.length ? (
+                  <ul>
+                    {narrativeIssues(active).map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                ) : undefined,
+              },
+            ]}
+          />
+          <div className="file-card">
+            <span className="file-card__icon" aria-hidden="true">
+              <FileText size={18} />
+            </span>
+            <span className="file-card__body">
+              <strong>
+                {active.snapshot.project.title} · 研究提案 v{active.version}
+              </strong>
+              <small>
+                {active.kind === 'plan_only' ? '计划型提案' : '含探索性结果'} ·{' '}
+                {active.sections.length} 节 · 约 {wordCount.toLocaleString()} 字
+              </small>
+            </span>
+            <button type="button" className="product-button" onClick={() => setDocOpen(!docOpen)}>
+              {docOpen ? '收起' : '打开'}
+            </button>
           </div>
+          {docOpen && (
+            <div className="doc-preview">
+              <div className="doc-preview__bar no-print">
+                <strong>研究提案 v{active.version}</strong>
+                <button type="button" className="product-button" onClick={copyMd}>
+                  <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
+                </button>
+                <button type="button" className="product-button" onClick={exportMd}>
+                  <Download size={14} aria-hidden="true" /> 导出 .md
+                </button>
+              </div>
+              <div className="proposal-layout fill">
+                <nav className="proposal-toc no-print" data-scroll-region="" aria-label="提案目录">
+                  {active.sections.map((s) => (
+                    <button
+                      key={s.key}
+                      className={sec === s.key ? 'is-active' : ''}
+                      aria-current={sec === s.key ? 'true' : undefined}
+                      onClick={() => {
+                        setSec(s.key)
+                        document.getElementById('sec-' + s.key)?.scrollIntoView({ block: 'start' })
+                      }}
+                    >
+                      {titles[s.key] || s.key}
+                    </button>
+                  ))}
+                </nav>
+                <ScrollRegion className="proposal-scroll" label="提案正文">
+                  <article className="proposal-document">
+                    {active.snapshot.run && (
+                      <Link
+                        className="no-print"
+                        to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}
+                      >
+                        查看本提案的原始检验与复算 →
+                      </Link>
+                    )}
+                    <p className="eyebrow">
+                      {active.kind === 'plan_only'
+                        ? '计划型提案 · 尚无实证结果'
+                        : '研究提案 · 含探索性结果'}
+                    </p>
+                    <h1>{active.snapshot.project.title}</h1>
+                    <p className="muted">已移除无效引用 {active.removed_references} 处</p>
+                    {active.sections.map((s) => (
+                      <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
+                        <SectionView
+                          section={s}
+                          proposalId={active.id}
+                          readOnly={!stage.editable}
+                          failure={
+                            active.narrative_failures?.find((f) => f.section === s.key)?.reason
+                          }
+                          onRegenerate={
+                            stage.editable && llmOk ? () => generate.mutate() : undefined
+                          }
+                        />
+                        {s.key === 'results' && active.interpretation?.llm_model && (
+                          <p className="no-print">
+                            结果解读 <GeneratedBy of={active.interpretation} />
+                          </p>
+                        )}
+                        {s.key === 'results' && active.snapshot.run?.result && (
+                          <AnalysisCharts result={active.snapshot.run.result} />
+                        )}
+                      </div>
+                    ))}
+                  </article>
+                </ScrollRegion>
+              </div>
+              <div className="doc-preview__foot">{wordCount.toLocaleString()} 字</div>
+            </div>
+          )}
         </>
       )}
     </>

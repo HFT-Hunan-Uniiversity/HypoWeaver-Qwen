@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { Check, Loader2, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import ProcessTimeline, { type TimelineStep } from './ProcessTimeline'
 import type { CheckItem } from './FlowContext'
 
 /** 任务清单：最多 3 项，单动作阶段不显示 */
@@ -18,7 +19,7 @@ export function StepChecklist({ items }: { items?: CheckItem[] }) {
   )
 }
 
-/** 系统长时间工作时占满工作区的进度视图 */
+/** 系统长时间工作时的进度：ClawsGO 式过程时间线（每步一行，当前步加粗转圈） */
 export function ProgressView({
   title,
   detail,
@@ -28,31 +29,17 @@ export function ProgressView({
   detail?: string
   steps?: { label: string; state: 'done' | 'now' | 'todo' | 'failed' }[]
 }) {
-  const done = steps?.filter((s) => s.state === 'done').length ?? 0
+  let list: TimelineStep[] = (
+    steps?.length ? steps : [{ label: title, state: 'now' as const }]
+  ).map((st, i) => ({ key: `${i}-${st.label}`, label: st.label, state: st.state }))
+  if (!list.some((x) => x.state === 'now')) {
+    const i = list.findIndex((x) => x.state === 'todo')
+    if (i >= 0) list = list.map((x, j) => (j === i ? { ...x, state: 'now' as const } : x))
+  }
   return (
-    <section className="flow-progress fill" role="status" aria-live="polite">
-      <Loader2 className="flow-progress__spin" size={28} aria-hidden="true" />
-      <h2>{title}</h2>
-      <p>
-        {steps?.length ? `已完成 ${done}/${steps.length} · ` : ''}
-        {detail || '完成后会自动显示结果，你可以先离开此页。'}
-      </p>
-      {steps && steps.length > 0 && (
-        <ul>
-          {steps.map((s) => (
-            <li key={s.label} className={`is-${s.state}`}>
-              {s.state === 'done'
-                ? '✓'
-                : s.state === 'failed'
-                  ? '✕'
-                  : s.state === 'now'
-                    ? '…'
-                    : '·'}{' '}
-              {s.label}
-            </li>
-          ))}
-        </ul>
-      )}
+    <section className="flow-progress-tl" role="status" aria-live="polite">
+      <ProcessTimeline title={title} steps={list} />
+      <p className="muted">{detail || '完成后会自动显示结果，你可以先离开此页。'}</p>
     </section>
   )
 }

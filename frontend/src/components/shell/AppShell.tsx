@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import { X } from 'lucide-react'
 import AppSidebar from './AppSidebar'
@@ -66,6 +67,7 @@ export default function AppShell() {
               <ModelBanner />
               <Outlet />
             </main>
+            <ScrollFab />
             {showRail && (
               <div className={wide ? 'rail-dock' : 'rail-drawer'}>
                 {!wide && (
@@ -85,5 +87,46 @@ export default function AppShell() {
         </div>
       </div>
     </ShellContext.Provider>
+  )
+}
+
+/** 整页滚动的回到顶部/底部按钮：滚过一屏后出现，靠近底部时指向顶部 */
+function ScrollFab() {
+  const [state, setState] = useState<'none' | 'up' | 'down'>('none')
+  useEffect(() => {
+    const el = document.querySelector<HTMLElement>('.shell-view')
+    if (!el) return
+    const on = () => {
+      const max = el.scrollHeight - el.clientHeight
+      if (max < 200) return setState('none')
+      setState(el.scrollTop > max / 2 ? 'up' : 'down')
+    }
+    on()
+    el.addEventListener('scroll', on, { passive: true })
+    const ro = new ResizeObserver(on)
+    ro.observe(el)
+    if (el.firstElementChild) ro.observe(el.firstElementChild)
+    return () => {
+      el.removeEventListener('scroll', on)
+      ro.disconnect()
+    }
+  }, [])
+  if (state === 'none') return null
+  const go = () => {
+    const el = document.querySelector<HTMLElement>('.shell-view')
+    if (!el) return
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    el.scrollTo({ top: state === 'up' ? 0 : el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' })
+  }
+  return (
+    <button
+      type="button"
+      className="scroll-fab no-print"
+      aria-label={state === 'up' ? '回到顶部' : '到底部'}
+      title={state === 'up' ? '回到顶部' : '到底部'}
+      onClick={go}
+    >
+      {state === 'up' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+    </button>
   )
 }
