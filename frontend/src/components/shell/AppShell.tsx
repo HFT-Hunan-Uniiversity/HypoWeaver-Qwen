@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ArrowDown, ArrowUp } from 'lucide-react'
-import { Link, Outlet, useMatch } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { Link, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom'
+import { PanelLeft, Plus, Search, Settings2, X } from 'lucide-react'
 import AppSidebar from './AppSidebar'
-import ResearchRail from './ResearchRail'
-import { ShellContext, useViewportWide } from './ShellContext'
+import { ShellContext } from './ShellContext'
 import { useLlm } from '../../lib/llm'
 
-function ModelBanner() {
+export function ModelBanner() {
   const llm = useLlm()
   const [hidden, setHidden] = useState(() => sessionStorage.getItem('hw-model-banner') === '0')
   if (!llm.data || llm.data.configured || hidden) return null
@@ -31,59 +30,95 @@ function ModelBanner() {
   )
 }
 
-/** 壳层：侧栏（≤1366 默认折叠）+ 主卡（视口高度，页面本身不滚动）+ 右栏（≥1600 常驻，其余抽屉） */
+/** 壳层：最左图标栏（HW / 项目抽屉 / 搜索 / 新建 / 设置）+ 主区。
+ *  项目路由下主区由 StageLayout 渲染为「左 AI 对话 + 右文档」工作台；其余页面为单栏整页滚动。 */
 export default function AppShell() {
-  const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem('hw-sidebar')
-    return saved === null ? window.innerWidth <= 1366 : saved === '1'
-  })
-  const [railOpen, setRailOpen] = useState(false)
+  const [drawer, setDrawer] = useState<false | 'list' | 'search'>(false)
+  const [q, setQ] = useState('')
   const [actionsEl, setActionsEl] = useState<HTMLElement | null>(null)
-  const wide = useViewportWide(1600)
   const project = useMatch('/p/:id/*')
   const id = project?.params.id
-  const toggle = () => {
-    localStorage.setItem('hw-sidebar', collapsed ? '0' : '1')
-    setCollapsed(!collapsed)
-  }
-  const showRail = !!id && (wide || railOpen)
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  useEffect(() => setDrawer(false), [pathname])
   return (
     <ShellContext.Provider
-      value={{
-        railOpen: showRail,
-        toggleRail: () => setRailOpen(!railOpen),
-        actionsEl,
-        setActionsEl,
-      }}
+      value={{ railOpen: false, toggleRail: () => {}, actionsEl, setActionsEl }}
     >
-      <div className={`shell ${collapsed ? 'is-collapsed' : ''}`}>
+      <div className={`shell is-wb ${id ? 'is-project' : ''}`}>
         <a className="skip-link" href="#main-content">
           跳到正文
         </a>
-        <AppSidebar collapsed={collapsed} onToggle={toggle} activeProjectId={id} />
+        <nav className="wb-rail no-print" aria-label="全局">
+          <Link to="/" className="wb-rail__logo" title="HypoWeaver · 研究项目">
+            HW
+          </Link>
+          <button
+            type="button"
+            className={`wb-rail__btn ${drawer === 'list' ? 'is-on' : ''}`}
+            title="项目列表"
+            aria-label="项目列表"
+            aria-expanded={drawer === 'list'}
+            onClick={() => setDrawer(drawer ? false : 'list')}
+          >
+            <PanelLeft size={16} />
+          </button>
+          <button
+            type="button"
+            className="wb-rail__btn"
+            title="搜索项目（打开项目列表）"
+            aria-label="搜索项目"
+            onClick={() => setDrawer(drawer === 'search' ? false : 'search')}
+          >
+            <Search size={16} />
+          </button>
+          <button
+            type="button"
+            className="wb-rail__btn"
+            title="新建研究"
+            aria-label="新建研究"
+            onClick={() => navigate('/?new=1')}
+          >
+            <Plus size={16} />
+          </button>
+          <span className="wb-rail__grow" />
+          <Link to="/settings" className="wb-rail__btn" title="设置" aria-label="设置">
+            <Settings2 size={16} />
+          </Link>
+        </nav>
+        {drawer && (
+          <>
+            <div className="wb-drawer-mask" onClick={() => setDrawer(false)} />
+            <div className="wb-drawer">
+              {drawer === 'search' && (
+                <input
+                  autoFocus
+                  className="wb-drawer__search"
+                  placeholder="按标题搜索项目"
+                  aria-label="按标题搜索项目"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              )}
+              <AppSidebar
+                filter={drawer === 'search' ? q : ''}
+                collapsed={false}
+                onToggle={() => setDrawer(false)}
+                activeProjectId={id}
+              />
+            </div>
+          </>
+        )}
         <div className="shell-main">
-          <div className={`shell-body ${id && wide ? 'has-rail' : ''}`}>
+          {id ? (
+            <Outlet />
+          ) : (
             <main id="main-content" className="shell-view">
               <ModelBanner />
               <Outlet />
+              <ScrollFab />
             </main>
-            <ScrollFab />
-            {showRail && (
-              <div className={wide ? 'rail-dock' : 'rail-drawer'}>
-                {!wide && (
-                  <button
-                    type="button"
-                    className="rail-drawer__close"
-                    aria-label="关闭进度与证据"
-                    onClick={() => setRailOpen(false)}
-                  >
-                    <X size={15} />
-                  </button>
-                )}
-                <ResearchRail projectId={id!} />
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </ShellContext.Provider>
@@ -91,7 +126,7 @@ export default function AppShell() {
 }
 
 /** 整页滚动的回到顶部/底部按钮：滚过一屏后出现，靠近底部时指向顶部 */
-function ScrollFab() {
+export function ScrollFab() {
   const [state, setState] = useState<'none' | 'up' | 'down'>('none')
   useEffect(() => {
     const el = document.querySelector<HTMLElement>('.shell-view')

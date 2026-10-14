@@ -89,7 +89,7 @@ JS = """() => {
     if (cs.textOverflow === 'ellipsis' && w && (!titled || numeric)) why = '省略号';
     else if (cs.textOverflow === 'ellipsis' && w) continue;
     else if (w && ox !== 'visible') why = '横向裁剪';
-    else if (h && oy !== 'visible' && !el.closest('.sidebar, [role="dialog"], .rail-dock, .rail-drawer') && !el.matches('textarea') && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, body, html')) why = '纵向裁剪';
+    else if (h && oy !== 'visible' && !el.closest('.sidebar, [role="dialog"], .rail-dock, .rail-drawer, .wb-chat, .wb-rail, .wb-tabs, .wb-drawer') && !el.matches('textarea') && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, .wb, .wb-right, body, html')) why = '纵向裁剪';
     if (why) clipped.push(why + ':' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName) + '「' + (el.innerText || '').trim().slice(0, 14) + '」');
   }
   // 卡片内部空白与同行等高（总览 .overview-grid 卡片）

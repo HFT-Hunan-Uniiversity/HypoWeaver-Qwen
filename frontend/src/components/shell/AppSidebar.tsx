@@ -11,10 +11,12 @@ export default function AppSidebar({
   collapsed,
   onToggle,
   activeProjectId,
+  filter = '',
 }: {
   collapsed: boolean
   onToggle: () => void
   activeProjectId?: string
+  filter?: string
 }) {
   const projects = useQuery({ queryKey: ['projects'], queryFn: () => api<Project[]>('/projects') })
   const llm = useLlm()
@@ -97,40 +99,42 @@ export default function AppSidebar({
             </div>
             {projects.data?.length === 0 && <p className="sidebar__empty">还没有项目。</p>}
             <div className="sidebar__list" role="list" data-scroll-region="" aria-label="项目列表">
-              {projects.data?.map((p) => (
-                <div
-                  role="listitem"
-                  key={p.id}
-                  className={`sidebar__row ${p.id === activeProjectId ? 'is-active' : ''}`}
-                >
-                  <Link
-                    to={`/p/${p.id}`}
-                    className={`sidebar__task ${p.id === activeProjectId ? 'is-active' : ''}`}
-                    title={p.title}
+              {projects.data
+                ?.filter((p) => !filter || p.title.toLowerCase().includes(filter.toLowerCase()))
+                .map((p) => (
+                  <div
+                    role="listitem"
+                    key={p.id}
+                    className={`sidebar__row ${p.id === activeProjectId ? 'is-active' : ''}`}
                   >
-                    <span className="sidebar__dot is-project" aria-hidden="true" />
-                    <span className="sidebar__task-copy">
-                      <strong>{p.title}</strong>
-                      <small>
-                        <CaseTag project={p} /> 更新于{' '}
-                        {new Date(p.updated_at).toLocaleDateString('zh-CN')}
-                      </small>
-                    </span>
-                  </Link>
-                  <button
-                    type="button"
-                    className="sidebar__del"
-                    aria-label={`删除项目：${p.title}`}
-                    title="删除项目"
-                    onClick={() => {
-                      remove.reset()
-                      setDeleting(p)
-                    }}
-                  >
-                    <Trash2 size={14} aria-hidden="true" />
-                  </button>
-                </div>
-              ))}
+                    <Link
+                      to={`/p/${p.id}`}
+                      className={`sidebar__task ${p.id === activeProjectId ? 'is-active' : ''}`}
+                      title={p.title}
+                    >
+                      <span className="sidebar__dot is-project" aria-hidden="true" />
+                      <span className="sidebar__task-copy">
+                        <strong>{p.title}</strong>
+                        <small>
+                          <CaseTag project={p} /> 更新于{' '}
+                          {new Date(p.updated_at).toLocaleDateString('zh-CN')}
+                        </small>
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      className="sidebar__del"
+                      aria-label={`删除项目：${p.title}`}
+                      title="删除项目"
+                      onClick={() => {
+                        remove.reset()
+                        setDeleting(p)
+                      }}
+                    >
+                      <Trash2 size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
             </div>
           </section>
         </div>
