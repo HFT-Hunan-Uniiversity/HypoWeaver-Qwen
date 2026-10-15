@@ -1,11 +1,13 @@
-"""版面验收（整页滚动版）：内容页允许整页纵向滚动；但任何卡片/区块不得出现内部纵向滚动条，内容不得被裁剪或无提示省略。
+"""版面验收（J 研究手记版，2026-10-15）：只允许 html/body 与全屏阅读层 .nb-reader 滚动；任何实际可滚动的 overflow:auto/scroll 小框都算失败。
+另断言：hero ≤70px、无横向滚动、无聊天输入框 / 「示意」「未接入」字样、当前卡主按钮可达。
+（以下为旧说明）版面验收（整页滚动版）：内容页允许整页纵向滚动；但任何卡片/区块不得出现内部纵向滚动条，内容不得被裁剪或无提示省略。
 （2026-10-14 起替代旧的"一屏不滚动"规则；侧栏项目列表、文本框、弹窗/抽屉、左侧阶段进度栏不在此列。）
 用法：python measure_one_screen.py [--shots] [视图名关键字...]   （脚本后端 :8001）"""
 import json, sys, asyncio
 from playwright.async_api import async_playwright
 d = json.load(open('/tmp/fake_ids')); P = d['P']
 SEC = ['方法与变量', '模型与识别', '稳健性检查', '置换与决策规则', '计划结论与边界']
-VIEWS = [('01_项目列表', '/', None), ('02_总览', f'/p/{P}', None), ('03_方向', f'/p/{P}/direction', None),
+VIEWS = [('01_项目列表', '/', None), ('02_手记默认', f'/p/{P}', None), ('03_方向', f'/p/{P}/direction', None),
          ('04_文献', f'/p/{P}/literature', None), ('05_候选', f'/p/{P}/candidates', None), ('06_方案_概要', f'/p/{P}/plan', None)] + [
          (f'06{chr(98+i)}_方案_{t}', f'/p/{P}/plan', f'.plan-nav >> text={t}') for i, t in enumerate(SEC)] + [
          ('07_数据_资产', f'/p/{P}/data?tab=assets', None), ('07b_数据_绑定', f'/p/{P}/data?tab=binding', None),
@@ -16,15 +18,24 @@ SIDEBAR_OPEN = '--collapsed' not in sys.argv
 WIDTH_MIN = 0.75   # 内容横向跨度须 ≥ 可用宽度 75%（硬断言）
 BLANK_WARN = 0.30  # 最大连续空白矩形 > 内容区 30% 时告警（软提示，人工复核截图）
 JS = """() => {
-  const v = document.querySelector('.shell-view');
   const doc = document.scrollingElement;
+  const v = doc;
   const bad = [];
-  for (const el of document.querySelectorAll('.shell-view *')) {
-    if (el.matches('textarea, select, option') || el.closest('[role="dialog"], .side-drawer, .modal, .rail-drawer, .rail-dock')) continue;
-    const oy = getComputedStyle(el).overflowY;
-    if ((oy === 'auto' || oy === 'scroll' || oy === 'hidden') && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0 && oy !== 'hidden')
+  for (const el of document.querySelectorAll('body *')) {
+    if (el.matches('textarea, select, option') || el.closest('.nb-reader, [role="dialog"]')) continue;
+    const cs = getComputedStyle(el);
+    const scrollable = (o) => o === 'auto' || o === 'scroll';
+    if ((scrollable(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0) ||
+        (scrollable(cs.overflowX) && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0))
       bad.push('内部滚动:' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName));
   }
+  const hero = document.querySelector('.nb-hero');
+  const hero_h = hero ? Math.round(hero.getBoundingClientRect().height) : 0;
+  const hscroll = doc.scrollWidth > innerWidth + 1;
+  const txt = document.body.innerText;
+  const forbidden = [];
+  if (/示意|未接入/.test(txt)) forbidden.push('含「示意/未接入」');
+  if (document.querySelector('.wb-chat, .wb-composer, [aria-label*="对话"], .dir-msgs')) forbidden.push('含聊天输入/对话');
   const regions = [...document.querySelectorAll('[data-scroll-region]')].filter(e => e.scrollHeight > e.clientHeight + 1).length;
   // 宽度利用率与大块空白：以内容区 .stage-body/.page-body 为基准，统计可见“叶子”内容（文字、控件、图表）
   const B = document.querySelector('.stage-body, .page-body');
@@ -89,7 +100,7 @@ JS = """() => {
     if (cs.textOverflow === 'ellipsis' && w && (!titled || numeric)) why = '省略号';
     else if (cs.textOverflow === 'ellipsis' && w) continue;
     else if (w && ox !== 'visible') why = '横向裁剪';
-    else if (h && oy !== 'visible' && !el.closest('.sidebar, [role="dialog"], .rail-dock, .rail-drawer, .wb-chat, .wb-rail, .wb-tabs, .wb-drawer') && !el.matches('textarea') && el !== v && el !== doc && !el.matches('.shell, .shell-main, .shell-body, .shell-view, .wb, .wb-right, body, html')) why = '纵向裁剪';
+    else if (h && oy !== 'visible' && !el.closest('[role="dialog"], .nb-reader') && !el.matches('textarea') && el !== v && el !== doc && !el.matches('body, html, #root')) why = '纵向裁剪';
     if (why) clipped.push(why + ':' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName) + '「' + (el.innerText || '').trim().slice(0, 14) + '」');
   }
   // 卡片内部空白与同行等高（总览 .overview-grid 卡片）
@@ -119,12 +130,23 @@ JS = """() => {
   const row_mismatch = Object.values(rows).some(hs => Math.max(...hs) - Math.min(...hs) > 1);
   const card_blank_max = cards.length ? Math.max(...cards.map(c => c.blank)) : 0;
   const ov_blank_bad = ov.filter(c => c.blank > 0.15).map(c => c.name + ' ' + Math.round(c.blank * 100) + '%');
-  const r = v.getBoundingClientRect();
-  return { need: Math.round(r.top + v.scrollHeight), view: innerHeight,
-           page_scroll: doc.scrollHeight > doc.clientHeight + 1 || v.scrollHeight > v.clientHeight + 1,
+  return { need: doc.scrollHeight, view: innerHeight, hero_h, hscroll, forbidden,
+           page_scroll: doc.scrollHeight > doc.clientHeight + 1,
            other_scroll: bad, regions_scrolling: regions,
            clipped: clipped, cards: cards, row_mismatch: row_mismatch, card_blank_max: card_blank_max, ov_blank_bad: ov_blank_bad,
            width_util: Math.round(width_util * 100) / 100, blank: Math.round(blank * 100) / 100 };
+}"""
+PRIMARY_JS = """() => {
+  // 当前展开卡的主按钮：滚到可见后，须在 hero 之下、视口之内且未被遮挡
+  const b = document.querySelector('.nb-sec.is-open [data-primary]');
+  if (!b) return true;
+  b.scrollIntoView({block: 'center'});
+  const r = b.getBoundingClientRect(), hero = document.querySelector('.nb-hero');
+  const top = hero ? hero.getBoundingClientRect().bottom : 0;
+  const ok = r.top >= top && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
+  const hit = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+  window.scrollTo(0, 0);
+  return ok && !!hit && (hit === b || b.contains(hit));
 }"""
 async def main():
     args = sys.argv[1:]; shots = '--shots' in args; only = [a for a in args if not a.startswith('--')]
@@ -139,7 +161,10 @@ async def main():
                 if only and not any(o in name for o in only): continue
                 await pg.goto(f'http://localhost:8001{path}'); await pg.wait_for_load_state('networkidle'); await pg.wait_for_timeout(900)
                 if click: await pg.click(click); await pg.wait_for_timeout(400)
-                m = await pg.evaluate(JS); m['pass'] = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and not m['row_mismatch'] and not m['ov_blank_bad']
+                m = await pg.evaluate(JS)
+                m['primary_ok'] = await pg.evaluate(PRIMARY_JS)
+                m['pass'] = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and not m['row_mismatch'] and not m['ov_blank_bad'] \
+                    and m['hero_h'] <= 70 and not m['hscroll'] and not m['forbidden'] and m['primary_ok']
                 out.setdefault(name, {})[f'{vw}x{vh}'] = m
                 if shots: await pg.screenshot(path=f'/workspace/hw/review/screens/one-screen/{vw}x{vh}/{name}.png')
             await pg.close()
@@ -153,7 +178,8 @@ async def main():
             m = v.get(vp)
             if not m: row.append('-'); continue
             ok &= m['pass']
-            why = m['other_scroll'][:2] + m['clipped'][:3] + (['宽度<75%'] if m['width_util'] < WIDTH_MIN else []) + \
+            why = m['other_scroll'][:2] + m['clipped'][:3] + m['forbidden'] + (['hero>70px'] if m['hero_h'] > 70 else []) + \
+                  (['横向滚动'] if m['hscroll'] else []) + ([] if m['primary_ok'] else ['主按钮不可达']) + (['宽度<75%'] if m['width_util'] < WIDTH_MIN else []) + \
                   (['同行卡片不等高'] if m['row_mismatch'] else []) + ['卡内空白 ' + x for x in m['ov_blank_bad']]
             row.append(f"{m['need']}/{m['view']} 卡空{m['card_blank_max']:.0%} " + ('✓' if m['pass'] else '✗ ' + ','.join(why)))
         row.append(str(max(x['regions_scrolling'] for x in v.values())))

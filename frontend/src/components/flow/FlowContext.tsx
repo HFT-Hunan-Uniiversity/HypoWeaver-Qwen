@@ -111,8 +111,15 @@ export function useFlowStage(key: StageKey) {
 }
 
 /** 页面声明主按钮 / 任务清单。函数取最新引用，签名变化时刷新外壳 */
+/** 阅读层内嵌入的阶段页不接管卡底主按钮 */
+export const ReaderCtx = createContext(false)
+
 export function useStageUi(ui: StageUi) {
-  const { uiRef, setUiSig } = useFlow()
+  const reader = useContext(ReaderCtx)
+  const flowCtx = useFlow()
+  const noop = useRef<StageUi | null>(null)
+  const uiRef = reader ? noop : flowCtx.uiRef
+  const setUiSig = reader ? (_: string) => {} : flowCtx.setUiSig
   const latest = useRef(ui)
   latest.current = ui
   uiRef.current = ui

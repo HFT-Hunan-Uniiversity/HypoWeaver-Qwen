@@ -110,3 +110,9 @@ export function loadLocal(projectId: string): LocalFlow {
 export function saveLocal(projectId: string, l: LocalFlow) {
   localStorage.setItem(storeKey(projectId), JSON.stringify(l))
 }
+
+/** 时间线圆点五态：在流程四态之上叠加「后台任务运行中」 */
+export type DotState = FlowStatus | 'running'
+export function dotState(s: FlowStage, running: boolean): DotState {
+  return running && s.status !== 'locked' ? 'running' : s.status
+}

@@ -77,6 +77,8 @@ export default function Candidates() {
   const llmOk = useLlm().data?.configured !== false
   const [version, setVersion] = useState('')
   const [job, setJob] = useState('')
+  const [jobEnd, setJobEnd] = useState<'' | 'succeeded' | 'failed'>('')
+  const [jobErr, setJobErr] = useState<string | null>(null)
   const sets = useQuery({
     queryKey: ['candidate-sets', id],
     queryFn: () => api<CandidateSet[]>(`/projects/${id}/candidate-sets`),
@@ -97,6 +99,8 @@ export default function Candidates() {
     mutationFn: () => api<{ job_id: string }>(`/projects/${id}/candidate-sets`, body('POST')),
     onSuccess: (d) => {
       setJob(d.job_id)
+      setJobEnd('')
+      setJobErr(null)
       setVersion('')
       refresh()
     },
@@ -110,13 +114,18 @@ export default function Candidates() {
     },
   })
   const current = sets.data?.find((s) => s.id === version) || sets.data?.[0]
-  const generating = generate.isPending || current?.status === 'generating'
+  const generating = generate.isPending || current?.status === 'generating' || (!!job && !jobEnd)
+  const onJobDone = (j: { status: string; error: string | null }) => {
+    setJobEnd(j.status === 'failed' ? 'failed' : 'succeeded')
+    if (j.status === 'failed') setJobErr(j.error || '候选生成失败')
+    refresh()
+  }
   const included = cards.data?.filter((c) => c.included).length ?? 0
   const selectedId = project.data?.selected_candidate_id
   const ready = current?.status === 'ready' ? current : undefined
   const chosen = ready?.candidates.find((c) => c.id === selectedId)
   const rec = ready ? recommended(ready) : undefined
-  const failed = current?.status === 'failed' ? current.error || '候选生成失败' : null
+  const failed = jobErr || (current?.status === 'failed' ? current.error || '候选生成失败' : null)
   const candJob = useStageJob(id, 'candidates', current?.job_id)
 
   useStageUi({
@@ -155,7 +164,12 @@ export default function Candidates() {
     return (
       <>
         {(job || current?.job_id) && (
-          <JobProgress id={job || current!.job_id!} onComplete={refresh} />
+          <JobProgress
+            id={job || current!.job_id!}
+            label="正在生成候选假设…"
+            onComplete={onJobDone}
+            onRetry={() => generate.mutate()}
+          />
         )}
         <ProgressView
           title="正在生成候选假设"
@@ -166,6 +180,7 @@ export default function Candidates() {
   if (!ready)
     return (
       <>
+        {job && jobEnd === 'failed' && <JobProgress id={job} onRetry={() => generate.mutate()} />}
         <ErrorNote error={sets.error || generate.error} />
         <EmptyState
           title="这里会出现几条可以比较的候选假设"

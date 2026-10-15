@@ -87,7 +87,7 @@ def views(P, F=None):
           ('11_edit_dialog', f'/p/{P}/plan', ['edit']), ('12_settings', '/settings', [])]
     if F:  # 空项目：方向空状态、对话中、未解锁阶段
         v += [('20_fresh_direction_empty', f'/p/{F}/direction', []),
-              ('21_fresh_direction_chat', f'/p/{F}/direction', ['chat']),
+              ('21_fresh_direction_idea', f'/p/{F}/direction', ['chat']),
               ('22_fresh_literature_locked', f'/p/{F}/literature', []),
               ('23_fresh_data_locked', f'/p/{F}/data', [])]
     return v
@@ -113,11 +113,14 @@ async def run(a):
                         elif act == 'chat':
                             await pg.evaluate("localStorage.removeItem('hw.dirdraft.' + location.pathname.split('/')[2])")
                             await pg.reload(); await pg.wait_for_load_state('networkidle')
-                            for _ in range(3):  # 示例想法开始对话，再回答两轮
-                                chip = pg.locator('.dir-chip').first
+                            # J：一句话想法（示例）→ 方向卡 + 卡内澄清提示，点两次提示选项
+                            chip = pg.locator('.dir-chip').first
+                            if await chip.count(): await chip.click(); await pg.wait_for_timeout(300)
+                            for _ in range(2):
+                                chip = pg.locator('.dir-ask .dir-chip').first
                                 if await chip.count(): await chip.click(); await pg.wait_for_timeout(300)
                         elif act == 'edit':
-                            b = pg.locator('button:has-text("修改此阶段")')
+                            b = pg.locator('.nb-ro button:has-text("修改")')
                             if await b.count(): await b.first.click()
                         else:
                             loc = pg.locator(act)
@@ -125,21 +128,18 @@ async def run(a):
                         await pg.wait_for_timeout(300)
                     tag = name + ('_intro' if intro else '')
                     # 整页滚动：逐屏滚动主视图检查（吸顶页头属浮层，被它盖住的文字跳过）
-                    hits, sh = [], await pg.evaluate("(document.querySelector('.shell-view')||{}).scrollHeight||0")
+                    hits, sh = [], await pg.evaluate("document.scrollingElement.scrollHeight")
                     for y in range(0, max(1, sh - H + 1), max(200, H - 120)):
-                        await pg.evaluate(f"(() => {{ const v = document.querySelector('.shell-view'); if (v) v.scrollTop = {y} }})()")
+                        await pg.evaluate(f"window.scrollTo(0, {y})")
                         await pg.wait_for_timeout(60)
                         hits += [h for h in await pg.evaluate(JS, TOL) if h not in hits]
-                    await pg.evaluate("(() => { const v = document.querySelector('.shell-view'); if (v) v.scrollTop = 0 })()")
+                    await pg.evaluate("window.scrollTo(0, 0)")
                     total += len(hits)
                     print(f"{'PASS' if not hits else 'FAIL'} {W}x{H} {tag}" + ''.join(f'\n    {h}' for h in hits[:12]))
                     if a.shots:
                         d = os.path.join(a.shots, f'{W}x{H}'); os.makedirs(d, exist_ok=True)
-                        if a.full:  # 整页截图：临时把视口拉高到内容高度
-                            fh = await pg.evaluate("(() => { const v = document.querySelector('.shell-view'); return v ? v.scrollHeight - v.clientHeight : 0 })()")
-                            await pg.set_viewport_size({'width': W, 'height': H + max(0, fh)}); await pg.wait_for_timeout(400)
-                            await pg.screenshot(path=os.path.join(d, tag + '.png'))
-                            await pg.set_viewport_size({'width': W, 'height': H})
+                        if a.full and 'edit' not in acts:  # 整页截图（J：html/body 整页滚动）；弹窗视图截视口
+                            await pg.screenshot(path=os.path.join(d, tag + '.png'), full_page=True)
                         else:
                             await pg.screenshot(path=os.path.join(d, tag + '.png'))
                 await ctx.close()

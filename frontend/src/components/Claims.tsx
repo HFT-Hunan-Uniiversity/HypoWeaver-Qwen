@@ -117,13 +117,19 @@ export default function Claims({ runId }: { runId: string }) {
     queryKey: ['claims', runId],
     queryFn: () => api<Claim[]>(`/runs/${runId}/claims`),
   })
+  const [shown, setShown] = useState(4)
   return (
     <section>
       <h2>结论评估与研究者决定</h2>
       <ErrorNote error={query.error} />
-      {query.data?.map((c) => (
+      {query.data?.slice(0, shown).map((c) => (
         <Card key={runId + c.claim_id} claim={c} />
       ))}
+      {(query.data?.length || 0) > shown && (
+        <button type="button" className="quiet" onClick={() => setShown(shown + 4)}>
+          显示更多（还有 {query.data!.length - shown} 条）
+        </button>
+      )}
       {!query.data?.length && <p className="muted">本次运行尚无结论评估。</p>}
     </section>
   )

@@ -21,10 +21,11 @@ Run: `uv run --with playwright python measure_one_screen.py [--shots] [view-name
 (the frontend must be served by the backends on :8000/:8001; screenshots go to `review/screens/one-screen/<w>x<h>/`).
 
 Viewports: 1024×576, 1180×640, 1280×720, 1366×768, 1440×900. Assertions per view:
+
 - one screen: page does not scroll; only `[data-scroll-region]` areas may scroll;
 - no clipping or overflow outside scroll regions;
 - no truncation: an ellipsis is allowed only for non-numeric text inside an element with `title` (full text on hover); numbers are never truncated;
 - width utilisation ≥ 0.75;
 - cards in the same row have equal height;
 - blank space inside each card ≤ 15%.
-Output: table "need/viewport, largest card blank, ✓/✗ + reasons", plus `measure.json`.
+  Output: table "need/viewport, largest card blank, ✓/✗ + reasons", plus `measure.json`.

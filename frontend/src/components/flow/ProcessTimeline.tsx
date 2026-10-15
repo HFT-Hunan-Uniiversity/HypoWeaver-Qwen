@@ -30,6 +30,13 @@ export function useStageJob(projectId: string | undefined, kind: string, jobId?:
     queryFn: () => api<StageJob[]>(`/projects/${projectId}/jobs?kind=${kind}`),
     enabled: !!projectId,
     staleTime: 5000,
+    // 有任务在跑时轮询，供时间线圆点 / hero 显示「运行中」
+    refetchInterval: (q) =>
+      (q.state.data as StageJob[] | undefined)?.some((j) =>
+        ['queued', 'running'].includes(j.status),
+      )
+        ? 3000
+        : false,
   })
   const list = q.data || []
   return (jobId ? list.find((j) => j.id === jobId) : undefined) || list[0]

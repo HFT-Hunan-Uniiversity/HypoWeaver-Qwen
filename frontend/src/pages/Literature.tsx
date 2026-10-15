@@ -48,7 +48,7 @@ interface Search {
     }
   >
 }
-const PAGE = 30
+const PAGE = 12
 const norm = (s: string) =>
   s
     .replace(/[（(].*?[)）]/g, '')
@@ -436,7 +436,7 @@ export default function Literature() {
         <div className={`lit-list-wrap ${flash ? 'is-flash' : ''}`}>
           <ScrollRegion className="lit-list" label="论文列表">
             <div ref={listRef} />
-            {scored.slice(offset, offset + PAGE).map(({ c, rel, vHit }) => (
+            {scored.slice(0, offset + PAGE).map(({ c, rel, vHit }) => (
               <article key={c.id} className={`lit-paper ${c.included ? 'is-on' : ''}`}>
                 <input
                   type="checkbox"
@@ -476,20 +476,10 @@ export default function Literature() {
               </article>
             ))}
           </ScrollRegion>
-          {list.length > PAGE && (
+          {offset + PAGE < list.length && (
             <div className="lit-pager">
-              <button className="quiet" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                上一页
-              </button>
-              <span>
-                第 {page + 1} / {Math.ceil(list.length / PAGE)} 页
-              </span>
-              <button
-                className="quiet"
-                disabled={offset + PAGE >= list.length}
-                onClick={() => setPage(page + 1)}
-              >
-                下一页
+              <button className="quiet" onClick={() => setPage(page + 1)}>
+                显示更多（还有 {list.length - offset - PAGE} 篇）
               </button>
             </div>
           )}
