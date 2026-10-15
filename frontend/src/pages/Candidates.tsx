@@ -290,9 +290,9 @@ export default function Candidates() {
                   <dd>{c.hypothesis}</dd>
                   <dt>机制</dt>
                   <dd className="cand-tags">
-                    {c.mechanism.slice(0, 3).map((m) => (
+                    {c.mechanism.map((m) => (
                       <i key={m} title={m}>
-                        {m.length > 14 ? m.slice(0, 14) + '…' : m}
+                        {m}
                       </i>
                     ))}
                   </dd>

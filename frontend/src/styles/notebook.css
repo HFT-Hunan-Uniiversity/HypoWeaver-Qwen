@@ -104,9 +104,9 @@ html.nb-reading {
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 10px 16px 6px;
+  padding: 10px 24px 6px;
 }
 .wz-top__row h1 {
   flex: 1;
@@ -153,8 +153,10 @@ html.nb-reading {
   color: #9ca3af;
 }
 .wz .model-banner {
-  max-width: 820px;
+  max-width: 1200px;
   margin: 8px auto 0;
+  padding-left: 24px;
+  padding-right: 24px;
   border-radius: 8px;
   font-size: 12px;
 }
@@ -163,9 +165,9 @@ html.nb-reading {
 .wz-stepper {
   display: flex;
   align-items: center;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 4px 12px 12px;
+  padding: 4px 20px 12px;
   overflow-x: auto;
 }
 .wz-step-wrap {
@@ -254,10 +256,10 @@ html.nb-reading {
 
 /* —— 主区 —— */
 .wz-main {
-  max-width: 820px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 14px 16px 48px;
+  padding: 14px 24px 48px;
 }
 .wz-chips {
   display: flex;
@@ -660,4 +662,52 @@ html.nb-reading {
   .job__bar i {
     animation: none !important;
   }
+}
+
+/* —— 候选三列比较：加宽列、机制标签整词换行不截断 —— */
+.wz-card .cand-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .wz-card .cand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .wz-card .cand-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.wz-card .cand-card {
+  min-width: 0;
+}
+.wz-card .cand-card__body,
+.wz-card .cand-card__body [data-scroll-region],
+.wz-card .cand-card .scroll-region {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+.wz-card .cand-card dl {
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+.wz-card .cand-card dd {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.55;
+}
+.wz-card .cand-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: flex-start;
+}
+.wz-card .cand-tags i {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: 100%;
+  line-height: 1.4;
+  height: auto;
 }
