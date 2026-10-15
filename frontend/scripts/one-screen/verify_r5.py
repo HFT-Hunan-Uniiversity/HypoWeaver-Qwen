@@ -12,7 +12,7 @@ async def real(route):
 
 async def run(pg, vp):
     async def fit(name):
-        m = await pg.evaluate(JS); ok = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and m['hero_h'] <= 70 and not m['hscroll'] and not m['forbidden']  # J：整页滚动、hero≤70、无横向滚动/示意
+        m = await pg.evaluate(JS); ok = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and m['hero_h'] <= 120 and not m['hscroll'] and not m['forbidden']  # J：整页滚动、hero≤70、无横向滚动/示意
         return ok, m
     # 计划 id
     plans = await (await pg.request.get(f'{BASE}/api/projects/{P}/plans')).json()

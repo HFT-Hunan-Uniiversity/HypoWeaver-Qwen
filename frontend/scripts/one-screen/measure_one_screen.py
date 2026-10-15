@@ -29,8 +29,9 @@ JS = """() => {
         (scrollable(cs.overflowX) && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0))
       bad.push('内部滚动:' + ((el.className && el.className.toString().split(' ')[0]) || el.tagName));
   }
-  const hero = document.querySelector('.nb-hero');
+  const hero = document.querySelector('.wz-top');
   const hero_h = hero ? Math.round(hero.getBoundingClientRect().height) : 0;
+  // I：顶栏含 stepper，允许 ≤120px；无顶栏时 0
   const hscroll = doc.scrollWidth > innerWidth + 1;
   const txt = document.body.innerText;
   const forbidden = [];
@@ -138,10 +139,10 @@ JS = """() => {
 }"""
 PRIMARY_JS = """() => {
   // 当前展开卡的主按钮：滚到可见后，须在 hero 之下、视口之内且未被遮挡
-  const b = document.querySelector('.nb-sec.is-open [data-primary]');
+  const b = document.querySelector('.wz-card [data-primary]');
   if (!b) return true;
   b.scrollIntoView({block: 'center'});
-  const r = b.getBoundingClientRect(), hero = document.querySelector('.nb-hero');
+  const r = b.getBoundingClientRect(), hero = document.querySelector('.wz-top');
   const top = hero ? hero.getBoundingClientRect().bottom : 0;
   const ok = r.top >= top && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
   const hit = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
@@ -164,7 +165,7 @@ async def main():
                 m = await pg.evaluate(JS)
                 m['primary_ok'] = await pg.evaluate(PRIMARY_JS)
                 m['pass'] = not m['other_scroll'] and not m['clipped'] and m['width_util'] >= WIDTH_MIN and not m['row_mismatch'] and not m['ov_blank_bad'] \
-                    and m['hero_h'] <= 70 and not m['hscroll'] and not m['forbidden'] and m['primary_ok']
+                    and m['hero_h'] <= 120 and not m['hscroll'] and not m['forbidden'] and m['primary_ok']
                 out.setdefault(name, {})[f'{vw}x{vh}'] = m
                 if shots: await pg.screenshot(path=f'/workspace/hw/review/screens/one-screen/{vw}x{vh}/{name}.png')
             await pg.close()
@@ -178,7 +179,7 @@ async def main():
             m = v.get(vp)
             if not m: row.append('-'); continue
             ok &= m['pass']
-            why = m['other_scroll'][:2] + m['clipped'][:3] + m['forbidden'] + (['hero>70px'] if m['hero_h'] > 70 else []) + \
+            why = m['other_scroll'][:2] + m['clipped'][:3] + m['forbidden'] + (['hero>120px'] if m['hero_h'] > 120 else []) + \
                   (['横向滚动'] if m['hscroll'] else []) + ([] if m['primary_ok'] else ['主按钮不可达']) + (['宽度<75%'] if m['width_util'] < WIDTH_MIN else []) + \
                   (['同行卡片不等高'] if m['row_mismatch'] else []) + ['卡内空白 ' + x for x in m['ov_blank_bad']]
             row.append(f"{m['need']}/{m['view']} 卡空{m['card_blank_max']:.0%} " + ('✓' if m['pass'] else '✗ ' + ','.join(why)))

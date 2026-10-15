@@ -22,7 +22,7 @@ async def run(b, vw, vh):
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
     # 1 空项目默认展开方向
     await pg.goto(f'{BASE}/p/{FRESH}'); await pg.wait_for_timeout(2500)
-    secs = await pg.eval_on_selector_all('.nb-sec', 'els => els.map(e => [e.id, e.className])')
+    secs = await pg.eval_on_selector_all('.wz-card', 'els => els.map(e => [e.id, e.className])')
     ok(f'{vp} 六节完整渲染', len(secs) == 6, str(len(secs)))
     ok(f'{vp} 空项目默认展开方向卡', 'is-open' in secs[0][1], secs[0][1])
     await shot(pg, vp, 'J01_fresh_direction_open')
@@ -32,14 +32,14 @@ async def run(b, vw, vh):
     ok(f'{vp} 锁定节不可展开且提示', 'is-open' not in lit and '先完成上一步' in tip, tip.replace('\n', ' '))
     # 2 R7 默认
     await pg.goto(f'{BASE}/p/{R7}'); await pg.wait_for_timeout(3000)
-    heads = await pg.eval_on_selector_all('.nb-sec', "els => els.map(e => e.className.match(/is-(locked|active|running|confirmed|stale)/)[1] + ' | ' + e.querySelector('.nb-sh').innerText.replace(/\\n/g,' '))")
+    heads = await pg.eval_on_selector_all('.wz-card', "els => els.map(e => e.className.match(/is-(locked|active|running|confirmed|stale)/)[1] + ' | ' + e.querySelector('.nb-sh').innerText.replace(/\\n/g,' '))")
     ok(f'{vp} R7 卡头（圆点态 | 名称 摘要 耗时）', True, ' ;; '.join(heads))
-    hero = await pg.eval_on_selector('.nb-hero', 'e => e.getBoundingClientRect().height')
+    hero = await pg.eval_on_selector('.wz-top', 'e => e.getBoundingClientRect().height')
     ok(f'{vp} hero ≤70px', hero <= 70, f'{hero}px')
     await shot(pg, vp, 'J02_r7_default')
     # 3 深链 + 滚动到卡顶
     await pg.goto(f'{BASE}/p/{R7}/plan'); await pg.wait_for_timeout(3000)
-    st = await pg.evaluate("() => { const s = document.getElementById('nb-plan'); const h = document.querySelector('.nb-hero').getBoundingClientRect().bottom; return [s.className, Math.round(s.getBoundingClientRect().top - h)] }")
+    st = await pg.evaluate("() => { const s = document.getElementById('nb-plan'); const h = document.querySelector('.wz-top').getBoundingClientRect().bottom; return [s.className, Math.round(s.getBoundingClientRect().top - h)] }")
     ok(f'{vp} 深链 /plan 展开并滚到 hero 下方', 'is-open' in st[0] and -2 <= st[1] <= 40, str(st))
     await shot(pg, vp, 'J03_deeplink_plan')
     # 4 折叠 / 展开
@@ -60,7 +60,7 @@ async def run(b, vw, vh):
     y1 = await pg.evaluate('scrollY')
     ok(f'{vp} 关闭阅读层回到原位置', abs(y1 - y0) < 4 and not await pg.query_selector('.nb-reader'), f'{y0}->{y1}')
     # 6 全部文件
-    await pg.click('.nb-hero >> text=全部文件'); await pg.wait_for_timeout(500)
+    await pg.click('.wz-top >> text=全部文件'); await pg.wait_for_timeout(500)
     n = len(await pg.query_selector_all('.nb-reader .wb-files__grp'))
     ok(f'{vp} 全部文件为次要入口（hero 按钮）', n == 6, f'{n} 组')
     await shot(pg, vp, 'J06_all_files')
