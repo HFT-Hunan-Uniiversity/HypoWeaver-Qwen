@@ -139,6 +139,20 @@ def inject(text, numbers):
     return TOKEN.sub(lambda m: number(numbers[m.group(1)]), text)
 
 
+def _norm_title(text):
+    text = re.sub(r"[（(][^）)]*[）)]", "", text)
+    text = re.sub(r"^[一二三四五六七八九十]+、", "", text.strip())
+    return re.sub(r"[\s#:：]", "", text)
+
+
+def strip_duplicate_heading(markdown, title):
+    """Drop a leading heading that only repeats the section name."""
+    match = re.match(r"\s*#{1,6}\s*([^\n]*)\n?", markdown or "")
+    if not match or _norm_title(match.group(1)) != _norm_title(title):
+        return markdown
+    return markdown[match.end():].lstrip("\n")
+
+
 def render_markdown(proposal):
     parts = [
         "# " + proposal.snapshot["project"]["title"],
@@ -149,7 +163,9 @@ def render_markdown(proposal):
     if proposal.stale:
         parts.append("> 上游信息已变更，本提案已过期。")
     for section in proposal.sections:
-        parts += ["## " + section_title(section["key"]), inject(section["markdown"], section["injected_numbers_ref"])]
+        title = section_title(section["key"])
+        body = strip_duplicate_heading(section["markdown"], title)
+        parts += ["## " + title, inject(body, section["injected_numbers_ref"])]
     return "\n\n".join(parts) + "\n"
 
 

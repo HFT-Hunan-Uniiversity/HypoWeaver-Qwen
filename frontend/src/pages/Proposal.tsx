@@ -65,8 +65,21 @@ type ProposalRecord = {
 function narrativeIssues(p: ProposalRecord): string[] {
   return (p.narrative_failures || []).map((x) => `${titles[x.section] || x.section}：${x.reason}`)
 }
+/** 去掉与节名重复的首行标题（忽略序号、空格、英文括注）。 */
+function normTitle(x: string) {
+  return x
+    .replace(/[（(][^）)]*[）)]/g, '')
+    .replace(/^[一二三四五六七八九十]+、/, '')
+    .replace(/[\s#:：]/g, '')
+}
+export function stripDuplicateHeading(md: string, title?: string) {
+  if (!title) return md
+  const m = md.match(/^\s*#{1,6}\s*([^\n]*)\n?/)
+  if (!m || normTitle(m[1]) !== normTitle(title)) return md
+  return md.slice(m[0].length).replace(/^\s*\n/, '')
+}
 function render(s: Section) {
-  return s.markdown.replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>
+  return stripDuplicateHeading(s.markdown, titles[s.key]).replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>
     s.injected_numbers_ref[key] === null
       ? '未估计'
       : fmtNumber(Number(s.injected_numbers_ref[key])),

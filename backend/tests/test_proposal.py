@@ -202,3 +202,12 @@ def test_ten_item_order_and_legacy_sections_render():
     )
     md = render_markdown(legacy)
     assert "## 研究缺口" in md and "## mystery" in md
+
+
+def test_strip_duplicate_section_heading():
+    from hypoweaver.proposal.rendering import strip_duplicate_heading
+
+    assert strip_duplicate_heading("### 必要的技术手段\n\n- a", "三、必要的技术手段") == "- a"
+    assert strip_duplicate_heading("## 数据集（Source/Target）\n正文", "四、数据集") == "正文"
+    assert strip_duplicate_heading("### 待检验研究假设\n正文", "一、待研究问题").startswith("###")
+    assert strip_duplicate_heading("正文\n### 必要的技术手段", "三、必要的技术手段").startswith("正文")
