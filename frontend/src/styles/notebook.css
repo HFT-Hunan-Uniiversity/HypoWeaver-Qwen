@@ -775,21 +775,26 @@ html.nb-reading {
   max-width: none !important;
 }
 .cx {
-  /* 同一暖珊瑚语系：浅色淡底 / 深色深底，切换不跳色相 */
-  --cx-bg: #f7f5f2;
-  --cx-side: #f3f0ec;
+  /* 浅色对齐向导页：浅灰底、黑主按钮、蓝高亮、绿成功、橙警告 */
+  --cx-bg: #f4f5f7;
+  --cx-side: #f7f7f8;
   --cx-panel: #ffffff;
-  --cx-text: #1c1917;
-  --cx-muted: #78716c;
-  --cx-faint: #a8a29e;
-  --cx-line: #e7e0d8;
-  --cx-accent: #c2410c;
-  --cx-accent-strong: #9a3412;
-  --cx-accent-soft: #f5e6d8;
-  --cx-accent-badge-bg: #fef3c7;
-  --cx-accent-badge-fg: #92400e;
-  --cx-chip: #fffcfa;
-  --cx-shadow: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --cx-text: #18181b;
+  --cx-muted: #6b6b73;
+  --cx-faint: #8d8d95;
+  --cx-line: #e7e7ea;
+  --cx-line-strong: #d9d9de;
+  --cx-accent: #2563eb;
+  --cx-accent-strong: #18181b;
+  --cx-accent-soft: #eef4ff;
+  --cx-accent-badge-bg: #eef4ff;
+  --cx-accent-badge-fg: #2563eb;
+  --cx-ok: #16a34a;
+  --cx-ok-soft: #e9f8ee;
+  --cx-warn: #d97706;
+  --cx-warn-soft: #fff7e6;
+  --cx-chip: #ffffff;
+  --cx-shadow: none;
   --cx-on-accent: #ffffff;
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
@@ -803,21 +808,27 @@ html.nb-reading {
   grid-template-columns: 56px minmax(0, 1fr);
 }
 .cx[data-theme='dark'] {
-  --cx-bg: #141210;
-  --cx-side: #1a1714;
-  --cx-panel: #24201c;
-  --cx-text: #f5f2ef;
+  /* 深色 Codex：紫强调（对齐 dark ref），壳层仍为深底 */
+  --cx-bg: #141414;
+  --cx-side: #1a1a1a;
+  --cx-panel: #242424;
+  --cx-text: #f5f5f4;
   --cx-muted: #a8a29e;
   --cx-faint: #78716c;
-  --cx-line: #3a342e;
-  --cx-accent: #ea8a5c;
-  --cx-accent-strong: #f0a57a;
-  --cx-accent-soft: #3b2a22;
-  --cx-accent-badge-bg: #3b2a22;
-  --cx-accent-badge-fg: #f0c7a8;
-  --cx-chip: #2a2622;
+  --cx-line: #33302c;
+  --cx-line-strong: #44403c;
+  --cx-accent: #a78bfa;
+  --cx-accent-strong: #7c3aed;
+  --cx-accent-soft: #2e1065;
+  --cx-accent-badge-bg: #2e1065;
+  --cx-accent-badge-fg: #ddd6fe;
+  --cx-ok: #4ade80;
+  --cx-ok-soft: #14532d;
+  --cx-warn: #fbbf24;
+  --cx-warn-soft: #422006;
+  --cx-chip: #2a2a2a;
   --cx-shadow: none;
-  --cx-on-accent: #1c1410;
+  --cx-on-accent: #ffffff;
 }
 
 .cx-side {
@@ -977,10 +988,10 @@ html.nb-reading {
   background: var(--cx-faint);
 }
 .cx-dot.is-ok {
-  background: #16a34a;
+  background: var(--cx-ok);
 }
 .cx-dot.is-wait {
-  background: #d97706;
+  background: var(--cx-warn);
 }
 .cx-muted {
   color: var(--cx-muted);
