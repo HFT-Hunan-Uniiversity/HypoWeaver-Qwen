@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, body, type Project } from '../api/client'
 import { ErrorNote } from '../components/Shared'
+import { displayProjectTitle } from '../lib/displayTitle'
 export default function Projects() {
   const query = useQuery({ queryKey: ['projects'], queryFn: () => api<Project[]>('/projects') })
   const [search, setSearch] = useSearchParams()
@@ -50,7 +51,7 @@ export default function Projects() {
               <article key={p.id}>
                 <div>
                   <Link className="project-title" to={`/p/${p.id}?open=1`}>
-                    {p.title}
+                    {displayProjectTitle(p.title)}
                   </Link>
                   <p className="muted">{p.direction.text || '尚未填写研究方向'}</p>
                   <small>更新于 {new Date(p.updated_at).toLocaleString('zh-CN')}</small>
@@ -83,7 +84,7 @@ export default function Projects() {
               aria-labelledby="delete-title"
             >
               <h2 id="delete-title">删除项目</h2>
-              <p>确认删除“{deleting.title}”？项目内容将被删除。</p>
+              <p>确认删除“{displayProjectTitle(deleting.title)}”？项目内容将被删除。</p>
               <ErrorNote error={remove.error} />
               <div className="actions">
                 <button className="quiet" onClick={() => setDeleting(null)}>

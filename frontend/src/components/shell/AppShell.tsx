@@ -46,7 +46,7 @@ export default function AppShell() {
       ) : (
         <div className="nb-plain">
           <header className="nb-hero is-plain">
-            <Link to="/" className="nb-logo" title="HypoWeaver · 研究项目">
+            <Link to="/" className="nb-logo" title="HypoWeaver · 分步向导">
               HW
             </Link>
             <div className="nb-hero__txt">

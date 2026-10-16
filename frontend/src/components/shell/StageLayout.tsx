@@ -12,6 +12,7 @@ import {
   Settings2,
 } from 'lucide-react'
 import { STAGE_TITLES, STAGE_TODO, stageKeyFromPath, useOverview } from '../../lib/stages'
+import { displayProjectTitle } from '../../lib/displayTitle'
 import { useLlm } from '../../lib/llm'
 import {
   dotState,
@@ -141,7 +142,7 @@ function Wizard({ title }: { title: string }) {
           <Link to="/" className="nb-logo" title="返回项目列表">
             HW
           </Link>
-          <h1 title={title}>{title}</h1>
+          <h1 title={displayProjectTitle(title)}>{displayProjectTitle(title)}</h1>
           <span className={`wz-badge ${runningStage ? 'is-run' : done === 6 ? 'is-ok' : ''}`}>
             {runningStage && <Loader2 size={11} className="ptl-spin" aria-hidden="true" />}
             {badge}

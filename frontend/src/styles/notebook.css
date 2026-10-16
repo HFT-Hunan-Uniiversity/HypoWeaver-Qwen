@@ -306,7 +306,7 @@ html.nb-reading {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 .wz-card__hd h2 {
   margin: 0;
@@ -316,14 +316,15 @@ html.nb-reading {
   letter-spacing: -0.01em;
 }
 .wz-card__sub {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
   color: var(--text-faint);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 .wz-card .stage-body {
   padding: 0 !important;
   margin: 0 !important;
+  gap: 6px !important;
 }
 .wz-card .acts {
   display: flex;
@@ -341,6 +342,59 @@ html.nb-reading {
   max-width: 42%;
   white-space: normal;
 }
+
+/* 提案页：版本胶囊与「打印 / 保存 PDF」同高同圆角同边框同字号；收紧标题→工具条间距 */
+.wz-card .proposal-toolbar {
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+.wz-card .proposal-toolbar .version-pills {
+  gap: 6px;
+}
+.wz-card .proposal-toolbar .version-pills__label {
+  font-size: var(--fz-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.wz-card .proposal-toolbar .version-pills button,
+.wz-card .proposal-toolbar .product-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 30px !important;
+  height: 30px;
+  padding: 0 12px !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--fz-xs) !important;
+  font-weight: 600;
+  line-height: 1;
+}
+.wz-card .proposal-toolbar .version-pills button.is-active {
+  border-color: var(--brand) !important;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.wz-card .proposal-toolbar .version-pills button small {
+  font-size: var(--fz-2xs);
+  font-weight: 500;
+  line-height: 1;
+}
+.wz-card .proposal-toolbar .generated-by {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--fz-xs);
+  align-items: center;
+}
+
 .nb-ro {
   display: flex;
   align-items: center;

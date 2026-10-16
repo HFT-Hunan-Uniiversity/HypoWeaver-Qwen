@@ -10,6 +10,7 @@ import { strengths } from '../components/Claims'
 import { num } from '../components/ResultTable'
 import { useProjectFacts } from '../lib/facts'
 import { STAGE_TITLES, STAGE_TODO, useOverview } from '../lib/stages'
+import { displayProjectTitle } from '../lib/displayTitle'
 
 const FLOW_LABEL = { locked: '未解锁', active: '进行中', confirmed: '已确认', stale: '需要更新' }
 const FLOW_TONE = { locked: 'gray', active: 'orange', confirmed: 'green', stale: 'yellow' }
@@ -80,7 +81,7 @@ export default function Overview() {
       <div className="overview-grid fill">
         <section className="panel overview-card overview-summary" style={{ gridArea: 'summary' }}>
           <div className="overview-card__head">
-            <h2>{project.title}</h2>
+            <h2>{displayProjectTitle(project.title)}</h2>
             <CaseTag project={project} />
           </div>
           <ScrollRegion label="项目概要">

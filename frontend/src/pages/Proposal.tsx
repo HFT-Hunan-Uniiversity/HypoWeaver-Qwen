@@ -17,6 +17,7 @@ import { EmptyState, ProgressView } from '../components/flow/FlowBits'
 import { useLlm } from '../lib/llm'
 import { Copy, Download, FileText } from 'lucide-react'
 import ProcessTimeline, { jobSeconds, useStageJob } from '../components/flow/ProcessTimeline'
+import { displayProjectTitle } from '../lib/displayTitle'
 const titles: Record<string, string> = {
   overview: '一页概览',
   question: '研究问题与贡献',
@@ -269,7 +270,7 @@ export default function Proposal() {
         />
       ) : (
         <>
-          <div className="toolbar no-print">
+          <div className="toolbar proposal-toolbar no-print">
             <VersionPills
               label="提案版本"
               value={active.id}
@@ -340,7 +341,7 @@ export default function Proposal() {
             </span>
             <span className="file-card__body">
               <strong>
-                {active.snapshot.project.title} · 研究提案 v{active.version}
+                {displayProjectTitle(active.snapshot.project.title)} · 研究提案 v{active.version}
               </strong>
               <small>
                 {active.kind === 'plan_only' ? '计划型提案' : '含探索性结果'} ·{' '}
@@ -393,7 +394,7 @@ export default function Proposal() {
                         ? '计划型提案 · 尚无实证结果'
                         : '研究提案 · 含探索性结果'}
                     </p>
-                    <h1>{active.snapshot.project.title}</h1>
+                    <h1>{displayProjectTitle(active.snapshot.project.title)}</h1>
                     <p className="muted">已移除无效引用 {active.removed_references} 处</p>
                     {active.sections.map((s) => (
                       <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
