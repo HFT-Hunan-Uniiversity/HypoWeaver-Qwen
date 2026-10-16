@@ -52,7 +52,7 @@ PROMPTS = {
             "样本起止年份和企业数使用dataset.year_min、dataset.year_max、dataset.n_units等已有占位符。"
             "来源引用年使用dataset.source_year，不得以样本终止年替代；已知来源与引用元数据可原样引用。"
             "引用统一放evidence_ids。尊重max_strength（碳市场案例最多写到关联；"
-            "problem/abstract/title/rationale等结论性章节不写因果）；"
+            "problem/abstract/title/rationale等结论性章节一律用「关联」「条件关联」表述，尽量不出现「因果」一词，需要说明边界时写「仅报告关联」即可）；"
             "techniques/experiments/methods以方法说明为主，可用识别术语但避免结论口吻。"
             "计划型提案（kind=plan_only）只写待检验命题、预期结果与待补数据，不编造结果。"
             "不能把数据集当成已发表的论文结论。"

@@ -199,3 +199,32 @@ def test_edit_uses_saved_metadata_and_still_rejects_bare_numbers(tmp_path):
         assert client.patch(url, json={"markdown": text + "提升了12%"}).status_code == 400
         saved = client.get(f"/api/proposals/{identifier}").json()
         assert next(s["markdown"] for s in saved["sections"] if s["key"] == "datasets") == text
+
+
+ACTUAL_BLOCKED_JOB_4193 = [
+    "- H1：在双向固定效应面板模型中，行业同群碳市场暴露与绿色发明专利申请数之间是否可观察到条件关联；方向与大小不预设，不解释为因果。",
+    "- H3：在事件研究设定中，暴露状态变化前后是否可观察到不同的关联模式；该模式仅作为动态关联线索，不解释为政策或同群效应因果。",
+    "创新点不在于宣称新的因果机制，而在于把碳价研究中关于创新能力的异质性线索谨慎迁移到行业同群暴露场景。",
+    "由于证据强度不足，上述数值仅作为待核验输出和不确定性边界，不用于判断关联方向或形成因果结论。",
+    "本研究不主张因果关系，并非因果证据，不构成因果推断，无法识别因果效应。",
+    "待检验的因果机制包括同群学习；是否存在因果关系仍需后续数据。",
+]
+
+
+@pytest.mark.parametrize("text", ACTUAL_BLOCKED_JOB_4193)
+def test_job_4193_negated_or_hypothetical_causal_passes(text):
+    assert check_wording(text, "associational")["valid"], check_wording(text, "associational")
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "碳市场导致绿色创新增加。",
+        "结果证明了因果关系。",
+        "因果效应为正。",
+        "不解释为因果，但碳市场导致创新。",
+        "是否存在因果关系已被证明，因果效应显著。",
+    ],
+)
+def test_real_causal_assertions_still_blocked(text):
+    assert not check_wording(text, "associational")["valid"]

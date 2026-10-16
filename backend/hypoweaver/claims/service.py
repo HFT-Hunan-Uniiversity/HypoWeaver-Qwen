@@ -32,9 +32,17 @@ def check_wording(text, max_strength, known_titles=()):
     )
     # Negation is scoped to the current clause; double negation does not license a causal claim.
     cleaned = re.sub(
-        r"(?:尚不能|不能|不足以|不支持|无法|不作|不据此|不宜|避免)"
+        r"(?:尚不能|不能解释为|不能|不足以|不支持|无法识别|无法|不作|不据此|不宜|避免|不解释为|并非|不构成|"
+        r"不主张|不宣称|不在于|不用于|不形成|不推断|不作为)"
         r"(?:(?!否认|排除|不|但|却|然而)[^，。；！？,;!?\n]){0,30}因果"
-        r"(?:关系|解释|证据|效应)?",
+        r"(?:关系|解释|证据|效应|结论|机制|推断)?",
+        "",
+        cleaned,
+    )
+    # A causal mechanism posed as an open hypothesis/question is not an asserted conclusion.
+    cleaned = re.sub(
+        r"(?:是否存在|是否具有|是否构成|待检验(?:的)?|有待检验(?:的)?)"
+        r"(?:(?!证明|导致|证实|表明|但|却|然而)[^，。；！？,;!?\n]){0,30}因果(?:关系|效应|机制)?",
         "",
         cleaned,
     )
