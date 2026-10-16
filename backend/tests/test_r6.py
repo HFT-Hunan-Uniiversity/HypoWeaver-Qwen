@@ -265,3 +265,20 @@ def test_repair_rewrites_only_failed_sections():
     assert "待检验命题" in accepted["problem"].markdown
     assert "techniques" in llm.payloads[1]["accepted_sections"]
     assert "problem" in llm.payloads[1]["repair_sections"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "- 计数结果稳健变换：用于处理绿色发明申请的非负计数分布，检查敏感性。",
+        "稳健性设定给出的系数分别为{{num:main.coef}}。",
+        "按代理变量分组估计，或做分样本分析。",
+    ],
+)
+def test_job_35c2_number_false_positives_pass(text):
+    assert issues(text, {"main.coef": 1}, "associational") == []
+
+
+def test_real_chinese_quantities_still_fail_after_phrase_fix():
+    assert issues("约三分之一的企业", {}, "associational")
+    assert issues("几分之几", {}, "associational")

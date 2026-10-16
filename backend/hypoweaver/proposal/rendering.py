@@ -103,6 +103,12 @@ def issues(text, numbers, strength, metadata=None, section=None):
         "一旦",
         "唯一",
         "同一",
+        # 「数」后接「分」会被误当成量词表达（系数分别、计数分布）。
+        "分别",
+        "分布",
+        "分析",
+        "分组",
+        "分样本",
     ]:
         quantitative = quantitative.replace(phrase, "")
     chinese_number = (
