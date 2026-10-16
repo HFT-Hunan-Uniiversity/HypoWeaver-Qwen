@@ -142,7 +142,7 @@ function Wizard({ title }: { title: string }) {
           <Link to="/" className="nb-logo" title="返回项目列表">
             HW
           </Link>
-          <h1 title={displayProjectTitle(title)}>{displayProjectTitle(title)}</h1>
+          <h1 title={displayProjectTitle(title, id)}>{displayProjectTitle(title, id)}</h1>
           <span className={`wz-badge ${runningStage ? 'is-run' : done === 6 ? 'is-ok' : ''}`}>
             {runningStage && <Loader2 size={11} className="ptl-spin" aria-hidden="true" />}
             {badge}

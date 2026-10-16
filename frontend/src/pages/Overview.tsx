@@ -81,7 +81,7 @@ export default function Overview() {
       <div className="overview-grid fill">
         <section className="panel overview-card overview-summary" style={{ gridArea: 'summary' }}>
           <div className="overview-card__head">
-            <h2>{displayProjectTitle(project.title)}</h2>
+            <h2>{displayProjectTitle(project.title, project.id)}</h2>
             <CaseTag project={project} />
           </div>
           <ScrollRegion label="项目概要">

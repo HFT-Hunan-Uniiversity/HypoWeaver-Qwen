@@ -341,7 +341,8 @@ export default function Proposal() {
             </span>
             <span className="file-card__body">
               <strong>
-                {displayProjectTitle(active.snapshot.project.title)} · 研究提案 v{active.version}
+                {displayProjectTitle(active.snapshot.project.title, id)} · 研究提案 v
+                {active.version}
               </strong>
               <small>
                 {active.kind === 'plan_only' ? '计划型提案' : '含探索性结果'} ·{' '}
@@ -394,7 +395,7 @@ export default function Proposal() {
                         ? '计划型提案 · 尚无实证结果'
                         : '研究提案 · 含探索性结果'}
                     </p>
-                    <h1>{displayProjectTitle(active.snapshot.project.title)}</h1>
+                    <h1>{displayProjectTitle(active.snapshot.project.title, id)}</h1>
                     <p className="muted">已移除无效引用 {active.removed_references} 处</p>
                     {active.sections.map((s) => (
                       <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
