@@ -27,7 +27,7 @@ export function ProgressView({
 }: {
   title: string
   detail?: string
-  steps?: { label: string; state: 'done' | 'now' | 'todo' | 'failed' }[]
+  steps?: { label: string; state: 'done' | 'now' | 'todo' | 'failed' | 'na' }[]
 }) {
   let list: TimelineStep[] = (
     steps?.length ? steps : [{ label: title, state: 'now' as const }]

@@ -73,7 +73,7 @@ export default function StageLayout() {
 function Wizard({ title }: { title: string }) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { projectId: id, flow } = useFlow()
+  const { projectId: id, flow, runsSettled } = useFlow()
   const routeKey = stageKeyFromPath(pathname) as StageKey | undefined
   const firstOpen = flow.find((s) => s.status !== 'confirmed' && s.status !== 'locked')
   const { seconds, running } = useStageJobs(id)
@@ -86,11 +86,14 @@ function Wizard({ title }: { title: string }) {
     'direction'
 
   // 无阶段段：落到当前应打开的阶段。锁定深链：回退到第一个未确认。
+  // runs 未 settle 前不把提案深链踢回（dataRunOk 可能尚未算出）
   useEffect(() => {
     if (!routeKey) navigate(`/p/${id}/${cur}`, { replace: true })
-    else if (flow.find((x) => x.key === routeKey)?.status === 'locked')
+    else if (flow.find((x) => x.key === routeKey)?.status === 'locked') {
+      if (routeKey === 'proposal' && !runsSettled) return
       navigate(`/p/${id}/${cur}`, { replace: true })
-  }, [routeKey, cur]) // eslint-disable-line react-hooks/exhaustive-deps
+    }
+  }, [routeKey, cur, runsSettled]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 确认后：若仍停在刚确认的阶段，跳到下一节（阶段页自己的 navigate 优先；这里兜底）
   const prevStatus = useRef<Record<string, string>>({})
@@ -114,13 +117,16 @@ function Wizard({ title }: { title: string }) {
   )
   const done = flow.filter((s) => s.status === 'confirmed').length
   const runningStage = flow.find((s) => runOf(s.key))
+  const dataWarn = flow.some((s) => s.key === 'data' && s.backend === 'failed')
   const badge = runningStage
     ? '运行中'
     : done === 6
       ? '全流程完成'
       : flow.some((s) => s.status === 'stale')
         ? '需更新'
-        : '进行中'
+        : dataWarn
+          ? '主模型已完成'
+          : '进行中'
   const go = (k: StageKey) => {
     const s = flow.find((x) => x.key === k)
     if (!s || s.status === 'locked') return

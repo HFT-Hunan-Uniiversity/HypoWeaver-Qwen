@@ -39,7 +39,27 @@ export interface FlowStage {
 /** 后端状态表示"该阶段有实质进展" */
 const touched = (s?: Stage) => !!s && s.status !== 'not_started'
 
-export function deriveFlow(stages: Stage[], local: LocalFlow): FlowStage[] {
+/** 最近一次检验是否足以解锁提案：整次 succeeded，或主模型步 succeeded（稳健性部分失败不锁死） */
+export function runUnlocksProposal(
+  run?: {
+    status?: string
+    stale?: boolean
+    steps?: Record<string, { status?: string } | undefined>
+    result?: { main?: unknown } | null
+  } | null,
+): boolean {
+  if (!run || run.stale) return false
+  if (run.status === 'succeeded') return true
+  if (run.steps?.main?.status === 'succeeded') return true
+  if (run.result?.main) return true
+  return false
+}
+
+export function deriveFlow(
+  stages: Stage[],
+  local: LocalFlow,
+  opts?: { dataRunOk?: boolean },
+): FlowStage[] {
   const by = (k: string) => stages.find((s) => s.key === k)
   const out: FlowStage[] = []
   let open = true // 前面阶段都已确认 / 需更新 → 本阶段可进入
@@ -47,11 +67,15 @@ export function deriveFlow(stages: Stage[], local: LocalFlow): FlowStage[] {
     const s = by(key)
     const later = FLOW_ORDER.slice(i + 1).some((k) => touched(by(k)))
     const v = local.confirmed[key] ?? 0
+    // 数据阶段：overview 可能因稳健性单步失败标 failed，但主模型已成功 → 仍视为可完成
+    const dataOkEnough = key === 'data' && !!opts?.dataRunOk
+    const backendDone =
+      s?.status === 'completed' ||
+      (dataOkEnough && (s?.status === 'failed' || s?.status === 'completed'))
     let status: FlowStatus
     if (local.editing[key]) status = 'active'
     else if (s?.status === 'stale' || local.stale[key]) status = open ? 'stale' : 'locked'
-    // 后端已完成 + 用户确认过（或下游已有进展，说明此前流程中已确认）
-    else if (s?.status === 'completed' && (v > 0 || later)) status = 'confirmed'
+    else if (backendDone && (v > 0 || later)) status = 'confirmed'
     else status = open ? 'active' : 'locked'
     out.push({
       key,
@@ -60,7 +84,9 @@ export function deriveFlow(stages: Stage[], local: LocalFlow): FlowStage[] {
       backend: s?.status || 'not_started',
       summary: s?.summary,
     })
-    if (status === 'active' || status === 'locked') open = false
+    // 数据阶段主模型已成功时，不阻断提案解锁（仍可停在 data 修改）
+    if (status === 'locked') open = false
+    else if (status === 'active' && !(key === 'data' && opts?.dataRunOk)) open = false
   })
   return out
 }

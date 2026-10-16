@@ -160,7 +160,12 @@ export default function Analysis() {
                 }),
                 note:
                   `方案 v${r.plan_snapshot.version}` +
-                  (r.status === 'succeeded' ? '' : ' · ' + statusNames[r.status]) +
+                  (r.steps?.main?.status === 'succeeded' &&
+                  Object.values(r.steps || {}).some((st) => st.status === 'failed')
+                    ? ' · 主模型成功（有部分失败）'
+                    : r.status === 'succeeded'
+                      ? ''
+                      : ' · ' + statusNames[r.status]) +
                   (r.stale ? ' · 已过期' : ''),
                 tone: r.stale ? 'stale' : r.status === 'failed' ? 'failed' : undefined,
               }))}
@@ -169,30 +174,68 @@ export default function Analysis() {
           <ProcessTimeline
             title="检验运行"
             seconds={jobSeconds(runJob)}
-            steps={Object.entries(current.steps).map(([key, st]) => ({
-              key,
-              label: `${stepNames[key] || key}${st.status === 'succeeded' ? '' : ' · ' + (statusNames[st.status] || st.status)}${st.error ? '：' + st.error : ''}`,
-              state: (st.status === 'succeeded' || st.status === 'not_applicable'
-                ? 'done'
-                : st.status === 'running'
-                  ? 'now'
-                  : st.status === 'failed'
-                    ? 'failed'
-                    : 'todo') as StepState,
-              detail: stepDetail(key),
-            }))}
+            steps={Object.entries(current.steps).map(([key, st]) => {
+              const finished = ['succeeded', 'failed'].includes(current.status)
+              const na =
+                st.status === 'not_applicable' || (!!st.error && /此方法类别不执行/.test(st.error))
+              return {
+                key,
+                label: `${stepNames[key] || key}${
+                  st.status === 'succeeded'
+                    ? ''
+                    : na
+                      ? ' · 不适用'
+                      : ' · ' + (statusNames[st.status] || st.status)
+                }${st.error && !na ? '：' + st.error : na && st.error ? '：' + st.error : ''}`,
+                state: (st.status === 'succeeded'
+                  ? 'done'
+                  : na || st.status === 'not_applicable'
+                    ? 'na'
+                    : st.status === 'running' || st.status === 'queued'
+                      ? 'now'
+                      : st.status === 'failed'
+                        ? 'failed'
+                        : finished
+                          ? 'na'
+                          : 'todo') as StepState,
+                detail: stepDetail(key),
+              }
+            })}
           />
           {current.stale && (
             <p className="notice">上游方案、数据或绑定已变更，本次运行已过期；旧数字保留供核对。</p>
           )}
           {current.error && <p className="error">{current.error}</p>}
           {Object.entries(current.steps)
-            .filter(([, st]) => st.error)
+            .filter(
+              ([, st]) =>
+                st.error &&
+                st.status !== 'not_applicable' &&
+                !/此方法类别不执行/.test(st.error || ''),
+            )
             .map(([key, st]) => (
               <p className="error" key={key}>
                 {stepNames[key] || key}：{st.error}
               </p>
             ))}
+          {Object.entries(current.steps)
+            .filter(
+              ([, st]) =>
+                st.status === 'not_applicable' ||
+                (!!st.error && /此方法类别不执行/.test(st.error || '')),
+            )
+            .map(([key, st]) => (
+              <p className="muted" key={'na-' + key}>
+                {stepNames[key] || key}
+                {st.error ? `：${st.error}` : '：此方法类别不执行'}
+              </p>
+            ))}
+          {current.steps?.main?.status === 'succeeded' &&
+            Object.values(current.steps).some((st) => st.status === 'failed') && (
+              <p className="notice">
+                主模型已成功；部分稳健性步骤失败。仍可生成研究提案，失败步骤仅作警告。
+              </p>
+            )}
           {!result && current.status === 'failed' && <Claims runId={current.id} />}{' '}
           {result && (
             <div className="results-stack">

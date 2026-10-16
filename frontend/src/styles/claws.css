@@ -234,6 +234,13 @@ button.is-primary,
   color: var(--text) !important;
   font-weight: 700 !important;
 }
+.ptl__row.is-na .ptl__head {
+  color: var(--text-faint);
+}
+.ptl__row.is-na .ptl__icon {
+  color: #9ca3af;
+  border-color: #d1d5db;
+}
 .ptl__row.is-failed .ptl__head {
   color: var(--danger) !important;
 }

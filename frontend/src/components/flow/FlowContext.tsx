@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../../api/client'
 import type { ReactNode } from 'react'
 import type { Stage } from '../../api/client'
 import {
@@ -6,6 +8,7 @@ import {
   confirmStage,
   deriveFlow,
   loadLocal,
+  runUnlocksProposal,
   saveLocal,
   startEdit,
   type FlowStage,
@@ -42,6 +45,10 @@ interface FlowCtx {
   projectId: string
   flow: FlowStage[]
   local: LocalFlow
+  /** runs 查询已返回（成功或失败）；未 settle 前勿因提案锁定做深链回退 */
+  runsSettled: boolean
+  /** 存在足以解锁提案的检验运行 */
+  dataRunOk: boolean
   uiRef: React.MutableRefObject<StageUi | null>
   uiSig: string
   setUiSig: (s: string) => void
@@ -65,7 +72,29 @@ export function FlowProvider({
   useEffect(() => {
     setLocal(loadLocal(projectId))
   }, [projectId])
-  const flow = useMemo(() => deriveFlow(stages, local), [stages, local])
+  const runs = useQuery({
+    queryKey: ['runs', projectId],
+    queryFn: () =>
+      api<
+        {
+          status: string
+          stale: boolean
+          steps?: Record<string, { status?: string }>
+          result?: { main?: unknown } | null
+        }[]
+      >(`/projects/${projectId}/runs`),
+    staleTime: 5000,
+  })
+  const dataRunOk = !!runs.data?.some((r) => runUnlocksProposal(r))
+  const runsSettled = runs.isFetched
+  const dataBackend = stages.find((s) => s.key === 'data')?.status
+  // 首次拉取中：若 overview 已标 data failed/completed，暂按可解锁处理，避免 /proposal 深链被误踢
+  const unlockHint =
+    dataRunOk || (!runs.isFetched && (dataBackend === 'failed' || dataBackend === 'completed'))
+  const flow = useMemo(
+    () => deriveFlow(stages, local, { dataRunOk: unlockHint }),
+    [stages, local, unlockHint],
+  )
   const uiRef = useRef<StageUi | null>(null)
   const [uiSig, setUiSig] = useState('')
   const update = useCallback(
@@ -79,6 +108,8 @@ export function FlowProvider({
     projectId,
     flow,
     local,
+    runsSettled,
+    dataRunOk,
     uiRef,
     uiSig,
     setUiSig,

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronRight, Circle, Loader2, X } from 'lucide-react'
 import { api } from '../../api/client'
 
-export type StepState = 'done' | 'now' | 'todo' | 'failed'
+export type StepState = 'done' | 'now' | 'todo' | 'failed' | 'na'
 export interface TimelineStep {
   key: string
   label: string
@@ -58,6 +58,8 @@ function Icon({ state }: { state: StepState }) {
         <Check size={14} />
       ) : state === 'failed' ? (
         <X size={14} />
+      ) : state === 'na' ? (
+        <Circle size={10} />
       ) : (
         <Circle size={10} />
       )}
@@ -108,13 +110,16 @@ export default function ProcessTimeline({
   seconds?: number
   defaultOpen?: boolean
 }) {
-  const running = steps.some((s) => s.state === 'now' || s.state === 'todo')
+  const running = steps.some((s) => s.state === 'now')
+  const pending = steps.some((s) => s.state === 'todo')
   const failed = steps.some((s) => s.state === 'failed')
   const [open, setOpen] = useState(!!defaultOpen)
-  const expanded = running || open
-  const summary = running
-    ? `${title || '进行中'} · 第 ${Math.min(steps.length, steps.filter((s) => s.state === 'done').length + 1)} / ${steps.length} 步`
-    : `${seconds !== undefined ? `用时 ${fmtSeconds(seconds)} · ` : ''}${steps.length} 步${failed ? ' · 有失败' : ''}`
+  // 仅真正在跑的步显示「进行中」；已结束但有 todo/失败的不算进行中
+  const inFlight = running
+  const expanded = inFlight || open
+  const summary = inFlight
+    ? `${title || '进行中'} · 第 ${Math.min(steps.length, steps.filter((s) => s.state === 'done' || s.state === 'na').length + 1)} / ${steps.length} 步`
+    : `${seconds !== undefined ? `用时 ${fmtSeconds(seconds)} · ` : ''}${steps.length} 步${failed ? ' · 部分失败' : ''}${pending && !failed ? ' · 有未执行步' : ''}`
   return (
     <section className={`ptl ${expanded ? 'is-open' : ''}`} aria-label={title || '处理过程'}>
       <button

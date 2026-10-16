@@ -97,7 +97,15 @@ export default function Data() {
   const planRuns = runs.data?.filter((r) => r.plan_id === plan?.id) || []
   const lastRun = planRuns[0]
   const running = lastRun && ['queued', 'running'].includes(lastRun.status)
-  const runOk = lastRun?.status === 'succeeded' && !lastRun.stale
+  const mainOk = lastRun?.steps?.main?.status === 'succeeded' || !!lastRun?.result?.main
+  /** 主模型成功即可进入提案；稳健性单步失败只作警告，不锁死 */
+  const runOk = !!lastRun && !lastRun.stale && (lastRun.status === 'succeeded' || !!mainOk)
+  const partialFail =
+    !!lastRun &&
+    !lastRun.stale &&
+    !!mainOk &&
+    (lastRun.status === 'failed' ||
+      Object.values(lastRun.steps || {}).some((st) => st.status === 'failed'))
   const start = useMutation({
     mutationFn: () => api<{ job_id: string }>(`/plans/${plan!.id}/runs`, body('POST')),
     onSuccess: () => {
@@ -147,7 +155,9 @@ export default function Data() {
                   }
                 : {
                     label: '确认并进入下一阶段',
-                    reason: '检验已完成',
+                    reason: partialFail
+                      ? '主模型已成功；有稳健性步骤失败，可作为警告进入提案'
+                      : '检验已完成',
                     onClick: () => {
                       if (!confirm('data')) navigate(`/p/${id}/proposal`)
                     },
@@ -156,14 +166,18 @@ export default function Data() {
 
   if (running) {
     const steps = Object.entries(lastRun!.steps || {}).map(([k, v]) => ({
-      label: STEP_NAMES[k] || k,
-      state: (v.status === 'succeeded' || v.status === 'not_applicable'
+      label:
+        (STEP_NAMES[k] || k) +
+        (v.status === 'not_applicable' ? ' · 不适用' : v.status === 'failed' ? ' · 失败' : ''),
+      state: (v.status === 'succeeded'
         ? 'done'
-        : v.status === 'running'
-          ? 'now'
-          : v.status === 'failed'
-            ? 'failed'
-            : 'todo') as 'done' | 'now' | 'todo' | 'failed',
+        : v.status === 'not_applicable'
+          ? 'na'
+          : v.status === 'running' || v.status === 'queued'
+            ? 'now'
+            : v.status === 'failed'
+              ? 'failed'
+              : 'todo') as 'done' | 'now' | 'todo' | 'failed' | 'na',
     }))
     return (
       <ProgressView
@@ -180,7 +194,17 @@ export default function Data() {
           [
             ['assets', '1 数据', current ? `${current.name}` : '尚未上传'],
             ['binding', '2 变量绑定', bound ? '已确认' : '待确认'],
-            ['results', '3 检验结果', runOk ? '已完成' : lastRun ? '需要重新运行' : '尚未运行'],
+            [
+              'results',
+              '3 检验结果',
+              runOk
+                ? partialFail
+                  ? '主模型成功 · 有部分失败'
+                  : '已完成'
+                : lastRun
+                  ? '需要重新运行'
+                  : '尚未运行',
+            ],
           ] as const
         ).map(([k, label, note]) => (
           <button
