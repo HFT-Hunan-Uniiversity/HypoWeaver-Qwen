@@ -916,3 +916,11 @@ input[type='checkbox'] {
     font-size: var(--fz-body);
   }
 }
+
+/* 提案正文中的图片（旧版真实案例图表）不超出版心 */
+.proposal-document img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px auto;
+}
