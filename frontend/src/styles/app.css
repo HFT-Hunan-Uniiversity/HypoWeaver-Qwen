@@ -924,3 +924,21 @@ input[type='checkbox'] {
   height: auto;
   margin: 12px auto;
 }
+
+/* 品牌图标（HW 连笔，自带黑/砖红底）：容器不再叠加纯色底 */
+.sidebar__mark.hw-mark,
+.nb-logo.hw-mark {
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+}
+.hw-mark__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* 夜间全黑底：黑色半边与背景融合，加一圈细米白描边 */
+.theme-night .hw-mark,
+[data-theme='night'] .hw-mark {
+  box-shadow: 0 0 0 1px rgba(247, 241, 234, 0.32);
+}

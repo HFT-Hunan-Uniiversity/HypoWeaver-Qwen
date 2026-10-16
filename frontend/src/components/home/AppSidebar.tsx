@@ -49,8 +49,8 @@ export function AppSidebar({
           onClick={() => onNavigate('new')}
           title="HypoWeaver · 实证科研工作台"
         >
-          <span className="sidebar__mark" aria-hidden="true">
-            HW
+          <span className="sidebar__mark hw-mark" aria-hidden="true">
+            <img className="hw-mark__img" src="/brand/hw-logo.svg" alt="" draggable={false} />
           </span>
           {!collapsed && (
             <span className="sidebar__name">

@@ -55,8 +55,8 @@ export default function AppShell() {
         <div className="wz nb-plain">
           <header className="wz-top">
             <div className="wz-top__row">
-              <Link to="/" className="nb-logo" title="HypoWeaver · 返回工作台首页">
-                HW
+              <Link to="/" className="nb-logo hw-mark" title="HypoWeaver · 返回工作台首页">
+                <img className="hw-mark__img" src="/brand/hw-logo.svg" alt="" draggable={false} />
               </Link>
               <Link to="/" className="wz-top__crumb">
                 HypoWeaver 工作台
