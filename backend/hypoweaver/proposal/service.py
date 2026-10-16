@@ -294,7 +294,11 @@ def edit(db, identifier, key, payload):
     if not section or not section["editable"]:
         raise AppError("section_locked", "此节包含系统结果或引用，只能重新生成，不能直接修改")
     problems = issues(
-        payload.markdown, section["injected_numbers_ref"], section["max_strength"], validation_metadata(entity.snapshot)
+        payload.markdown,
+        section["injected_numbers_ref"],
+        section["max_strength"],
+        validation_metadata(entity.snapshot),
+        section=key,
     )
     if TOKEN.findall(payload.markdown) != TOKEN.findall(section["markdown"]):
         problems.append("不能增加、删除或更换数字占位符")

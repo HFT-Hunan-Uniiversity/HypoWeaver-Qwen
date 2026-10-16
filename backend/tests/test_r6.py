@@ -176,3 +176,92 @@ def test_actual_failed_sections_pass_generation_without_repair():
     accepted, errors = asyncio.run(generate_sections(llm, {"numbers": {}, "max_strength": "associational"}, "test"))
     assert llm.calls == 1 and errors == [] and len(accepted) == len(NARRATIVE)
     assert all(accepted[key].markdown == text for key, text in originals.items())
+
+
+@pytest.mark.parametrize(
+    "section,text",
+    [
+        ("techniques", "采用双向固定效应与事件研究，用于检验关联并估计处理效应。"),
+        ("techniques", "双重差分用于识别因果效应的处理组—对照组差异，配套置换检验。"),
+        ("experiments", "| 实验 | 目的 |\n|---|---|\n| 主模型 | 检验行业暴露与绿色发明的关联 |"),
+        ("experiments", "事件研究用于评估政策冲击前后差异，不据此下因果结论。"),
+        ("methods", "识别策略为面板固定效应；标准误在企业层面聚类，用于估计处理效应。"),
+        ("methods", "在识别假设成立时可讨论谨慎的因果解释边界，主文仍报告关联。"),
+    ],
+)
+def test_method_sections_allow_identification_terminology(section, text):
+    assert issues(text, {}, "associational", section=section) == []
+
+
+@pytest.mark.parametrize(
+    "section",
+    ["problem", "abstract", "title", "rationale", "datasets", None],
+)
+@pytest.mark.parametrize(
+    "text",
+    [
+        "双重差分识别因果效应。",
+        "碳市场促进了绿色创新。",
+        "固定效应证明因果关系。",
+    ],
+)
+def test_conclusion_sections_still_block_causal_wording(section, text):
+    assert issues(text, {}, "associational", section=section)
+
+
+def test_method_sections_still_require_number_placeholders():
+    assert issues("样本有50家企业。", {}, "associational", section="techniques")
+    assert issues("估计值为0.05。", {}, "associational", section="experiments")
+
+
+def test_repair_rewrites_only_failed_sections():
+    import asyncio
+    from hypoweaver.proposal.narrative import generate_sections
+    from hypoweaver.proposal.rendering import NARRATIVE
+
+    class SelectiveLLM:
+        def __init__(self):
+            self.calls = 0
+            self.payloads = []
+
+        async def generate(self, name, payload, schema, project_id=None):
+            self.calls += 1
+            self.payloads.append(payload)
+            if self.calls == 1:
+                sections = []
+                for key in NARRATIVE:
+                    if key == "techniques":
+                        md = "采用双重差分识别因果效应，配套事件研究。"
+                    elif key == "problem":
+                        md = "碳市场促进了绿色创新。"
+                    else:
+                        md = "结合已纳入文献与变量定义开展后续研究。"
+                    sections.append({"key": key, "markdown": md, "evidence_ids": []})
+                return schema.model_validate({"sections": sections})
+            # Second pass: only repair_sections should matter; return fixed texts for all.
+            assert "repair_sections" in payload
+            assert "problem" in payload["repair_sections"]
+            # techniques is method-description: first-pass causal jargon should already be accepted
+            assert "techniques" not in payload["repair_sections"]
+            assert "techniques" in payload["accepted_sections"]
+            sections = []
+            for key in NARRATIVE:
+                if key == "problem":
+                    md = "待检验命题：行业同群暴露与绿色发明是否存在条件关联。"
+                elif key == "techniques":
+                    md = "不应再被请求重写的技术手段正文。"
+                else:
+                    md = "结合已纳入文献与变量定义开展后续研究。"
+                sections.append({"key": key, "markdown": md, "evidence_ids": []})
+            return schema.model_validate({"sections": sections})
+
+    llm = SelectiveLLM()
+    accepted, errors = asyncio.run(
+        generate_sections(llm, {"numbers": {}, "max_strength": "associational"}, "test")
+    )
+    assert llm.calls == 2
+    assert errors == []
+    assert accepted["techniques"].markdown == "采用双重差分识别因果效应，配套事件研究。"
+    assert "待检验命题" in accepted["problem"].markdown
+    assert "techniques" in llm.payloads[1]["accepted_sections"]
+    assert "problem" in llm.payloads[1]["repair_sections"]

@@ -115,12 +115,28 @@ def test_narrative_generation_accepts_originals_and_known_metadata(text):
     ],
 )
 def test_real_violations_remain_partial_after_repair(text):
+    from hypoweaver.proposal.rendering import METHOD_DESCRIPTION_SECTIONS
+
     llm = NarrativeLLM(text)
     sections, _, record = asyncio.run(build_proposal(snapshot(), llm, "project", lambda _: None))
     assert record["narrative_status"] == "partial"
-    assert len(record["narrative_errors"]) >= len(NARRATIVE)
     assert llm.calls == ["write_proposal_sections"] * 2
-    assert all(s["markdown"] != text for s in sections if s["key"] in NARRATIVE)
+    failed_sections = {e["section"] for e in record["narrative_errors"]}
+    assert failed_sections
+    # Conclusion-facing sections must not keep the violating draft.
+    by_key = {s["key"]: s["markdown"] for s in sections if s["key"] in NARRATIVE}
+    for key in failed_sections:
+        assert by_key[key] != text
+    # Method-description sections only fail on number/placeholder rules, not wording alone.
+    wording_only = text in {"碳市场促进了绿色创新", "证明了因果效应"} or text.endswith("碳市场促进了绿色创新。")
+    if wording_only:
+        assert failed_sections.isdisjoint(METHOD_DESCRIPTION_SECTIONS)
+        for key in METHOD_DESCRIPTION_SECTIONS:
+            assert by_key[key] == text
+    else:
+        # Number or metadata violations still apply to every narrative section.
+        assert METHOD_DESCRIPTION_SECTIONS <= failed_sections or failed_sections >= set(NARRATIVE) - METHOD_DESCRIPTION_SECTIONS
+
 
 
 @pytest.mark.parametrize(

@@ -28,6 +28,9 @@ LEGACY_TITLES = {
 }
 SYSTEM_SECTIONS = {"results", "references"}
 NARRATIVE = [k for k in TITLES if k not in SYSTEM_SECTIONS]
+# Method-description sections may name identification strategies (含「因果」等术语);
+# conclusion-strength wording is enforced on problem/abstract/title/rationale/datasets/results.
+METHOD_DESCRIPTION_SECTIONS = frozenset({"techniques", "experiments", "methods"})
 
 
 def section_title(key):
@@ -68,7 +71,7 @@ def numerical_prose(text):
     )
 
 
-def issues(text, numbers, strength, metadata=None):
+def issues(text, numbers, strength, metadata=None, section=None):
     bad = []
     if any(k not in numbers for k in TOKEN.findall(text)):
         bad.append("存在未知数字占位符")
@@ -119,8 +122,10 @@ def issues(text, numbers, strength, metadata=None):
         or re.search(english_number, quantitative, re.I)
     ):
         bad.append("所有数字须使用给定占位符")
-    if not check_wording(stripped, strength, (metadata or {}).get("titles", []))["valid"]:
-        bad.append("存在超出结论上限的措辞")
+    # techniques/experiments/methods describe methods, not study conclusions.
+    if section not in METHOD_DESCRIPTION_SECTIONS:
+        if not check_wording(stripped, strength, (metadata or {}).get("titles", []))["valid"]:
+            bad.append("存在超出结论上限的措辞")
     return bad
 
 

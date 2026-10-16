@@ -22,7 +22,11 @@ async def generate_sections(llm, payload, project_id):
                     problems.extend(
                         {"section": key, "snippet": paragraph, "rule": rule}
                         for rule in issues(
-                            paragraph, payload["numbers"], payload["max_strength"], payload.get("metadata")
+                            paragraph,
+                            payload["numbers"],
+                            payload["max_strength"],
+                            payload.get("metadata"),
+                            section=key,
                         )
                     )
                 if not problems:
