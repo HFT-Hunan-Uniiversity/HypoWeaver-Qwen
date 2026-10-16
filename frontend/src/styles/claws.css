@@ -1,22 +1,22 @@
-/* ClawsGO Science 风格（浅色）：白底、浅灰侧栏、细边圆角卡片、黑色主按钮、蓝色下划线链接。
-   品牌色（赭红）只用于当前阶段与关键状态。最后导入，覆盖前面各层。 */
+/* 学术工作台统一风格（浅色日间 · 雾灰与暖陶土）：
+   画布 #f4f5f7、纯白细边圆角卡片、炭黑主按钮、陶土红（#b5533a）用于当前阶段与关键状态。 */
 :root {
   --ink: #18181b;
   --ink-hover: #3f3f46;
-  --link: #2563eb;
-  --surface-bg: #ffffff;
+  --link: #b5533a;
+  --surface-bg: #f4f5f7;
   --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --surface-3: #ececee;
-  --sidebar-bg: #f7f7f8;
-  --hairline: #e7e7ea;
-  --hairline-strong: #d9d9de;
+  --surface-2: #f1f2f5;
+  --surface-3: #e7e9ee;
+  --sidebar-bg: #ffffff;
+  --hairline: #e6e7ec;
+  --hairline-strong: #d5d7de;
   --text: #18181b;
-  --text-muted: #6b6b73;
-  --text-faint: #8d8d95;
-  --shadow-1: none;
-  --radius: 12px;
-  --radius-sm: 8px;
+  --text-muted: #555b66;
+  --text-faint: #717784;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.03);
+  --radius: 14px;
+  --radius-sm: 9px;
 }
 html,
 body,

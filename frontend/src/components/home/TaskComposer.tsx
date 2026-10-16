@@ -1,22 +1,18 @@
 /**
- * Ported from repo/frontend TaskComposer — visual structure + class names preserved.
- * Submit / examples → onCreateProject (real v2 project).
+ * 新研究入口（与分步向导统一设计语言）：
+ * 时段问候 → 六步向导路径预览 → 分类启发模板 → 底部研究方向输入台。
  */
 import {
   ArrowRight,
-  ArrowUp,
   BookOpenText,
   ChartNoAxesCombined,
-  ChevronDown,
   ClipboardList,
   Database,
   FileText,
   FlaskConical,
   Lightbulb,
-  Network,
-  Paperclip,
+  RotateCcw,
   Settings2,
-  SlidersHorizontal,
   Sparkles,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -47,46 +43,46 @@ interface JourneyStage {
 
 const RESEARCH_JOURNEY: JourneyStage[] = [
   {
-    title: '多源检索',
-    description: '文献 · 政策 · 数据',
-    owner: '系统自动',
-    tone: 'auto',
-    icon: Database,
-  },
-  {
-    title: '趋势与图谱',
-    description: '主题演进 · 证据关系',
-    owner: '系统自动',
-    tone: 'auto',
-    icon: Network,
-  },
-  {
-    title: '研究空白 H0',
-    description: '证据边界 · 空白确认',
-    owner: '你来确认',
+    title: '研究方向',
+    description: '问题 · 变量 · 范围',
+    owner: '你来明确',
     tone: 'confirm',
     icon: Lightbulb,
   },
   {
+    title: '文献',
+    description: '多源检索 · 勾选证据',
+    owner: '检索与勾选',
+    tone: 'collaborate',
+    icon: BookOpenText,
+  },
+  {
     title: '候选假设',
-    description: '机制 · 变量 · 证伪',
-    owner: '共同选择',
+    description: '缺口 · 机制 · 引用校验',
+    owner: '生成与选择',
     tone: 'collaborate',
     icon: Sparkles,
   },
   {
-    title: '科学十项',
-    description: '方案草案 · 逐项审查',
-    owner: '你来确认',
+    title: '研究方案',
+    description: '识别策略 · 锁定规则',
+    owner: '起草与确认',
     tone: 'confirm',
     icon: ClipboardList,
   },
   {
-    title: '正式研究',
-    description: '六步向导 · 结果交付',
-    owner: '共同推进',
+    title: '数据与检验',
+    description: '变量绑定 · 回归与复算',
+    owner: '执行与评估',
+    tone: 'auto',
+    icon: Database,
+  },
+  {
+    title: '研究提案',
+    description: '数字注入 · 结论边界',
+    owner: '审阅与导出',
     tone: 'collaborate',
-    icon: FlaskConical,
+    icon: FileText,
   },
 ]
 
@@ -121,9 +117,9 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
       },
       {
         id: 'lit_graph',
-        title: '建立主题证据图谱',
-        description: '把文献、政策、变量、方法与结论连接起来，便于后续提出假设。',
-        prompt: '建立绿色金融政策、融资约束、研发投入与绿色专利质量之间的证据图谱。',
+        title: '碳市场同群暴露与企业绿色创新',
+        description: '围绕行业同群暴露与企业绿色发明专利申请，梳理文献依据并检验条件关联。',
+        prompt: '同行业出现碳交易控排企业后，行业内上市公司的绿色发明专利申请是否发生变化？',
         icon: Sparkles,
       },
     ],
@@ -169,14 +165,14 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
       {
         id: 'design_full',
         title: '把研究问题变成可执行方案',
-        description: '定义样本、变量、估计量、识别策略和诊断，输出可冻结的研究合同。',
+        description: '定义样本、变量、估计量、识别策略和诊断，输出可锁定的研究方案。',
         prompt: '为绿色金融改革创新试验区政策与企业绿色创新设计一套可执行的实证研究方案。',
         icon: FlaskConical,
       },
       {
         id: 'design_variable',
         title: '完善变量与测量方案',
-        description: '比较代理变量、数据来源和测量误差，给出变量字典与替代口径。',
+        description: '比较代理变量、数据来源和测量误差，给出变量角色与派生口径。',
         prompt: '完善绿色金融政策、绿色研发强度和绿色专利质量的变量定义、数据来源与替代测量。',
         icon: ChartNoAxesCombined,
       },
@@ -190,77 +186,43 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
       {
         id: 'design_diagnostics',
         title: '列出必须通过的诊断检验',
-        description: '提前约定平行趋势、安慰剂、稳健性和敏感性分析，防止事后选择。',
-        prompt: '为绿色金融政策的双重差分研究设计必须通过的诊断、安慰剂与敏感性检验。',
+        description: '提前约定平行趋势、置换检验、稳健性和独立复算，防止事后挑结果。',
+        prompt: '为绿色金融政策的双重差分研究设计必须通过的诊断、置换检验与稳健性方案。',
         icon: Sparkles,
       },
     ],
   },
   {
     id: 'causal',
-    label: '数据与因果',
+    label: '数据与因果边界',
     cards: [
       {
         id: 'causal_strategy',
-        title: '比较可行的因果识别策略',
-        description: '针对同一问题比较 DID、事件研究、工具变量等方案的假设与风险。',
-        prompt: '比较识别绿色金融政策因果效应的 DID、事件研究与工具变量方案，并给出推荐条件。',
+        title: '比较可行的识别策略',
+        description: '针对同一问题比较政策 DID、面板关联与机制边界方案的假设与风险。',
+        prompt: '比较识别绿色金融政策效应的政策 DID、面板关联与机制检验方案，并明确适用条件。',
         icon: ChartNoAxesCombined,
       },
       {
         id: 'causal_audit',
         title: '审计现有数据能否支撑结论',
-        description: '检查处理组、时间、变量变异和缺失，明确能做什么、不能做什么。',
-        prompt: '审计现有企业—地区—年份面板是否足以识别绿色金融政策对绿色创新的因果效应。',
+        description: '检查处理组、时间、变量变异和缺失，明确结论强度上限。',
+        prompt: '审计现有企业—行业—年份面板是否足以识别碳市场暴露对绿色创新的效应。',
         icon: FlaskConical,
       },
       {
         id: 'causal_robust',
-        title: '规划稳健性与敏感性分析',
-        description: '把关键识别威胁转成可执行检查，并约定失败后的结论降级规则。',
-        prompt: '为绿色金融政策研究规划稳健性、敏感性与结论降级规则。',
+        title: '规划稳健性与结论降级规则',
+        description: '把关键识别威胁转成可执行检查，并约定未通过时的结论降级规则。',
+        prompt: '为绿色金融政策研究规划稳健性、置换检验与结论强度降级规则。',
         icon: Sparkles,
       },
       {
         id: 'causal_result',
-        title: '解释模型结果而不过度推断',
-        description: '区分统计事实、识别假设和可授权结论，生成证据支持的表述。',
-        prompt: '审核一组绿色金融政策回归结果，区分统计相关、因果证据和不能发布的主张。',
+        title: '解释模型结果而不过度宣称',
+        description: '区分条件关联与因果识别，按决策规则生成不越界的学术表述。',
+        prompt: '围绕行业层面政策暴露与企业绿色创新，设计审慎的实证检验与结论边界表述。',
         icon: FileText,
-      },
-    ],
-  },
-  {
-    id: 'writing',
-    label: '论文写作',
-    cards: [
-      {
-        id: 'write_outline',
-        title: '从研究方案生成论文结构',
-        description: '按问题、理论、设计、结果与限制组织章节，并绑定每节所需证据。',
-        prompt: '根据绿色金融政策与企业创新的研究方案生成论文结构和各章节证据需求。',
-        icon: FileText,
-      },
-      {
-        id: 'write_methods',
-        title: '写清楚可复现的方法部分',
-        description: '把样本、变量、模型、诊断和版本信息写成可复现的方法说明。',
-        prompt: '为企业—地区—年份面板研究撰写可复现的方法与识别策略部分。',
-        icon: FlaskConical,
-      },
-      {
-        id: 'write_results',
-        title: '把证据转成审慎结论',
-        description: '仅使用已通过审核的主张，主动说明边界、失败检验和替代解释。',
-        prompt: '把已审核的绿色金融政策实证结果整理成审慎的结果与讨论部分。',
-        icon: ChartNoAxesCombined,
-      },
-      {
-        id: 'write_review',
-        title: '检查全文证据与引文一致性',
-        description: '逐句核对结论来源、引用和图表，标出夸大或无法复现的内容。',
-        prompt: '审查论文中每条结论的证据、引用与图表来源，并列出需要降级或重写的句子。',
-        icon: BookOpenText,
       },
     ],
   },
@@ -268,16 +230,17 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
 
 export function TaskComposer({
   busy,
+  llmConfigured,
   onCreateProject,
   onOpenSettings,
 }: {
   busy?: boolean
+  llmConfigured?: boolean
   onCreateProject: (prompt: string) => void
   onOpenSettings: () => void
 }) {
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id)
   const [prompt, setPrompt] = useState('')
-  const [moreOpen, setMoreOpen] = useState(false)
   const greeting = useMemo(() => `${timeGreeting()}，研究者`, [])
   const cards = TEMPLATE_CATEGORIES.find((item) => item.id === category)?.cards ?? []
 
@@ -295,30 +258,31 @@ export function TaskComposer({
     <div className="composer">
       <div className="composer__scroll">
         <div className="composer__center">
-          <h1 className="composer__greeting" aria-label={greeting}>
-            {greeting.split('').map((char, index) => (
-              <span key={`${char}-${index}`} style={{ animationDelay: `${index * 45}ms` }}>
-                {char === ' ' ? '\u00a0' : char}
-              </span>
-            ))}
-          </h1>
-          <p className="composer__lead">
-            从文献与证据出发，与你一起识别研究空白、提出假设并完成可审查的研究。
-          </p>
+          <div className="composer__hero">
+            <h1 className="composer__greeting" aria-label={greeting}>
+              {greeting}
+            </h1>
+            <p className="composer__lead">
+              从一个研究问题出发，沿「研究方向 → 文献 → 候选假设 → 研究方案 → 数据与检验 →
+              研究提案」六步向导推进可核查的实证研究。
+            </p>
+          </div>
 
           <section className="composer__journey" aria-labelledby="composer-journey-title">
             <header>
               <div>
                 <span className="composer__journey-kicker">
-                  <ChartNoAxesCombined size={14} aria-hidden="true" />
-                  研究流程
+                  <ChartNoAxesCombined size={13} aria-hidden="true" />
+                  六步分步向导
                 </span>
-                <strong id="composer-journey-title">提交主题后，系统会沿这条路径推进</strong>
+                <strong id="composer-journey-title">
+                  提交研究想法后，将进入同一套六步向导逐步核查与确认
+                </strong>
               </div>
               <small>
                 <i className="is-auto" />
-                系统自动 <i className="is-confirm" />
-                需要确认
+                系统执行 <i className="is-confirm" />
+                你来确认
               </small>
             </header>
             <ol>
@@ -326,11 +290,16 @@ export function TaskComposer({
                 const Icon = stage.icon
                 return (
                   <li key={stage.title}>
-                    <span className={`composer__journey-icon is-${stage.tone}`} aria-hidden="true">
-                      <Icon size={16} />
-                    </span>
+                    <div className="composer__journey-top">
+                      <span className="composer__journey-num">{index + 1}</span>
+                      <span
+                        className={`composer__journey-icon is-${stage.tone}`}
+                        aria-hidden="true"
+                      >
+                        <Icon size={14} />
+                      </span>
+                    </div>
                     <span className="composer__journey-copy">
-                      <b>{String(index + 1).padStart(2, '0')}</b>
                       <strong>{stage.title}</strong>
                       <small>{stage.description}</small>
                     </span>
@@ -338,7 +307,7 @@ export function TaskComposer({
                     {index < RESEARCH_JOURNEY.length - 1 && (
                       <ArrowRight
                         className="composer__journey-arrow"
-                        size={13}
+                        size={12}
                         aria-hidden="true"
                       />
                     )}
@@ -348,39 +317,45 @@ export function TaskComposer({
             </ol>
           </section>
 
-          <div className="composer__chips" role="tablist" aria-label="任务模板分类">
-            {TEMPLATE_CATEGORIES.map((item) => (
-              <button
-                type="button"
-                role="tab"
-                key={item.id}
-                aria-selected={category === item.id}
-                className={`composer__chip ${category === item.id ? 'is-active' : ''}`}
-                onClick={() => setCategory(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="composer__templates-hd">
+            <span className="composer__templates-label">启发模板 · 点击填入下方方向输入框</span>
+            <div className="composer__chips" role="tablist" aria-label="任务模板分类">
+              {TEMPLATE_CATEGORIES.map((item) => (
+                <button
+                  type="button"
+                  role="tab"
+                  key={item.id}
+                  aria-selected={category === item.id}
+                  className={`composer__chip ${category === item.id ? 'is-active' : ''}`}
+                  onClick={() => setCategory(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="composer__cards" key={category}>
-            {cards.map((card) => (
-              <button
-                type="button"
-                className="composer__card"
-                key={card.id}
-                onClick={() => pickTemplate(card)}
-              >
-                <span className="composer__card-icon" aria-hidden="true">
-                  <card.icon size={18} />
-                </span>
-                <span className="composer__card-copy">
-                  <h3>{card.title}</h3>
-                  <p>{card.description}</p>
-                </span>
-                <ArrowRight className="composer__card-arrow" size={17} aria-hidden="true" />
-              </button>
-            ))}
+            {cards.map((card) => {
+              const selected = prompt.trim() === card.prompt.trim()
+              return (
+                <button
+                  type="button"
+                  className={`composer__card ${selected ? 'is-selected' : ''}`}
+                  key={card.id}
+                  onClick={() => pickTemplate(card)}
+                >
+                  <span className="composer__card-icon" aria-hidden="true">
+                    <card.icon size={17} />
+                  </span>
+                  <span className="composer__card-copy">
+                    <h3>{card.title}</h3>
+                    <p>{card.description}</p>
+                  </span>
+                  <ArrowRight className="composer__card-arrow" size={16} aria-hidden="true" />
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -396,7 +371,8 @@ export function TaskComposer({
           <textarea
             value={prompt}
             rows={2}
-            placeholder="描述你的研究任务，或从上方模板开始…"
+            aria-label="研究方向或一句话想法"
+            placeholder="用一句话描述你想研究的问题（例如：碳交易试点是否提升了行业内企业绿色发明专利？），或点选上方模板…"
             onChange={(event) => setPrompt(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -407,56 +383,48 @@ export function TaskComposer({
           />
           <div className="composer__box-row">
             <div className="composer__box-left">
-              <div className="composer__more">
+              <button type="button" className="composer__tool" onClick={() => onOpenSettings()}>
+                <span
+                  className={`composer__status-dot ${llmConfigured ? 'is-ready' : ''}`}
+                  aria-hidden="true"
+                />
+                <Settings2 size={13} aria-hidden="true" />
+                {llmConfigured ? '千问模型已就绪' : '配置千问模型'}
+              </button>
+              <button
+                type="button"
+                className="composer__tool"
+                disabled={busy}
+                onClick={() => onCreateProject('')}
+              >
+                直接填空白方向卡 →
+              </button>
+              {prompt.trim() && (
                 <button
                   type="button"
                   className="composer__tool"
-                  aria-haspopup="menu"
-                  aria-expanded={moreOpen}
-                  onClick={() => setMoreOpen((c) => !c)}
+                  onClick={() => setPrompt('')}
+                  title="清空输入"
                 >
-                  <SlidersHorizontal size={14} />
-                  更多选项
+                  <RotateCcw size={13} aria-hidden="true" />
+                  清空
                 </button>
-                {moreOpen && (
-                  <div className="composer__menu" role="menu">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setMoreOpen(false)
-                        onOpenSettings()
-                      }}
-                    >
-                      <Settings2 size={13} />
-                      模型与执行器配置
-                    </button>
-                  </div>
-                )}
-              </div>
-              <button type="button" className="composer__tool" onClick={() => onOpenSettings()}>
-                <Paperclip size={14} />
-                导入资料
-              </button>
-              <label className="composer__mode">
-                <select defaultValue="rigorous" aria-label="研究模式">
-                  <option value="rigorous">研究模式 · 严谨</option>
-                  <option value="reproduce">研究模式 · 复现</option>
-                </select>
-                <ChevronDown size={13} aria-hidden="true" />
-              </label>
+              )}
             </div>
             <button
               type="submit"
               className="composer__send"
               disabled={busy || !prompt.trim()}
-              aria-label="创建研究项目"
+              aria-label="创建研究项目并进入第一步"
             >
-              <ArrowUp size={16} />
+              <span>{busy ? '正在创建…' : '进入向导'}</span>
+              <ArrowRight size={15} aria-hidden="true" />
             </button>
           </div>
         </form>
-        <p className="composer__hint">发送后将创建真实项目并进入研究方向；每一步可确认、可回溯。</p>
+        <p className="composer__hint">
+          创建后将自动带入「1. 研究方向」卡片，每一步自动保存草稿，确认后依次解锁下一阶段。
+        </p>
       </div>
     </div>
   )

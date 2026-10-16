@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, body, type Project } from '../api/client'
 import { ErrorNote } from '../components/Shared'
@@ -19,6 +19,7 @@ const draftKey = (id: string) => `hw.dirdraft.${id}`
 /** 研究方向：一句话想法 → 方向卡字段（两列）；澄清问题以卡内提示给出，可点选项直接填入。草稿自动保存在本机，确认时写入项目。 */
 function Editor({ project }: { project: Project }) {
   const navigate = useNavigate()
+  const [search] = useSearchParams()
   const qc = useQueryClient()
   const { confirm } = useFlow()
   const stage = useFlowStage('direction')
@@ -38,7 +39,7 @@ function Editor({ project }: { project: Project }) {
   const [input, setInput] = useState('')
   const [answerText, setAnswerText] = useState('')
   const [savedAt, setSavedAt] = useState<string>('')
-  const [skipped, setSkipped] = useState(false)
+  const [skipped, setSkipped] = useState(() => search.get('direct') === '1')
   const q = nextQuestion(card)
   const missing = cardMissing(card)
   const started = !!card.idea || !!card.question || skipped

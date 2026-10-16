@@ -139,14 +139,23 @@ function Wizard({ title }: { title: string }) {
     <div className="wz">
       <header className="wz-top">
         <div className="wz-top__row">
-          <Link to="/" className="nb-logo" title="返回项目列表">
+          <Link to="/" className="nb-logo" title="返回工作台首页">
             HW
           </Link>
+          <Link to="/?view=projects" className="wz-top__crumb" title="查看全部研究项目">
+            工作台
+          </Link>
+          <span className="wz-top__sep" aria-hidden="true">
+            /
+          </span>
           <h1 title={displayProjectTitle(title, id)}>{displayProjectTitle(title, id)}</h1>
           <span className={`wz-badge ${runningStage ? 'is-run' : done === 6 ? 'is-ok' : ''}`}>
             {runningStage && <Loader2 size={11} className="ptl-spin" aria-hidden="true" />}
             {badge}
           </span>
+          <Link to="/" className="nb-small wz-top__home" title="回到首页或新建研究">
+            工作台首页
+          </Link>
           <Link to="/settings" className="nb-small is-icon" title="设置" aria-label="设置">
             <Settings2 size={14} />
           </Link>

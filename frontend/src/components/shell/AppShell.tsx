@@ -28,7 +28,7 @@ export function ModelBanner() {
   )
 }
 
-/** 壳层：项目内 StageLayout；首页自带旧版 shell；设置用简洁页头。 */
+/** 壳层：项目内 StageLayout；首页统一工作台壳层；设置页共用向导顶栏（.wz-top）。 */
 export default function AppShell() {
   const [actionsEl, setActionsEl] = useState<HTMLElement | null>(null)
   const project = useMatch('/p/:id/*')
@@ -52,24 +52,29 @@ export default function AppShell() {
           <Outlet />
         </main>
       ) : (
-        <div className="nb-plain">
-          <header className="nb-hero is-plain">
-            <Link to="/" className="nb-logo" title="HypoWeaver · 分步向导">
-              HW
-            </Link>
-            <div className="nb-hero__txt">
-              <h1>HypoWeaver</h1>
-              <p>实证科研工作台</p>
+        <div className="wz nb-plain">
+          <header className="wz-top">
+            <div className="wz-top__row">
+              <Link to="/" className="nb-logo" title="HypoWeaver · 返回工作台首页">
+                HW
+              </Link>
+              <Link to="/" className="wz-top__crumb">
+                HypoWeaver 工作台
+              </Link>
+              <span className="wz-top__sep" aria-hidden="true">
+                /
+              </span>
+              <h1>服务与用量设置</h1>
+              <Link to="/" className="nb-small">
+                ← 返回工作台
+              </Link>
+              <Link to="/?view=projects" className="nb-small">
+                我的项目
+              </Link>
             </div>
-            <Link to="/" className="nb-small">
-              项目
-            </Link>
-            <Link to="/settings" className="nb-small is-icon" title="设置" aria-label="设置">
-              <Settings2 size={14} />
-            </Link>
           </header>
-          <main id="main-content">
-            <ModelBanner />
+          <ModelBanner />
+          <main id="main-content" className="wz-main">
             <Outlet />
           </main>
         </div>
