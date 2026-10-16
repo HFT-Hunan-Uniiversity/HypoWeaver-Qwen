@@ -63,6 +63,13 @@ def stage_status(db, project):
     from ..jobs import Job
     from sqlalchemy import func
 
+    from ..cases.legacy import is_legacy
+
+    if is_legacy(project):
+        return [
+            {"key": key, "label": label, "status": "completed", "summary": "旧版真实案例 · 内容见研究提案"}
+            for key, label in STAGES
+        ]
     pid = project.id
     count = db.scalar(
         select(func.count())

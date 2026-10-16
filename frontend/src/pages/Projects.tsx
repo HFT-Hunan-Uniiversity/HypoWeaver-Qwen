@@ -93,33 +93,24 @@ export default function Projects() {
   })
 
   const projects = query.data || []
-  // Demo titles shown under the real project; not backed by DB rows.
-  const DEMO_SIDEBAR_TITLES = [
-    '绿色金融政策能否激励企业高质量绿色创新？',
-    '碳市场行业同群暴露与企业绿色发明',
-    '融资约束如何调节环境规制的创新补偿效应？',
-    '信息披露质量与绿色债券定价效率',
-  ]
-  const sidebarProjects = useMemo(
-    () =>
-      projects.slice(0, 12).map((p) => {
-        const hasDir = !!p.direction?.text?.trim()
-        return {
-          id: p.id,
-          title: displayProjectTitle(p.title, p.id),
-          statusText: hasDir ? '进行中 · 分步向导' : '第 1 步 · 待明确方向',
-          tone: (hasDir ? 'is-live' : 'is-wait') as 'is-live' | 'is-wait',
-        }
-      }).concat(
-        DEMO_SIDEBAR_TITLES.map((title, i) => ({
-          id: `demo:sidebar:${i}`,
-          title,
-          statusText: '已完成 · 示例',
-          tone: 'is-wait' as 'is-live' | 'is-wait',
-        })),
-      ),
-    [projects],
-  )
+  // 真实项目在上，旧版导入的真实案例（case 以 legacy: 开头）在后。
+  const sidebarProjects = useMemo(() => {
+    const isLegacy = (p: (typeof projects)[number]) => (p.case || '').startsWith('legacy:')
+    const ordered = [...projects.filter((p) => !isLegacy(p)), ...projects.filter(isLegacy)]
+    return ordered.slice(0, 12).map((p) => {
+      const hasDir = !!p.direction?.text?.trim()
+      const legacy = isLegacy(p)
+      return {
+        id: p.id,
+        title: displayProjectTitle(p.title, p.id),
+        statusText: legacy ? '已完成 · 真实案例' : hasDir ? '进行中 · 分步向导' : '第 1 步 · 待明确方向',
+        tone: (legacy ? 'is-done' : hasDir ? 'is-live' : 'is-wait') as
+          | 'is-live'
+          | 'is-wait'
+          | 'is-done',
+      }
+    })
+  }, [projects])
 
   const goNav = (next: ShellNav) => {
     setDrawerOpen(false)
@@ -151,7 +142,6 @@ export default function Projects() {
         onNavigate={goNav}
         onOpenProject={(id) => {
           setDrawerOpen(false)
-          if (id.startsWith('demo:')) return
           navigate(`/p/${id}?open=1`)
         }}
       />

@@ -257,7 +257,11 @@ async def build_proposal(snapshot, llm, project_id, progress):
 
 
 def start(app, project_id, llm):
+    from ..cases.legacy import is_legacy
+
     with app.state.sessions() as db:
+        if is_legacy(projects.get(db, project_id)):
+            raise AppError("legacy_case", "旧版真实案例为只读展示，不能重新生成提案")
         snapshot = context(db, project_id)
 
     async def work(progress):
