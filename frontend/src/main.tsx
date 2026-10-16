@@ -10,6 +10,9 @@ import './styles/one-screen.css'
 import './styles/flow.css'
 import './styles/claws.css'
 import './styles/notebook.css'
+import './styles/home-theme.css'
+import './styles/home-shell.css'
+import './styles/home-composer.css'
 const client = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: () => {

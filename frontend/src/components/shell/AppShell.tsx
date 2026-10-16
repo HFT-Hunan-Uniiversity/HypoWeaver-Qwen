@@ -28,7 +28,7 @@ export function ModelBanner() {
   )
 }
 
-/** 壳层：项目内用 StageLayout；首页自带 Codex 侧栏；设置用简洁页头。 */
+/** 壳层：项目内 StageLayout；首页自带旧版 shell；设置用简洁页头。 */
 export default function AppShell() {
   const [actionsEl, setActionsEl] = useState<HTMLElement | null>(null)
   const project = useMatch('/p/:id/*')
@@ -45,7 +45,10 @@ export default function AppShell() {
           <Outlet />
         </main>
       ) : home ? (
-        <main id="main-content" className="cx-root">
+        <main
+          id="main-content"
+          style={{ height: '100%', minHeight: '100vh', margin: 0, padding: 0 }}
+        >
           <Outlet />
         </main>
       ) : (
