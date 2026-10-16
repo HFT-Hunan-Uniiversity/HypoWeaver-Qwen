@@ -34,6 +34,11 @@ def get(identifier: str, db: Session = Depends(session)):
     return service.public(service.get(db, identifier))
 
 
+@router.post("/proposals/{identifier}/confirm")
+def confirm(identifier: str, db: Session = Depends(session)):
+    return service.confirm(db, identifier)
+
+
 @router.patch("/proposals/{identifier}/sections/{key}")
 def edit(identifier: str, key: str, payload: SectionEdit, db: Session = Depends(session)):
     return service.edit(db, identifier, key, payload)

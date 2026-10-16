@@ -191,6 +191,15 @@ export default function Proposal() {
       refresh()
     },
   })
+  // 确认状态写入后端（提案 confirmed_at），侧栏与徽章都读后端
+  const confirmProposal = useMutation({
+    mutationFn: (pid: string) => api(`/proposals/${pid}/confirm`, body('POST')),
+    onSuccess: () => {
+      refresh()
+      qc.invalidateQueries({ queryKey: ['projects'] })
+      if (!confirm('proposal')) navigate(`/p/${id}/proposal`)
+    },
+  })
   const busy =
     generate.isPending || !!jobs.data?.some((j) => ['queued', 'running'].includes(j.status))
   const failedJob = jobs.data?.[0]?.status === 'failed' ? '提案生成失败' : null
@@ -246,9 +255,9 @@ export default function Proposal() {
                 active.narrative_status === 'partial'
                   ? `${active.narrative_failures?.length || 0} 节生成失败，可先重新生成`
                   : `第 ${active.version} 版`,
-              onClick: () => {
-                if (!confirm('proposal')) navigate(`/p/${id}/proposal`)
-              },
+              onClick: () => confirmProposal.mutate(active.id),
+              busy: confirmProposal.isPending,
+              error: confirmProposal.error ? (confirmProposal.error as Error).message : null,
             },
   })
   const [sec, setSec] = useUrlParam<string>('sec', '')

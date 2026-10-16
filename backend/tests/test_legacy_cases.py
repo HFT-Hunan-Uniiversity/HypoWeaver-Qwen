@@ -28,3 +28,10 @@ def test_import_legacy_cases(tmp_path):
         carbon = next(p for p in legacy if p["case"] == "legacy:carbon")
         md = client.get(f"/api/projects/{carbon['id']}/proposals").json()[0]["markdown"]
         assert "0.0717" in md and "p=0.494" in md and "/cases/carbon/figure_2_event_study.png" in md
+        pid = carbon["id"]
+        proposal = client.get(f"/api/projects/{pid}/proposals").json()[0]
+        assert not carbon["completed"]
+        assert client.post(f"/api/proposals/{proposal['id']}/confirm").status_code == 200
+        assert next(p for p in client.get("/api/projects").json() if p["id"] == pid)["completed"] is True
+        stages = client.get(f"/api/projects/{pid}/overview").json()["stages"]
+        assert stages[-1]["status"] == "confirmed"

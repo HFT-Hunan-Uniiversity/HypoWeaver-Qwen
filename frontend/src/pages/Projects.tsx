@@ -103,8 +103,14 @@ export default function Projects() {
       return {
         id: p.id,
         title: displayProjectTitle(p.title, p.id),
-        statusText: legacy ? '已完成 · 真实案例' : hasDir ? '进行中 · 分步向导' : '第 1 步 · 待明确方向',
-        tone: (legacy ? 'is-done' : hasDir ? 'is-live' : 'is-wait') as
+        statusText: p.completed
+          ? legacy
+            ? '已完成 · 真实案例'
+            : '已完成 · 全流程'
+          : legacy
+            ? '进行中 · 真实案例'
+            : hasDir ? '进行中 · 分步向导' : '第 1 步 · 待明确方向',
+        tone: (p.completed ? 'is-done' : hasDir ? 'is-live' : 'is-wait') as
           | 'is-live'
           | 'is-wait'
           | 'is-done',

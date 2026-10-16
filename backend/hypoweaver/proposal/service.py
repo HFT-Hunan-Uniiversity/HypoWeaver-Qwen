@@ -311,3 +311,14 @@ def edit(db, identifier, key, payload):
     entity.sections = [{**s, "markdown": payload.markdown} if s["key"] == key else s for s in entity.sections]
     db.commit()
     return public(entity)
+
+
+def confirm(db, identifier):
+    from ..db import now
+
+    entity = get(db, identifier)
+    if entity.stale:
+        raise AppError("proposal_stale", "提案已过期，请先重新生成再确认")
+    entity.confirmed_at = entity.confirmed_at or now()
+    db.commit()
+    return public(entity)

@@ -11,6 +11,7 @@ ADDITIONS = {
         "interpretation": "JSON",
         "narrative_status": "TEXT",
         "narrative_errors": "JSON",
+        "confirmed_at": "TEXT",
     },
 }
 

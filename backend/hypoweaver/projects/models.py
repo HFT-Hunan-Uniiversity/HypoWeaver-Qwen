@@ -15,6 +15,21 @@ class Project(Base):
     created_at: Mapped[str] = mapped_column(default=now)
     updated_at: Mapped[str] = mapped_column(default=now)
 
+    @property
+    def completed(self) -> bool:
+        """最新一版提案已在后端确认且未过期。"""
+        from sqlalchemy import select
+        from sqlalchemy.orm import object_session
+        from ..proposal.models import Proposal
+
+        db = object_session(self)
+        if db is None:
+            return False
+        latest = db.scalar(
+            select(Proposal).where(Proposal.project_id == self.id).order_by(Proposal.version.desc()).limit(1)
+        )
+        return bool(latest and latest.confirmed_at and not latest.stale)
+
 
 class Direction(BaseModel):
     text: str = Field(default="", max_length=10000)
@@ -43,4 +58,5 @@ class ProjectOut(BaseModel):
     direction: Direction
     selected_candidate_id: str | None
     created_at: str
+    completed: bool = False
     updated_at: str

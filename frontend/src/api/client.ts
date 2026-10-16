@@ -47,6 +47,7 @@ export interface Project {
   selected_candidate_id?: string | null
   /** 案例标记：'carbon' 启用碳市场约束；null 为通用项目 */
   case?: 'carbon' | (string & {}) | null
+  completed?: boolean
 }
 export interface Stage {
   key: string

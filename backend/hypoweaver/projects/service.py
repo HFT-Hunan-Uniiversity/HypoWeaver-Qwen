@@ -67,7 +67,12 @@ def stage_status(db, project):
 
     if is_legacy(project):
         return [
-            {"key": key, "label": label, "status": "completed", "summary": "旧版真实案例 · 内容见研究提案"}
+            {
+                "key": key,
+                "label": label,
+                "status": "confirmed" if key == "proposal" and project.completed else "completed",
+                "summary": "旧版真实案例 · 内容见研究提案",
+            }
             for key, label in STAGES
         ]
     pid = project.id
@@ -152,6 +157,8 @@ def stage_status(db, project):
             if "proposal" in kinds
             else "stale"
             if proposal and proposal.stale
+            else "confirmed"
+            if proposal and proposal.confirmed_at
             else "completed"
             if proposal
             else "not_started",

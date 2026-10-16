@@ -25,6 +25,7 @@ export const STATUS_LABELS: Record<string, string> = {
   not_started: '未开始',
   running: '进行中',
   completed: '已完成',
+  confirmed: '已确认',
   stale: '已过期',
   draft: '待审阅',
   ready: '已绑定',
@@ -34,7 +35,7 @@ export const STATUS_LABELS: Record<string, string> = {
 
 /** 状态色：gray 未开始 / orange 进行中 / green 完成 / yellow 过期 / red 失败 */
 export function statusTone(status: string): 'gray' | 'orange' | 'green' | 'yellow' | 'red' {
-  if (status === 'completed') return 'green'
+  if (status === 'completed' || status === 'confirmed') return 'green'
   if (status === 'stale') return 'yellow'
   if (status === 'failed') return 'red'
   if (['running', 'draft', 'ready', 'awaiting_selection'].includes(status)) return 'orange'
@@ -49,7 +50,7 @@ export function nextStage(stages: Stage[]): Stage | undefined {
 }
 
 export function completedCount(stages: Stage[]) {
-  return stages.filter((s) => s.status === 'completed').length
+  return stages.filter((s) => s.status === 'completed' || s.status === 'confirmed').length
 }
 
 export function stageKeyFromPath(pathname: string): string | undefined {

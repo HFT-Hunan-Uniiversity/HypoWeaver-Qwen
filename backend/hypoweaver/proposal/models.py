@@ -18,6 +18,7 @@ class Proposal(Base):
     snapshot: Mapped[dict] = mapped_column(JSON)
     removed_references: Mapped[int] = mapped_column(default=0)
     stale: Mapped[bool] = mapped_column(default=False)
+    confirmed_at: Mapped[str | None] = mapped_column(default=None)
     created_at: Mapped[str] = mapped_column(default=now)
 
 

@@ -75,7 +75,7 @@ export function deriveFlow(
     let status: FlowStatus
     if (local.editing[key]) status = 'active'
     else if (s?.status === 'stale' || local.stale[key]) status = open ? 'stale' : 'locked'
-    else if (backendDone && (v > 0 || later)) status = 'confirmed'
+    else if (s?.status === 'confirmed' || (backendDone && (v > 0 || later))) status = 'confirmed'
     else status = open ? 'active' : 'locked'
     out.push({
       key,
