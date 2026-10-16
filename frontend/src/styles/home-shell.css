@@ -278,3 +278,31 @@
   background: var(--brand) !important;
   color: var(--on-accent) !important;
 }
+
+/* 夜间：纯黑壳 + 高对比问候 / 侧栏 */
+.shell[data-theme='night'] {
+  background: #000 !important;
+}
+.shell[data-theme='night'] .shell-main {
+  background: #0a0a0a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.shell[data-theme='night'] .sidebar {
+  background: #000 !important;
+}
+.shell[data-theme='night'] .sidebar__link:hover,
+.shell[data-theme='night'] .sidebar__task:hover,
+.shell[data-theme='night'] .sidebar__logo:hover {
+  background: #141414 !important;
+}
+.shell[data-theme='night'] .sidebar__task-copy strong,
+.shell[data-theme='night'] .sidebar__name strong {
+  color: #fafafa !important;
+}
+.shell[data-theme='night'] .sidebar__link {
+  color: #a1a1aa !important;
+}
+.shell[data-theme='night'] .sidebar__link.is-active {
+  background: rgba(155, 111, 194, 0.22) !important;
+  color: #c4a8e8 !important;
+}

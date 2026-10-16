@@ -43,24 +43,25 @@
   color-scheme: light;
 }
 .shell[data-theme="night"] {
-  --surface-bg: #1a1a1e;
-  --surface: #212126;
-  --surface-2: #29292f;
-  --surface-3: #34343b;
-  --hairline: rgba(244, 242, 248, 0.10);
-  --hairline-strong: rgba(244, 242, 248, 0.18);
-  --text: #f2f1f5;
-  --text-muted: #aaa7b2;
-  --text-faint: #74717c;
+  /* 近纯黑分层：外壳 / 主卡 / 悬浮面可辨，紫强调保留 */
+  --surface-bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141414;
+  --surface-3: #1a1a1a;
+  --hairline: rgba(255, 255, 255, 0.10);
+  --hairline-strong: rgba(255, 255, 255, 0.18);
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-faint: #71717a;
   --brand: #9b6fc2;
-  --brand-soft: rgba(155, 111, 194, 0.16);
-  --on-accent: #151018;
-  --attention: #c7a9e0;
-  --attention-soft: rgba(199, 169, 224, 0.14);
-  --positive: #a693c0;
-  --negative: #dc8f9a;
-  --glow: rgba(155, 111, 194, 0.10);
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 18px 44px -22px rgba(0, 0, 0, 0.6);
+  --brand-soft: rgba(155, 111, 194, 0.22);
+  --on-accent: #ffffff;
+  --attention: #d4b8ec;
+  --attention-soft: rgba(212, 184, 236, 0.16);
+  --positive: #c4b0e0;
+  --negative: #f0a8b2;
+  --glow: rgba(155, 111, 194, 0.14);
+  --shadow-1: none;
+  --shadow-2: 0 12px 40px -20px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
 }

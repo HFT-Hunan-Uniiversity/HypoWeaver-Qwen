@@ -288,3 +288,36 @@
   .composer__cards { animation: none; }
   .composer__card, .composer__send { transition: none; }
 }
+
+.shell[data-theme='night'] .composer__greeting {
+  color: #ffffff !important;
+}
+.shell[data-theme='night'] .composer__greeting > span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.shell[data-theme='night'] .composer__lead {
+  color: #a1a1aa !important;
+}
+.shell[data-theme='night'] .composer__box {
+  background: #0a0a0a !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+.shell[data-theme='night'] .composer__card,
+.shell[data-theme='night'] .composer__journey {
+  background: #0a0a0a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.shell[data-theme='night'] .composer__journey li {
+  background: #141414 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.shell[data-theme='night'] .composer__chip {
+  background: #141414 !important;
+  color: #a1a1aa !important;
+}
+.shell[data-theme='night'] .composer__chip.is-active {
+  background: rgba(155, 111, 194, 0.22) !important;
+  color: #c4a8e8 !important;
+}
