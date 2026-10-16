@@ -14,7 +14,7 @@ class LLM:
         self.model = settings.llm_model
         self.client = client
 
-    # Long structured proposals need more than the default short-call budget.
+    # Long structured proposals need up to 600s; short prompts stay at 90s.
     LONG_TIMEOUT_PROMPTS = frozenset({"write_proposal_sections", "interpret_results"})
 
     async def generate(self, prompt_name, payload, OutputModel, project_id=None, timeout=None):
@@ -33,7 +33,7 @@ class LLM:
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
         ]
         if timeout is None:
-            timeout = 300 if prompt_name in self.LONG_TIMEOUT_PROMPTS else 90
+            timeout = 600 if prompt_name in self.LONG_TIMEOUT_PROMPTS else 90
         client = self.client or AsyncOpenAI(
             api_key=settings.llm_api_key, base_url=settings.llm_base_url, timeout=timeout, max_retries=0
         )
