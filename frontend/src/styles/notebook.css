@@ -775,6 +775,7 @@ html.nb-reading {
   max-width: none !important;
 }
 .cx {
+  /* 同一暖珊瑚语系：浅色淡底 / 深色深底，切换不跳色相 */
   --cx-bg: #f7f5f2;
   --cx-side: #f3f0ec;
   --cx-panel: #ffffff;
@@ -782,10 +783,14 @@ html.nb-reading {
   --cx-muted: #78716c;
   --cx-faint: #a8a29e;
   --cx-line: #e7e0d8;
-  --cx-accent: #9a3412;
+  --cx-accent: #c2410c;
+  --cx-accent-strong: #9a3412;
   --cx-accent-soft: #f5e6d8;
+  --cx-accent-badge-bg: #fef3c7;
+  --cx-accent-badge-fg: #92400e;
   --cx-chip: #fffcfa;
   --cx-shadow: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --cx-on-accent: #ffffff;
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
   height: 100vh;
@@ -798,17 +803,21 @@ html.nb-reading {
   grid-template-columns: 56px minmax(0, 1fr);
 }
 .cx[data-theme='dark'] {
-  --cx-bg: #141414;
-  --cx-side: #1a1a1a;
-  --cx-panel: #242424;
-  --cx-text: #f5f5f4;
+  --cx-bg: #141210;
+  --cx-side: #1a1714;
+  --cx-panel: #24201c;
+  --cx-text: #f5f2ef;
   --cx-muted: #a8a29e;
   --cx-faint: #78716c;
-  --cx-line: #33302c;
-  --cx-accent: #e7a78a;
+  --cx-line: #3a342e;
+  --cx-accent: #ea8a5c;
+  --cx-accent-strong: #f0a57a;
   --cx-accent-soft: #3b2a22;
-  --cx-chip: #2a2a2a;
+  --cx-accent-badge-bg: #3b2a22;
+  --cx-accent-badge-fg: #f0c7a8;
+  --cx-chip: #2a2622;
   --cx-shadow: none;
+  --cx-on-accent: #1c1410;
 }
 
 .cx-side {
@@ -841,13 +850,10 @@ html.nb-reading {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: var(--cx-accent);
-  color: #fff;
+  background: var(--cx-accent-strong);
+  color: var(--cx-on-accent);
   font-size: 13px;
   font-weight: 700;
-}
-.cx[data-theme='dark'] .cx-brand__mark {
-  background: #7c3aed;
 }
 .cx-brand__txt {
   display: flex;
@@ -1043,14 +1049,10 @@ html.nb-reading {
   margin: 0;
   padding: 3px 10px;
   border-radius: 999px;
-  background: color-mix(in srgb, #fbbf24 22%, var(--cx-panel));
-  color: #92400e;
+  background: var(--cx-accent-badge-bg);
+  color: var(--cx-accent-badge-fg);
   font-size: 11.5px;
   font-weight: 650;
-}
-.cx[data-theme='dark'] .cx-badge {
-  background: #3b2a22;
-  color: #f0c7a8;
 }
 .cx-blurb {
   margin: 0;
@@ -1188,11 +1190,8 @@ html.nb-reading {
   padding: 0 !important;
   border: 0 !important;
   border-radius: 50% !important;
-  background: var(--cx-accent) !important;
-  color: #fff !important;
-}
-.cx[data-theme='dark'] .cx-send {
-  background: #7c3aed !important;
+  background: var(--cx-accent-strong) !important;
+  color: var(--cx-on-accent) !important;
 }
 .cx-send:disabled {
   opacity: 0.5;
