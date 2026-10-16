@@ -28,10 +28,11 @@ export function ModelBanner() {
   )
 }
 
-/** 壳层：项目页由 StageLayout 渲染「研究手记」时间线；项目列表 / 设置为简洁页头 + 整页滚动。 */
+/** 壳层：项目内用 StageLayout；首页自带 Codex 侧栏；设置用简洁页头。 */
 export default function AppShell() {
   const [actionsEl, setActionsEl] = useState<HTMLElement | null>(null)
   const project = useMatch('/p/:id/*')
+  const home = useMatch({ path: '/', end: true })
   return (
     <ShellContext.Provider
       value={{ railOpen: false, toggleRail: () => {}, actionsEl, setActionsEl }}
@@ -41,6 +42,10 @@ export default function AppShell() {
       </a>
       {project ? (
         <main id="main-content" className="nb-page">
+          <Outlet />
+        </main>
+      ) : home ? (
+        <main id="main-content" className="cx-root">
           <Outlet />
         </main>
       ) : (
