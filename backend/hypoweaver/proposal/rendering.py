@@ -3,6 +3,19 @@ from ..claims.service import check_wording
 from .metadata import without_metadata
 
 TITLES = {
+    "problem": "一、待研究问题",
+    "rationale": "二、解决思路",
+    "techniques": "三、必要的技术手段",
+    "datasets": "四、数据集",
+    "title": "五、标题",
+    "abstract": "六、摘要",
+    "methods": "七、方法论",
+    "experiments": "八、实验设计",
+    "results": "九、实验结果",
+    "references": "十、参考论文",
+}
+# 旧版提案（十项改造前）的节名，仅用于展示/导出历史版本，不再生成。
+LEGACY_TITLES = {
     "overview": "一页概览",
     "question": "研究问题与贡献",
     "literature": "文献依据",
@@ -10,12 +23,17 @@ TITLES = {
     "hypothesis": "假设与机制",
     "design": "识别设计",
     "data": "数据与变量",
-    "results": "探索性结果",
     "conclusions": "结论与边界",
     "limitations": "局限和后续计划",
-    "references": "参考文献",
 }
-NARRATIVE = [k for k in TITLES if k not in {"results", "conclusions", "references"}]
+SYSTEM_SECTIONS = {"results", "references"}
+NARRATIVE = [k for k in TITLES if k not in SYSTEM_SECTIONS]
+
+
+def section_title(key):
+    return TITLES.get(key) or LEGACY_TITLES.get(key) or key
+
+
 TOKEN = re.compile(r"\{\{num:([a-zA-Z0-9_.]+)\}\}")
 
 
@@ -120,7 +138,7 @@ def render_markdown(proposal):
     if proposal.stale:
         parts.append("> 上游信息已变更，本提案已过期。")
     for section in proposal.sections:
-        parts += ["## " + TITLES[section["key"]], inject(section["markdown"], section["injected_numbers_ref"])]
+        parts += ["## " + section_title(section["key"]), inject(section["markdown"], section["injected_numbers_ref"])]
     return "\n\n".join(parts) + "\n"
 
 

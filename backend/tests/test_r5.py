@@ -170,10 +170,10 @@ def test_partial_narrative_retains_good_sections_and_returns_reasons(tmp_path):
                         "sections": [
                             {
                                 "key": k,
-                                "markdown": "样本年份为2010。" if k == "data" else "已通过的文献讨论，后续继续核实。",
+                                "markdown": "样本年份为2010。" if k == "datasets" else "已通过的文献讨论，后续继续核实。",
                             }
                             for k in NARRATIVE
-                            if len(self.calls) == 1 or k == "data"
+                            if len(self.calls) == 1 or k == "datasets"
                         ]
                     }
                 )
@@ -190,14 +190,14 @@ def test_partial_narrative_retains_good_sections_and_returns_reasons(tmp_path):
         drain(client, app)
         proposal = client.get(f"/api/projects/{project}/proposals").json()[0]
         assert proposal["narrative_status"] == "partial"
-        assert {e["section"] for e in proposal["narrative_errors"]} == {"data"}
+        assert {e["section"] for e in proposal["narrative_errors"]} == {"datasets"}
         assert fake.calls[1]["rewrite_reasons"][0] == {
-            "section": "data",
+            "section": "datasets",
             "snippet": "样本年份为2010。",
             "rule": "所有数字须使用给定占位符",
         }
         for section in proposal["sections"]:
-            if section["key"] in NARRATIVE and section["key"] != "data":
+            if section["key"] in NARRATIVE and section["key"] != "datasets":
                 assert section["markdown"] == "已通过的文献讨论，后续继续核实。"
         assert "2010" not in proposal["markdown"] and "部分叙述未通过校验" in proposal["markdown"]
 
@@ -245,7 +245,7 @@ def test_dataset_year_placeholders_and_identical_conclusion_not_duplicated():
                             "key": k,
                             "markdown": "样本起止年份为{{num:dataset.year_min}}至{{num:dataset.year_max}}，"
                             "企业数为{{num:dataset.n_units}}。"
-                            if k == "data"
+                            if k == "datasets"
                             else "继续核实文献。",
                         }
                         for k in NARRATIVE
@@ -268,7 +268,7 @@ def test_dataset_year_placeholders_and_identical_conclusion_not_duplicated():
     }
     sections, _, metadata = asyncio.run(build_proposal(snapshot, NarrativeLLM(), "project", lambda _: None))
     assert metadata["narrative_status"] == "complete"
-    conclusions = next(s for s in sections if s["key"] == "conclusions")
+    conclusions = next(s for s in sections if s["key"] == "results")
     assert conclusions["markdown"].count(text) == 1
 
 
@@ -306,4 +306,4 @@ def test_interpretation_failure_is_partial_and_preserves_other_claims():
     claims = [{"claim_id": key, "chosen_strength": "associational"} for key in ["good", "bad"]]
     accepted, errors = asyncio.run(generate_interpretations(Fake(), claims, {}, "project"))
     assert accepted == {"good": "两者存在条件关联。"}
-    assert errors[0]["section"] == "conclusions" and errors[0]["claim_id"] == "bad"
+    assert errors[0]["section"] == "results" and errors[0]["claim_id"] == "bad"

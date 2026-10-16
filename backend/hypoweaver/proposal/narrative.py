@@ -62,7 +62,7 @@ async def generate_interpretations(llm, claims, numbers, project_id, metadata=No
             if reasons:
                 failures[key] = [
                     {
-                        "section": "conclusions",
+                        "section": "results",
                         "claim_id": key,
                         "snippet": matches[0].text if matches else "",
                         "rule": reason,

@@ -143,14 +143,14 @@ async def build_proposal(snapshot, llm, project_id, progress):
 
     generated, narrative_errors = await generate_sections(llm, payload, project_id)
     defaults = {
-        "overview": "本提案围绕所选研究问题组织文献依据、变量与可执行方案。",
-        "question": "研究问题及预期贡献仍需结合文献与数据条件进一步核实。",
-        "literature": "下列参考文献来自本项目已纳入证据，需回到原文核对具体论断。",
-        "gap": "研究缺口是待核实的工作假设，需继续核对已有文献。",
-        "hypothesis": "所列假设属于待检验命题，不是已有结论。",
-        "design": "研究依照已审阅的变量角色与模型设定执行；识别假设仍需研究者核实。",
-        "data": "数据来源、变量含义与可获得性需逐项核对。",
-        "limitations": "应补充关键文献、数据含义核验和识别假设论证，并如实报告不支持的证据。",
+        "problem": "待研究问题与研究假设仍需结合已纳入文献与数据条件进一步核实；所列假设属于待检验命题，不是已有结论。",
+        "rationale": "研究思路依据已审阅方案组织：先界定变量与识别策略，再以可复算的统计检验评估假设。",
+        "techniques": "需要文献检索与证据整理、面板数据处理、固定效应回归与稳健性检验等技术手段，具体实现以方案为准。",
+        "datasets": "Source（历史数据）与 Target（拟采集验证数据）的来源、变量含义与可获得性需逐项核对。",
+        "title": "标题待研究者根据研究问题确定。",
+        "abstract": "摘要待补：应概括研究背景、方法与预期或主要结果。",
+        "methods": "研究依照已审阅的变量角色与模型设定执行；识别假设仍需研究者核实。",
+        "experiments": "实验设计依照已审阅方案的主模型与稳健性检验执行，基线与评估指标需研究者核实。",
     }
     refs = set(ref for ref in candidate["evidence_ids"] if ref in valid)
     for key in NARRATIVE:
@@ -199,18 +199,21 @@ async def build_proposal(snapshot, llm, project_id, progress):
                 + "。"
                 + conclusion
             )
-    sections += [
-        {"key": "results", "markdown": result_md, "injected_numbers_ref": numbers, "editable": False},
-        {
-            "key": "conclusions",
-            "markdown": "\n\n".join(conclusions)
-            if run
-            else "计划型提案尚无实证结果，不作结果判断。\n\n待补数据计划：\n"
-            + "\n".join("- " + s for s in snapshot["readiness"].get("data_plan", [])),
-            "injected_numbers_ref": numbers,
-            "editable": False,
-        },
+    data_plan = snapshot["readiness"].get("data_plan", [])
+    if run:
+        results_md = result_md + "\n\n### 结论强度与边界\n\n" + "\n\n".join(conclusions or ["尚无可报告的结论。"])
+    else:
+        results_md = "计划型提案尚无实证结果，不作结果判断。" + (
+            "\n\n待补数据计划：\n" + "\n".join("- " + s for s in data_plan) if data_plan else ""
+        )
+    limitations = [
+        "结论强度上限为「" + LABELS[strength] + "」，不得据此作超出该强度的解读。",
+        "需补充关键文献、核验数据字段含义与识别假设，并如实报告不支持或失败的检验。",
     ]
+    if run and data_plan:
+        limitations.append("后续数据计划：" + "；".join(data_plan))
+    results_md += "\n\n### 局限与后续计划\n\n" + "\n".join("- " + x for x in limitations)
+    sections.append({"key": "results", "markdown": results_md, "injected_numbers_ref": numbers, "editable": False})
     for section in sections:
         section["source_ref"] = run["id"] if run else plan["id"]
     references = []
@@ -221,9 +224,10 @@ async def build_proposal(snapshot, llm, project_id, progress):
             f"- {authors}（{c['year'] or '年份未详'}）。{c['title']}。{c['venue'] or ''}"
             + (f" [DOI](https://doi.org/{c['doi']})" if c["doi"] else "")
         )
+    data_sources = []
     if snapshot["dataset"]:
         source = snapshot["dataset"]["source"]
-        references.append(
+        data_sources.append(
             "- 数据来源："
             + str(source.get("citation") or source.get("doi") or source.get("url") or "待补来源")
             + "；许可："
@@ -233,7 +237,8 @@ async def build_proposal(snapshot, llm, project_id, progress):
     sections.append(
         {
             "key": "references",
-            "markdown": "\n".join(references) or "尚无有效引用，请补充证据。",
+            "markdown": "\n".join(references or ["尚无有效引用，请补充证据。"])
+            + ("\n\n### 数据来源\n\n" + "\n".join(data_sources) if data_sources else ""),
             "injected_numbers_ref": {},
             "editable": False,
         }

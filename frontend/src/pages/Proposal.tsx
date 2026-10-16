@@ -18,7 +18,19 @@ import { useLlm } from '../lib/llm'
 import { Copy, Download, FileText } from 'lucide-react'
 import ProcessTimeline, { jobSeconds, useStageJob } from '../components/flow/ProcessTimeline'
 import { displayProjectTitle } from '../lib/displayTitle'
+// 赛题《科学假设与研究计划》十项，顺序固定
 const titles: Record<string, string> = {
+  problem: '一、待研究问题',
+  rationale: '二、解决思路',
+  techniques: '三、必要的技术手段',
+  datasets: '四、数据集',
+  title: '五、标题',
+  abstract: '六、摘要',
+  methods: '七、方法论',
+  experiments: '八、实验设计',
+  results: '九、实验结果',
+  references: '十、参考论文',
+  // 旧版提案节名，仅用于显示历史版本
   overview: '一页概览',
   question: '研究问题与贡献',
   literature: '文献依据',
@@ -26,10 +38,8 @@ const titles: Record<string, string> = {
   hypothesis: '假设与机制',
   design: '识别设计',
   data: '数据与变量',
-  results: '探索性结果',
   conclusions: '结论与边界',
   limitations: '局限和后续计划',
-  references: '参考文献',
 }
 type Section = {
   key: string
@@ -93,7 +103,7 @@ function SectionView({
   return (
     <section className={'proposal-section ' + (!section.editable ? 'injected' : '')}>
       <div className="section-heading">
-        <h2>{titles[section.key]}</h2>
+        <h2>{titles[section.key] || section.key}</h2>
         {section.editable && !readOnly && (
           <button
             className="secondary no-print"
@@ -259,7 +269,7 @@ export default function Proposal() {
       ) : !active ? (
         <EmptyState
           title="这里会生成一份完整的研究提案"
-          what="包括研究问题、文献依据、研究缺口、假设与机制、识别设计、数据与变量、探索性结果、结论与边界。数字和图表由系统注入，内容自动保存。"
+          what="按赛题《科学假设与研究计划》十项：待研究问题、解决思路、必要的技术手段、数据集、标题、摘要、方法论、实验设计、实验结果、参考论文。数字和图表由系统注入，内容自动保存。"
           example={{
             title: '假设与机制',
             body: 'H1：同行业出现控排企业后，行业内上市公司的绿色发明专利申请增加……',

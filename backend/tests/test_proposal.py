@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from hypoweaver.app import create_app
 from hypoweaver.config import Settings
 from hypoweaver.llm.service import get_llm
-from hypoweaver.proposal.rendering import NARRATIVE
+from hypoweaver.proposal.rendering import NARRATIVE, TITLES
 from test_plans import seed_selected, drain, PlanLLM
 
 
@@ -57,13 +57,13 @@ def test_plan_only_proposal_edit_download_and_fallback(tmp_path):
         assert client.get("/api/jobs/" + response.json()["job_id"]).json()["status"] == "succeeded"
         proposal = client.get(f"/api/projects/{p}/proposals").json()[0]
         assert proposal["kind"] == "plan_only" and proposal["removed_references"] == 8
-        assert len(proposal["sections"]) == 11
+        assert [s["key"] for s in proposal["sections"]] == list(TITLES)
         identifier = proposal["id"]
         md = client.get("/api/proposals/" + identifier + ".md")
         assert "计划型提案" in md.text and "文献一" in md.text
         assert (
             client.patch(
-                f"/api/proposals/{identifier}/sections/overview", json={"markdown": "人工补充研究问题与限制。"}
+                f"/api/proposals/{identifier}/sections/problem", json={"markdown": "人工补充研究问题与限制。"}
             ).status_code
             == 200
         )
@@ -72,16 +72,16 @@ def test_plan_only_proposal_edit_download_and_fallback(tmp_path):
             == 400
         )
         assert (
-            client.patch(f"/api/proposals/{identifier}/sections/overview", json={"markdown": "促进了创新"}).status_code
+            client.patch(f"/api/proposals/{identifier}/sections/problem", json={"markdown": "促进了创新"}).status_code
             == 400
         )
         assert (
-            client.patch(f"/api/proposals/{identifier}/sections/overview", json={"markdown": "样本99"}).status_code
+            client.patch(f"/api/proposals/{identifier}/sections/problem", json={"markdown": "样本99"}).status_code
             == 400
         )
         assert (
             client.patch(
-                f"/api/proposals/{identifier}/sections/overview",
+                f"/api/proposals/{identifier}/sections/problem",
                 json={"markdown": "样本约为一百家企业，约占百分之五十。"},
             ).status_code
             == 400
@@ -173,3 +173,32 @@ def test_numerical_words_cannot_bypass_injection():
     ]:
         assert issues(text, {}, "associational"), text
     assert not issues("两者存在条件关联，进一步核对文献。", {}, "associational")
+
+
+def test_ten_item_order_and_legacy_sections_render():
+    from types import SimpleNamespace
+    from hypoweaver.proposal.rendering import render_markdown
+
+    assert list(TITLES) == [
+        "problem",
+        "rationale",
+        "techniques",
+        "datasets",
+        "title",
+        "abstract",
+        "methods",
+        "experiments",
+        "results",
+        "references",
+    ]
+    legacy = SimpleNamespace(
+        snapshot={"project": {"title": "旧版"}},
+        kind="plan_only",
+        stale=False,
+        sections=[
+            {"key": "gap", "markdown": "旧缺口", "injected_numbers_ref": {}},
+            {"key": "mystery", "markdown": "未知节", "injected_numbers_ref": {}},
+        ],
+    )
+    md = render_markdown(legacy)
+    assert "## 研究缺口" in md and "## mystery" in md

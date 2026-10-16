@@ -156,8 +156,9 @@ def test_interpretation_containing_final_text_is_not_duplicated(paragraph):
     llm = NarrativeLLM("继续核实文献。", paragraph)
     sections, _, record = asyncio.run(build_proposal(snapshot(empirical=True), llm, "project", lambda _: None))
     assert record["narrative_status"] == "complete"
-    conclusion = next(s["markdown"] for s in sections if s["key"] == "conclusions")
+    conclusion = next(s["markdown"] for s in sections if s["key"] == "results")
     expected = paragraph if FINAL_TEXT in paragraph else FINAL_TEXT + " " + paragraph
+    conclusion = conclusion.split("### 结论强度与边界\n\n", 1)[1].split("\n\n### 局限与后续计划", 1)[0]
     assert conclusion == "采用强度：关联。" + expected
     assert conclusion.count(FINAL_TEXT) == 1
 
@@ -176,9 +177,9 @@ def test_edit_uses_saved_metadata_and_still_rejects_bare_numbers(tmp_path):
             db.add(proposal)
             db.commit()
             identifier = proposal.id
-        url = f"/api/proposals/{identifier}/sections/data"
+        url = f"/api/proposals/{identifier}/sections/datasets"
         text = ORIGINALS[1] + "仍需核实变量口径。"
         assert client.patch(url, json={"markdown": text}).status_code == 200
         assert client.patch(url, json={"markdown": text + "提升了12%"}).status_code == 400
         saved = client.get(f"/api/proposals/{identifier}").json()
-        assert next(s["markdown"] for s in saved["sections"] if s["key"] == "data") == text
+        assert next(s["markdown"] for s in saved["sections"] if s["key"] == "datasets") == text
