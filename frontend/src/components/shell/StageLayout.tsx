@@ -297,38 +297,44 @@ function StageCard({
   return (
     <section className={`wz-card is-${ds}`} aria-labelledby="wz-card-title">
       <header className="wz-card__hd">
-        <div>
+        <div className="wz-card__hd-main">
           <h2 id="wz-card-title">
             {FLOW_ORDER.indexOf(key) + 1}. {STAGE_TITLES[key]}
           </h2>
           <p className="wz-card__sub">
             {s.status === 'confirmed' && !editing
-              ? '已确认，内容只读。可点「修改」后重新编辑。'
+              ? '已确认，内容只读。可点右侧「修改」重新编辑。'
               : STAGE_TODO[key] || ''}
           </p>
         </div>
-        <span className={`wz-badge is-${ds}`}>{STATUS_TEXT[ds]}</span>
-      </header>
-      {(editing || s.status === 'confirmed') && (
-        <div className="nb-ro">
+        <div className="wz-card__hd-acts">
           {editing ? (
             <>
               <span className="status-badge is-orange">修改中 · 草稿自动保存</span>
-              <button type="button" className="product-button is-quiet" onClick={() => cancel(key)}>
+              <button
+                type="button"
+                className="product-button is-quiet nb-hd-btn"
+                onClick={() => cancel(key)}
+              >
                 放弃修改
               </button>
             </>
           ) : (
-            <button
-              type="button"
-              className="product-button is-quiet"
-              onClick={() => setAsking(true)}
-            >
-              <Pencil size={13} aria-hidden="true" /> 修改
-            </button>
+            <>
+              <span className={`wz-badge is-${ds}`}>{STATUS_TEXT[ds]}</span>
+              {s.status === 'confirmed' && (
+                <button
+                  type="button"
+                  className="product-button is-quiet nb-hd-btn"
+                  onClick={() => setAsking(true)}
+                >
+                  <Pencil size={12} aria-hidden="true" /> 修改
+                </button>
+              )}
+            </>
           )}
         </div>
-      )}
+      </header>
       <div className="stage-body">
         <Suspense fallback={loading}>
           <Page />

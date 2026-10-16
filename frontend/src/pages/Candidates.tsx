@@ -266,13 +266,33 @@ export default function Candidates() {
           const score = testability(c)
           const isRec = c.id === rec
           const on = c.id === selectedId
+          const posLabel = positioning[c.positioning] || c.positioning
+          const dataText = c.required_data.slice(0, 2).join('；')
           return (
             <article
               key={c.id}
               className={`cand-card ${on ? 'is-on' : ''} ${isRec ? 'is-rec' : ''}`}
             >
-              <div className={`cand-card__rec ${isRec ? '' : 'is-none'}`}>
-                {isRec ? '系统推荐' : `候选 ${i + 1}`}
+              <div className="cand-card__top">
+                <span className={`cand-card__rec ${isRec ? '' : 'is-none'}`}>
+                  {isRec ? '系统推荐' : `候选 ${i + 1}`}
+                </span>
+                <span
+                  className="cand-card__metrics"
+                  title={`${posLabel} · 支持证据 ${c.evidence_ids.length} 篇 · 可检验性 ${score}`}
+                >
+                  <span>证据 {c.evidence_ids.length} 篇</span>
+                  <span aria-hidden="true">·</span>
+                  <span>
+                    可检验{' '}
+                    <span className="cand-score" title="前端按证据数、识别思路、风险估算">
+                      <i style={{ width: score + '%' }} />
+                    </span>{' '}
+                    <b>{score}</b>
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>{posLabel}</span>
+                </span>
               </div>
               <label className="cand-card__head">
                 <input
@@ -282,12 +302,14 @@ export default function Candidates() {
                   disabled={!stage.editable || choose.isPending}
                   onChange={() => choose.mutate(c.id)}
                 />
-                <span>{c.title}</span>
+                <span title={c.title}>{c.title}</span>
               </label>
               <ScrollRegion className="cand-card__body" label={`候选 ${i + 1} 详情`}>
                 <dl>
                   <dt>假设</dt>
-                  <dd>{c.hypothesis}</dd>
+                  <dd className="cand-clamp-3" title={c.hypothesis}>
+                    {c.hypothesis}
+                  </dd>
                   <dt>机制</dt>
                   <dd className="cand-tags">
                     {c.mechanism.map((m) => (
@@ -296,19 +318,10 @@ export default function Candidates() {
                       </i>
                     ))}
                   </dd>
-                  <dt>支持证据</dt>
-                  <dd>{c.evidence_ids.length} 篇</dd>
-                  <dt>需要数据</dt>
-                  <dd>{c.required_data.slice(0, 2).join('；')}</dd>
-                  <dt>可检验性</dt>
-                  <dd>
-                    <span className="cand-score" title="前端按证据数、识别思路、风险估算">
-                      <i style={{ width: score + '%' }} />
-                    </span>{' '}
-                    {score}
+                  <dt>数据</dt>
+                  <dd className="cand-clamp-2" title={c.required_data.join('；')}>
+                    {dataText}
                   </dd>
-                  <dt>定位</dt>
-                  <dd>{positioning[c.positioning] || c.positioning}</dd>
                 </dl>
                 <details>
                   <summary>缺口、识别思路、风险与证据</summary>

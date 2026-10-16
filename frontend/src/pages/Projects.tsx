@@ -149,7 +149,7 @@ export default function Projects() {
         />
       )}
       <div className="shell-main">
-        <header className="main-toolbar">
+        <header className={`main-toolbar ${nav === 'new' ? 'is-new' : ''}`}>
           <button
             type="button"
             className="main-toolbar__menu"
@@ -161,22 +161,18 @@ export default function Projects() {
           <span className="main-toolbar__sep" aria-hidden="true" />
           <div className="main-toolbar__title">
             <strong>
-              {nav === 'new'
-                ? '新研究 · 分步向导起点'
-                : nav === 'projects'
-                  ? '我的研究项目'
-                  : '数据与资源库'}
+              {nav === 'new' ? 'HypoWeaver' : nav === 'projects' ? '我的研究项目' : '数据与资源库'}
             </strong>
-            <small>
-              {nav === 'new'
-                ? '1 研究方向 → 2 文献 → 3 候选假设 → 4 研究方案 → 5 数据与检验 → 6 研究提案'
-                : nav === 'projects'
+            {nav !== 'new' && (
+              <small>
+                {nav === 'projects'
                   ? `共 ${projects.length} 个项目 · 点击进入六步向导`
                   : '全局共享数据资产与模型服务状态'}
-            </small>
+              </small>
+            )}
           </div>
-          <div className="main-toolbar__actions">
-            {nav !== 'new' && (
+          {nav !== 'new' && (
+            <div className="main-toolbar__actions">
               <button
                 type="button"
                 className="product-button is-primary home-top-btn"
@@ -184,12 +180,8 @@ export default function Projects() {
               >
                 <Plus size={14} aria-hidden="true" /> 新建研究
               </button>
-            )}
-            <Link to="/settings" className="nb-small" title="服务与用量设置">
-              <Settings2 size={13} aria-hidden="true" />
-              <span>{llm.data?.configured ? '千问已就绪' : '配置模型'}</span>
-            </Link>
-          </div>
+            </div>
+          )}
         </header>
         <ModelBanner />
         <div className="shell-view">
@@ -198,9 +190,7 @@ export default function Projects() {
               <ErrorNote error={create.error || query.error} />
               <TaskComposer
                 busy={create.isPending}
-                llmConfigured={!!llm.data?.configured}
                 onCreateProject={(prompt) => create.mutate(prompt)}
-                onOpenSettings={() => navigate('/settings')}
               />
             </>
           )}

@@ -8,7 +8,6 @@ import {
   PanelLeftOpen,
   Plus,
   Settings2,
-  Sparkles,
 } from 'lucide-react'
 
 export type ShellNav = 'new' | 'projects' | 'library' | 'settings'
@@ -151,33 +150,25 @@ export function AppSidebar({
       <div className="sidebar__foot">
         <button
           type="button"
-          className={`sidebar__link ${nav === 'settings' ? 'is-active' : ''}`}
+          className={`sidebar__settings-btn ${nav === 'settings' ? 'is-active' : ''}`}
           title="服务与用量设置"
           onClick={() => onNavigate('settings')}
         >
-          <Settings2 size={16} aria-hidden="true" />
-          {!collapsed && <span>服务与设置</span>}
+          <span className="sidebar__profile-icon" aria-hidden="true">
+            <Settings2 size={14} />
+          </span>
           {!collapsed && (
-            <span
-              className={`sidebar__service ${llmConfigured ? 'is-ready' : ''}`}
-              title={llmConfigured ? '千问模型已配置' : '模型未配置'}
-              aria-hidden="true"
-            />
+            <span className="sidebar__settings-copy">
+              <strong>服务与设置</strong>
+              <small>{llmConfigured ? '千问模型已就绪 · 本地存盘' : '待配置千问模型密钥'}</small>
+            </span>
           )}
+          <span
+            className={`sidebar__service ${llmConfigured ? 'is-ready' : ''}`}
+            title={llmConfigured ? '千问模型已配置' : '模型未配置'}
+            aria-hidden="true"
+          />
         </button>
-        {!collapsed && (
-          <div className="sidebar__profile">
-            <span className="sidebar__profile-icon" aria-hidden="true">
-              <Sparkles size={13} />
-            </span>
-            <span>
-              <strong>六步实证向导</strong>
-              <small>
-                {llmConfigured ? '千问模型就绪 · 本地存盘' : '检索与统计就绪 · 本地存盘'}
-              </small>
-            </span>
-          </div>
-        )}
       </div>
     </aside>
   )

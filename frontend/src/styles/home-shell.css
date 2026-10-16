@@ -335,42 +335,64 @@
 .sidebar__foot {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   border-top: 1px solid var(--hairline);
   padding-top: 8px;
 }
-.sidebar__profile {
+.sidebar__settings-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-  padding: 7px 8px 2px;
-  border-top: 1px solid var(--hairline);
-  color: var(--text-muted);
+  gap: 9px;
+  width: 100%;
+  min-height: 44px !important;
+  padding: 6px 8px !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-sm);
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.sidebar__settings-btn:hover {
+  background: var(--surface-2) !important;
+  border-color: var(--hairline) !important;
+}
+.sidebar__settings-btn.is-active {
+  background: var(--brand-soft) !important;
+}
+.sidebar.is-collapsed .sidebar__settings-btn {
+  justify-content: center;
+  padding: 6px 0 !important;
+}
+.sidebar.is-collapsed .sidebar__settings-btn .sidebar__service {
+  display: none;
 }
 .sidebar__profile-icon {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: var(--brand-soft);
   color: var(--brand);
 }
-.sidebar__profile > span:last-child {
+.sidebar__settings-copy {
   min-width: 0;
+  flex: 1;
   display: grid;
   gap: 1px;
 }
-.sidebar__profile strong {
+.sidebar__settings-copy strong {
   color: var(--text);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
 }
-.sidebar__profile small {
+.sidebar__settings-copy small {
   color: var(--text-faint);
-  font-size: 10px;
+  font-size: 10.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -382,11 +404,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 46px;
+  min-height: 44px;
   padding: 6px 24px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--hairline);
+}
+@media (min-width: 769px) {
+  .main-toolbar.is-new {
+    display: none;
+  }
 }
 .main-toolbar__menu {
   display: none;
@@ -450,7 +477,7 @@
   padding: 18px 24px 48px;
 }
 .home-subview__inner {
-  max-width: 1120px;
+  max-width: 920px;
   margin: 0 auto;
 }
 .home-proj-list {

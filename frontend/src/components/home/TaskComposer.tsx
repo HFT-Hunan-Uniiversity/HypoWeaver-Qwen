@@ -1,18 +1,15 @@
 /**
  * 新研究入口（与分步向导统一设计语言）：
- * 时段问候 → 六步向导路径预览 → 分类启发模板 → 底部研究方向输入台。
+ * 时段问候 → 分类启发模板 → 研究方向输入台（单列居中、充足左右留白）。
  */
 import {
   ArrowRight,
   BookOpenText,
   ChartNoAxesCombined,
-  ClipboardList,
-  Database,
   FileText,
   FlaskConical,
   Lightbulb,
   RotateCcw,
-  Settings2,
   Sparkles,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -32,59 +29,6 @@ interface TemplateCategory {
   label: string
   cards: TemplateCard[]
 }
-
-interface JourneyStage {
-  title: string
-  description: string
-  owner: string
-  tone: 'auto' | 'confirm' | 'collaborate'
-  icon: LucideIcon
-}
-
-const RESEARCH_JOURNEY: JourneyStage[] = [
-  {
-    title: '研究方向',
-    description: '问题 · 变量 · 范围',
-    owner: '你来明确',
-    tone: 'confirm',
-    icon: Lightbulb,
-  },
-  {
-    title: '文献',
-    description: '多源检索 · 勾选证据',
-    owner: '检索与勾选',
-    tone: 'collaborate',
-    icon: BookOpenText,
-  },
-  {
-    title: '候选假设',
-    description: '缺口 · 机制 · 引用校验',
-    owner: '生成与选择',
-    tone: 'collaborate',
-    icon: Sparkles,
-  },
-  {
-    title: '研究方案',
-    description: '识别策略 · 锁定规则',
-    owner: '起草与确认',
-    tone: 'confirm',
-    icon: ClipboardList,
-  },
-  {
-    title: '数据与检验',
-    description: '变量绑定 · 回归与复算',
-    owner: '执行与评估',
-    tone: 'auto',
-    icon: Database,
-  },
-  {
-    title: '研究提案',
-    description: '数字注入 · 结论边界',
-    owner: '审阅与导出',
-    tone: 'collaborate',
-    icon: FileText,
-  },
-]
 
 const TEMPLATE_CATEGORIES: TemplateCategory[] = [
   {
@@ -230,14 +174,10 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
 
 export function TaskComposer({
   busy,
-  llmConfigured,
   onCreateProject,
-  onOpenSettings,
 }: {
   busy?: boolean
-  llmConfigured?: boolean
   onCreateProject: (prompt: string) => void
-  onOpenSettings: () => void
 }) {
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id)
   const [prompt, setPrompt] = useState('')
@@ -268,57 +208,8 @@ export function TaskComposer({
             </p>
           </div>
 
-          <section className="composer__journey" aria-labelledby="composer-journey-title">
-            <header>
-              <div>
-                <span className="composer__journey-kicker">
-                  <ChartNoAxesCombined size={13} aria-hidden="true" />
-                  六步分步向导
-                </span>
-                <strong id="composer-journey-title">
-                  提交研究想法后，将进入同一套六步向导逐步核查与确认
-                </strong>
-              </div>
-              <small>
-                <i className="is-auto" />
-                系统执行 <i className="is-confirm" />
-                你来确认
-              </small>
-            </header>
-            <ol>
-              {RESEARCH_JOURNEY.map((stage, index) => {
-                const Icon = stage.icon
-                return (
-                  <li key={stage.title}>
-                    <div className="composer__journey-top">
-                      <span className="composer__journey-num">{index + 1}</span>
-                      <span
-                        className={`composer__journey-icon is-${stage.tone}`}
-                        aria-hidden="true"
-                      >
-                        <Icon size={14} />
-                      </span>
-                    </div>
-                    <span className="composer__journey-copy">
-                      <strong>{stage.title}</strong>
-                      <small>{stage.description}</small>
-                    </span>
-                    <em className={`is-${stage.tone}`}>{stage.owner}</em>
-                    {index < RESEARCH_JOURNEY.length - 1 && (
-                      <ArrowRight
-                        className="composer__journey-arrow"
-                        size={12}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </li>
-                )
-              })}
-            </ol>
-          </section>
-
           <div className="composer__templates-hd">
-            <span className="composer__templates-label">启发模板 · 点击填入下方方向输入框</span>
+            <span className="composer__templates-label">启发模板 · 点击填入下方输入框</span>
             <div className="composer__chips" role="tablist" aria-label="任务模板分类">
               {TEMPLATE_CATEGORIES.map((item) => (
                 <button
@@ -357,74 +248,66 @@ export function TaskComposer({
               )
             })}
           </div>
-        </div>
-      </div>
 
-      <div className="composer__dock">
-        <form
-          className="composer__box"
-          onSubmit={(event) => {
-            event.preventDefault()
-            submit()
-          }}
-        >
-          <textarea
-            value={prompt}
-            rows={2}
-            aria-label="研究方向或一句话想法"
-            placeholder="用一句话描述你想研究的问题（例如：碳交易试点是否提升了行业内企业绿色发明专利？），或点选上方模板…"
-            onChange={(event) => setPrompt(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+          <div className="composer__dock">
+            <form
+              className="composer__box"
+              onSubmit={(event) => {
                 event.preventDefault()
                 submit()
-              }
-            }}
-          />
-          <div className="composer__box-row">
-            <div className="composer__box-left">
-              <button type="button" className="composer__tool" onClick={() => onOpenSettings()}>
-                <span
-                  className={`composer__status-dot ${llmConfigured ? 'is-ready' : ''}`}
-                  aria-hidden="true"
-                />
-                <Settings2 size={13} aria-hidden="true" />
-                {llmConfigured ? '千问模型已就绪' : '配置千问模型'}
-              </button>
-              <button
-                type="button"
-                className="composer__tool"
-                disabled={busy}
-                onClick={() => onCreateProject('')}
-              >
-                直接填空白方向卡 →
-              </button>
-              {prompt.trim() && (
-                <button
-                  type="button"
-                  className="composer__tool"
-                  onClick={() => setPrompt('')}
-                  title="清空输入"
-                >
-                  <RotateCcw size={13} aria-hidden="true" />
-                  清空
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="composer__send"
-              disabled={busy || !prompt.trim()}
-              aria-label="创建研究项目并进入第一步"
+              }}
             >
-              <span>{busy ? '正在创建…' : '进入向导'}</span>
-              <ArrowRight size={15} aria-hidden="true" />
-            </button>
+              <textarea
+                value={prompt}
+                rows={3}
+                aria-label="研究方向或一句话想法"
+                placeholder="用一句话描述你想研究的问题（例如：碳交易试点是否提升了行业内企业绿色发明专利？），或点选上方模板…"
+                onChange={(event) => setPrompt(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                    event.preventDefault()
+                    submit()
+                  }
+                }}
+              />
+              <div className="composer__box-row">
+                <div className="composer__box-left">
+                  <button
+                    type="button"
+                    className="composer__tool"
+                    disabled={busy}
+                    onClick={() => onCreateProject('')}
+                  >
+                    直接填空白方向卡 →
+                  </button>
+                  {prompt.trim() && (
+                    <button
+                      type="button"
+                      className="composer__tool"
+                      onClick={() => setPrompt('')}
+                      title="清空输入"
+                    >
+                      <RotateCcw size={13} aria-hidden="true" />
+                      清空
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="composer__send"
+                  disabled={busy || !prompt.trim()}
+                  aria-label="创建研究项目并进入第一步"
+                >
+                  <span>{busy ? '正在创建…' : '进入向导'}</span>
+                  <ArrowRight size={15} aria-hidden="true" />
+                </button>
+              </div>
+            </form>
+            <p className="composer__hint">
+              创建后自动带入「1. 研究方向」卡片，每一步自动保存草稿，确认后依次解锁下一阶段。
+            </p>
           </div>
-        </form>
-        <p className="composer__hint">
-          创建后将自动带入「1. 研究方向」卡片，每一步自动保存草稿，确认后依次解锁下一阶段。
-        </p>
+        </div>
       </div>
     </div>
   )
