@@ -25,7 +25,7 @@
 }
 .composer__center {
   margin: auto;
-  width: min(760px, calc(100% - 96px));
+  width: min(840px, calc(100% - 80px));
   padding: 28px 0 24px;
   display: flex;
   flex-direction: column;
@@ -123,9 +123,13 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   min-height: 68px !important;
   padding: 12px 14px !important;
   text-align: left;
+  white-space: normal !important;
+  flex-shrink: 1 !important;
+  overflow: hidden;
   border: 1px solid var(--hairline) !important;
   border-radius: 12px !important;
   background: var(--surface) !important;
@@ -159,6 +163,7 @@
   min-width: 0;
   display: grid;
   gap: 3px;
+  white-space: normal !important;
 }
 .composer__card h3 {
   margin: 0;
@@ -167,12 +172,17 @@
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
+  white-space: normal !important;
+  overflow-wrap: anywhere;
 }
 .composer__card p {
   margin: 0;
   font-size: 11.5px;
   line-height: 1.5;
   color: var(--text-muted);
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .composer__card-arrow {
   color: var(--text-faint);

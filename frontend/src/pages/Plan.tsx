@@ -176,65 +176,81 @@ export default function Plan() {
               )}
               <div className="cols-2 plan-summary-grid fill" hidden={sec !== 'summary'}>
                 <section
-                  className="panel scroll-region"
+                  className="panel scroll-region plan-summary-card"
                   data-scroll-region=""
                   tabIndex={0}
                   id="plan-summary"
                 >
                   <h2>{methods[current.method_family]}</h2>
-                  <p>
+                  <p className="plan-summary-meta">
                     {current.variables.length} 个变量 · {current.robustness.length} 项稳健性检查 ·{' '}
                     {current.permutation.n} 次置换
                   </p>
-                  <p>{current.boundary_notes}</p>
+                  <p className="plan-summary-notes">{current.boundary_notes}</p>
+                  {current.model.identification_assumptions.length > 0 && (
+                    <div className="plan-assumptions-box">
+                      <h3 className="plan-subhd">核心识别假设</h3>
+                      <ul>
+                        {current.model.identification_assumptions.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   {stage.editable && !running && llmOk && (
-                    <button className="product-button is-quiet" onClick={() => draft.mutate()}>
-                      按当前候选重新起草
-                    </button>
+                    <div className="plan-summary-foot">
+                      <button className="product-button is-quiet" onClick={() => draft.mutate()}>
+                        按当前候选重新起草
+                      </button>
+                    </div>
                   )}
                 </section>
                 <section
-                  className="panel scroll-region"
+                  className="panel scroll-region plan-summary-card"
                   data-scroll-region=""
                   tabIndex={0}
                   id="plan-review"
                 >
                   <h2>重点审阅</h2>
-                  {current.variables
-                    .filter((v) => v.uncertain)
-                    .map((v) => (
-                      <p key={v.name}>
-                        <strong>待确认：{v.name}</strong> — {v.definition}
+                  <div className="plan-uncertain-list">
+                    {current.variables
+                      .filter((v) => v.uncertain)
+                      .map((v) => (
+                        <div key={v.name} className="plan-uncertain-item">
+                          <strong>待确认：{v.name}</strong>
+                          <p>{v.definition}</p>
+                        </div>
+                      ))}
+                    {!current.variables.some((v) => v.uncertain) && (
+                      <p className="muted">
+                        未标记含义不确定的变量，请重点核对左侧识别假设与下方分配性质。
                       </p>
-                    ))}
-                  {!current.variables.some((v) => v.uncertain) && (
-                    <p>未标记含义不确定的变量，仍需检查下列识别假设。</p>
-                  )}
-                  <ul>
-                    {current.model.identification_assumptions.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                  <p>
-                    处理是否为真实分配：
-                    <strong>
-                      {current.treatment_is_real_assignment ? '已由用户标记为是' : '否 / 尚未核实'}
-                    </strong>
-                    {current.treatment_semantics && (
-                      <span className="muted">
-                        {' '}
-                        · 绑定字段语义：
-                        {semanticsLabels[current.treatment_semantics] ||
-                          current.treatment_semantics}
-                      </span>
                     )}
-                  </p>
-                  {peer && current.treatment_is_real_assignment && (
-                    <p className="error">
-                      冲突：处理变量绑定的字段是“同群 /
-                      暴露”变量，并非真实分配，结论最高只能到“关联”。请新建版本并取消该勾选。
+                  </div>
+                  <div className="plan-assignment-box">
+                    <p>
+                      处理是否为真实分配：
+                      <strong>
+                        {current.treatment_is_real_assignment
+                          ? '已由用户标记为是'
+                          : '否 / 尚未核实'}
+                      </strong>
+                      {current.treatment_semantics && (
+                        <span className="muted">
+                          {' '}
+                          · 绑定字段语义：
+                          {semanticsLabels[current.treatment_semantics] ||
+                            current.treatment_semantics}
+                        </span>
+                      )}
                     </p>
-                  )}
+                    {peer && current.treatment_is_real_assignment && (
+                      <p className="error">
+                        冲突：处理变量绑定的字段是“同群 /
+                        暴露”变量，并非真实分配，结论最高只能到“关联”。请新建版本并取消该勾选。
+                      </p>
+                    )}
+                  </div>
                 </section>
               </div>
               <div className="plan-editor-wrap fill" hidden={sec === 'summary'}>

@@ -1,5 +1,3 @@
-import PageBar from '../components/shell/PageBar'
-import { ScrollRegion } from '../components/shell/ShellContext'
 import { useState } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { api, body } from '../api/client'
@@ -61,19 +59,22 @@ export default function Settings() {
     },
   })
   return (
-    <div className="page-fill">
-      <PageBar title="服务与用量">
-        <span className="inline-meta">密钥只在本机环境中配置，此页面不显示或保存密钥。</span>
-      </PageBar>
-      <div className="page-body">
+    <section className="wz-card settings-card">
+      <header className="wz-card__hd">
+        <div className="wz-card__hd-main">
+          <h2>服务与用量</h2>
+          <p className="wz-card__sub">密钥只在本机环境中配置，此页面不显示或保存密钥。</p>
+        </div>
+      </header>
+      <div className="stage-body">
         <ErrorNote error={q.error} />
         {q.isPending ? (
-          <p>正在检查服务状态…</p>
+          <p className="loading-line">正在检查服务状态…</p>
         ) : (
           q.data && (
-            <div className="cols-side settings-grid fill">
-              <div className="col-stack">
-                <section className="panel">
+            <div className="settings-grid">
+              <div className="settings-left">
+                <section className="panel settings-panel">
                   <h2>模型连接 · 千问</h2>
                   <p>
                     当前模型：
@@ -126,36 +127,55 @@ export default function Settings() {
                   )}
                   <ErrorNote error={switchModel.error || llm.error} />
                   <p>{q.data.message}</p>
-                  <button
-                    onClick={() => {
-                      setMessage('')
-                      test.mutate()
-                    }}
-                    disabled={test.isPending}
-                  >
-                    {test.isPending ? '正在测试…' : '测试连接'}
-                  </button>
+                  <div className="settings-test-row">
+                    <button
+                      onClick={() => {
+                        setMessage('')
+                        test.mutate()
+                      }}
+                      disabled={test.isPending}
+                    >
+                      {test.isPending ? '正在测试…' : '测试连接'}
+                    </button>
+                    {message && (
+                      <span role="status" className="settings-test-msg">
+                        {message}
+                      </span>
+                    )}
+                  </div>
                   <ErrorNote error={test.error} />
-                  {message && <p role="status">{message}</p>}
                 </section>
-                <section className="panel">
+                <section className="panel settings-panel settings-sources-panel">
                   <h2>文献来源</h2>
-                  {Object.entries(q.data.sources).map(([key, value]) => (
-                    <p key={key}>
-                      {key === 'openalex' ? 'OpenAlex' : 'Crossref'}：
-                      {value.status === 'ok' ? '可用' : `不可用 · ${value.reason}`}
-                    </p>
-                  ))}
+                  <div className="settings-sources-list">
+                    {Object.entries(q.data.sources).map(([key, value]) => (
+                      <div key={key} className="settings-source-row">
+                        <span className="settings-source-name">
+                          {key === 'openalex' ? 'OpenAlex' : 'Crossref'}
+                        </span>
+                        <span
+                          className={
+                            'settings-status-pill ' + (value.status === 'ok' ? 'is-ok' : 'is-err')
+                          }
+                        >
+                          {value.status === 'ok' ? '可用' : `不可用 · ${value.reason}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </section>
               </div>
-              <section className="panel fill">
-                <h2>调用用量</h2>
-                <p>
-                  {q.data.usage.calls} 次请求 · 输入 {q.data.usage.input_tokens} tokens · 输出{' '}
-                  {q.data.usage.output_tokens} tokens
-                </p>
-                <ScrollRegion label="最近调用">
-                  <table>
+              <section className="panel settings-panel settings-calls-panel">
+                <div className="settings-calls-hd">
+                  <h2>调用用量</h2>
+                  <p className="settings-calls-summary">
+                    <b>{q.data.usage.calls}</b> 次请求 · 输入{' '}
+                    <b>{q.data.usage.input_tokens.toLocaleString()}</b> tokens · 输出{' '}
+                    <b>{q.data.usage.output_tokens.toLocaleString()}</b> tokens
+                  </p>
+                </div>
+                <div className="settings-calls-scroll" role="region" aria-label="最近调用">
+                  <table className="settings-calls-table">
                     <thead>
                       <tr>
                         <th>提示</th>
@@ -174,18 +194,29 @@ export default function Settings() {
                             {call.input_tokens} / {call.output_tokens}
                           </td>
                           <td>{call.latency_ms} ms</td>
-                          <td>{call.status === 'succeeded' ? '成功' : call.error || '失败'}</td>
+                          <td>
+                            {call.status === 'succeeded' ? (
+                              <span className="settings-status-pill is-ok">成功</span>
+                            ) : (
+                              <span
+                                className="settings-status-pill is-err"
+                                title={call.error || '调用失败'}
+                              >
+                                失败
+                              </span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </ScrollRegion>
+                </div>
                 {!q.data.recent_calls.length && <p className="muted">暂无模型调用记录</p>}
               </section>
             </div>
           )
         )}
       </div>
-    </div>
+    </section>
   )
 }
