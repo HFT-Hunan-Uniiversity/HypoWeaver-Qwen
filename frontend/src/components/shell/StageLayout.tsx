@@ -65,7 +65,7 @@ export default function StageLayout() {
   const overview = useOverview(id)
   if (!overview.data) return <p className="loading-line">正在读取项目…</p>
   return (
-    <FlowProvider projectId={id!} stages={overview.data.stages}>
+    <FlowProvider projectId={id!} stages={overview.data.stages} title={overview.data.project.title}>
       <Wizard title={overview.data.project.title} />
     </FlowProvider>
   )

@@ -1,5 +1,8 @@
 import { fmtNumber } from '../components/ResultTable'
 import PaperView, { type PaperData } from '../components/paper/PaperView'
+import { showcaseHead, showcaseSections } from '../components/paper/showcase'
+import { isShowcaseProject } from '../lib/showcase'
+import { useOverview } from '../lib/stages'
 import { useUrlParam } from '../lib/urlState'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -323,13 +326,38 @@ export default function Proposal() {
             },
   })
   const [sec, setSec] = useUrlParam<string>('sec', '')
+  const showcase = isShowcaseProject(useOverview(id).data?.project.title)
+  const [paperView, setPaperView] = useUrlParam<string>('paper', 'showcase')
+  const showShowcase = showcase && paperView !== 'generated'
+  const switcher = showcase ? (
+    <div className="hw-paper__switch no-print" role="group" aria-label="论文版本">
+      <button type="button" aria-pressed={showShowcase} onClick={() => setPaperView('showcase')}>
+        展示稿
+      </button>
+      <button
+        type="button"
+        aria-pressed={!showShowcase}
+        onClick={() => setPaperView('generated')}
+      >
+        生成稿
+      </button>
+    </div>
+  ) : null
   useEffect(() => {
     if (sec) document.getElementById('sec-' + sec)?.scrollIntoView({ block: 'start' })
     // 仅在提案载入时定位一次
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id])
+  if (showShowcase)
+    return (
+      <>
+        <div className="toolbar proposal-toolbar no-print">{switcher}</div>
+        <PaperView data={showcaseHead} sections={showcaseSections} />
+      </>
+    )
   return (
     <>
+      {switcher && <div className="toolbar proposal-toolbar no-print">{switcher}</div>}
       <div className="no-print">
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (
