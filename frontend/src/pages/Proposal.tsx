@@ -247,6 +247,18 @@ export default function Proposal() {
   const { confirm } = useFlow()
   const stage = useFlowStage('proposal')
   const llmOk = useLlm().data?.configured !== false
+  // 只改 ?proposal=，保留 ?tab= 等其它参数（旧写法整串覆盖，JobProgress 对已完成任务挂载即回调，会把 ?tab=ten 冲掉）
+  const selectProposal = (pid: string) => {
+    if (params.get('proposal') === pid) return
+    setParams(
+      (p) => {
+        const n = new URLSearchParams(p)
+        n.set('proposal', pid)
+        return n
+      },
+      { replace: true },
+    )
+  }
   const active = query.data?.find((p) => p.id === params.get('proposal')) || query.data?.[0]
   const currentJob = job || jobs.data?.[0]?.id || ''
   const refresh = () => {
@@ -484,7 +496,7 @@ export default function Proposal() {
             id={currentJob}
             onComplete={(j) => {
               refresh()
-              if (j.result?.proposal_id) setParams({ proposal: String(j.result.proposal_id) })
+              if (j.result?.proposal_id) selectProposal(String(j.result.proposal_id))
             }}
           />
         )}
@@ -515,7 +527,7 @@ export default function Proposal() {
             <VersionPills
               label="提案版本"
               value={active.id}
-              onChange={(v) => setParams({ proposal: v })}
+              onChange={(v) => selectProposal(v)}
               items={(query.data || []).map((p) => ({
                 id: p.id,
                 label: `第 ${p.version} 版`,
