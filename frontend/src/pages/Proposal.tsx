@@ -352,7 +352,8 @@ export default function Proposal() {
     ['ten', 'paper'],
   )
   // 碳市场展示项目：无生成提案时科学十项显示展示版；有生成提案时默认生成版，可切到展示版
-  const [tenView, setTenView] = useUrlParam<'generated' | 'showcase'>('ten', 'generated', [
+  // 碳市场展示项目默认显示展示版（旧版成果页样式），生成版可切换查看
+  const [tenView, setTenView] = useUrlParam<'generated' | 'showcase'>('ten', showcase ? 'showcase' : 'generated', [
     'generated',
     'showcase',
   ])
