@@ -1,91 +1,255 @@
+<p align="center"><img src="frontend/public/brand/hw-logo-192.png" width="96" alt="HypoWeaver 标志"></p>
+
 # HypoWeaver v2
 
-从研究方向出发，以真实文献、数据和检验结果形成研究提案的单用户本地工作台。产品规格见 [SPEC](docs/SPEC.md)，任务清单见 [PLAN](docs/PLAN.md)，已完成内容与验证记录见 [PROGRESS](PROGRESS.md)，逐项验收与延期边界见 [ACCEPTANCE](docs/ACCEPTANCE.md)。
+**HypoWeaver 是一个在本机运行的实证研究工作台。** 你写下一个研究问题，它带你按六步走完：查文献、生成候选假设、定研究方案、导入真实数据并跑统计检验，最后写出一份十项结构的研究提案。
 
-## 启动
+它的核心价值有三点：
 
-需要 Python 3.12、uv 和 Node 22。在仓库根目录运行：
+1. **大模型负责广度。** 生成检索式、候选假设、研究方案和提案文字，接入阿里云百炼的通义千问（DashScope Qwen）。
+2. **计量负责可信。** 所有数字都由代码在真实数据上算出来，包括主回归、事件研究、稳健性、置换检验和独立复算。大模型不能编造数字，引用的文献必须真实存在于证据库中。
+3. **结论强度由数据封顶。** 系统根据检验结果和处理变量的性质，给每条结论定一个“最高允许强度”。研究者只能降级，不能升级，提案里超出强度的措辞（如“促进”“导致”）会被拦下。
+
+> 相关文档：产品规格 [SPEC](docs/SPEC.md) · 任务清单 [PLAN](docs/PLAN.md) · 前端流程 [flow](docs/flow.md) · 术语 [GLOSSARY](GLOSSARY.md) · 开发记录 [PROGRESS](PROGRESS.md) · 验收记录 [ACCEPTANCE](docs/ACCEPTANCE.md) · 后端接口约定 [API_NOTES](docs/API_NOTES.md) · 碳市场数据 [DATA_carbon_case](docs/DATA_carbon_case.md)
+
+---
+
+## 一、六个阶段在做什么
+
+界面是向导式的：只有一条路，每页一个主按钮，确认后进入下一阶段。还没走到的阶段锁定；修改已确认的阶段会生成新版本，下游阶段标黄点“需要更新”，按顺序重做即可，历史版本都保留可查。
+
+| # | 阶段（界面名） | 你做什么 | 系统做什么 |
+|---|---|---|---|
+| 1 | 研究方向 | 写下问题、研究对象和约束 | 保存方向，作为后续所有步骤的起点 |
+| 2 | 文献调研 | 用模型生成或手写最多 6 条中英文检索式；筛选证据；可上传 PDF | OpenAlex + Crossref 联合检索、去重、按相关性融合排序（默认纳入前 40 条）；画出年度、期刊、关键词、方法分布概况 |
+| 3 | 缺口与候选 | 比较多组候选，打开引用查看依据，选定一个并可编辑 | 基于证据卡生成多组可检验的候选假设（缺口、假设、数据需求、风险），自审一次，删除无效引用 |
+| 4 | 研究方案 | 审阅变量定义、识别假设、事件窗口、稳健性和决策规则，确认后锁定 | 起草方案，方法分三类：政策因果、面板关联、机制与边界 |
+| 5 | 数据与检验 | 上传 `.csv/.xlsx/.dta`，把方案变量绑定到数据字段，点“统计检验” | 就绪检查后跑主模型（双向固定效应）、事件研究与前趋势检验、稳健性、置换检验（默认 499 次）、statsmodels 独立复算，再给出结论评估 |
+| 6 | 研究提案 | 审阅、编辑叙述，确认提案，导出 Markdown 或打印成 PDF | 生成十项提案；有数据时带实证结果，没有数据时生成计划型提案和待补清单 |
+
+### 结论强度如何被“封顶”
+
+结论强度从低到高共五级：**证据不足 → 初步线索 → 混合证据 → 关联 → 谨慎因果**。系统按以下规则自动定出上限（代码见 `backend/hypoweaver/claims/service.py`）：
+
+- 主模型失败，或独立复算与主模型不一致：上限为“证据不足”。
+- 主系数方向或显著性不符合预期：上限为“证据不足”（判定为“不支持”）。
+- 方向对，但稳健性同向比例不够、置换检验没过，或政策因果设计的前趋势检验没过：上限为“初步线索”。
+- 以上全部通过：上限为“关联”。
+- 只有当方法是政策因果、**且**研究者确认处理变量是真实的政策分配时，才可能到“谨慎因果”。像“行业同群暴露”这类变量，最高只能写“关联”。
+
+研究者可以接受、降级、暂缓或拒绝结论，但不能升级（直接调接口升级也会被拒绝）。提案叙述会检查措辞，超出强度的说法无法保存。
+
+### 十项研究提案
+
+一、待研究问题；二、解决思路；三、必要的技术手段；四、数据集；五、标题；六、摘要；七、方法论；八、实验设计；九、实验结果；十、参考论文。
+
+其中“实验结果”和“参考论文”由系统根据检验结果和证据卡生成，只读；其余八项由模型撰写，数字以占位符注入，经过数字和措辞校验。确认提案后（`POST /api/proposals/{id}/confirm`），首页侧栏里该项目显示“已完成”。
+
+---
+
+## 二、整体架构
+
+```
+浏览器 (React 19 + Vite 7 + TypeScript)
+   │  /api 请求（开发时由 Vite 代理到 127.0.0.1:8000）
+   ▼
+后端 FastAPI (Python 3.12, uvicorn)
+   ├─ projects / jobs        项目、后台任务、阶段状态与过期传播
+   ├─ literature / landscape 文献检索（OpenAlex、Crossref）、PDF 解析、文献概况
+   ├─ candidates / plans     候选假设与研究方案（调用大模型，Pydantic 校验输出）
+   ├─ datasets / binding     数据导入、字段语义、变量绑定与就绪检查
+   ├─ stats / claims         统计引擎（linearmodels / statsmodels）、置换、复算、结论评估
+   ├─ proposal               十项提案生成、校验、确认与 Markdown 导出
+   ├─ llm                    大模型配置与调用（OpenAI 兼容接口 → DashScope Qwen）
+   └─ cases                  碳市场案例数据准备；旧案例只读标记
+   │
+   ▼
+DATA_DIR（默认仓库根目录 var/）
+   ├─ hypoweaver.sqlite      全部项目数据
+   ├─ .env.llm               设置页保存的模型配置（权限 0600，不入 Git）
+   ├─ staging/ datasets/ raw/ 上传原件、分析用 CSV、案例原始数据
+```
+
+- **大模型**：后端用 OpenAI 官方 SDK 连接 DashScope 的“OpenAI 兼容模式”，地址 `https://dashscope.aliyuncs.com/compatible-mode/v1`。模型名不写死，从配置读取：代码默认 `qwen-plus`，演示机在设置页配置的是 `qwen3.8-flash`。早期验收用过的 Luna/Codex 桥接已经移除，后端只走这一条 OpenAI 兼容通道。
+- **数据库**：单机 SQLite，刷新或重启不丢数据。
+- **构建后**，后端也可以直接托管 `frontend/dist`，只开 8000 一个端口也能用。
+
+---
+
+## 三、快速开始
+
+### 1. 需要准备
+
+- Python 3.12 和 [uv](https://docs.astral.sh/uv/)
+- Node 22（仓库里有 `.nvmrc`）
+- 一个阿里云百炼（DashScope）API Key。没有 Key 也能启动，文献检索、PDF、数据导入和统计检验都能用，只是需要大模型的步骤会提示“未配置模型”。
+
+### 2. 配置
 
 ```sh
 cp .env.example .env
-make setup
-make dev
 ```
 
-打开 http://localhost:5173。开发服务器把 `/api` 转发到本机 8000 端口；SQLite 默认存放在仓库根目录 `var/`，刷新或重启不会丢失项目。相对 `DATA_DIR` 始终以仓库根目录为基准。
+打开 `.env` 填写（**不要把真实密钥提交到 Git**，`.env` 已在 `.gitignore` 中）：
 
-在项目列表新建项目，进入研究方向页填写问题和约束并保存。列表提供删除入口，删除需确认。六阶段主流程均已接入，验证记录与真实模型接入边界见 PROGRESS。
+| 变量 | 含义 | 示例 |
+|---|---|---|
+| `LLM_API_KEY` | DashScope API Key | `sk-你的密钥`（留空则模型步骤不可用） |
+| `LLM_BASE_URL` | OpenAI 兼容地址 | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| `LLM_MODEL` | 模型名 | `qwen-plus`、`qwen3.8-flash` 等 |
+| `CONTACT_EMAIL` | 联系邮箱，随 OpenAlex/Crossref 请求发送（可空） | |
+| `DATA_DIR` | 数据目录，相对路径以仓库根目录为准 | `./var` |
+| `LOCAL_LIBRARY_DIR` | 可选，本地文献库目录 | 留空 |
+
+**也可以不改 `.env`**：启动后点侧栏底部的“服务与设置”（地址 `/settings`），填写地址、密钥和模型名并测试连接。设置页保存到 `DATA_DIR/.env.llm`，优先于 `.env`，重启后仍生效。
+
+### 3. 安装与启动
 
 ```sh
-make test
-make build
-# 构建后也可只运行后端，由其托管前端
-cd backend && uv run uvicorn hypoweaver.app:app --port 8000
+make setup     # 安装后端（uv sync）和前端（npm ci）依赖
+make dev       # 同时启动后端 :8000 和前端 :5173
 ```
 
-模型配置从本地 `.env`、环境变量及设置接口读取；设置接口保存到忽略的 `DATA_DIR/.env.llm`（权限 0600），重启后仍生效，并优先于环境配置。`.env.example` 提供配置示例；密钥、数据库、上传文件和碳市场原始数据均不入 Git。真实模型调用需要 LLM_API_KEY 和 LLM_MODEL，测试使用替代客户端。
+打开 http://localhost:5173 。也可以分开启动：
 
-文献页支持最多 6 条手动中英文检索式、OpenAlex/Crossref 联合检索和 PDF 上传。可用 `LOCAL_LIBRARY_DIR` 指向一个已有本地目录：优先读取 `library.jsonl`（每行是一张证据卡，至少有字符串 title；可带 year、doi、authors、abstract、concepts），否则读取目录顶层 PDF。索引最多 10 MB/2000 行，PDF 最多 200 个，每个 30 MB；截断或坏行会在来源状态中提示。上传 PDF 提取前 100 页文字，保留前 12000 字摘录；扫描件需先 OCR。
+```sh
+# 后端
+cd backend && uv run uvicorn hypoweaver.app:app --reload --port 8000
+# 前端（另开一个终端）
+cd frontend && npm run dev -- --host 127.0.0.1 --port 5174
+```
 
-### 导入研究数据
+前端默认端口是 5173，加 `--port` 可改，答辩演示机用的是 **5174**。前端把 `/api` 转发到 `http://127.0.0.1:8000`，可用环境变量 `HW_API` 改成别的后端地址。如果电脑开了代理，访问本机地址时请设置 `NO_PROXY=127.0.0.1,localhost`。
 
-在项目的“数据与检验”页面上传 `.csv`、`.xlsx` 或 `.dta`，查看列名及标签后选择所需列，再确认导入。Excel 可切换工作表；Stata 仅加载选择的列。已上传文件可复用，不需要为了改变列选择重复上传。
+只开后端的方式：先 `make build`，再启动后端，打开 http://localhost:8000 。
 
-公开碳市场案例的下载、准备、字段含义与引用见 [DATA_carbon_case.md](docs/DATA_carbon_case.md)。运行 `cd backend && uv run python -m hypoweaver.cases.carbon fetch`，然后 `uv run python -m hypoweaver.cases.carbon prepare`；刷新数据页即可选择资产。
+### 4. 答辩演示机的实际部署（参考）
 
-如果已有该公开来源的原始 `data.dta`，可直接放入 `DATA_DIR/raw/data.dta`（默认是项目 `var/raw/data.dta`），然后在 `backend` 运行 `uv run python -m hypoweaver.cases.carbon prepare`，无需重复 fetch。prepare 会核验文件大小及所需字段，并登记准备后的资产。
+演示机上，前后端在 `screen` 会话里常驻：
 
-真实碳数据测试在 `DATA_DIR/hypoweaver.sqlite` 不存在，或库中没有 DOI 与 prepare 字段集合匹配的登记资产时会 skip；登记文件缺失或路径不一致则测试失败。先准备数据再运行全量测试，才能验证真实数据这一项。
+- `hw_back`：在本仓库 `backend/` 下运行 uvicorn `--port 8000`，`DATA_DIR` 指向旧检出目录 `../HypoWeaver-Qwen/var`（真实演示数据都在那里），Python 环境借用 `../HypoWeaver-Qwen/backend/.venv`。
+- `hw_front_flow`：在本仓库 `frontend/` 下运行 `vite --host 127.0.0.1 --port 5174`。
 
-数据读取上限为单文件 500 MB、300 列、200 万行，`DATA_DIR` 下 `staging/`、`datasets/`、`raw/` 的合计文件大小上限为 3 GB。达到上限会停止新导入并显示原因，不会删除历史数据。`staging/` 存上传原件（含失败留下的片段），`datasets/` 存已登记资产引用的 CSV，`raw/` 存案例原件。需要释放空间时先备份并核对用途；不要删除 SQLite 正在引用的分析 CSV。产品暂不提供自动清理或历史资产删除功能。
+查看：`screen -ls`；进入：`screen -r hw_back`；退出但不关闭：先按 `Ctrl-A` 再按 `D`。**不要随意删除或覆盖 `var/` 下的数据库和备份文件。**
 
-## 从研究方向到提案
+---
 
-1. 新建项目，在“研究方向”写下具体问题、研究对象和约束；保存后总览显示实际进度。
-2. 在“文献调研”生成检索式，或手动输入中英文检索式。开始联合检索，查看每个来源的成功/失败记录。筛选纳入证据，上传可公开使用的 PDF，并核对标题、年份和摘要；概况图只描述本次样本。
-3. 生成候选，比较缺口、假设、数据需求和风险，打开引用查看依据；选择并编辑一个候选。重新生成保留旧版本。
-4. 起草研究方案，审阅变量定义、识别假设、事件窗口、稳健性和决策规则。模型不能替研究者确认真实处理分配。确认后锁定；编辑已确认方案会产生新的草稿版本，需要重新确认。
-5. 导入数据，在数据页选择已确认方案，逐项绑定字段或公式，保存并明确确认绑定。就绪卡列出有效样本、分组、首次暴露和缺失项。点击“统计检验”，执行并查看主模型、事件研究、稳健性、置换、独立复算及结论评估。研究者可接受、降级、暂缓或拒绝结论，不能升级。
-6. 生成研究提案。已有合适运行时带探索性结果；缺少数据时生成计划型提案和待补清单。编辑叙述时保留数字占位符，结果与引用只读。下载 Markdown，或通过浏览器打印保存 PDF。
+## 四、演示案例
 
-上游修改会标记下游过期，历史方案、运行和提案仍可查看。应按顺序更新过期阶段。方向修改会先显示影响提示；总览和各阶段均提示过期状态。共享数据来源信息修改会使引用它的项目更新运行/提案。
+首页侧栏里有三个真实项目：
 
-### 碳市场案例的人工核对
+| 项目 | 来源 | 说明 |
+|---|---|---|
+| 绿色信贷与技术创新 | 在本系统里实际走完六步的项目 | 提案已确认（第 1 版），侧栏显示“已完成”。注意：数据库里的原标题是内部测试名，侧栏显示的名称由前端 `lib/displayTitle.ts` 替换而来；项目实际使用的是碳市场公开数据 |
+| 碳市场约束能否转化为企业高质量绿色创新？ | 旧仓库的真实案例，导入为只读项目 | 14,196 条企业—年份观测、1,183 家上市公司（2010—2021）；政策暴露系数 0.0717（企业聚类 SE=0.0204，p=0.00043）；前趋势联合检验 p=0.494；499 次置换 p=0.004。数据来自 Mendeley 公开数据集（CC BY 4.0） |
+| 绿色金融试验区能否改善城市空气质量？（Case009） | 旧仓库的真实案例，导入为只读项目 | Harvard Dataverse 公开数据（CC0）；8 个核心校验门全部通过，但目标因果结论**未获准写入**，用来展示系统的“科学防线” |
 
-准备数据后，结果变量可绑定 `log1p(green_invention_independent + green_invention_joint)`，核心解释变量绑定 `industry_peer_exposure`，个体和时期绑定 `firm_id`、`year`；控制可用 `log(total_assets)`、`leverage`、`return_on_assets`。原始 `Size` 是资产总计，不能再次误当成已取对数。
+两个旧案例的正文原样取自 `docs/legacy_cases/carbon.md` 和 `case009.md`，碳市场案例的配图在 `frontend/public/cases/carbon/`。重新导入（会先自动备份数据库，可重复执行）：
 
-该数据变量是行业同群暴露，不是企业实际控排身份。保留“真实处理分配”为否，最高只报告条件关联。默认企业聚类；如要核验行业层面的误差关联，可在新方案版本把聚类字段改为 `industry_code` 后单独运行。事件研究仅用单调路径样本，不能把前趋势检验通过直接当成识别假设已成立。数据来源需引用 Daihui Wei 的 Mendeley 数据集，不能当成已找到的期刊论文结论。
+```sh
+DATA_DIR=<数据目录> python3 scripts/import_legacy_cases.py
+# 或直接指定数据库
+python3 scripts/import_legacy_cases.py --db <数据目录>/hypoweaver.sqlite
+```
 
-### 验证与当前边界
+### 自己准备碳市场数据
 
-`make test` 运行真实统计计算、数据格式导入、结论规则和从建项目到提案的 API 主流程；模型和文献网络在自动测试中由明确隔离的测试替身提供。产品运行时没有模拟数据入口。`make build` 执行 TypeScript 检查与生产构建。
+想在“数据与检验”阶段从头跑碳市场数据：
 
-本轮真实 Qwen 连接和输出质量验收按使用者要求后置。未配置密钥时模型步骤会明确报错；可以先使用真实文献检索、PDF和数据导入。配置后在设置页测试连接，并逐项验收检索式、候选、方案和提案内容。不要把离线测试通过视为真实模型的内容质量已验证。
+```sh
+cd backend
+uv run python -m hypoweaver.cases.carbon fetch     # 下载公开数据（约 330 MB）
+uv run python -m hypoweaver.cases.carbon prepare   # 核验并登记为数据资产
+```
 
-### 第二轮后端接口约定
+如果手上已有原始 `data.dta`，放到 `DATA_DIR/raw/data.dta` 后只运行 `prepare`。下载来源、字段含义和引用方式见 [DATA_carbon_case.md](docs/DATA_carbon_case.md)。
 
-- `GET /api/settings/llm` → `{base_url, llm_model, configured}`，不包含密钥，也不会主动调用模型。
-- `PUT /api/settings/llm` 接受可选的 `base_url`、`api_key`、`llm_model`；省略密钥保留现值，传空字符串清除。保存后后续请求使用新配置，进行中的任务保持启动时配置。默认地址和模型集中在后端 Settings / `.env.example`，模型名不限制枚举。未知字段（包括旧名 `model`）返回 422 和中文提示，配置不会被部分写入。
-- 未配置时，生成查询、候选、方案、绑定建议、提案及连接测试均直接返回 HTTP 409 / `llm_not_configured`，不会创建待执行任务。前端可先 GET 配置，再跳转设置页填写。
-- 候选集、方案和提案版本统一用 `llm_model` 记录生成模型；提案的 `interpretation` 保存 `{llm_model, paragraphs, status}`。方案的 `model` 只表示统计模型设定。手工新建版本继承该来源；历史记录未知模型为 null，不补猜测值。
-- `PATCH /api/datasets/{id}/fields/{name}` 接受 `semantics`、`level`；方案接口返回 `treatment_semantics`，运行保存当时的语义快照。字段语义变化后，旧运行和提案标为过期。
+建议绑定：结果变量 `log1p(green_invention_independent + green_invention_joint)`，核心解释变量 `industry_peer_exposure`，个体 `firm_id`，时期 `year`，控制变量 `log(total_assets)`、`leverage`、`return_on_assets`。原始 `Size` 是资产总计，不能再当成已取对数的值。该数据的核心变量是**行业同群暴露**，不是企业实际的控排身份，所以“真实处理分配”要保持为否，结论最高只到“关联”。默认按企业聚类；如需核验行业层面误差，可在新方案版本里把聚类字段改为 `industry_code` 单独运行。事件研究只用路径单调的样本，前趋势检验通过不等于识别假设成立。数据引用 Daihui Wei 的 Mendeley 数据集，不能当成某篇期刊论文的结论。
 
-本轮仅交付后端与接口，前端设置界面由另一项工作接入。真实千问连接与生成验收按用户要求延后；离线接口测试不能替代真实连通性证据。
+---
 
-项目创建和更新接口接受 `case: "carbon" | null`。碳市场稳健性约束仅由该标记或项目实际绑定资产的 DOI `10.17632/rrfwny7byp.1` 触发；仅上传/登记资产、标题或研究方向出现碳相关字样都不会触发。案例标记变更会使下游过期。
+## 五、数据与文献的细节
 
-### 第五轮后端接口约定
+**导入研究数据**：在“数据与检验”页上传 `.csv`、`.xlsx` 或 `.dta`，查看列名和标签，选择需要的列后确认导入。Excel 可以切换工作表，Stata 只加载选中的列。已上传的文件可以复用。
 
-- 候选生成及方案起草按最新方案绑定查找项目数据；未绑定且 `case=carbon` 时使用已登记的“碳市场企业面板 · Mendeley V1”。有数据时传入 `dataset_fields`（name、label、type、semantics、level、missing_rate），否则省略。不可由已有字段和白名单公式构造的概念应写入边界。
-- 方案可带 `suggested_binding: {变量名: {field | formula}}`。`GET /api/plans/{id}/bindings` 在尚未保存绑定时返回预填建议及 dataset_id、confirmed=false、note；已有绑定优先。新版本只继承同名变量及数据资产，必须重新确认。预填与建议都不代表已保存或确认。
-- `case=carbon` 起草固定为 policy_causal：行业同群暴露、绿色发明对数结果及总资产对数/杠杆率/资产收益率控制，默认四项稳健性由案例模块提供。确认时解析稳健性中的方案变量别名；有可用数据时校验真实字段，无法解析返回中文 422。尚无数据时仅能校验公式语法；完整绑定被确认时再校验实际字段。新增已在基准中的控制变量会被拒绝。
-- 复算返回 `main_consistent`；整体 consistent 只覆盖主模型及原先成功的稳健性。原先失败项仍在 rows 中标为 failed、origin=analysis。主结论仅以主模型复算作为复算门槛，其余稳健性、置换、前趋势规则继续独立适用。
-- 提案接口返回 `narrative_status: complete | partial | null` 与 `narrative_errors`。旧提案未知状态为 null。失败原因含 section、snippet、rule，结果解读另含 claim_id；两次仍未通过的部分才用默认说明，合格章节/解读保留。年份也使用 `dataset.year_min/year_max` 占位符，企业数使用 `dataset.n_units`。本轮未接入前端状态展示。
-- 文献联合检索先去重，按各来源及各查询的相关性名次做倒数名次融合；新卡默认仅纳入排序前 40 条，其他卡仍可手动纳入。重新检索不会覆盖已有卡的手工纳入/排除状态。
+**上限**：单文件 500 MB、300 列、200 万行；`DATA_DIR` 下 `staging/`、`datasets/`、`raw/` 合计不超过 3 GB。达到上限会停止新导入并提示原因，不会删除历史数据。`staging/` 存上传原件，`datasets/` 存已登记资产引用的 CSV，`raw/` 存案例原件。产品不提供自动清理，要释放空间请先备份，也不要删除数据库正在引用的 CSV。
 
-### 第六轮后端接口约定
+**文献**：最多 6 条中英文检索式，OpenAlex 和 Crossref 联合检索，每个来源的成功或失败都会显示，一个来源失败不影响另一个。上传的 PDF 提取前 100 页文字，保留前 12000 字摘录；扫描件需要先 OCR。`LOCAL_LIBRARY_DIR` 可指向一个本地目录：优先读取 `library.jsonl`（每行一张证据卡，至少有字符串 `title`，可带 `year`、`doi`、`authors`、`abstract`、`concepts`），没有时读取目录顶层的 PDF。索引最多 10 MB / 2000 行，PDF 最多 200 个、每个 30 MB。
 
-- 数字校验排除常见非数量术语、字段标识、公式和反引号代码；中文数字需带量词/单位才触发。未注入的真实数量仍被拦截，否定因果语境不作为肯定因果表述。
-- 提案 `narrative_failures` 为 `[{section, reason}]`，同节多条规则与段落摘要合并。`narrative_errors` 暂保留一版，作为同结构兼容别名；数据库中的原始诊断不改写，旧提案也在读取时转换。
-- 继承绑定返回 `inherited_from`（来源方案 ID），未确认时 note 为“继承自 vN，请重新确认”。历史未知来源为 null，不猜测来源；重新确认后 note 显示已确认。
-- 方案 PATCH 与确认复用稳健性参数校验，非法编辑返回中文 422，既不保存新版本也不使下游过期。空 args 的 drop_controls 在保存前展开为基准控制变量名列表。
+**大模型未配置时**：生成检索式、候选、方案、绑定建议、提案和连接测试都会直接返回 HTTP 409（`llm_not_configured`），不会创建任务。
+
+---
+
+## 六、目录结构
+
+```
+HypoWeaver-Qwen-flow/
+├─ README.md               本文件
+├─ AGENTS.md               给 AI 编码助手的开发规则
+├─ GLOSSARY.md             界面流程术语
+├─ PROGRESS.md             各轮开发与验证记录
+├─ Makefile                setup / dev / test / build
+├─ .env.example            配置示例（不含真实密钥）
+├─ backend/
+│  ├─ pyproject.toml       Python 依赖（uv 管理）
+│  ├─ hypoweaver/          后端代码，按功能分模块（见上文架构图）
+│  │  ├─ app.py            FastAPI 入口，注册所有路由，可托管前端 dist
+│  │  └─ config.py         配置项（LLM_*、DATA_DIR 等）
+│  └─ tests/               自动测试（pytest）
+├─ frontend/
+│  ├─ index.html           入口（favicon 使用新 HW 标志）
+│  ├─ vite.config.ts       开发服务器与 /api 代理
+│  ├─ public/brand/        HW 标志：hw-logo.svg、hw-logo-16.svg 及 16/32/64/192/512 像素 PNG
+│  ├─ public/cases/        旧案例配图
+│  ├─ scripts/             界面验收脚本（一屏检查、文字重叠检查）
+│  └─ src/
+│     ├─ pages/            六个阶段页面、项目列表、设置页
+│     ├─ components/       通用组件（home 首页侧栏、shell 外框、flow 流程等）
+│     ├─ lib/              阶段定义、标题清洗等工具
+│     ├─ api/              后端接口封装
+│     └─ styles/           样式（tokens.css 定义主色：砖红 #b5533a 等）
+├─ docs/
+│  ├─ SPEC.md PLAN.md      产品规格与任务计划（定稿 2026-10-12）
+│  ├─ flow.md adr/         前端流程设计与关键取舍
+│  ├─ ACCEPTANCE.md        v2 验收记录
+│  ├─ API_NOTES.md         各轮后端接口约定
+│  ├─ DATA_carbon_case.md  碳市场公开数据说明
+│  └─ legacy_cases/        两个旧案例的十项提案原文
+└─ scripts/
+   ├─ dev.py               make dev 调用，同时启动前后端
+   └─ import_legacy_cases.py  导入旧案例为只读项目
+```
+
+---
+
+## 七、开发与测试
+
+```sh
+make test     # 后端测试：cd backend && uv run pytest -q
+make build    # 前端类型检查 + 生产构建
+```
+
+- 测试覆盖统计引擎、结论评估、数据导入、旧案例导入、提案确认，以及从建项目到提案的 API 主流程。大模型和文献网络在测试中用隔离的替身，**测试通过不代表真实模型输出质量已验证**。
+- 2026-10-17 在演示机上运行结果：164 项通过，2 项跳过。跳过的是依赖真实碳市场数据的测试，测试数据目录里没有登记碳数据时会自动跳过；先 `carbon prepare` 再跑才能覆盖这一项。
+- 开发规则（禁止写死模型名、禁止模拟数据旁路、数字只由代码产生等）见 [AGENTS.md](AGENTS.md)。
+- 当前演示分支是 `ui-merged`。标签 `v2-demo-20261016` 指向提交 `51d46be`，它**早于**旧案例导入、提案确认和新标志这几次提交。
+
+---
+
+## 八、常见问题与已知局限
+
+**Q：打开页面提示“未配置模型”？**
+到侧栏底部的“服务与设置”页填写 DashScope 地址、密钥和模型名，点测试连接；或在 `.env` 里填 `LLM_API_KEY` 后重启后端。
+
+**Q：页面打不开或接口报错？**
+确认后端 8000 端口在运行（访问 http://127.0.0.1:8000/api/health 应返回 `{"status":"ok"}`）；开了代理时设置 `NO_PROXY=127.0.0.1,localhost`。
+
+**Q：数据存在哪？会丢吗？**
+都在 `DATA_DIR`（默认 `var/`）的 SQLite 里，刷新或重启不会丢。删除项目需要二次确认。
+
+**已知局限**
+
+- **方法论中的公式显示为原文**：旧案例导入时，LaTeX 公式被转成了代码块或行内代码，前端也没有接入公式渲染，所以“七、方法论”里的公式显示为 LaTeX 源码。
+- **旧案例只有提案**：碳市场和 Case009 是只读导入，总览里六个阶段都显示“已完成”，但前五个阶段（方向以外的文献、候选、方案、数据与检验）没有实际内容，点进去基本是空的。演示时请直接看提案。
+- **ESG 案例尚未恢复**：旧仓库中的 ESG 案例没有导入。
+- **只支持单用户、本机使用**，没有账号体系和自动数据清理。
