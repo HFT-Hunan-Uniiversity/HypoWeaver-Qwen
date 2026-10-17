@@ -94,7 +94,10 @@ function paperData(p: ProposalRecord, pid?: string): Omit<PaperData, 'sections'>
   if (abstract) {
     const m = abstract.match(/^\s*\**关键词\**[:：]\s*(.+)$/m)
     if (m) {
-      keywords = m[1].split(/[；;，,、]/).map((x) => plain(x)).filter(Boolean)
+      keywords = m[1]
+        .split(/[；;，,、]/)
+        .map((x) => plain(x))
+        .filter(Boolean)
       abstract = abstract.replace(m[0], '').trim()
     }
   }
@@ -144,10 +147,12 @@ export function stripDuplicateHeading(md: string, title?: string) {
   return md.slice(m[0].length).replace(/^\s*\n/, '')
 }
 function render(s: Section) {
-  return stripDuplicateHeading(s.markdown, titles[s.key]).replace(/\{\{num:([\w.]+)\}\}/g, (_, key) =>
-    s.injected_numbers_ref[key] === null
-      ? '未估计'
-      : fmtNumber(Number(s.injected_numbers_ref[key])),
+  return stripDuplicateHeading(s.markdown, titles[s.key]).replace(
+    /\{\{num:([\w.]+)\}\}/g,
+    (_, key) =>
+      s.injected_numbers_ref[key] === null
+        ? '未估计'
+        : fmtNumber(Number(s.injected_numbers_ref[key])),
   )
 }
 function SectionView({
@@ -327,37 +332,119 @@ export default function Proposal() {
   })
   const [sec, setSec] = useUrlParam<string>('sec', '')
   const showcase = isShowcaseProject(useOverview(id).data?.project.title, id)
-  const [paperView, setPaperView] = useUrlParam<string>('paper', 'showcase')
-  const showShowcase = showcase && paperView !== 'generated'
-  const switcher = showcase ? (
-    <div className="hw-paper__switch no-print" role="group" aria-label="论文版本">
-      <button type="button" aria-pressed={showShowcase} onClick={() => setPaperView('showcase')}>
-        展示稿
-      </button>
-      <button
-        type="button"
-        aria-pressed={!showShowcase}
-        onClick={() => setPaperView('generated')}
-      >
-        生成稿
-      </button>
+  // 两个标签：科学十项（生成的十项提案，可编辑）/ 论文（纸面版式）。兼容旧链接 ?paper=generated
+  const legacyTen = params.get('paper') === 'generated'
+  const [tab, setTabRaw] = useUrlParam<'ten' | 'paper'>(
+    'tab',
+    showcase && !legacyTen ? 'paper' : 'ten',
+    ['ten', 'paper'],
+  )
+  const setTab = (t: 'ten' | 'paper') => {
+    setTabRaw(t)
+    window.scrollTo({ top: 0 })
+  }
+  const tabs = (
+    <div
+      className="stage-tabs is-compact proposal-tabs no-print"
+      role="tablist"
+      aria-label="研究提案"
+    >
+      {(
+        [
+          [
+            'ten',
+            '科学十项',
+            active ? `第 ${active.version} 版 · ${active.sections.length} 节` : '尚未生成',
+          ],
+          ['paper', '论文', showcase ? '期刊规范化初稿' : active ? '论文版式' : '待生成'],
+        ] as const
+      ).map(([k, label, note]) => (
+        <button
+          key={k}
+          type="button"
+          role="tab"
+          aria-selected={tab === k}
+          className={tab === k ? 'is-active' : ''}
+          onClick={() => setTab(k)}
+        >
+          <strong>{label}</strong>
+          <small>{note}</small>
+        </button>
+      ))}
     </div>
-  ) : null
+  )
   useEffect(() => {
     if (sec) document.getElementById('sec-' + sec)?.scrollIntoView({ block: 'start' })
     // 仅在提案载入时定位一次
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id])
-  if (showShowcase)
+  if (tab === 'paper')
     return (
       <>
-        <div className="toolbar proposal-toolbar no-print">{switcher}</div>
-        <PaperView data={showcaseHead} sections={showcaseSections} />
+        {tabs}
+        {showcase ? (
+          <PaperView data={showcaseHead} sections={showcaseSections} />
+        ) : active ? (
+          <PaperView
+            data={paperData(active, id)}
+            toolbar={
+              <>
+                <button type="button" className="product-button" onClick={copyMd}>
+                  <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
+                </button>
+                <button type="button" className="product-button" onClick={exportMd}>
+                  <Download size={14} aria-hidden="true" /> 导出 .md
+                </button>
+              </>
+            }
+            sections={active.sections
+              .filter((s) => !PAPER_FRONT.has(s.key))
+              .map((s) => ({
+                id: s.key,
+                title: titles[s.key] || s.key,
+                body: (
+                  <div className="proposal-anchor">
+                    <SectionView
+                      section={s}
+                      proposalId={active.id}
+                      readOnly
+                      failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
+                    />
+                  </div>
+                ),
+                extra: s.key === 'results' && (
+                  <>
+                    {active.interpretation?.llm_model && (
+                      <p className="no-print">
+                        结果解读 <GeneratedBy of={active.interpretation} />
+                      </p>
+                    )}
+                    {active.snapshot.run?.result && (
+                      <AnalysisCharts result={active.snapshot.run.result} />
+                    )}
+                    {active.snapshot.run && (
+                      <p className="no-print">
+                        <Link to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
+                          查看本提案的原始检验与复算 →
+                        </Link>
+                      </p>
+                    )}
+                  </>
+                ),
+              }))}
+          />
+        ) : (
+          <EmptyState
+            title="完成并确认科学十项后生成论文"
+            what="论文按科学十项的内容排成期刊版式：标题、摘要、正文、表格与参考文献，可下载 Word 或打印为 PDF。"
+            action={{ label: '去科学十项', onClick: () => setTab('ten') }}
+          />
+        )}
       </>
     )
   return (
     <>
-      {switcher && <div className="toolbar proposal-toolbar no-print">{switcher}</div>}
+      {tabs}
       <div className="no-print">
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (
@@ -473,55 +560,40 @@ export default function Proposal() {
             </button>
           </div>
           {docOpen && (
-            <PaperView
-              data={paperData(active, id)}
-              toolbar={
-                <>
-                  <button type="button" className="product-button" onClick={copyMd}>
-                    <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
-                  </button>
-                  <button type="button" className="product-button" onClick={exportMd}>
-                    <Download size={14} aria-hidden="true" /> 导出 .md
-                  </button>
-                </>
-              }
-              sections={active.sections
-                .filter((s) => !PAPER_FRONT.has(s.key))
-                .map((s) => ({
-                  id: s.key,
-                  title: titles[s.key] || s.key,
-                  body: (
-                    <div id={'sec-' + s.key} className="proposal-anchor">
-                      <SectionView
-                        section={s}
-                        proposalId={active.id}
-                        readOnly={!stage.editable}
-                        failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
-                        onRegenerate={stage.editable && llmOk ? () => generate.mutate() : undefined}
-                      />
-                    </div>
-                  ),
-                  extra: s.key === 'results' && (
-                    <>
-                      {active.interpretation?.llm_model && (
-                        <p className="no-print">
-                          结果解读 <GeneratedBy of={active.interpretation} />
-                        </p>
-                      )}
-                      {active.snapshot.run?.result && (
-                        <AnalysisCharts result={active.snapshot.run.result} />
-                      )}
-                      {active.snapshot.run && (
-                        <p className="no-print">
-                          <Link to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
-                            查看本提案的原始检验与复算 →
-                          </Link>
-                        </p>
-                      )}
-                    </>
-                  ),
-                }))}
-            />
+            <article className="proposal-document proposal-ten">
+              <div className="toolbar no-print">
+                <button type="button" className="product-button" onClick={copyMd}>
+                  <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
+                </button>
+                <button type="button" className="product-button" onClick={exportMd}>
+                  <Download size={14} aria-hidden="true" /> 导出 .md
+                </button>
+                <button type="button" className="product-button" onClick={() => setTab('paper')}>
+                  <FileText size={14} aria-hidden="true" /> 查看论文版式
+                </button>
+              </div>
+              {active.sections.map((s) => (
+                <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
+                  <SectionView
+                    section={s}
+                    proposalId={active.id}
+                    readOnly={!stage.editable}
+                    failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
+                    onRegenerate={stage.editable && llmOk ? () => generate.mutate() : undefined}
+                  />
+                  {s.key === 'results' && active.snapshot.run?.result && (
+                    <AnalysisCharts result={active.snapshot.run.result} />
+                  )}
+                  {s.key === 'results' && active.snapshot.run && (
+                    <p className="no-print">
+                      <Link to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
+                        查看本提案的原始检验与复算 →
+                      </Link>
+                    </p>
+                  )}
+                </div>
+              ))}
+            </article>
           )}
         </>
       )}
