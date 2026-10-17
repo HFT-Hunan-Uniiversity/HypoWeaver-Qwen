@@ -125,10 +125,16 @@ cd frontend && npm run dev -- --host 127.0.0.1 --port 5174
 
 ### 4. 答辩演示机的实际部署（参考）
 
-演示机上，前后端在 `screen` 会话里常驻：
+演示机上项目放在 `~/Public/揭榜挂帅新/HypoWeaver`，所有东西都在这一个文件夹里：代码、数据目录 `var/`（数据库、数据集、模型配置和备份）、后端 Python 环境 `backend/.venv`、前端依赖 `frontend/node_modules`。前后端在 `screen` 会话里常驻：
 
-- `hw_back`：在本仓库 `backend/` 下运行 uvicorn `--port 8000`，`DATA_DIR` 指向旧检出目录 `../HypoWeaver-Qwen/var`（真实演示数据都在那里），Python 环境借用 `../HypoWeaver-Qwen/backend/.venv`。
-- `hw_front_flow`：在本仓库 `frontend/` 下运行 `vite --host 127.0.0.1 --port 5174`。
+```sh
+# 后端 :8000
+screen -dmS hw_back bash -lc 'cd "$HOME/Public/揭榜挂帅新/HypoWeaver/backend" && DATA_DIR="$HOME/Public/揭榜挂帅新/HypoWeaver/var" NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost .venv/bin/uvicorn hypoweaver.app:app --reload --port 8000 > /tmp/hw_back.log 2>&1'
+# 前端 :5174
+screen -dmS hw_front_flow bash -lc 'cd "$HOME/Public/揭榜挂帅新/HypoWeaver/frontend" && NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost npm run dev -- --host 127.0.0.1 --port 5174 > /tmp/hw_front_flow.log 2>&1'
+```
+
+后端环境没了或坏了，在 `backend/` 下运行 `uv sync` 重建；前端依赖没了，在 `frontend/` 下运行 `npm ci`。日志在 `/tmp/hw_back.log` 和 `/tmp/hw_front_flow.log`。
 
 查看：`screen -ls`；进入：`screen -r hw_back`；退出但不关闭：先按 `Ctrl-A` 再按 `D`。**不要随意删除或覆盖 `var/` 下的数据库和备份文件。**
 
@@ -183,10 +189,11 @@ uv run python -m hypoweaver.cases.carbon prepare   # 核验并登记为数据资
 ## 六、目录结构
 
 ```
-HypoWeaver-Qwen-flow/
+HypoWeaver/
 ├─ README.md               本文件
 ├─ Makefile                setup / dev / test / build
 ├─ .env.example            配置示例（不含真实密钥）
+├─ var/                    数据目录（不入 Git）：SQLite 数据库、数据集、模型配置、备份
 ├─ backend/
 │  ├─ pyproject.toml       Python 依赖（uv 管理）
 │  ├─ hypoweaver/          后端代码，按功能分模块（见上文架构图）
