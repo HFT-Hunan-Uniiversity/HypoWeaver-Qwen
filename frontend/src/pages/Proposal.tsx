@@ -1,5 +1,5 @@
 import { fmtNumber } from '../components/ResultTable'
-import { ScrollRegion } from '../components/shell/ShellContext'
+import PaperView, { type PaperData } from '../components/paper/PaperView'
 import { useUrlParam } from '../lib/urlState'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -60,7 +60,69 @@ type ProposalRecord = {
   narrative_status?: 'complete' | 'partial' | null
   /** R5：按节归并的失败原因 */
   narrative_failures?: { section: string; reason: string }[] | null
-  snapshot: { project: { title: string }; run: null | { id: string; result: AnalysisResult } }
+  created_at?: string
+  snapshot: {
+    project: { title: string; direction?: { domain?: string } | null }
+    run: null | { id: string; result: AnalysisResult }
+    candidate?: { title?: string; mechanism?: string[] } | null
+    dataset?: {
+      name?: string
+      source?: { citation?: string; license?: string; doi?: string; url?: string } | null
+    } | null
+  }
+}
+/** 不进入正文的节：标题、摘要、参考文献分别放到论文页眉、摘要框、参考文献 */
+const PAPER_FRONT = new Set(['title', 'abstract', 'references'])
+const plain = (md: string) =>
+  md
+    .replace(/^\s*#{1,6}\s*/gm, '')
+    .replace(/[*_`>]/g, '')
+    .trim()
+/** 把真实提案映射成论文纸面所需字段；缺的字段走兜底。 */
+function paperData(p: ProposalRecord, pid?: string): Omit<PaperData, 'sections'> {
+  const by = (k: string) => p.sections.find((s) => s.key === k)
+  const titleSec = by('title')
+  const title =
+    (titleSec && plain(render(titleSec)).split('\n').find(Boolean)) ||
+    p.snapshot.candidate?.title ||
+    displayProjectTitle(p.snapshot.project.title, pid)
+  let abstract = by('abstract') ? render(by('abstract')!) : undefined
+  let keywords: string[] | undefined
+  if (abstract) {
+    const m = abstract.match(/^\s*\**关键词\**[:：]\s*(.+)$/m)
+    if (m) {
+      keywords = m[1].split(/[；;，,、]/).map((x) => plain(x)).filter(Boolean)
+      abstract = abstract.replace(m[0], '').trim()
+    }
+  }
+  if (!keywords) {
+    const kw = [p.snapshot.project.direction?.domain, ...(p.snapshot.candidate?.mechanism || [])]
+    keywords = kw.filter((x): x is string => !!x)
+  }
+  const refLines = (by('references') ? render(by('references')!) : '')
+    .split('\n')
+    .map((l) => l.replace(/^\s*(?:[-*+]|\d+[.、)])\s+/, '').trim())
+    .filter(Boolean)
+  const isData = (l: string) => /^数据来源[:：]/.test(l)
+  const src = p.snapshot.dataset?.source
+  const dataStatement =
+    refLines.find(isData)?.replace(/^数据来源[:：]\s*/, '') ||
+    (src?.citation ? src.citation + (src.license ? `；许可：${src.license}` : '') : undefined)
+  const date = p.created_at ? new Date(p.created_at).toLocaleDateString('zh-CN') : ''
+  return {
+    kicker: p.kind === 'plan_only' ? '计划型提案 · 尚无实证结果' : '研究提案 · 含探索性结果',
+    title,
+    authors: 'HypoWeaver 研究助理 生成',
+    affiliation: p.snapshot.dataset?.name ? `数据：${p.snapshot.dataset.name}` : undefined,
+    subtitle: [`第 ${p.version} 版`, date, p.stale ? '上游已修改，待更新' : '']
+      .filter(Boolean)
+      .join(' · '),
+    abstract,
+    keywords,
+    references: refLines.filter((l) => !isData(l)),
+    dataStatement,
+    fileName: `${title}_研究提案v${p.version}`,
+  }
 }
 function narrativeIssues(p: ProposalRecord): string[] {
   return (p.narrative_failures || []).map((x) => `${titles[x.section] || x.section}：${x.reason}`)
@@ -315,9 +377,6 @@ export default function Proposal() {
               }))}
             />
             <GeneratedBy of={active} />
-            <button className="product-button is-quiet" onClick={() => window.print()}>
-              打印 / 保存 PDF
-            </button>
           </div>
           {active.stale && (
             <p className="notice">
@@ -386,77 +445,55 @@ export default function Proposal() {
             </button>
           </div>
           {docOpen && (
-            <div className="doc-preview">
-              <div className="doc-preview__bar no-print">
-                <strong>研究提案 v{active.version}</strong>
-                <button type="button" className="product-button" onClick={copyMd}>
-                  <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
-                </button>
-                <button type="button" className="product-button" onClick={exportMd}>
-                  <Download size={14} aria-hidden="true" /> 导出 .md
-                </button>
-              </div>
-              <div className="proposal-layout fill">
-                <nav className="proposal-toc no-print" data-scroll-region="" aria-label="提案目录">
-                  {active.sections.map((s) => (
-                    <button
-                      key={s.key}
-                      className={sec === s.key ? 'is-active' : ''}
-                      aria-current={sec === s.key ? 'true' : undefined}
-                      onClick={() => {
-                        setSec(s.key)
-                        document.getElementById('sec-' + s.key)?.scrollIntoView({ block: 'start' })
-                      }}
-                    >
-                      {titles[s.key] || s.key}
-                    </button>
-                  ))}
-                </nav>
-                <ScrollRegion className="proposal-scroll" label="提案正文">
-                  <article className="proposal-document">
-                    {active.snapshot.run && (
-                      <Link
-                        className="no-print"
-                        to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}
-                      >
-                        查看本提案的原始检验与复算 →
-                      </Link>
-                    )}
-                    <p className="eyebrow">
-                      {active.kind === 'plan_only'
-                        ? '计划型提案 · 尚无实证结果'
-                        : '研究提案 · 含探索性结果'}
-                    </p>
-                    <h1>{displayProjectTitle(active.snapshot.project.title, id)}</h1>
-                    <p className="muted">已移除无效引用 {active.removed_references} 处</p>
-                    {active.sections.map((s) => (
-                      <div key={active.id + s.key} id={'sec-' + s.key} className="proposal-anchor">
-                        <SectionView
-                          section={s}
-                          proposalId={active.id}
-                          readOnly={!stage.editable}
-                          failure={
-                            active.narrative_failures?.find((f) => f.section === s.key)?.reason
-                          }
-                          onRegenerate={
-                            stage.editable && llmOk ? () => generate.mutate() : undefined
-                          }
-                        />
-                        {s.key === 'results' && active.interpretation?.llm_model && (
-                          <p className="no-print">
-                            结果解读 <GeneratedBy of={active.interpretation} />
-                          </p>
-                        )}
-                        {s.key === 'results' && active.snapshot.run?.result && (
-                          <AnalysisCharts result={active.snapshot.run.result} />
-                        )}
-                      </div>
-                    ))}
-                  </article>
-                </ScrollRegion>
-              </div>
-              <div className="doc-preview__foot">{wordCount.toLocaleString()} 字</div>
-            </div>
+            <PaperView
+              data={paperData(active, id)}
+              toolbar={
+                <>
+                  <button type="button" className="product-button" onClick={copyMd}>
+                    <Copy size={14} aria-hidden="true" /> {copied ? '已复制' : '复制'}
+                  </button>
+                  <button type="button" className="product-button" onClick={exportMd}>
+                    <Download size={14} aria-hidden="true" /> 导出 .md
+                  </button>
+                </>
+              }
+              sections={active.sections
+                .filter((s) => !PAPER_FRONT.has(s.key))
+                .map((s) => ({
+                  id: s.key,
+                  title: titles[s.key] || s.key,
+                  body: (
+                    <div id={'sec-' + s.key} className="proposal-anchor">
+                      <SectionView
+                        section={s}
+                        proposalId={active.id}
+                        readOnly={!stage.editable}
+                        failure={active.narrative_failures?.find((f) => f.section === s.key)?.reason}
+                        onRegenerate={stage.editable && llmOk ? () => generate.mutate() : undefined}
+                      />
+                    </div>
+                  ),
+                  extra: s.key === 'results' && (
+                    <>
+                      {active.interpretation?.llm_model && (
+                        <p className="no-print">
+                          结果解读 <GeneratedBy of={active.interpretation} />
+                        </p>
+                      )}
+                      {active.snapshot.run?.result && (
+                        <AnalysisCharts result={active.snapshot.run.result} />
+                      )}
+                      {active.snapshot.run && (
+                        <p className="no-print">
+                          <Link to={`/p/${id}/analysis?run=${active.snapshot.run.id}`}>
+                            查看本提案的原始检验与复算 →
+                          </Link>
+                        </p>
+                      )}
+                    </>
+                  ),
+                }))}
+            />
           )}
         </>
       )}
