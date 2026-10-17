@@ -17,7 +17,7 @@ npm run build                                 # 类型检查 + 生产构建到 d
 
 - `src/pages/`：六个阶段页面（Direction、Literature、Candidates、Plan、Data/Analysis、Proposal）、项目列表和设置页
 - `src/components/`：`home/`（首页与侧栏）、`shell/`（外框与阶段布局）、`flow/`、`notebook/` 等
-- `src/lib/stages.ts`：阶段顺序与中文名；`src/lib/displayTitle.ts`：侧栏标题清洗（把内部测试名替换为展示名）
+- `src/lib/stages.ts`：阶段顺序与中文名；`src/lib/displayTitle.ts`：侧栏标题清洗（隐藏标题里的内部测试编号）
 - `src/styles/tokens.css`：配色变量（主色砖红 `#b5533a`、墨色 `#18181b`、背景 `#f4f5f7`）
 - `public/brand/`：HW 标志（`hw-logo.svg`、`hw-logo-16.svg`，以及 16/32/64/192/512 像素 PNG），用于侧栏、外框、阶段页和 favicon
 - `public/cases/carbon/`：碳市场旧案例的配图

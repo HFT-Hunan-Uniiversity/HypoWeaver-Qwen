@@ -10,7 +10,7 @@
 2. **计量负责可信。** 所有数字都由代码在真实数据上算出来，包括主回归、事件研究、稳健性、置换检验和独立复算。大模型不能编造数字，引用的文献必须真实存在于证据库中。
 3. **结论强度由数据封顶。** 系统根据检验结果和处理变量的性质，给每条结论定一个“最高允许强度”。研究者只能降级，不能升级，提案里超出强度的措辞（如“促进”“导致”）会被拦下。
 
-> 相关文档：产品规格 [SPEC](docs/SPEC.md) · 任务清单 [PLAN](docs/PLAN.md) · 前端流程 [flow](docs/flow.md) · 术语 [GLOSSARY](GLOSSARY.md) · 开发记录 [PROGRESS](PROGRESS.md) · 验收记录 [ACCEPTANCE](docs/ACCEPTANCE.md) · 后端接口约定 [API_NOTES](docs/API_NOTES.md) · 碳市场数据 [DATA_carbon_case](docs/DATA_carbon_case.md)
+> 相关文档：后端 [backend/README](backend/README.md) · 前端 [frontend/README](frontend/README.md) · 后端接口约定 [API_NOTES](docs/API_NOTES.md) · 碳市场数据 [DATA_carbon_case](docs/DATA_carbon_case.md)
 
 ---
 
@@ -140,7 +140,7 @@ cd frontend && npm run dev -- --host 127.0.0.1 --port 5174
 
 | 项目 | 来源 | 说明 |
 |---|---|---|
-| 绿色信贷与技术创新 | 在本系统里实际走完六步的项目 | 提案已确认（第 1 版），侧栏显示“已完成”。注意：数据库里的原标题是内部测试名，侧栏显示的名称由前端 `lib/displayTitle.ts` 替换而来；项目实际使用的是碳市场公开数据 |
+| 碳市场行业同群暴露与企业绿色发明 | 在本系统里实际走完六步的项目 | 研究问题：碳市场行业同群暴露是否提升企业绿色发明？使用碳市场公开数据，结论上限为“关联”；提案已确认（第 1 版），侧栏显示“已完成” |
 | 碳市场约束能否转化为企业高质量绿色创新？ | 旧仓库的真实案例，导入为只读项目 | 14,196 条企业—年份观测、1,183 家上市公司（2010—2021）；政策暴露系数 0.0717（企业聚类 SE=0.0204，p=0.00043）；前趋势联合检验 p=0.494；499 次置换 p=0.004。数据来自 Mendeley 公开数据集（CC BY 4.0） |
 | 绿色金融试验区能否改善城市空气质量？（Case009） | 旧仓库的真实案例，导入为只读项目 | Harvard Dataverse 公开数据（CC0）；8 个核心校验门全部通过，但目标因果结论**未获准写入**，用来展示系统的“科学防线” |
 
@@ -185,9 +185,6 @@ uv run python -m hypoweaver.cases.carbon prepare   # 核验并登记为数据资
 ```
 HypoWeaver-Qwen-flow/
 ├─ README.md               本文件
-├─ AGENTS.md               给 AI 编码助手的开发规则
-├─ GLOSSARY.md             界面流程术语
-├─ PROGRESS.md             各轮开发与验证记录
 ├─ Makefile                setup / dev / test / build
 ├─ .env.example            配置示例（不含真实密钥）
 ├─ backend/
@@ -209,9 +206,6 @@ HypoWeaver-Qwen-flow/
 │     ├─ api/              后端接口封装
 │     └─ styles/           样式（tokens.css 定义主色：砖红 #b5533a 等）
 ├─ docs/
-│  ├─ SPEC.md PLAN.md      产品规格与任务计划（定稿 2026-10-12）
-│  ├─ flow.md adr/         前端流程设计与关键取舍
-│  ├─ ACCEPTANCE.md        v2 验收记录
 │  ├─ API_NOTES.md         各轮后端接口约定
 │  ├─ DATA_carbon_case.md  碳市场公开数据说明
 │  └─ legacy_cases/        两个旧案例的十项提案原文
@@ -231,8 +225,8 @@ make build    # 前端类型检查 + 生产构建
 
 - 测试覆盖统计引擎、结论评估、数据导入、旧案例导入、提案确认，以及从建项目到提案的 API 主流程。大模型和文献网络在测试中用隔离的替身，**测试通过不代表真实模型输出质量已验证**。
 - 2026-10-17 在演示机上运行结果：164 项通过，2 项跳过。跳过的是依赖真实碳市场数据的测试，测试数据目录里没有登记碳数据时会自动跳过；先 `carbon prepare` 再跑才能覆盖这一项。
-- 开发规则（禁止写死模型名、禁止模拟数据旁路、数字只由代码产生等）见 [AGENTS.md](AGENTS.md)。
-- 当前演示分支是 `ui-merged`。标签 `v2-demo-20261016` 指向提交 `51d46be`，它**早于**旧案例导入、提案确认和新标志这几次提交。
+- 开发约定：模型名不写死；产品里没有模拟数据或演示旁路；所有数字只由代码产生；大模型输出必须经过 Pydantic 校验，引用的证据 ID 必须真实存在；失败时直接显示清楚的错误。
+- 当前演示分支是 `ui-merged`，答辩版本标签为 `v2-demo-20261017`。旧标签 `v2-demo-20261016`（提交 `51d46be`）早于旧案例导入、提案确认和新标志，仅作历史保留。
 
 ---
 
