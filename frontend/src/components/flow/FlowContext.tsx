@@ -98,11 +98,11 @@ export function FlowProvider({
   const flow = useMemo(
     () =>
       deriveFlow(stages, local, { dataRunOk: unlockHint }).map((s) =>
-        s.key === 'proposal' && s.status === 'locked' && isShowcaseProject(title)
+        s.key === 'proposal' && s.status === 'locked' && isShowcaseProject(title, projectId)
           ? { ...s, status: 'active' as const }
           : s,
       ),
-    [stages, local, unlockHint, title],
+    [stages, local, unlockHint, title, projectId],
   )
   const uiRef = useRef<StageUi | null>(null)
   const [uiSig, setUiSig] = useState('')

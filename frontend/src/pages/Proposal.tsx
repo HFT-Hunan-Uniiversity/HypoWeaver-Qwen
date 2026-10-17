@@ -326,7 +326,7 @@ export default function Proposal() {
             },
   })
   const [sec, setSec] = useUrlParam<string>('sec', '')
-  const showcase = isShowcaseProject(useOverview(id).data?.project.title)
+  const showcase = isShowcaseProject(useOverview(id).data?.project.title, id)
   const [paperView, setPaperView] = useUrlParam<string>('paper', 'showcase')
   const showShowcase = showcase && paperView !== 'generated'
   const switcher = showcase ? (
