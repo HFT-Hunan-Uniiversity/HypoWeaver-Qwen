@@ -16,3 +16,13 @@ dist/
 *.log
 
 *.tsbuildinfo
+
+# 内部工作文档：只留在本地，不上传 GitHub
+AGENTS.md
+PROGRESS.md
+GLOSSARY.md
+docs/SPEC.md
+docs/PLAN.md
+docs/ACCEPTANCE.md
+docs/flow.md
+docs/adr/
