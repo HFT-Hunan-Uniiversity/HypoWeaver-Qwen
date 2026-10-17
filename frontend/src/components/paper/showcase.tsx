@@ -1,8 +1,10 @@
+import { Check, ChevronDown } from 'lucide-react'
 import {
   SHOWCASE_PAPER,
   SHOWCASE_PAPER_FIGURES,
   SHOWCASE_PAPER_TABLES,
   SHOWCASE_TEN,
+  SHOWCASE_TEN_STATUS,
   type ShowcasePaperBlock,
   type ShowcasePaperFigure,
   type ShowcasePaperTable,
@@ -112,29 +114,48 @@ export const showcaseSections: PaperSection[] = SHOWCASE_PAPER.sections.map((s) 
   ),
 }))
 
-/** 碳市场展示版《科学十项》：只读 */
+/** 碳市场展示版《科学十项》：按旧版成果页「科学十项」面板 1:1 复刻（只读） */
 export function ShowcaseTen() {
+  const confirmed = SHOWCASE_TEN.filter((x) => x.confirmed).length
   return (
-    <article className="sc-ten" aria-label="科学十项（展示版本）">
-      <header className="sc-ten__head">
-        <span className="sc-ten__badge">展示版本 · 只读</span>
-        <h3>科学十项研究方案</h3>
-        <p>{SHOWCASE_PAPER.title}</p>
+    <div className="project-outcomes__panel outcome-scientific" aria-label="科学十项（展示版本）">
+      <header className="outcome-panel__header is-compact">
+        <div>
+          <span className="outcome-kicker">
+            <Check size={12} aria-hidden="true" />
+            {SHOWCASE_TEN_STATUS === 'confirmed' ? '10/10 已确认' : `${confirmed}/10 已核对`}
+          </span>
+          <h3>科学十项研究方案</h3>
+          <p>把研究构想编译为可以审查、执行和复现的完整方案。</p>
+        </div>
+        <span className="outcome-demo-note">展示版本 · 只读</span>
       </header>
-      <ol className="sc-ten__list">
-        {SHOWCASE_TEN.map((it) => (
-          <li key={it.itemNo} id={'ten-' + it.itemNo}>
-            <span className="sc-ten__no" aria-hidden="true">
-              {it.itemNo}
-            </span>
-            <div>
-              <strong>{it.title}</strong>
-              <p>{it.content}</p>
+      <div className="outcome-scientific__list">
+        {SHOWCASE_TEN.map((item, index) => (
+          <details key={item.itemNo} id={'ten-' + item.itemNo} open={index < 2 ? true : undefined}>
+            <summary>
+              <span className="outcome-scientific__number">
+                {item.confirmed ? <Check size={13} /> : item.itemNo}
+              </span>
+              <span>
+                <strong>{item.title}</strong>
+                <small>
+                  {item.status === 'evidence_bound'
+                    ? '证据已绑定'
+                    : item.status === 'conditional'
+                      ? '条件性结论'
+                      : '等待补充'}
+                </small>
+              </span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </summary>
+            <div className="outcome-scientific__content">
+              <p>{item.content}</p>
+              <span>证据引用：{item.evidenceRefs.join(' · ') || '待补充'}</span>
             </div>
-          </li>
+          </details>
         ))}
-      </ol>
-      <p className="sc-ten__foot">与「论文」标签中的期刊规范化初稿使用同一套数据与估计。</p>
-    </article>
+      </div>
+    </div>
   )
 }
