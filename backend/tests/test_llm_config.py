@@ -27,6 +27,8 @@ def test_llm_config(tmp_path, monkeypatch):
             "llm_model": "config-test-model",
             "base_url": "https://example.invalid/v1",
             "configured": True,
+            "server_key": True,
+            "settings_writable": True,
         }
         assert "offline-test-key" not in result.text
         result = client.put("/api/settings/llm", json={"llm_model": "changed-model"})
@@ -123,7 +125,8 @@ def test_llm_settings_reject_unknown_fields_without_mutation(tmp_path, unknown):
         message = response.json()["error"]["message"]
         assert unknown in message and "未知字段" in message
         assert "do-not-echo-this-key" not in response.text
-        assert client.get("/api/settings/llm").json() == before
+        after = client.get("/api/settings/llm").json()
+        assert {k: after[k] for k in before} == before
         assert (tmp_path / ".env.llm").read_bytes() == saved
 
 

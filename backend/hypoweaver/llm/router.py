@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ..db import session
 from . import configuration
 from .models import ConnectionCheck, LLMCall
-from .service import get_llm, configured
+from .service import get_llm, configured, request_settings
 
 router = APIRouter(prefix="/api/settings")
 
@@ -25,7 +25,7 @@ async def probe(url, params):
 
 @router.get("/status")
 async def status(request: Request, db: Session = Depends(session)):
-    settings = request.app.state.settings
+    settings = request_settings(request)
     usage = db.execute(
         select(func.count(LLMCall.id), func.sum(LLMCall.input_tokens), func.sum(LLMCall.output_tokens))
     ).one()
@@ -51,7 +51,10 @@ async def test_connection(llm=Depends(get_llm)):
 
 @router.get("/llm")
 def get_configuration(request: Request):
-    return configuration.public(request.app.state.settings)
+    data = configuration.public(request_settings(request))
+    data["server_key"] = configured(request.app.state.settings)
+    data["settings_writable"] = request.app.state.settings.allow_settings_write
+    return data
 
 
 @router.put("/llm")

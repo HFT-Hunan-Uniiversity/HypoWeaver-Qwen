@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { api, body } from '../api/client'
 import { ErrorNote } from '../components/Shared'
 import { QWEN_MODELS, useLlm } from '../lib/llm'
+import { getBrowserKey, setBrowserKey, setBrowserModel } from '../lib/llmKey'
 interface Status {
   configured: boolean
   /** R4-03 起的字段名 */
@@ -43,13 +44,33 @@ export default function Settings() {
   })
   const llm = useLlm()
   const [picked, setPicked] = useState('')
+  const [keyDraft, setKeyDraft] = useState('')
+  const [hasKey, setHasKey] = useState(() => !!getBrowserKey())
+  const refresh = () => {
+    for (const k of ['llm', 'settings']) cache.invalidateQueries({ queryKey: [k] })
+  }
+  // 模型与密钥都只保存在本浏览器，不修改服务器上的全局设置
   const switchModel = useMutation({
-    mutationFn: (model: string) => api('/settings/llm', body('PUT', { llm_model: model })),
+    mutationFn: async (model: string) => setBrowserModel(model),
     onSuccess: () => {
       setPicked('')
-      for (const k of ['llm', 'settings']) cache.invalidateQueries({ queryKey: [k] })
+      refresh()
     },
   })
+  const saveKey = () => {
+    setBrowserKey(keyDraft)
+    setKeyDraft('')
+    setHasKey(!!getBrowserKey())
+    setMessage('')
+    refresh()
+  }
+  const clearKey = () => {
+    setBrowserKey('')
+    setKeyDraft('')
+    setHasKey(false)
+    setMessage('')
+    refresh()
+  }
   const models = QWEN_MODELS
   const test = useMutation({
     mutationFn: () => api<{ message: string }>('/settings/llm:test', body('POST')),
@@ -63,7 +84,9 @@ export default function Settings() {
       <header className="wz-card__hd">
         <div className="wz-card__hd-main">
           <h2>服务与用量</h2>
-          <p className="wz-card__sub">密钥只在本机环境中配置，此页面不显示或保存密钥。</p>
+          <p className="wz-card__sub">
+            千问密钥只保存在你自己的浏览器里，随请求临时发给服务器使用，服务器不会保存。
+          </p>
         </div>
       </header>
       <div className="stage-body">
@@ -84,8 +107,34 @@ export default function Settings() {
                         q.data.model ||
                         '未设置（默认 qwen-plus）'}
                     </strong>{' '}
-                    · {(llm.data?.configured ?? q.data.configured) ? '已配置' : '未配置密钥'}
+                    ·{' '}
+                    {hasKey
+                      ? '已配置（本浏览器密钥）'
+                      : (llm.data?.configured ?? q.data.configured)
+                        ? '已配置（服务器本机密钥）'
+                        : '未配置密钥'}
                   </p>
+                  <div className="action-cluster" style={{ justifyContent: 'flex-start' }}>
+                    <label style={{ margin: 0 }}>
+                      千问 API Key（只存本浏览器）
+                      <input
+                        type="password"
+                        autoComplete="off"
+                        spellCheck={false}
+                        placeholder={hasKey ? '已保存，输入新密钥可替换' : 'sk-…'}
+                        value={keyDraft}
+                        onChange={(e) => setKeyDraft(e.target.value)}
+                      />
+                    </label>
+                    <button className="secondary" disabled={!keyDraft.trim()} onClick={saveKey}>
+                      保存到本浏览器
+                    </button>
+                    {hasKey && (
+                      <button className="secondary" onClick={clearKey}>
+                        清除密钥
+                      </button>
+                    )}
+                  </div>
                   <div className="action-cluster" style={{ justifyContent: 'flex-start' }}>
                     <label style={{ margin: 0 }}>
                       切换千问模型
@@ -117,7 +166,7 @@ export default function Settings() {
                       disabled={!llm.data?.switchable || !picked || switchModel.isPending}
                       onClick={() => switchModel.mutate(picked)}
                     >
-                      {switchModel.isPending ? '正在保存…' : '保存模型'}
+                      {switchModel.isPending ? '正在保存…' : '保存模型（本浏览器）'}
                     </button>
                   </div>
                   {llm.data && !llm.data.switchable && (

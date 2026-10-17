@@ -1,11 +1,14 @@
 import asyncio
 import logging
+import re
 import traceback
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import ForeignKey, JSON, select, update
 from sqlalchemy.orm import Mapped, Session, mapped_column
 from .db import Base, now, session, uid
 from .errors import AppError
+
+_KEYLIKE = re.compile(r"sk-[A-Za-z0-9_\-]{6,}")
 
 
 class Job(Base):
@@ -68,6 +71,8 @@ def submit(app, kind, project_id, fn):
             secret = app.state.settings.llm_api_key
             if secret:
                 detail = detail.replace(secret, "[redacted]")
+            # Per-request keys from browsers are unknown here; mask anything key-shaped.
+            detail = _KEYLIKE.sub("[redacted]", detail)
             logging.getLogger(__name__).error(
                 "Task %s (%s): %s: %s\n%s",
                 job_id,

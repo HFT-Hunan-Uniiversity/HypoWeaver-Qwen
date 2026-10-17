@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     llm_model: str = "qwen-plus"
+    # Public deployments set ALLOW_SETTINGS_WRITE=false so visitors cannot change server-wide model settings.
+    allow_settings_write: bool = True
     openalex_url: str = "https://api.openalex.org/works"
     crossref_url: str = "https://api.crossref.org/works"
     contact_email: str = ""

@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from fastapi import Request
 from openai import AsyncOpenAI, APIConnectionError, APIStatusError, APITimeoutError
@@ -105,10 +106,41 @@ class LLM:
                 await client.close()
 
 
+KEY_HEADER = "x-llm-api-key"
+MODEL_HEADER = "x-llm-model"
+_MODEL_RE = re.compile(r"^[A-Za-z0-9._:/-]{1,200}$")
+
+
+def request_settings(request: Request):
+    """Settings for this request only.
+
+    A visitor's own key (and optional model) arrive in headers set by the browser from
+    localStorage. They live only in this request / the job closure that captures the LLM;
+    they are never written to the DB, .env.llm, job records or logs. Without the header the
+    server-wide default (LLM_API_KEY env / var/.env.llm) is used, as in the local Mac demo.
+    """
+    settings = request.app.state.settings
+    key = (request.headers.get(KEY_HEADER) or "").strip()
+    model = (request.headers.get(MODEL_HEADER) or "").strip()
+    changes = {}
+    if key:
+        if len(key) > 4096 or any(ord(c) < 33 or ord(c) > 126 for c in key):
+            raise AppError("llm_bad_key", "模型密钥格式不正确", 400)
+        changes["llm_api_key"] = key
+    if model:
+        if not _MODEL_RE.match(model):
+            raise AppError("llm_bad_model", "模型名格式不正确", 400)
+        changes["llm_model"] = model
+    return settings.model_copy(update=changes) if changes else settings
+
+
 def get_llm(request: Request):
     """FastAPI dependency: tests may override with a deterministic FakeLLM."""
-    require_configured(request.app.state.settings)
-    return request.app.state.llm
+    settings = request_settings(request)
+    require_configured(settings)
+    if settings is request.app.state.settings:
+        return request.app.state.llm
+    return LLM(settings, request.app.state.sessions)
 
 
 def configured(settings):

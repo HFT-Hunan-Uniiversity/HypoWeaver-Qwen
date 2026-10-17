@@ -2,6 +2,7 @@ import os
 from urllib.parse import urlsplit
 from dotenv import dotenv_values, set_key
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from ..errors import AppError
 from .service import LLM, configured
 
 
@@ -54,6 +55,14 @@ def public(settings):
 
 def save(app, payload):
     settings = app.state.settings
+    if not settings.allow_settings_write:
+        raise AppError(
+            "settings_read_only", "此服务器不允许修改全局模型设置；请在本浏览器的设置页填写自己的密钥和模型", 403
+        )
+    if payload.api_key:
+        # Keys are per browser (X-LLM-API-Key header); the API never persists a key server-side.
+        # Clearing (empty string) is still allowed so an old stored key can be removed.
+        raise AppError("server_key_disabled", "服务器不保存模型密钥：密钥只保存在你自己的浏览器里", 400)
     names = {"base_url": "llm_base_url", "api_key": "llm_api_key", "llm_model": "llm_model"}
     changes = {names[key]: value for key, value in payload.model_dump(exclude_none=True).items()}
     updated = settings.model_copy(update=changes)

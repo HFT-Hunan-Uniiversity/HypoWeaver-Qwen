@@ -1,3 +1,4 @@
+import { llmHeaders } from '../lib/llmKey'
 export class ApiError extends Error {
   status: number
   code: string
@@ -16,6 +17,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...llmHeaders(),
       ...options.headers,
     },
   })
