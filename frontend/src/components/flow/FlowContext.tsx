@@ -1,3 +1,4 @@
+import { isShowcaseProject } from '../../lib/showcase'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../api/client'
@@ -62,10 +63,13 @@ const Ctx = createContext<FlowCtx | null>(null)
 export function FlowProvider({
   projectId,
   stages,
+  title,
   children,
 }: {
   projectId: string
   stages: Stage[]
+  /** 后端原始题名：碳市场项目的提案步骤始终可进入（展示稿） */
+  title?: string
   children: ReactNode
 }) {
   const [local, setLocal] = useState<LocalFlow>(() => loadLocal(projectId))
@@ -92,8 +96,13 @@ export function FlowProvider({
   const unlockHint =
     dataRunOk || (!runs.isFetched && (dataBackend === 'failed' || dataBackend === 'completed'))
   const flow = useMemo(
-    () => deriveFlow(stages, local, { dataRunOk: unlockHint }),
-    [stages, local, unlockHint],
+    () =>
+      deriveFlow(stages, local, { dataRunOk: unlockHint }).map((s) =>
+        s.key === 'proposal' && s.status === 'locked' && isShowcaseProject(title, projectId)
+          ? { ...s, status: 'active' as const }
+          : s,
+      ),
+    [stages, local, unlockHint, title, projectId],
   )
   const uiRef = useRef<StageUi | null>(null)
   const [uiSig, setUiSig] = useState('')
