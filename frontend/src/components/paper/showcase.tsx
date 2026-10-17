@@ -2,6 +2,7 @@ import {
   SHOWCASE_PAPER,
   SHOWCASE_PAPER_FIGURES,
   SHOWCASE_PAPER_TABLES,
+  SHOWCASE_TEN,
   type ShowcasePaperBlock,
   type ShowcasePaperFigure,
   type ShowcasePaperTable,
@@ -110,3 +111,30 @@ export const showcaseSections: PaperSection[] = SHOWCASE_PAPER.sections.map((s) 
     </>
   ),
 }))
+
+/** 碳市场展示版《科学十项》：只读 */
+export function ShowcaseTen() {
+  return (
+    <article className="sc-ten" aria-label="科学十项（展示版本）">
+      <header className="sc-ten__head">
+        <span className="sc-ten__badge">展示版本 · 只读</span>
+        <h3>科学十项研究方案</h3>
+        <p>{SHOWCASE_PAPER.title}</p>
+      </header>
+      <ol className="sc-ten__list">
+        {SHOWCASE_TEN.map((it) => (
+          <li key={it.itemNo} id={'ten-' + it.itemNo}>
+            <span className="sc-ten__no" aria-hidden="true">
+              {it.itemNo}
+            </span>
+            <div>
+              <strong>{it.title}</strong>
+              <p>{it.content}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="sc-ten__foot">与「论文」标签中的期刊规范化初稿使用同一套数据与估计。</p>
+    </article>
+  )
+}

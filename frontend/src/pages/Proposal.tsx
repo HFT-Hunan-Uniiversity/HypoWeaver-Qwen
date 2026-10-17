@@ -1,6 +1,6 @@
 import { fmtNumber } from '../components/ResultTable'
 import PaperView, { type PaperData } from '../components/paper/PaperView'
-import { showcaseHead, showcaseSections } from '../components/paper/showcase'
+import { ShowcaseTen, showcaseHead, showcaseSections } from '../components/paper/showcase'
 import { isShowcaseProject } from '../lib/showcase'
 import { useOverview } from '../lib/stages'
 import { useUrlParam } from '../lib/urlState'
@@ -339,6 +339,25 @@ export default function Proposal() {
     showcase && !legacyTen ? 'paper' : 'ten',
     ['ten', 'paper'],
   )
+  // 碳市场展示项目：无生成提案时科学十项显示展示版；有生成提案时默认生成版，可切到展示版
+  const [tenView, setTenView] = useUrlParam<'generated' | 'showcase'>('ten', 'generated', [
+    'generated',
+    'showcase',
+  ])
+  const tenShowcase = showcase && (!active || tenView === 'showcase')
+  const tenToggle =
+    showcase && active ? (
+      <div className="toolbar sc-ten__toggle no-print">
+        <span>{tenShowcase ? '正在查看展示版本' : '已有生成的科学十项'}</span>
+        <button
+          type="button"
+          className="product-button is-quiet"
+          onClick={() => setTenView(tenShowcase ? 'generated' : 'showcase')}
+        >
+          {tenShowcase ? '回到生成版' : '查看展示版'}
+        </button>
+      </div>
+    ) : null
   const setTab = (t: 'ten' | 'paper') => {
     setTabRaw(t)
     window.scrollTo({ top: 0 })
@@ -354,7 +373,11 @@ export default function Proposal() {
           [
             'ten',
             '科学十项',
-            active ? `第 ${active.version} 版 · ${active.sections.length} 节` : '尚未生成',
+            tenShowcase
+              ? '展示版 · 10 项'
+              : active
+                ? `第 ${active.version} 版 · ${active.sections.length} 节`
+                : '尚未生成',
           ],
           ['paper', '论文', showcase ? '期刊规范化初稿' : active ? '论文版式' : '待生成'],
         ] as const
@@ -378,6 +401,14 @@ export default function Proposal() {
     // 仅在提案载入时定位一次
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id])
+  if (tab === 'ten' && tenShowcase)
+    return (
+      <>
+        {tabs}
+        {tenToggle}
+        <ShowcaseTen />
+      </>
+    )
   if (tab === 'paper')
     return (
       <>
@@ -445,6 +476,7 @@ export default function Proposal() {
   return (
     <>
       {tabs}
+      {tenToggle}
       <div className="no-print">
         <ErrorNote error={query.error || generate.error || jobs.error} />
         {currentJob && (

@@ -482,3 +482,82 @@
     overflow: visible;
   }
 }
+/* 碳市场展示版《科学十项》 */
+.sc-ten {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius, 10px);
+  background: var(--surface);
+  padding: 20px 24px;
+}
+.sc-ten__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+.sc-ten__badge {
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-2, #f3f3f3);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.sc-ten__head h3 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 18px;
+}
+.sc-ten__head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.sc-ten__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-ten__list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.sc-ten__no {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand-soft, #eef1f6);
+  color: var(--brand, #333);
+  font-size: 13px;
+  font-weight: 700;
+}
+.sc-ten__list strong {
+  color: var(--text);
+  font-size: 14px;
+}
+.sc-ten__list p {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.sc-ten__foot {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.sc-ten__toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
